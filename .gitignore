@@ -1,0 +1,11 @@
+node_modules
+dist
+.next
+coverage
+.env
+*.log
+.DS_Store
+apps/web/.next
+apps/api/dist
+**/*.tsbuildinfo
+.prisma

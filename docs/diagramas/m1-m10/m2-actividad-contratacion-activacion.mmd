@@ -1,0 +1,44 @@
+flowchart TB
+    START(("Inicio")) --> A["Cliente consulta<br>catalogo de planes"]
+    A --> B["Selecciona plan<br>y vigencia (30/365 dias)"]
+    B --> C["Confirma cargo simulado"]
+    C --> D["Pasarela simulada<br>procesa el cobro"]
+    D --> E{"Cargo aprobado?"}
+    E -- No --> F["Registrar transaccion<br>rechazada"]
+    F --> G["Mostrar motivo<br>del rechazo"]
+    G --> END1(("Fin"))
+    E -- Si --> H["Registrar transaccion<br>aprobada"]
+    H --> I["Crear suscripcion<br>estado = Activa"]
+    I --> J["Aplicar limites del plan<br>al contenedor (M5)"]
+    J --> K["Registrar en historial<br>de pagos"]
+    K --> L["Enviar confirmacion<br>de contratacion"]
+    L --> END2(("Fin"))
+
+     START:::startEnd
+     A:::process
+     B:::input
+     C:::input
+     D:::process
+     E:::decision
+     F:::error
+     G:::error
+     END1:::startEnd
+     H:::process
+     I:::process
+     J:::process
+     K:::process
+     L:::success
+     END2:::startEnd
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e
+    classDef input fill:#ecfeff,stroke:#06b6d4,stroke-width:2px,color:#164e63
+    classDef process fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a
+    classDef decision fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef error fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef success fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#065f46
+    linkStyle 4 stroke:#ef4444,stroke-width:2px,fill:none
+    linkStyle 5 stroke:#ef4444,stroke-width:2px,fill:none
+    linkStyle 6 stroke:#10b981,stroke-width:2px,fill:none
+    linkStyle 7 stroke:#10b981,stroke-width:2px,fill:none
+    linkStyle 8 stroke:#10b981,stroke-width:2px,fill:none
+    linkStyle 9 stroke:#10b981,stroke-width:2px,fill:none
+    linkStyle 10 stroke:#10b981,stroke-width:2px,fill:none

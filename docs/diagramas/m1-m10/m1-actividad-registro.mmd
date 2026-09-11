@@ -1,0 +1,48 @@
+---
+config:
+  layout: fixed
+---
+flowchart TB
+    START(("Inicio")) --> A["Usuario selecciona<br>Registrarse"]
+    A --> B["Ingresar correo<br>y contraseña"]
+    B --> C["Enviar solicitud<br>de registro"]
+    C --> D{"¿Datos válidos?"}
+    D -- No --> E["Mostrar errores<br>de validación"]
+    E --> B
+    D -- Sí --> F["Verificar si el<br>correo ya existe"]
+    F --> G{"¿Correo registrado?"}
+    G -- Sí --> H["Informar que la cuenta<br>ya existe"]
+    H --> END1(("Fin"))
+    G -- No --> I["Crear cuenta<br>en estado pendiente"]
+    I --> J["Generar token temporal<br>de verificación"]
+    J --> K["Enviar correo<br>de verificación"]
+    K --> L["Mostrar confirmación:<br>revisar correo"]
+    L --> END2(("Fin"))
+
+     START:::startEnd
+     A:::input
+     B:::input
+     C:::input
+     D:::decision
+     E:::error
+     F:::process
+     G:::decision
+     H:::error
+     END1:::startEnd
+     I:::process
+     J:::process
+     K:::process
+     L:::success
+     END2:::startEnd
+    classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef input fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
+    classDef process fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px,color:#134e4a
+    classDef decision fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
+    classDef error fill:#fff1f2,stroke:#fb7185,stroke-width:2px,color:#881337
+    classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
+    linkStyle 4 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 5 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 6 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 7 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 8 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 9 stroke:#4ade80,stroke-width:2px,fill:none

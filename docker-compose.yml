@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-deploya}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deploya}
+      POSTGRES_DB: ${POSTGRES_DB:-deploya}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-deploya} -d ${POSTGRES_DB:-deploya}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - deploya_pg:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://deploya:deploya@postgres:5432/deploya
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${API_PORT:-3001}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+
+volumes:
+  deploya_pg:

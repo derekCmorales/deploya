@@ -1,0 +1,161 @@
+classDiagram
+    direction LR
+
+    class ServicioCatalogo {
+        +listarPlanes() List~Plan~
+        +obtenerPlan(planId) Plan
+        +listarComplementos() List~Complemento~
+    }
+
+    class ServicioSuscripciones {
+        +crearSuscripcion(clienteId, planId, vigencia) Suscripcion
+        +renovar(suscripcionId) Suscripcion
+        +cambiarPlan(suscripcionId, planNuevoId) Suscripcion
+        +cancelar(suscripcionId) Suscripcion
+        +actualizarEstadoPorCiclo(suscripcionId) Suscripcion
+    }
+
+    class ServicioPagos {
+        -pasarela : PasarelaPago
+        +procesarCargo(suscripcion, monto) Transaccion
+    }
+
+    class PasarelaPago {
+        <<interface>>
+        +cobrar(monto, metodo) ResultadoPago
+    }
+
+    class PasarelaSimulada {
+        +cobrar(monto, metodo) ResultadoPago
+    }
+
+    class ServicioCuotas {
+        +aplicarLimites(suscripcion, plan)
+        +reaplicarLimites(suscripcion, plan)
+    }
+
+    class ServicioHistorialPagos {
+        +registrar(transaccion)
+        +listarPorSuscripcion(suscripcionId) List~Transaccion~
+    }
+
+    class ServicioAdministracionPlanes {
+        +crearPlan(datosPlan) Plan
+        +actualizarPlan(planId, datosPlan) Plan
+        +descontinuarPlan(planId)
+    }
+
+    class ServicioAdministracionUsuarios {
+        +listarUsuarios(filtros) List~Usuario~
+        +suspenderCuenta(usuarioId)
+    }
+
+    class ServicioAuditoriaAdministrativa {
+        +registrarAccion(adminId, accion, entidad, entidadId)
+    }
+
+    class Plan {
+        +id : UUID
+        +nombre : String
+        +descripcion : String
+        +precio : Decimal
+        +vigenciaDias : Integer
+        +activo : Boolean
+    }
+
+    class LimitePlan {
+        +id : UUID
+        +planId : UUID
+        +recurso : String
+        +valor : String
+    }
+
+    class Complemento {
+        +id : UUID
+        +nombre : String
+        +descripcion : String
+        +precio : Decimal
+    }
+
+    class Suscripcion {
+        +id : UUID
+        +usuarioId : UUID
+        +planId : UUID
+        +estado : EstadoSuscripcion
+        +renovacionAutomatica : Boolean
+        +fechaInicio : DateTime
+        +fechaFin : DateTime
+        +fechaCreacion : DateTime
+        +fechaActualizacion : DateTime
+    }
+
+    class SuscripcionComplemento {
+        +suscripcionId : UUID
+        +complementoId : UUID
+        +cantidad : Integer
+        +fechaInicio : DateTime
+        +fechaFin : DateTime
+    }
+
+    class Transaccion {
+        +id : UUID
+        +suscripcionId : UUID
+        +tipo : TipoTransaccion
+        +monto : Decimal
+        +estado : EstadoTransaccion
+        +fecha : DateTime
+        +comprobante : String
+    }
+
+    class AccionAdministrativa {
+        +id : UUID
+        +adminId : UUID
+        +accion : String
+        +entidadAfectada : String
+        +entidadId : UUID
+        +fecha : DateTime
+        +detalle : String
+    }
+
+    class EstadoSuscripcion {
+        <<enumeration>>
+        ACTIVA
+        POR_VENCER
+        VENCIDA
+        SUSPENDIDA
+        CANCELADA
+    }
+
+    class TipoTransaccion {
+        <<enumeration>>
+        CONTRATACION
+        RENOVACION
+        CAMBIO_PLAN
+        COMPLEMENTO
+    }
+
+    class EstadoTransaccion {
+        <<enumeration>>
+        APROBADA
+        RECHAZADA
+        PENDIENTE
+    }
+
+    PasarelaPago <|.. PasarelaSimulada : implementa
+    ServicioPagos --> PasarelaPago : depende de (DIP)
+    ServicioSuscripciones --> ServicioCatalogo
+    ServicioSuscripciones --> ServicioPagos
+    ServicioSuscripciones --> ServicioCuotas
+    ServicioPagos --> ServicioHistorialPagos
+    ServicioAdministracionPlanes --> ServicioCatalogo
+    ServicioAdministracionPlanes --> ServicioAuditoriaAdministrativa
+    ServicioAdministracionUsuarios --> ServicioAuditoriaAdministrativa
+
+    Plan "1" --> "0..*" LimitePlan
+    Suscripcion "1" --> "1" Plan
+    Suscripcion "1" --> "0..*" SuscripcionComplemento
+    Complemento "1" --> "0..*" SuscripcionComplemento
+    Suscripcion "1" --> "0..*" Transaccion
+    Suscripcion "1" --> "1" EstadoSuscripcion
+    Transaccion "1" --> "1" TipoTransaccion
+    Transaccion "1" --> "1" EstadoTransaccion

@@ -1,0 +1,13 @@
+---
+description: Rol Derek — motor, tools, compose, adapters
+globs: "**/construccion/**,**/orquestacion/**,**/enrutamiento/**,**/herramientas/**,**/adapters/**,**/compose*,**/docker-compose*,**/Dockerfile*"
+alwaysApply: false
+---
+
+# Derek — M4 M5 M6 y capa herramientas M8
+
+Dueño: @derekCmorales. Kit: `docs/roles/derek-motor-despliegue/`.
+
+Cola Redis (stub en bootstrap). Artefacto versionado e inmutable. Reversión = levantar artefacto previo.
+
+Puertos: `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto`. Specs: `motor-construccion`, `orquestacion`, `enrutamiento`, `herramientas`. Commits `feat(m4):` / `feat(m5):` / `feat(m6):` / `feat(m8):`.

@@ -1,0 +1,277 @@
+---
+title: Diagrama de clases unificado Deploya — un solo artefacto
+---
+classDiagram
+    direction TB
+
+    class Usuario {
+        +id UUID
+        +correo String
+        +nombre String
+        +estadoCuenta String
+    }
+    class Rol {
+        +nombre String
+    }
+    class Sesion {
+        +expiracion DateTime
+    }
+    class Plan {
+        +nombre String
+        +precio Decimal
+        +vigenciaDias Integer
+        +activo Boolean
+    }
+    class LimitePlan {
+        +recurso String
+        +cantidad Decimal
+        +unidad String
+    }
+    class Complemento {
+        +nombre String
+        +precio Decimal
+    }
+    class Suscripcion {
+        +estado EstadoSuscripcion
+        +renovacionAutomatica Boolean
+        +fechaInicio DateTime
+        +fechaFin DateTime
+    }
+    class PoliticaCicloSuscripcion {
+        +avanzar(suscripcion, ahora) EstadoSuscripcion
+    }
+    class Transaccion {
+        +tipo TipoTransaccion
+        +monto Decimal
+        +estado EstadoTransaccion
+        +comprobante String
+    }
+    class EspacioTrabajo {
+        +nombre String
+    }
+    class Proyecto {
+        +nombre String
+        +tipoFuente String
+        +urlRepositorio String
+        +recetaConstruccion String
+        +comandoArranque String
+        +puertoHttp Integer
+    }
+    class VariableEntorno {
+        +clave String
+        +valorCifrado String
+    }
+    class TrabajoConstruccion {
+        +estado String
+        +stackDetectado String
+    }
+    class Imagen {
+        +digest String
+        +referencia String
+    }
+    class Artefacto {
+        +numeroVersion Integer
+        +inmutable Boolean
+    }
+    class Despliegue {
+        +estado EstadoDespliegue
+        +disparador String
+    }
+    class Contenedor {
+        +identificadorRuntime String
+        +cpu Decimal
+        +memoriaMb Integer
+    }
+    class Subdominio {
+        +fqdn String
+    }
+    class DominioPersonalizado {
+        +fqdn String
+        +estadoDns String
+    }
+    class CertificadoTls {
+        +dominio String
+        +emision DateTime
+        +vencimiento DateTime
+    }
+    class MetricaConsumo {
+        +porcentajeCpu Float
+        +usoRamMb Integer
+        +transferenciaGb Decimal
+    }
+    class EntradaBitacora {
+        +flujo String
+        +mensaje String
+    }
+    class Notificacion {
+        +tipo String
+        +canal String
+    }
+    class AccionAdministrativa {
+        +accion String
+        +entidadAfectada String
+    }
+
+    class EstadoSuscripcion {
+        <<enumeration>>
+        ACTIVA
+        POR_VENCER
+        VENCIDA
+        SUSPENDIDA
+        CANCELADA
+    }
+    class EstadoDespliegue {
+        <<enumeration>>
+        ENCOLADO
+        CONSTRUYENDO
+        APROVISIONANDO
+        PUBLICANDO
+        SALUDABLE
+        FALLIDO
+        REVIRTIENDO
+        DETENIDO
+    }
+    class TipoTransaccion {
+        <<enumeration>>
+        CONTRATACION
+        RENOVACION
+        CAMBIO_PLAN
+        COMPLEMENTO
+    }
+    class EstadoTransaccion {
+        <<enumeration>>
+        APROBADA
+        RECHAZADA
+        PENDIENTE
+    }
+
+    class PasarelaPago {
+        <<interface>>
+        +cobrar(monto, metodo) ResultadoPago
+    }
+    class PasarelaSimulada {
+        +cobrar(monto, metodo) ResultadoPago
+    }
+    class ProveedorFuente {
+        <<interface>>
+        +obtenerCodigoFuente() CodigoFuente
+    }
+    class FuenteRepositorio {
+        +obtenerCodigoFuente() CodigoFuente
+    }
+    class FuenteArchivoComprimido {
+        +obtenerCodigoFuente() CodigoFuente
+    }
+    class ContenedorPuerto {
+        <<interface>>
+        +crear(imagen, limites) Contenedor
+        +detener(contenedorId)
+        +reemplazar(contenedorId, artefacto) Contenedor
+    }
+    class EnrutamientoPuerto {
+        <<interface>>
+        +asignarSubdominio(proyecto) Subdominio
+        +emitirCertificado(dominio) CertificadoTls
+        +conmutarTrafico(contenedor)
+    }
+    class VerificacionEntornoPuerto {
+        <<interface>>
+        +comprobarSalud(contenedor) ResultadoSalud
+    }
+    class CorreoPuerto {
+        <<interface>>
+        +enviar(destinatario, plantilla, datos)
+    }
+
+    class ServicioSuscripciones {
+        +crearSuscripcion(clienteId, planId, vigencia) Suscripcion
+        +renovar(suscripcionId) Suscripcion
+        +cambiarPlan(suscripcionId, planNuevoId) Suscripcion
+        +cancelar(suscripcionId) Suscripcion
+    }
+    class ServicioPagos {
+        -pasarela PasarelaPago
+        +procesarCargo(suscripcion, monto) Transaccion
+    }
+    class ServicioProyectos {
+        -proveedorFuente ProveedorFuente
+        +crearProyecto(nombre, variablesEntorno) Proyecto
+    }
+    class ServicioConstruccion {
+        +encolar(proyecto) TrabajoConstruccion
+        +construir(trabajo) Artefacto
+    }
+    class ServicioOrquestacion {
+        -contenedores ContenedorPuerto
+        -salud VerificacionEntornoPuerto
+        +aprovisionar(artefacto, limites) Contenedor
+        +revertir(despliegueId) Despliegue
+        +detener(contenedorId)
+    }
+    class ServicioEnrutamiento {
+        -enrutamiento EnrutamientoPuerto
+        +publicar(proyecto, contenedor) Subdominio
+    }
+    class ServicioMetricas {
+        +consultarEnVivo(proyectoId) List~MetricaConsumo~
+    }
+    class ServicioBitacoras {
+        +transmitir(proyectoId)
+    }
+    class ServicioNotificaciones {
+        -correo CorreoPuerto
+        +notificarDespliegue(despliegue)
+        +notificarVencimiento(suscripcion)
+    }
+    class CapaHerramientas {
+        +consultarProyectos()
+        +desplegar(proyectoId)
+        +obtenerBitacoras(proyectoId)
+        +obtenerMetricas(proyectoId)
+        +revertir(despliegueId)
+        +gestionarVariables(proyectoId)
+    }
+
+    Usuario "1" --> "*" Sesion
+    Usuario "*" --> "*" Rol
+    Usuario "1" --> "*" Suscripcion
+    Usuario "1" --> "*" EspacioTrabajo
+    Plan "1" --> "*" LimitePlan
+    Plan "1" --> "*" Suscripcion
+    Suscripcion "1" --> "*" Transaccion
+    Suscripcion --> EstadoSuscripcion
+    ServicioSuscripciones --> PoliticaCicloSuscripcion
+    ServicioSuscripciones --> ServicioPagos
+    ServicioPagos --> PasarelaPago
+    PasarelaPago <|.. PasarelaSimulada
+    EspacioTrabajo "1" --> "*" Proyecto
+    Proyecto "1" --> "*" VariableEntorno
+    Proyecto "1" --> "*" Despliegue
+    Proyecto "1" --> "*" Artefacto
+    Despliegue --> EstadoDespliegue
+    Despliegue "1" --> "0..1" TrabajoConstruccion
+    Despliegue "*" --> "1" Artefacto
+    Artefacto "*" --> "1" Imagen
+    Despliegue "1" --> "0..1" Contenedor
+    Proyecto "1" --> "1" Subdominio
+    Proyecto "1" --> "*" DominioPersonalizado
+    Subdominio --> CertificadoTls
+    DominioPersonalizado --> CertificadoTls
+    Contenedor "1" --> "*" MetricaConsumo
+    Contenedor "1" --> "*" EntradaBitacora
+    Despliegue "1" --> "*" Notificacion
+    ServicioProyectos --> ProveedorFuente
+    ProveedorFuente <|.. FuenteRepositorio
+    ProveedorFuente <|.. FuenteArchivoComprimido
+    ServicioConstruccion --> ServicioOrquestacion
+    ServicioOrquestacion --> ContenedorPuerto
+    ServicioOrquestacion --> VerificacionEntornoPuerto
+    ServicioEnrutamiento --> EnrutamientoPuerto
+    ServicioNotificaciones --> CorreoPuerto
+    CapaHerramientas --> ServicioProyectos
+    CapaHerramientas --> ServicioConstruccion
+    CapaHerramientas --> ServicioOrquestacion
+    CapaHerramientas --> ServicioMetricas
+    CapaHerramientas --> ServicioBitacoras
+    ServicioOrquestacion --> ServicioEnrutamiento
+    ServicioOrquestacion --> ServicioNotificaciones

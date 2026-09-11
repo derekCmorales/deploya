@@ -1,0 +1,80 @@
+---
+title: C4 Nivel 3 — Componentes del motor de despliegue
+---
+flowchart TB
+    API["API de control"]
+
+    subgraph M4["M4 Motor de construcción"]
+        COLA_C["Consumidor de cola<br/>de construcción"]
+        DETECTOR["Detector de stack"]
+        CONSTRUCTOR["Constructor de imágenes"]
+        REGISTRO["Registro de artefactos<br/>versionados e inmutables"]
+    end
+
+    subgraph M5["M5 Orquestación y ejecución"]
+        ORQ["Orquestador de contenedores"]
+        LIMITES["Aplicador de límites<br/>CPU memoria procesos"]
+        REVERSION["Reversión de versión"]
+    end
+
+    subgraph M6["M6 Enrutamiento y TLS"]
+        SUBDOM["Asignador de subdominio"]
+        CERT["Gestor de certificados TLS"]
+        TRAFICO["Conmutador de tráfico"]
+        DOMINIO["Dominios personalizados"]
+    end
+
+    subgraph PUERTOS["Capa de adaptadores — la API no llama a Docker"]
+        P_FUENTE["ProveedorFuente"]
+        P_CONT["ContenedorPuerto"]
+        P_RUTA["EnrutamientoPuerto"]
+        P_SALUD["VerificacionEntornoPuerto"]
+    end
+
+    subgraph M8["M8 Capa de herramientas"]
+        HERR["CapaHerramientas<br/>consultar desplegar bitácoras<br/>métricas revertir variables"]
+    end
+
+    DOCKER["Docker"]
+    EDGE["Enrutador de borde"]
+    GIT["Repositorio / archivo comprimido"]
+    NOTIF["M10 Notificaciones"]
+    OBS["M7 Observabilidad"]
+
+    API --> COLA_C
+    API --> HERR
+    COLA_C --> DETECTOR
+    DETECTOR --> CONSTRUCTOR
+    CONSTRUCTOR --> REGISTRO
+    REGISTRO --> ORQ
+    ORQ --> LIMITES
+    ORQ --> REVERSION
+    ORQ --> SUBDOM
+    SUBDOM --> CERT
+    CERT --> TRAFICO
+    TRAFICO --> DOMINIO
+
+    DETECTOR --> P_FUENTE
+    P_FUENTE --> GIT
+    LIMITES --> P_CONT
+    ORQ --> P_CONT
+    REVERSION --> P_CONT
+    P_CONT --> DOCKER
+    SUBDOM --> P_RUTA
+    CERT --> P_RUTA
+    TRAFICO --> P_RUTA
+    P_RUTA --> EDGE
+    ORQ --> P_SALUD
+    P_SALUD --> DOCKER
+
+    ORQ --> NOTIF
+    COLA_C --> NOTIF
+    ORQ --> OBS
+    HERR --> API
+
+    classDef mod fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef port fill:#fff7ed,stroke:#fb923c,stroke-width:2px,color:#7c2d12
+    classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
+    class COLA_C,DETECTOR,CONSTRUCTOR,REGISTRO,ORQ,LIMITES,REVERSION,SUBDOM,CERT,TRAFICO,DOMINIO,HERR,API mod
+    class P_FUENTE,P_CONT,P_RUTA,P_SALUD port
+    class DOCKER,EDGE,GIT,NOTIF,OBS ext

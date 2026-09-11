@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Mínimo de bootstrap (Javier + review Derek). El ERD completo está en docs/diagramas/compartido.
+model Usuario {
+  id             String      @id @default(uuid())
+  correo         String      @unique
+  nombre         String
+  hashContrasena String
+  estadoCuenta   String      @default("pendiente")
+  fechaAlta      DateTime    @default(now())
+  proyectos      Proyecto[]
+}
+
+model Plan {
+  id           String  @id @default(uuid())
+  nombre       String  @unique
+  descripcion  String
+  precio       Decimal @default(0) @db.Decimal(10, 2)
+  vigenciaDias Int     @default(30)
+  activo       Boolean @default(true)
+}
+
+model Proyecto {
+  id                 String      @id @default(uuid())
+  nombre             String
+  tipoFuente         String
+  urlRepositorio     String?
+  recetaConstruccion String?
+  comandoArranque    String?
+  puertoHttp         Int         @default(8080)
+  usuarioId          String?
+  usuario            Usuario?    @relation(fields: [usuarioId], references: [id])
+  despliegues        Despliegue[]
+}
+
+model Despliegue {
+  id         String   @id @default(uuid())
+  proyectoId String
+  proyecto   Proyecto @relation(fields: [proyectoId], references: [id])
+  estado     String   @default("Encolado")
+  disparador String   @default("manual")
+  creacion   DateTime @default(now())
+}

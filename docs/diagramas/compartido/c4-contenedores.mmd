@@ -1,0 +1,49 @@
+---
+title: C4 Nivel 2 — Contenedores de Deploya
+---
+flowchart TB
+    CLIENTE["Cliente / Administrador /<br/>Operador / Soporte"]
+
+    subgraph DEPLOYA["Deploya — monolito modular con trabajadores"]
+        WEB["Interfaz web<br/>Next.js"]
+        API["API de control<br/>NestJS<br/>M1–M3, M8, M9, M10"]
+        MOTOR["Motor de despliegue<br/>trabajadores M4 M5 M6"]
+        HERR["Capa de herramientas M8<br/>asistente e integración"]
+        OBS["Observabilidad M7<br/>métricas y bitácoras en vivo"]
+        COLA["Cola y caché<br/>Redis"]
+        BD[("PostgreSQL")]
+    end
+
+    NUBE["Motor de contenedores<br/>Docker"]
+    EDGE["Enrutador de borde<br/>TLS automático"]
+    GIT["Proveedor de repositorios"]
+    CORREO["Correo transaccional"]
+    PAGOS["Pasarela de pagos simulada"]
+    LLM["Modelo de lenguaje"]
+
+    CLIENTE --> WEB
+    WEB --> API
+    API --> BD
+    API --> COLA
+    API --> HERR
+    API --> OBS
+    MOTOR --> COLA
+    MOTOR --> BD
+    MOTOR --> NUBE
+    MOTOR --> EDGE
+    OBS --> COLA
+    HERR --> API
+    HERR --> LLM
+    API --> CORREO
+    API --> PAGOS
+    API --> GIT
+    EDGE --> NUBE
+
+    classDef persona fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
+    classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
+    classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
+    class CLIENTE persona
+    class WEB,API,MOTOR,HERR,OBS app
+    class COLA,BD data
+    class NUBE,EDGE,GIT,CORREO,PAGOS,LLM ext

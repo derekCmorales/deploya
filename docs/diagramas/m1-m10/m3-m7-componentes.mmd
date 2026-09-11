@@ -1,0 +1,21 @@
+flowchart TD
+    %% Interfaz
+    UI[Interfaz Next.js - Panel de Cliente]
+
+    %% Componentes M3
+    subgraph M3 [Módulo 3: Proyectos y fuentes]
+        G[Gestor de Fuentes]
+        V[Gestor de Variables de Entorno]
+    end
+
+    %% Componentes M7
+    subgraph M7 [Módulo 7: Observabilidad]
+        M[Visor de Métricas de Recursos]
+        B[Terminal de Bitácoras en Vivo]
+    end
+
+    %% Relaciones
+    UI -->|Envía config| G
+    UI -->|Cifra y guarda| V
+    UI -->|Consulta API HTTP| M
+    UI -->|Abre conexión WSS| B

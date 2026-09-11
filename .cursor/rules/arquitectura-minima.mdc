@@ -1,0 +1,14 @@
+---
+description: Arquitectura mínima — C4, ciclo, puertos sin I
+alwaysApply: true
+---
+
+# Arquitectura
+
+Monolito modular Nest + Next. Ciclo: Recepción → Construcción → Ejecución → Enrutamiento → Operación.
+
+Puertos (DIP, **sin** prefijo `I`): `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto`. La API no llama a Docker.
+
+Estados de despliegue ≠ estados de suscripción §4.4.
+
+No hay kit visual canónico. No fijar paleta ni fingir UI final. Docs: `docs/arquitectura.md`.

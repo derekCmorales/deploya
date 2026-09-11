@@ -1,0 +1,15 @@
+stateDiagram-v2
+    [*] --> IniciarFormulario
+    IniciarFormulario --> IngresarNombreYFuente
+    IngresarNombreYFuente --> AgregarVariablesEntorno
+    AgregarVariablesEntorno --> ValidarDatos
+
+    state ValidarDatos {
+        [*] --> Verificacion
+        Verificacion --> DatosInvalidos
+        Verificacion --> DatosValidos
+    }
+
+    DatosInvalidos --> IngresarNombreYFuente : Corregir errores
+    DatosValidos --> EnviarSolicitudDespliegue
+    EnviarSolicitudDespliegue --> [*]

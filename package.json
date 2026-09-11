@@ -1,0 +1,14 @@
+{
+  "name": "deploya",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --filter @deploya/api --filter @deploya/web build",
+    "test": "pnpm --filter @deploya/api --filter @deploya/web test",
+    "test:smoke": "pnpm --filter @deploya/e2e test",
+    "validate:mermaid": "node scripts/validate-mermaid.mjs"
+  }
+}

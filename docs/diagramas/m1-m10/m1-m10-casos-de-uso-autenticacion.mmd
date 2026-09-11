@@ -1,0 +1,64 @@
+---
+config:
+  layout: fixed
+---
+flowchart LR
+ subgraph DEPLOYA["Deploya"]
+        REG(("Registrarse"))
+        VERIFY(("Verificar correo"))
+        LOGIN(("Iniciar sesión"))
+        LOGOUT(("Cerrar sesión"))
+        RECOVERY(("Recuperar contraseña"))
+        RESET(("Restablecer contraseña"))
+        PROFILE(("Consultar perfil"))
+        SESSION(("Gestionar sesiones"))
+        ACCESS(("Acceder según rol"))
+        VALID_REG(("Validar datos de registro"))
+        SEND_VERIFY(("Enviar correo de verificación"))
+        VALID_TOKEN_VERIFY(("Validar token de verificación"))
+        VALID_CREDENTIALS(("Validar credenciales"))
+        CREATE_SESSION(("Crear sesión"))
+        VALID_PERMISSION(("Validar permisos"))
+        GENERATE_RESET(("Generar token de recuperación"))
+        SEND_RESET(("Enviar enlace de recuperación"))
+        VALID_RESET_TOKEN(("Validar token de recuperación"))
+        UPDATE_PASSWORD(("Actualizar contraseña"))
+        AUDIT(("Registrar evento de auditoría"))
+        RESEND_VERIFY(("Reenviar correo de verificación"))
+        NEW_RECOVERY(("Solicitar nuevo enlace de recuperación"))
+  end
+    CLIENTE["👤 Cliente"] --- REG & VERIFY & LOGIN & LOGOUT & RECOVERY & RESET & PROFILE & SESSION & ACCESS
+    ADMIN["👤 Administrador"] --- LOGIN & LOGOUT & SESSION & ACCESS
+    OPERADOR["👤 Operador de infraestructura"] --- LOGIN & LOGOUT & SESSION & ACCESS
+    SOPORTE["👤 Soporte técnico"] --- LOGIN & LOGOUT & SESSION & ACCESS
+    REG -. include .-> VALID_REG & SEND_VERIFY & AUDIT
+    VERIFY -. include .-> VALID_TOKEN_VERIFY & AUDIT
+    LOGIN -. include .-> VALID_CREDENTIALS & CREATE_SESSION & AUDIT
+    LOGOUT -. include .-> AUDIT
+    ACCESS -. include .-> VALID_PERMISSION
+    RECOVERY -. include .-> GENERATE_RESET & SEND_RESET & AUDIT
+    RESET -. include .-> VALID_RESET_TOKEN & UPDATE_PASSWORD & AUDIT
+    RESEND_VERIFY -. extend .-> VERIFY
+    NEW_RECOVERY -. extend .-> RECOVERY
+
+    linkStyle 0 stroke:#FFD600,fill:none
+    linkStyle 1 stroke:#FFD600,fill:none
+    linkStyle 2 stroke:#FFD600,fill:none
+    linkStyle 3 stroke:#FFD600,fill:none
+    linkStyle 4 stroke:#FFD600,fill:none
+    linkStyle 5 stroke:#FFD600,fill:none
+    linkStyle 6 stroke:#FFD600,fill:none
+    linkStyle 7 stroke:#FFD600,fill:none
+    linkStyle 8 stroke:#FFD600,fill:none
+    linkStyle 9 stroke:#FF6D00,fill:none
+    linkStyle 10 stroke:#FF6D00,fill:none
+    linkStyle 11 stroke:#FF6D00,fill:none
+    linkStyle 12 stroke:#FF6D00,fill:none
+    linkStyle 13 stroke:#00C853,fill:none
+    linkStyle 14 stroke:#00C853,fill:none
+    linkStyle 15 stroke:#00C853,fill:none
+    linkStyle 16 stroke:#00C853,fill:none
+    linkStyle 17 stroke:#2962FF,fill:none
+    linkStyle 18 stroke:#2962FF,fill:none
+    linkStyle 19 stroke:#2962FF,fill:none
+    linkStyle 20 stroke:#2962FF

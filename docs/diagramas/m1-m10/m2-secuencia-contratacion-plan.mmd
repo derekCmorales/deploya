@@ -1,0 +1,49 @@
+sequenceDiagram
+    actor Cliente
+    participant UI as Interfaz web
+    participant SubCtrl as Controlador de suscripciones
+    participant Catalogo as Servicio de catalogo
+    participant Suscripcion as Servicio de suscripciones
+    participant Pagos as Servicio de pagos
+    participant Pasarela as Adaptador de pasarela (simulada)
+    participant Cuotas as Servicio de cuotas
+    participant Orquesta as M5 Orquestacion
+    participant Notif as M10 Notificaciones
+    participant BD as PostgreSQL
+
+    Cliente->>UI: Selecciona plan y vigencia (30/365 dias)
+    UI->>SubCtrl: POST /suscripciones (planId, vigencia)
+    SubCtrl->>Catalogo: obtenerPlan(planId)
+    Catalogo->>BD: SELECT plan
+    BD-->>Catalogo: plan (precio, recursos, vigencia)
+    Catalogo-->>SubCtrl: plan valido
+
+    SubCtrl->>Pagos: procesarCargo(cliente, plan, vigencia)
+    Pagos->>Pasarela: cobrar(monto, metodo)
+    Pasarela-->>Pagos: resultado (aprobado | rechazado)
+
+    alt Cargo aprobado
+        Pagos->>BD: registrar transaccion (aprobada)
+        Pagos-->>SubCtrl: pago aprobado
+
+        SubCtrl->>Suscripcion: crearSuscripcion(cliente, plan, vigencia)
+        Suscripcion->>BD: INSERT suscripcion (estado = Activa)
+        BD-->>Suscripcion: suscripcion creada
+
+        Suscripcion->>Cuotas: aplicarLimites(suscripcion, plan)
+        Cuotas->>Orquesta: configurarLimites(cpu, memoria, proyectos, ...)
+        Orquesta-->>Cuotas: limites aplicados
+        Cuotas-->>Suscripcion: cuota activa
+
+        Suscripcion->>Notif: enviarConfirmacionContratacion(cliente, plan)
+        Notif-->>Suscripcion: notificacion encolada
+
+        Suscripcion-->>SubCtrl: suscripcion activa
+        SubCtrl-->>UI: 201 Creada (suscripcion, comprobante)
+        UI-->>Cliente: Confirmacion de contratacion
+    else Cargo rechazado
+        Pagos->>BD: registrar transaccion (rechazada)
+        Pagos-->>SubCtrl: pago rechazado
+        SubCtrl-->>UI: 402 Pago rechazado
+        UI-->>Cliente: Muestra motivo del rechazo, no se crea la cuota
+    end

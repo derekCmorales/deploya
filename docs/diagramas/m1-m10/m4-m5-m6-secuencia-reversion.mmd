@@ -1,0 +1,39 @@
+---
+title: Secuencia de reversión — artefacto previo, sin reconstruir
+---
+sequenceDiagram
+    actor Cliente
+    participant UI as Interfaz web
+    participant API as API de control
+    participant BD as PostgreSQL
+    participant M5 as Orquestador de contenedores
+    participant Salud as VerificacionEntornoPuerto
+    participant M6 as Enrutador de borde
+    participant M10 as Notificaciones
+
+    Cliente->>UI: Revertir a versión anterior
+    UI->>API: POST despliegues reversión
+    API->>BD: obtener Artefacto previo del proyecto
+    API->>BD: Despliegue Revirtiendo
+    Note over API,M5: No se reconstruye. Se levanta un artefacto ya registrado.
+
+    alt Hay versión para reversión según el plan
+        API->>M5: levantar artefacto previo
+        M5->>M5: reemplazar contenedor con límites vigentes
+        M5->>M6: conmutar tráfico al contenedor revertido
+        M5->>Salud: comprobar salud HTTP
+        alt Healthcheck correcto
+            M5->>BD: Despliegue Saludable
+            M5->>M10: reversión correcta
+            M10-->>Cliente: correo
+            API-->>UI: 200 revertido
+        else Healthcheck fallido
+            M5->>BD: Despliegue Fallido
+            M5->>M10: reversión fallida
+            M10-->>Cliente: correo
+            API-->>UI: 409 reversión fallida
+        end
+    else No hay artefacto previo o el plan no incluye reversión
+        API-->>UI: 409 no hay versión para revertir
+        UI-->>Cliente: informar límite del plan
+    end

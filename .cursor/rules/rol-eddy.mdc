@@ -1,0 +1,13 @@
+---
+description: Rol Eddy — identidad, notificaciones, auth, CI
+globs: "**/identidad/**,**/notificaciones/**,**/(auth)/**,.github/workflows/**"
+alwaysApply: false
+---
+
+# Eddy — M1 Identidad y M10 Notificaciones
+
+Dueño: @EddyPoroj106. Kit: `docs/roles/eddy-cuentas-seguridad/`.
+
+Registro, verificación de correo, recuperación, sesiones, roles, auditoría. Notificaciones transaccionales vía `CorreoPuerto` (sin prefijo `I`).
+
+No implementes auth real en stubs: módulo + `GET /identidad/health` y `GET /notificaciones/health`. Specs: `openspec/specs/identidad`, `notificaciones`. Commits `feat(m1):` / `feat(m10):`.

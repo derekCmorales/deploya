@@ -1,0 +1,32 @@
+flowchart TB
+    START(("Inicio")) --> A["Administrador inicia sesion<br>en el panel"]
+    A --> B["Selecciona plan existente<br>o crea uno nuevo"]
+    B --> C["Ingresa nombre, precio,<br>vigencia y recursos asignados"]
+    C --> D{"Datos validos?"}
+    D -- No --> E["Mostrar errores<br>de validacion"]
+    E --> C
+    D -- Si --> F["Guardar cambios<br>en el catalogo (M2)"]
+    F --> G["Registrar accion<br>administrativa (auditoria)"]
+    G --> H{"Afecta suscripciones<br>ya activas?"}
+    H -- "No (aplica solo<br>a nuevas contrataciones)" --> END1(("Fin"))
+    H -- "Si (ej. plan<br>descontinuado)" --> I["Notificar impacto<br>a clientes afectados"]
+    I --> END2(("Fin"))
+
+     START:::startEnd
+     A:::input
+     B:::input
+     C:::input
+     D:::decision
+     E:::error
+     F:::process
+     G:::process
+     H:::decision
+     END1:::startEnd
+     I:::success
+     END2:::startEnd
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e
+    classDef input fill:#ecfeff,stroke:#06b6d4,stroke-width:2px,color:#164e63
+    classDef process fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a
+    classDef decision fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef error fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef success fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#065f46

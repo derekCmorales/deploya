@@ -1,0 +1,13 @@
+---
+description: Rol Javier — suscripciones, admin, billing, Prisma
+globs: "**/suscripciones/**,**/administracion/**,**/(billing)/**,**/(admin)/**,**/prisma/**"
+alwaysApply: false
+---
+
+# Javier — M2 Suscripciones y M9 Administración
+
+Dueño: @Javier-r04. Kit: `docs/roles/javier-monetizacion-admin/`.
+
+Pagos **simulados** (`PasarelaPago`, sin `I`). Estados §4.4: Activa, Por vencer, Vencida, Suspendida, Cancelada — distintos a los de despliegue.
+
+Prisma (`usuario`, `plan`, `proyecto`, `despliegue` mínimo) es tuyo; Derek es segundo reviewer. Specs: `openspec/specs/suscripciones`, `administracion`. Commits `feat(m2):` / `feat(m9):`.

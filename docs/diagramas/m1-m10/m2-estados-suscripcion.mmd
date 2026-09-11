@@ -1,0 +1,34 @@
+stateDiagram-v2
+    [*] --> Activa : contratacion con pago aprobado
+
+    Activa --> PorVencer : faltan 7 dias o menos<br/>para el vencimiento
+    PorVencer --> Activa : renovacion exitosa<br/>(manual o automatica)
+    PorVencer --> Vencida : se cumple la fecha<br/>de vencimiento sin renovar
+
+    Vencida --> Activa : renovacion exitosa dentro<br/>del periodo de gracia (5 dias)
+    Vencida --> Suspendida : termina el periodo de<br/>gracia sin renovacion
+
+    Suspendida --> Activa : renovacion exitosa durante<br/>la suspension (*)
+    Suspendida --> Cancelada : 30 dias en Suspendida<br/>sin renovar, o cancelacion<br/>solicitada por el cliente
+
+    Activa --> Cancelada : cancelacion solicitada<br/>por el cliente
+    PorVencer --> Cancelada : cancelacion solicitada<br/>por el cliente
+
+    Cancelada --> [*] : recursos liberados<br/>(tras ventana de exportacion)
+
+    note right of Activa
+        Todos los entornos operan
+        con la cuota contratada
+    end note
+    note right of Vencida
+        Entornos en linea;
+        nuevos despliegues bloqueados
+    end note
+    note right of Suspendida
+        Contenedores detenidos;
+        datos y configuracion conservados
+    end note
+    note right of Cancelada
+        Recursos liberados;
+        cliente puede exportar datos antes
+    end note

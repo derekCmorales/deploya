@@ -1,0 +1,96 @@
+---
+config:
+  layout: elk
+---
+flowchart TB
+    USER["Usuario"] --> UI["Interfaz web<br/>Next.js"]
+
+    subgraph DEPLOYA["Deploya"]
+        direction TB
+
+        subgraph API["Capa de entrada"]
+            direction LR
+            ACCOUNT_CTRL["Controlador de cuentas"]
+            AUTH_CTRL["Controlador de autenticación"]
+            SESSION_CTRL["Controlador de sesiones"]
+            RECOVERY_CTRL["Controlador de recuperación"]
+            VERIFY_CTRL["Controlador de verificación"]
+        end
+
+        subgraph M1["M1 · Identidad y acceso"]
+            direction TB
+            ACCOUNT["Servicio de cuentas"]
+            AUTH["Servicio de autenticación"]
+            SESSION["Servicio de sesiones"]
+            AUTHZ["Servicio de autorización"]
+            RECOVERY["Servicio de recuperación"]
+            VERIFY["Servicio de verificación"]
+            AUDIT["Servicio de auditoría"]
+        end
+
+        subgraph M10["M10 · Notificaciones"]
+            direction TB
+            NOTIFICATION["Servicio de notificaciones"]
+            CORREO_PUERTO["CorreoPuerto"]
+        end
+
+        subgraph ADAPTERS["Capa de adaptadores"]
+            direction TB
+            EMAIL_ADAPTER["Adaptador de proveedor<br/>de correo"]
+        end
+
+        DB[("PostgreSQL")]
+    end
+
+    EMAIL["Servicio externo<br/>de correo"]
+
+    UI --> ACCOUNT_CTRL
+    UI --> AUTH_CTRL
+    UI --> SESSION_CTRL
+    UI --> RECOVERY_CTRL
+    UI --> VERIFY_CTRL
+
+    ACCOUNT_CTRL --> ACCOUNT
+    AUTH_CTRL --> AUTH
+    SESSION_CTRL --> SESSION
+    RECOVERY_CTRL --> RECOVERY
+    VERIFY_CTRL --> VERIFY
+
+    AUTH --> SESSION
+    AUTH --> AUTHZ
+
+    ACCOUNT --> AUDIT
+    AUTH --> AUDIT
+    SESSION --> AUDIT
+    RECOVERY --> AUDIT
+    VERIFY --> AUDIT
+
+    ACCOUNT --> DB
+    AUTH --> DB
+    SESSION --> DB
+    AUTHZ --> DB
+    RECOVERY --> DB
+    VERIFY --> DB
+    AUDIT --> DB
+
+    ACCOUNT --> NOTIFICATION
+    VERIFY --> NOTIFICATION
+    RECOVERY --> NOTIFICATION
+
+    NOTIFICATION --> CORREO_PUERTO
+    CORREO_PUERTO --> EMAIL_ADAPTER
+    EMAIL_ADAPTER --> EMAIL
+
+    classDef external fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px;
+    classDef entry fill:#eef2ff,stroke:#818cf8,stroke-width:2px;
+    classDef identity fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px;
+    classDef notification fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px;
+    classDef adapter fill:#fff7ed,stroke:#fb923c,stroke-width:2px;
+    classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px;
+
+    class USER,UI,EMAIL external;
+    class ACCOUNT_CTRL,AUTH_CTRL,SESSION_CTRL,RECOVERY_CTRL,VERIFY_CTRL entry;
+    class ACCOUNT,AUTH,SESSION,AUTHZ,RECOVERY,VERIFY,AUDIT identity;
+    class NOTIFICATION,CORREO_PUERTO notification;
+    class EMAIL_ADAPTER adapter;
+    class DB data;

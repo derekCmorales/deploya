@@ -1,0 +1,11 @@
+---
+description: Flujo git — nunca a main, conventional commits, PRs
+alwaysApply: true
+---
+
+# Git
+
+- Nunca commits ni push a `main`. Ramas: `feat/m<n>-<slug>`, `fix/`, `docs/`, `chore/`.
+- Conventional Commits con ámbito: `feat(m1):`, `fix(m4):`, `docs:`, `chore:`.
+- Integración solo por PR. Plantilla en `.github/PULL_REQUEST_TEMPLATE.md`.
+- Dueños: CODEOWNERS. Derek revisa infra/motor; el dueño del módulo revisa lo suyo.

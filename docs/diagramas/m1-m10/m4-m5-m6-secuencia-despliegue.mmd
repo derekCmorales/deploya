@@ -1,0 +1,64 @@
+---
+title: Secuencia del despliegue completo — propuesta §3.2
+---
+sequenceDiagram
+    actor Cliente
+    participant UI as Interfaz web
+    participant API as API de control
+    participant BD as PostgreSQL
+    participant Cola as Cola Redis
+    participant M4 as Trabajador de construcción
+    participant M5 as Orquestador de contenedores
+    participant Salud as VerificacionEntornoPuerto
+    participant M6 as Enrutador de borde
+    participant M7 as Observabilidad
+    participant M10 as Notificaciones
+
+    Note over Cliente,M10: 1. Recepción
+    Cliente->>UI: Desplegar proyecto
+    UI->>API: POST despliegues
+    API->>BD: registrar Despliegue Encolado
+    API->>Cola: encolar construcción
+    API-->>UI: 202 aceptado
+
+    Note over Cliente,M10: 2. Construcción
+    Cola->>M4: entregar trabajo
+    M4->>M4: detectar stack
+    M4->>M4: construir imagen versionada
+
+    alt Construcción correcta
+        M4->>BD: registrar Artefacto inmutable
+        M4->>Cola: encolar ejecución
+
+        Note over Cliente,M10: 3. Ejecución
+        Cola->>M5: entregar artefacto
+        M5->>M5: crear contenedor con límites del plan
+        M5->>BD: Despliegue Aprovisionando
+
+        alt Contenedor en ejecución
+            Note over Cliente,M10: 4. Enrutamiento
+            M5->>M6: asignar subdominio y certificado TLS
+            M6->>M6: conmutar tráfico
+            M5->>Salud: comprobar salud HTTP
+            alt Healthcheck correcto
+                Note over Cliente,M10: 5. Operación
+                M5->>BD: Despliegue Saludable
+                M5->>M7: transmitir bitácoras y métricas
+                M5->>M10: resultado de despliegue correcto
+                M10-->>Cliente: correo de publicación
+                M7-->>UI: métricas y bitácoras en vivo
+            else Healthcheck fallido
+                M5->>BD: Despliegue Fallido
+                M5->>M10: resultado de despliegue fallido
+                M10-->>Cliente: correo de fallo
+            end
+        else No se pudo levantar el contenedor
+            M5->>BD: Despliegue Fallido
+            M5->>M10: resultado de despliegue fallido
+            M10-->>Cliente: correo de fallo
+        end
+    else Construcción fallida
+        M4->>BD: Despliegue Fallido
+        M4->>M10: resultado de despliegue fallido
+        M10-->>Cliente: correo de fallo
+    end

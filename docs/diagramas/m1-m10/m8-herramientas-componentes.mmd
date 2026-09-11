@@ -1,0 +1,46 @@
+---
+title: M8 Capa de herramientas — asistente e integración §9.3 §10.3
+---
+flowchart TB
+    PANEL["Asistente en el panel"]
+    EXT["Cliente externo<br/>protocolo abierto"]
+
+    HERR["CapaHerramientas<br/>misma superficie para ambos"]
+
+    subgraph OPS["Operaciones"]
+        OP1["Consultar proyectos"]
+        OP2["Desplegar"]
+        OP3["Obtener bitácoras"]
+        OP4["Obtener métricas"]
+        OP5["Revertir versión"]
+        OP6["Gestionar variables"]
+    end
+
+    API["API de control<br/>hereda permisos del usuario"]
+    LLM["Proveedor de modelo de lenguaje"]
+    CONF["Confirmación humana<br/>en operaciones destructivas"]
+
+    PANEL --> HERR
+    EXT --> HERR
+    PANEL --> LLM
+    HERR --> OP1
+    HERR --> OP2
+    HERR --> OP3
+    HERR --> OP4
+    HERR --> OP5
+    HERR --> OP6
+    OP1 --> API
+    OP2 --> API
+    OP3 --> API
+    OP4 --> API
+    OP5 --> API
+    OP6 --> API
+    OP2 --> CONF
+    OP5 --> CONF
+
+    classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px
+    classDef core fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px
+    classDef op fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px
+    class PANEL,EXT,LLM ext
+    class HERR,API,CONF core
+    class OP1,OP2,OP3,OP4,OP5,OP6 op

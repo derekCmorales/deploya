@@ -1,0 +1,12 @@
+---
+description: OpenSpec primero — propose, apply, archive
+alwaysApply: true
+---
+
+# OpenSpec
+
+Antes de codear una historia: `/opsx-propose` en el chat del repo. Change `feat/m<n>-<slug>` bajo `openspec/specs/<modulo>/`.
+
+Luego `/opsx-apply`. Tras el merge: `/opsx-archive`.
+
+No reescribir skills ni comandos `opsx-*`. No un spec único del producto: un spec por módulo (§6.1).

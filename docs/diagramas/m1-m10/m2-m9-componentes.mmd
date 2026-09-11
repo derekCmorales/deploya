@@ -1,0 +1,98 @@
+---
+config:
+  layout: elk
+---
+flowchart TB
+    USER["Cliente"] --> UI["Interfaz web<br/>Next.js"]
+    ADMIN_USER["Administrador"] --> UI
+
+    subgraph DEPLOYA["Deploya"]
+        direction TB
+
+        subgraph API["Capa de entrada"]
+            direction LR
+            PLAN_CTRL["Controlador de planes"]
+            SUB_CTRL["Controlador de suscripciones"]
+            PAY_CTRL["Controlador de pagos"]
+            ADMIN_CTRL["Controlador de administracion"]
+        end
+
+        subgraph M2["M2 · Suscripciones y pagos"]
+            direction TB
+            CATALOGO["Servicio de catalogo<br/>(planes y complementos)"]
+            SUSCRIPCION["Servicio de suscripciones"]
+            PAGOS["Servicio de pagos"]
+            CUOTAS["Servicio de cuotas"]
+            HISTORIAL["Servicio de historial<br/>de pagos"]
+        end
+
+        subgraph M9["M9 · Administracion"]
+            direction TB
+            ADMIN_USUARIOS["Servicio de administracion<br/>de usuarios"]
+            ADMIN_PLANES["Servicio de administracion<br/>de planes"]
+            ADMIN_INFRA["Servicio de estado<br/>de infraestructura"]
+            ADMIN_AUDIT["Servicio de auditoria<br/>administrativa"]
+        end
+
+        subgraph ADAPTERS["Capa de adaptadores"]
+            direction TB
+            PAY_ADAPTER["Adaptador de pasarela<br/>de pagos (simulada)"]
+        end
+
+        DB[("PostgreSQL")]
+    end
+
+    M1_USUARIO["M1 · Identidad y acceso<br/>(Usuario, Rol)"]
+    M5_ORQUESTA["M5 · Orquestacion<br/>(aplica limites al contenedor)"]
+    M7_OBSERVA["M7 · Observabilidad<br/>(metricas y consumo)"]
+    M10_NOTIF["M10 · Notificaciones"]
+
+    UI --> PLAN_CTRL
+    UI --> SUB_CTRL
+    UI --> PAY_CTRL
+    UI --> ADMIN_CTRL
+
+    PLAN_CTRL --> CATALOGO
+    SUB_CTRL --> SUSCRIPCION
+    PAY_CTRL --> PAGOS
+    ADMIN_CTRL --> ADMIN_USUARIOS
+    ADMIN_CTRL --> ADMIN_PLANES
+    ADMIN_CTRL --> ADMIN_INFRA
+
+    SUSCRIPCION --> CATALOGO
+    SUSCRIPCION --> CUOTAS
+    SUSCRIPCION --> PAGOS
+    PAGOS --> HISTORIAL
+    PAGOS --> PAY_ADAPTER
+
+    ADMIN_PLANES --> CATALOGO
+    ADMIN_USUARIOS --> M1_USUARIO
+    ADMIN_INFRA --> M5_ORQUESTA
+    ADMIN_INFRA --> M7_OBSERVA
+
+    CUOTAS --> M5_ORQUESTA
+    SUSCRIPCION --> M10_NOTIF
+    ADMIN_PLANES --> ADMIN_AUDIT
+    ADMIN_USUARIOS --> ADMIN_AUDIT
+
+    CATALOGO --> DB
+    SUSCRIPCION --> DB
+    PAGOS --> DB
+    HISTORIAL --> DB
+    ADMIN_AUDIT --> DB
+
+    classDef external fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px;
+    classDef entry fill:#eef2ff,stroke:#818cf8,stroke-width:2px;
+    classDef suscripciones fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px;
+    classDef administracion fill:#fff7ed,stroke:#fb923c,stroke-width:2px;
+    classDef adapter fill:#fdf4ff,stroke:#e879f9,stroke-width:2px;
+    classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px;
+    classDef otromodulo fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,stroke-dasharray: 4 3;
+
+    class USER,ADMIN_USER,UI external;
+    class PLAN_CTRL,SUB_CTRL,PAY_CTRL,ADMIN_CTRL entry;
+    class CATALOGO,SUSCRIPCION,PAGOS,CUOTAS,HISTORIAL suscripciones;
+    class ADMIN_USUARIOS,ADMIN_PLANES,ADMIN_INFRA,ADMIN_AUDIT administracion;
+    class PAY_ADAPTER adapter;
+    class DB data;
+    class M1_USUARIO,M5_ORQUESTA,M7_OBSERVA,M10_NOTIF otromodulo;

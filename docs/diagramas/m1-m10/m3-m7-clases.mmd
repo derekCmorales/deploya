@@ -1,0 +1,24 @@
+classDiagram
+    class ProveedorFuente {
+        <<interface>>
+        +obtenerCodigoFuente() CodigoFuente
+    }
+    class FuenteRepositorio {
+        +obtenerCodigoFuente() CodigoFuente
+    }
+    class FuenteArchivoComprimido {
+        +obtenerCodigoFuente() CodigoFuente
+    }
+    ProveedorFuente <|.. FuenteRepositorio
+    ProveedorFuente <|.. FuenteArchivoComprimido
+
+    class ControladorProyecto {
+        -proveedorFuente: ProveedorFuente
+        +crearProyecto(nombre, variablesEntorno) Proyecto
+    }
+    ControladorProyecto --> ProveedorFuente
+
+    class ControladorObservabilidad {
+        +consultarMetricasEnVivo(proyectoId) List~MetricaConsumo~
+        +transmitirBitacorasConstruccion(proyectoId)
+    }

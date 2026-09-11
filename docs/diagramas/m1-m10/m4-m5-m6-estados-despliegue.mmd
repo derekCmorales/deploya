@@ -1,0 +1,51 @@
+---
+title: Estados del despliegue — dominio §3.2 (no son los de suscripción)
+---
+stateDiagram-v2
+    [*] --> Encolado : API registra y encola la construcción
+
+    Encolado --> Construyendo : trabajador toma el trabajo
+    Construyendo --> Aprovisionando : imagen versionada registrada
+    Construyendo --> Fallido : falla la construcción
+
+    Aprovisionando --> Publicando : contenedor con límites en ejecución
+    Aprovisionando --> Fallido : no se levantó el contenedor
+
+    Publicando --> Saludable : subdominio TLS y healthcheck correctos
+    Publicando --> Fallido : falla enrutamiento o healthcheck
+
+    Saludable --> Encolado : nuevo despliegue
+    Saludable --> Revirtiendo : reversión a artefacto previo
+    Saludable --> Detenido : suscripción Suspendida o parada
+
+    Revirtiendo --> Publicando : se levanta el artefacto previo
+    Revirtiendo --> Fallido : no se pudo revertir
+
+    Detenido --> Aprovisionando : reanudar entorno
+    Fallido --> Encolado : reintentar construcción
+    Fallido --> Revirtiendo : revertir a versión anterior
+
+    note right of Encolado
+        Recepción §3.2
+        El despliegue queda registrado.
+    end note
+    note right of Construyendo
+        Construcción §3.2
+        Detector de stack e imagen.
+    end note
+    note right of Aprovisionando
+        Ejecución §3.2
+        Contenedor aislado con cuota.
+    end note
+    note right of Publicando
+        Enrutamiento §3.2
+        Subdominio, TLS, conmutación.
+    end note
+    note right of Saludable
+        Operación §3.2
+        Bitácoras y métricas al panel.
+    end note
+    note right of Detenido
+        Distinto de Cancelada.
+        Datos conservados.
+    end note

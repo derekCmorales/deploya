@@ -1,0 +1,49 @@
+sequenceDiagram
+    actor Cliente
+    participant Sched as Programador de renovaciones
+    participant UI as Interfaz web
+    participant SubCtrl as Controlador de suscripciones
+    participant Suscripcion as Servicio de suscripciones
+    participant Pagos as Servicio de pagos
+    participant Pasarela as Adaptador de pasarela (simulada)
+    participant Cuotas as Servicio de cuotas
+    participant Notif as M10 Notificaciones
+    participant BD as PostgreSQL
+
+    alt Renovacion manual
+        Cliente->>UI: Solicita renovar suscripcion
+        UI->>SubCtrl: POST /suscripciones/{id}/renovar
+    else Renovacion automatica
+        Sched->>SubCtrl: evaluarVencimientos() (tarea programada diaria)
+        Note over Sched,SubCtrl: Solo continua si renovacionAutomatica = true<br/>y estado en PorVencer o Vencida
+    end
+
+    SubCtrl->>Suscripcion: obtenerEstado(suscripcionId)
+    Suscripcion->>BD: SELECT suscripcion
+    BD-->>Suscripcion: suscripcion (estado, plan, vigencia)
+
+    alt Estado permite renovar (Activa por vencer, Vencida o Suspendida)
+        SubCtrl->>Pagos: procesarCargo(suscripcion, plan)
+        Pagos->>Pasarela: cobrar(monto, metodo)
+        Pasarela-->>Pagos: resultado (aprobado | rechazado)
+
+        alt Cargo aprobado
+            Pagos->>BD: registrar transaccion (renovacion, aprobada)
+            Suscripcion->>BD: UPDATE fechaFin, estado = Activa
+            Suscripcion->>Cuotas: reaplicarLimites(suscripcion, plan)
+            Cuotas-->>Suscripcion: cuota vigente
+            Suscripcion->>Notif: enviarConfirmacionRenovacion(cliente)
+            Suscripcion-->>SubCtrl: suscripcion renovada
+            SubCtrl-->>UI: 200 Renovada
+            UI-->>Cliente: Confirmacion de renovacion
+        else Cargo rechazado
+            Pagos->>BD: registrar transaccion (renovacion, rechazada)
+            Suscripcion->>Notif: enviarAvisoFalloRenovacion(cliente)
+            Note over Suscripcion: El estado no cambia por la renovacion fallida,<br/>continua su transicion natural (ver diagrama de estados)
+            SubCtrl-->>UI: 402 Pago rechazado
+            UI-->>Cliente: Muestra motivo del rechazo
+        end
+    else Estado no permite renovar (Cancelada)
+        SubCtrl-->>UI: 409 No es posible renovar una suscripcion cancelada
+        UI-->>Cliente: Debe contratar un plan nuevo
+    end

@@ -1,0 +1,97 @@
+---
+title: Componentes M4 M5 M6 — motor de despliegue
+---
+flowchart TB
+    UI["Interfaz web Next.js"]
+
+    subgraph API["Capa de entrada"]
+        DEP_CTRL["Controlador de despliegues"]
+        ENV_CTRL["Controlador de entornos"]
+        DOM_CTRL["Controlador de dominios"]
+    end
+
+    subgraph M4["M4 Motor de construcción"]
+        COLA_TRABAJO["Servicio de cola de trabajos"]
+        DETECTOR["Servicio detector de stack"]
+        CONSTRUCTOR["Servicio constructor de imágenes"]
+        ARTEFACTOS["Servicio de artefactos"]
+    end
+
+    subgraph M5["M5 Orquestación y ejecución"]
+        ORQ["Servicio de orquestación"]
+        CUOTA_CTR["Servicio de límites de contenedor"]
+        REV["Servicio de reversión"]
+    end
+
+    subgraph M6["M6 Enrutamiento y TLS"]
+        SUB["Servicio de subdominios"]
+        TLS["Servicio de certificados"]
+        CUT["Servicio de conmutación de tráfico"]
+    end
+
+    subgraph ADAPTADORES["Adaptadores"]
+        P_FUENTE["ProveedorFuente"]
+        P_CONT["ContenedorPuerto"]
+        P_RUTA["EnrutamientoPuerto"]
+        P_SALUD["VerificacionEntornoPuerto"]
+    end
+
+    BD[("PostgreSQL")]
+    REDIS[("Redis")]
+    DOCKER["Docker"]
+    EDGE["Enrutador de borde"]
+    GIT["Repositorio o archivo comprimido"]
+    M2["M2 Cuotas del plan"]
+    M7["M7 Observabilidad"]
+    M10["M10 Notificaciones"]
+
+    UI --> DEP_CTRL
+    UI --> ENV_CTRL
+    UI --> DOM_CTRL
+
+    DEP_CTRL --> COLA_TRABAJO
+    DEP_CTRL --> ORQ
+    DEP_CTRL --> REV
+    ENV_CTRL --> ORQ
+    DOM_CTRL --> SUB
+    DOM_CTRL --> TLS
+
+    COLA_TRABAJO --> REDIS
+    COLA_TRABAJO --> DETECTOR
+    DETECTOR --> P_FUENTE
+    P_FUENTE --> GIT
+    DETECTOR --> CONSTRUCTOR
+    CONSTRUCTOR --> ARTEFACTOS
+    ARTEFACTOS --> BD
+    ARTEFACTOS --> ORQ
+
+    ORQ --> CUOTA_CTR
+    CUOTA_CTR --> M2
+    ORQ --> P_CONT
+    REV --> P_CONT
+    P_CONT --> DOCKER
+    ORQ --> P_SALUD
+    ORQ --> SUB
+    SUB --> TLS
+    TLS --> CUT
+    CUT --> P_RUTA
+    P_RUTA --> EDGE
+
+    ORQ --> M7
+    ORQ --> M10
+    COLA_TRABAJO --> M10
+    COLA_TRABAJO --> BD
+    ORQ --> BD
+
+    classDef entry fill:#eef2ff,stroke:#818cf8,stroke-width:2px
+    classDef m4 fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px
+    classDef m5 fill:#fff7ed,stroke:#fb923c,stroke-width:2px
+    classDef m6 fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px
+    classDef port fill:#fdf4ff,stroke:#e879f9,stroke-width:2px
+    classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px
+    class DEP_CTRL,ENV_CTRL,DOM_CTRL entry
+    class COLA_TRABAJO,DETECTOR,CONSTRUCTOR,ARTEFACTOS m4
+    class ORQ,CUOTA_CTR,REV m5
+    class SUB,TLS,CUT m6
+    class P_FUENTE,P_CONT,P_RUTA,P_SALUD port
+    class BD,REDIS data

@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> EntrarDashboardProyecto
+    EntrarDashboardProyecto --> CargarDatos
+
+    fork
+        CargarDatos --> PeticionHTTPMetricas
+        PeticionHTTPMetricas --> RenderizarGraficasCPUyRAM
+    end
+
+    fork
+        CargarDatos --> IniciarConexionWebSocket
+        IniciarConexionWebSocket --> RecibirLogsEnVivo
+        RecibirLogsEnVivo --> RenderizarConsola
+    end
+
+    RenderizarGraficasCPUyRAM --> [*]
+    RenderizarConsola --> [*]

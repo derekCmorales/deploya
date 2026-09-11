@@ -1,0 +1,42 @@
+---
+title: C4 Nivel 1 — Contexto de Deploya
+---
+flowchart TB
+    subgraph ACTORES["Actores"]
+        CLIENTE["Cliente"]
+        ADMIN["Administrador"]
+        OPERADOR["Operador de infraestructura"]
+        SOPORTE["Soporte técnico"]
+    end
+
+    DEPLOYA["Deploya<br/>PaaS de alojamiento web<br/>panel, API, motor de despliegue"]
+
+    subgraph EXTERNOS["Sistemas externos"]
+        GIT["Proveedor de repositorios<br/>código fuente"]
+        NUBE["Motor de contenedores<br/>nodo Docker / nube"]
+        DNS["Proveedor DNS<br/>registro comodín"]
+        CA["Autoridad certificadora<br/>certificados TLS"]
+        CORREO["Correo transaccional"]
+        PAGOS["Pasarela de pagos<br/>simulada"]
+        LLM["Proveedor de modelo<br/>de lenguaje"]
+    end
+
+    CLIENTE --> DEPLOYA
+    ADMIN --> DEPLOYA
+    OPERADOR --> DEPLOYA
+    SOPORTE --> DEPLOYA
+
+    DEPLOYA --> GIT
+    DEPLOYA --> NUBE
+    DEPLOYA --> DNS
+    DEPLOYA --> CA
+    DEPLOYA --> CORREO
+    DEPLOYA --> PAGOS
+    DEPLOYA --> LLM
+
+    classDef actor fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
+    classDef sistema fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef externo fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
+    class CLIENTE,ADMIN,OPERADOR,SOPORTE actor
+    class DEPLOYA sistema
+    class GIT,NUBE,DNS,CA,CORREO,PAGOS,LLM externo

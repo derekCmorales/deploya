@@ -1,0 +1,58 @@
+---
+config:
+  layout: elk
+---
+flowchart TD
+
+    START((Inicio))
+
+    A["Usuario recibe<br/>correo de verificación"]
+    B["Seleccionar enlace<br/>de verificación"]
+    C["Enviar token<br/>a la plataforma"]
+
+    D["Buscar token"]
+    E{"¿Token válido<br/>y vigente?"}
+
+    F["Rechazar verificación"]
+    G["Solicitar un nuevo<br/>enlace de verificación"]
+
+    H["Activar cuenta"]
+    I["Marcar token<br/>como utilizado"]
+    J["Registrar evento<br/>de auditoría"]
+    K["Confirmar cuenta<br/>verificada"]
+
+    END1((Fin))
+    END2((Fin))
+
+    START --> A
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+
+    E -->|"No"| F
+    F --> G
+    G --> END1
+
+    E -->|"Sí"| H
+    H --> I
+    I --> J
+    J --> K
+    K --> END2
+
+    classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81;
+    classDef input fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b;
+    classDef process fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px,color:#134e4a;
+    classDef decision fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12;
+    classDef error fill:#fff1f2,stroke:#fb7185,stroke-width:2px,color:#881337;
+    classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534;
+
+    class START,END1,END2 startEnd;
+    class A,B,C input;
+    class D,H,I,J process;
+    class E decision;
+    class F,G error;
+    class K success;
+
+    linkStyle 5,6,7 stroke:#fb7185,stroke-width:2px;
+    linkStyle 8,9,10,11,12 stroke:#4ade80,stroke-width:2px;

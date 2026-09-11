@@ -1,0 +1,13 @@
+---
+description: Rol Eduardo — proyectos, observabilidad, web
+globs: "**/proyectos/**,**/observabilidad/**,apps/web/**"
+alwaysApply: false
+---
+
+# Eduardo — M3 Proyectos, M7 Observabilidad, UI
+
+Dueño: @Portillo17e. Kit: `docs/roles/eduardo-proyectos-ux/`.
+
+Fuentes: `ProveedorFuente` (repositorio o archivo comprimido). M3 termina en proyecto persistido; encolar es M4.
+
+**No hay kit visual canónico.** Sistema de diseño / mockups en curso. Placeholder neutro; no impongas colores, Inter, ni tokens. Prioriza a11y. Specs: `openspec/specs/proyectos`, `observabilidad`. Commits `feat(m3):` / `feat(m7):`.

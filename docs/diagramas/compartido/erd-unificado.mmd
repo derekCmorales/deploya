@@ -1,0 +1,270 @@
+---
+title: ERD unificado Deploya — un solo artefacto
+---
+erDiagram
+    USUARIO ||--o{ SESION : abre
+    USUARIO }o--|{ ROL : posee
+    USUARIO ||--o{ EVENTO_AUDITORIA : origina
+    USUARIO ||--o{ TOKEN_CUENTA : recibe
+    USUARIO ||--o{ SUSCRIPCION : contrata
+    USUARIO ||--o{ ESPACIO_TRABAJO : posee
+    USUARIO ||--o{ MIEMBRO_ESPACIO : participa
+    USUARIO ||--o{ ACCION_ADMINISTRATIVA : ejecuta
+
+    ROL {
+        uuid id PK
+        string nombre
+        string descripcion
+    }
+
+    USUARIO {
+        uuid id PK
+        string correo UK
+        string nombre
+        string hashContrasena
+        string estadoCuenta
+        datetime fechaAlta
+    }
+
+    SESION {
+        uuid id PK
+        uuid usuarioId FK
+        datetime expiracion
+        string origen
+    }
+
+    TOKEN_CUENTA {
+        uuid id PK
+        uuid usuarioId FK
+        string tipo
+        string hashToken
+        datetime expiracion
+        boolean utilizado
+    }
+
+    EVENTO_AUDITORIA {
+        uuid id PK
+        uuid usuarioId FK
+        string accion
+        string entidad
+        uuid entidadId
+        datetime fecha
+    }
+
+    PLAN ||--o{ LIMITE_PLAN : define
+    PLAN ||--o{ SUSCRIPCION : cubre
+    COMPLEMENTO ||--o{ SUSCRIPCION_COMPLEMENTO : aplica
+    SUSCRIPCION ||--o{ SUSCRIPCION_COMPLEMENTO : incluye
+    SUSCRIPCION ||--o{ TRANSACCION : genera
+
+    PLAN {
+        uuid id PK
+        string nombre
+        string descripcion
+        decimal precio
+        int vigenciaDias
+        boolean activo
+    }
+
+    LIMITE_PLAN {
+        uuid id PK
+        uuid planId FK
+        string recurso
+        decimal cantidad
+        string unidad
+    }
+
+    COMPLEMENTO {
+        uuid id PK
+        string nombre
+        string descripcion
+        decimal precio
+    }
+
+    SUSCRIPCION {
+        uuid id PK
+        uuid usuarioId FK
+        uuid planId FK
+        string estado
+        boolean renovacionAutomatica
+        datetime fechaInicio
+        datetime fechaFin
+    }
+
+    SUSCRIPCION_COMPLEMENTO {
+        uuid suscripcionId FK
+        uuid complementoId FK
+        int cantidad
+        datetime fechaInicio
+        datetime fechaFin
+    }
+
+    TRANSACCION {
+        uuid id PK
+        uuid suscripcionId FK
+        string tipo
+        decimal monto
+        string estado
+        datetime fecha
+        string comprobante
+    }
+
+    ESPACIO_TRABAJO ||--o{ MIEMBRO_ESPACIO : agrupa
+    ESPACIO_TRABAJO ||--o{ PROYECTO : contiene
+    PROYECTO ||--o{ VARIABLE_ENTORNO : configura
+    PROYECTO ||--o{ DESPLIEGUE : tiene
+    PROYECTO ||--o{ DOMINIO_PERSONALIZADO : declara
+    PROYECTO ||--o{ METRICA_CONSUMO : registra
+    PROYECTO ||--o{ SUBDOMINIO : expone
+
+    ESPACIO_TRABAJO {
+        uuid id PK
+        uuid propietarioId FK
+        string nombre
+    }
+
+    MIEMBRO_ESPACIO {
+        uuid espacioId FK
+        uuid usuarioId FK
+        string rolEspacio
+    }
+
+    PROYECTO {
+        uuid id PK
+        uuid espacioId FK
+        string nombre
+        string tipoFuente
+        string urlRepositorio
+        string rutaArchivoComprimido
+        string recetaConstruccion
+        string comandoArranque
+        int puertoHttp
+    }
+
+    VARIABLE_ENTORNO {
+        uuid id PK
+        uuid proyectoId FK
+        string clave
+        string valorCifrado
+    }
+
+    TRABAJO_CONSTRUCCION {
+        uuid id PK
+        uuid despliegueId FK
+        string estado
+        string stackDetectado
+        text bitacora
+        datetime inicio
+        datetime fin
+    }
+
+    IMAGEN {
+        uuid id PK
+        string digest UK
+        string referencia
+        datetime creacion
+    }
+
+    ARTEFACTO {
+        uuid id PK
+        uuid proyectoId FK
+        uuid imagenId FK
+        int numeroVersion
+        boolean inmutable
+        datetime creacion
+    }
+
+    DESPLIEGUE {
+        uuid id PK
+        uuid proyectoId FK
+        uuid artefactoId FK
+        uuid trabajoId FK
+        string estado
+        string disparador
+        datetime creacion
+        datetime actualizacion
+    }
+
+    CONTENEDOR {
+        uuid id PK
+        uuid despliegueId FK
+        string identificadorRuntime
+        decimal cpu
+        int memoriaMb
+        string estadoRuntime
+    }
+
+    SUBDOMINIO {
+        uuid id PK
+        uuid proyectoId FK
+        uuid certificadoId FK
+        string fqdn UK
+    }
+
+    DOMINIO_PERSONALIZADO {
+        uuid id PK
+        uuid proyectoId FK
+        uuid certificadoId FK
+        string fqdn UK
+        string estadoDns
+    }
+
+    CERTIFICADO_TLS {
+        uuid id PK
+        string dominio
+        datetime emision
+        datetime vencimiento
+        string emisor
+    }
+
+    METRICA_CONSUMO {
+        uuid id PK
+        uuid proyectoId FK
+        uuid contenedorId FK
+        float porcentajeCpu
+        int usoRamMb
+        decimal transferenciaGb
+        datetime captura
+    }
+
+    ENTRADA_BITACORA {
+        uuid id PK
+        uuid contenedorId FK
+        uuid despliegueId FK
+        string flujo
+        text mensaje
+        datetime fecha
+    }
+
+    NOTIFICACION {
+        uuid id PK
+        uuid usuarioId FK
+        uuid despliegueId FK
+        string tipo
+        string canal
+        datetime fecha
+    }
+
+    ACCION_ADMINISTRATIVA {
+        uuid id PK
+        uuid adminId FK
+        string accion
+        string entidadAfectada
+        uuid entidadId
+        datetime fecha
+        string detalle
+    }
+
+    DESPLIEGUE ||--o| TRABAJO_CONSTRUCCION : dispara
+    DESPLIEGUE }o--|| ARTEFACTO : usa
+    ARTEFACTO }o--|| IMAGEN : empaqueta
+    PROYECTO ||--o{ ARTEFACTO : versiona
+    DESPLIEGUE ||--o| CONTENEDOR : ejecuta
+    CONTENEDOR ||--o{ ENTRADA_BITACORA : emite
+    DESPLIEGUE ||--o{ ENTRADA_BITACORA : produce
+    CONTENEDOR ||--o{ METRICA_CONSUMO : genera
+    SUBDOMINIO }o--|| CERTIFICADO_TLS : protege
+    DOMINIO_PERSONALIZADO }o--|| CERTIFICADO_TLS : protege
+    CONTENEDOR }o--o| SUBDOMINIO : publica
+    DESPLIEGUE ||--o{ NOTIFICACION : dispara
+    USUARIO ||--o{ NOTIFICACION : recibe

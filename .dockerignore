@@ -1,0 +1,14 @@
+node_modules
+.git
+.next
+dist
+coverage
+*.md
+.env
+**/*.tsbuildinfo
+docs
+openspec
+.cursor
+.agents
+.claude
+.opencode

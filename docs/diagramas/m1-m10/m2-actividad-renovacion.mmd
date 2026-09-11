@@ -1,0 +1,48 @@
+flowchart TB
+    START(("Inicio")) --> A{"Origen"}
+    A -- "Cliente (manual)" --> B["Cliente solicita<br>renovar desde el panel"]
+    A -- "Programador (automatica)" --> C["Tarea programada detecta<br>vencimiento proximo"]
+    C --> D{"renovacionAutomatica<br>activa?"}
+    D -- No --> END0(("Fin<br>no se renueva"))
+    D -- Si --> E
+    B --> E{"Estado permite<br>renovar?"}
+    E -- "Cancelada" --> F["Informar que debe<br>contratar un plan nuevo"]
+    F --> END1(("Fin"))
+    E -- "PorVencer / Vencida / Suspendida" --> G["Procesar cobro<br>en pasarela simulada"]
+    G --> H{"Cargo aprobado?"}
+    H -- No --> I["Registrar transaccion<br>rechazada"]
+    I --> J["Notificar fallo de renovacion"]
+    J --> K["El estado continua su<br>transicion natural"]
+    K --> END2(("Fin"))
+    H -- Si --> L["Registrar transaccion<br>aprobada"]
+    L --> M["Extender fechaFin,<br>estado = Activa"]
+    M --> N["Reaplicar limites<br>del plan (M5)"]
+    N --> O["Notificar confirmacion<br>de renovacion"]
+    O --> END3(("Fin"))
+
+     START:::startEnd
+     A:::decision
+     B:::input
+     C:::process
+     D:::decision
+     END0:::startEnd
+     E:::decision
+     F:::error
+     END1:::startEnd
+     G:::process
+     H:::decision
+     I:::error
+     J:::error
+     K:::error
+     END2:::startEnd
+     L:::process
+     M:::process
+     N:::process
+     O:::success
+     END3:::startEnd
+    classDef startEnd fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e
+    classDef input fill:#ecfeff,stroke:#06b6d4,stroke-width:2px,color:#164e63
+    classDef process fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a
+    classDef decision fill:#fff7ed,stroke:#f97316,stroke-width:2px,color:#7c2d12
+    classDef error fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#7f1d1d
+    classDef success fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#065f46

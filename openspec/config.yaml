@@ -2,33 +2,34 @@ schema: spec-driven
 githubCopilot:
   cloudAgent: false
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Deploya es un PaaS (NestJS + Next.js, monolito modular, PostgreSQL, Redis, Docker).
+  Ciclo: Recepción → Construcción → Ejecución → Enrutamiento → Operación.
+  Puertos DIP sin prefijo I: ContenedorPuerto, EnrutamientoPuerto, VerificacionEntornoPuerto,
+  PasarelaPago, ProveedorFuente, CorreoPuerto.
+  Estados de despliegue ≠ estados de suscripción §4.4.
+  Nunca commits a main. Ramas feat/m<n>-<slug>. Conventional Commits feat(m1):.
+  OpenSpec primero: /opsx-propose → apply → archive. Un spec por módulo en openspec/specs/.
+  Dueños: Eddy M1/M10+CI; Javier M2/M9+Prisma; Eduardo M3/M7+UI; Derek M4/M5/M6+tools M8.
+  No hay kit visual canónico. No implementar auth/pagos/motor reales en el bootstrap.
+  Español de la propuesta. No usar IPasarelaPago ni ISourceProvider.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Keep proposals under 500 words
+    - Always include a Non-goals section
+    - Name the change feat/m<n>-<slug> and the owning module
+  specs:
+    - Write requirements in Spanish; SHALL/WHEN/THEN as in existing seeds
+    - Do not introduce I-prefixed ports
+  tasks:
+    - Break tasks into chunks a teammate can finish in one PR
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+operations:
+  apply:
+    guidance:
+      - Implement only the owning module plus tests; do not fake production UI
+      - Keep module health endpoints working
+  archive:
+    guidance:
+      - Summarize what landed in the main spec before finishing

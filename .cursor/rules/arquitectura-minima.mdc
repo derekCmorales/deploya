@@ -11,4 +11,4 @@ Puertos (DIP, **sin** prefijo `I`): `ContenedorPuerto`, `EnrutamientoPuerto`, `V
 
 Estados de despliegue ≠ estados de suscripción §4.4.
 
-No hay kit visual canónico. No fijar paleta ni fingir UI final. Docs: `docs/arquitectura.md`.
+Kit visual canónico en `apps/web` (Geist, SaaS oscuro). Auth, pagos y motor reales siguen fuera del bootstrap. Docs: `docs/arquitectura.md`.

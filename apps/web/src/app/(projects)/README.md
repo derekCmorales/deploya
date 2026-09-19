@@ -1,3 +1,3 @@
 # Projects (Eduardo)
 
-Panel de proyectos. Dueño: @Portillo17e. Placeholder neutro; no fingir UI final.
+Panel de proyectos y pantallas de validación del kit canónico. Dueño: @Portillo17e. Datos mock; no encola M4.

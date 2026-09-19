@@ -138,7 +138,7 @@ Fuente: [diagramas/compartido/c4-componentes-motor.mmd](diagramas/compartido/c4-
 
 ## Sistema de diseño
 
-En curso. **No hay canon** de paleta, tipografía ni tokens. No copiar kits visuales al código. La web del bootstrap es un placeholder neutro.
+Canon en `apps/web`: SaaS oscuro, tipografía Geist, acento cian/teal, primitivos shadcn + Lucide, grafo `@xyflow/react`. Documentado en [apps/web/README.md](../apps/web/README.md). Las pantallas de validación usan datos mock; no hay auth, pagos ni motor reales.
 
 ## Fuera de alcance (no implementar)
 

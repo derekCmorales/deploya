@@ -38,11 +38,11 @@ Specs: `openspec/specs/<modulo>/spec.md`.
 |---|---|
 | Eddy | `identidad`, `notificaciones`, `apps/web` `(auth)`, `.github/workflows` |
 | Javier | `suscripciones`, `administracion`, `(billing)`, `(admin)`, `prisma` |
-| Eduardo | `proyectos`, `observabilidad`, `apps/web` (UI neutra; **no hay kit visual canónico**) |
+| Eduardo | `proyectos`, `observabilidad`, `apps/web` (kit visual canónico: SaaS oscuro, Geist) |
 | Derek | `construccion`, `orquestacion`, `enrutamiento`, `herramientas`, compose, `adapters` |
 
 ## Bootstrap
 
 Stubs: módulo Nest registrado + `GET /<modulo>/health`. **No** implementar auth, pagos ni motor reales en PRs de andamiaje.
 
-La web es placeholder **neutro** (fuentes del sistema). Sistema de diseño / mockups en curso: no fijar paleta ni fingir UI final.
+La web usa el **kit visual canónico** (tokens en `apps/web`, Geist, SaaS oscuro). Auth, pagos y motor reales siguen fuera del bootstrap.

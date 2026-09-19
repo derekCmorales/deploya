@@ -11,7 +11,7 @@ context: |
   Nunca commits a main. Ramas feat/m<n>-<slug>. Conventional Commits feat(m1):.
   OpenSpec primero: /opsx-propose → apply → archive. Un spec por módulo en openspec/specs/.
   Dueños: Eddy M1/M10+CI; Javier M2/M9+Prisma; Eduardo M3/M7+UI; Derek M4/M5/M6+tools M8.
-  No hay kit visual canónico. No implementar auth/pagos/motor reales en el bootstrap.
+  Kit visual canónico en apps/web (Geist, SaaS oscuro). No implementar auth/pagos/motor reales en el bootstrap.
   Español de la propuesta. No usar IPasarelaPago ni ISourceProvider.
 
 rules:

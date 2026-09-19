@@ -1,6 +1,6 @@
 # Diagramas por módulo (M1–M10)
 
-Copias pulidas (sin prefijo `I`, sin kit visual). Canon de ERD y C4: [../compartido/](../compartido/).
+Copias pulidas (sin prefijo `I`; los diagramas no duplican el kit de `apps/web`). Canon de ERD y C4: [../compartido/](../compartido/).
 
 | Módulo | Archivos |
 |---|---|

@@ -16,9 +16,9 @@ Web: `apps/web/src/app/(projects)/` y el resto de `apps/web` **salvo** `(auth)` 
 
 Auth real, pagos, cola M4, Docker, Prisma de planes.
 
-## Sistema de diseño — no hay canon
+## Sistema de diseño — kit canónico
 
-El sistema de diseño y los mockups **están en curso**. No hay paleta, tipografía ni tokens oficiales. No copies kits visuales al repo. La web actual es un **placeholder neutro** (fuentes del sistema); no fingir la UI final. Accesibilidad sí: semántica, foco, contraste razonable del UA.
+Canon en `apps/web`: SaaS oscuro, Geist, acento cian, shadcn + Lucide + xyflow. README: [apps/web/README.md](../../../apps/web/README.md). Pantallas de validación con datos mock. Accesibilidad: semántica, foco, contraste del tema oscuro. No implementar auth, pagos ni motor reales.
 
 ## Diagramas tuyos primero
 

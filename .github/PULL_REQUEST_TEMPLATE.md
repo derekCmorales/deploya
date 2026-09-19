@@ -17,4 +17,4 @@
 - [ ] Rama `feat/` `fix/` `docs/` o `chore/` — **no** `main`
 - [ ] Conventional Commit `feat(mN):` / `fix(mN):`
 - [ ] Spec OpenSpec actualizado o change enlazado
-- [ ] No se finge UI final ni se fija paleta (kit visual aún no es canon)
+- [ ] UI del panel usa el kit canónico (`apps/web`) o no toca superficies visuales

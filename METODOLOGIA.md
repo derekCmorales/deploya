@@ -64,5 +64,5 @@ Kit de una pantalla: [docs/roles/](docs/roles/).
 
 ## Qué no es este repo (todavía)
 
-- No hay **kit visual canónico**. Sistema de diseño y mockups van en curso; la web es placeholder neutro.  
+- Hay **kit visual canónico** en `apps/web` (Geist, SaaS oscuro, tokens shadcn). Las pantallas de producto de este bootstrap son de validación con datos mock.  
 - No hay auth, pagos ni motor de contenedores **reales** en el bootstrap: solo stubs + health.

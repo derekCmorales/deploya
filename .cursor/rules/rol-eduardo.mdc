@@ -10,4 +10,4 @@ Dueño: @Portillo17e. Kit: `docs/roles/eduardo-proyectos-ux/`.
 
 Fuentes: `ProveedorFuente` (repositorio o archivo comprimido). M3 termina en proyecto persistido; encolar es M4.
 
-**No hay kit visual canónico.** Sistema de diseño / mockups en curso. Placeholder neutro; no impongas colores, Inter, ni tokens. Prioriza a11y. Specs: `openspec/specs/proyectos`, `observabilidad`. Commits `feat(m3):` / `feat(m7):`.
+**Kit visual canónico** en `apps/web` (Geist, SaaS oscuro, tokens shadcn). Prioriza a11y. Specs: `openspec/specs/proyectos`, `observabilidad`. Commits `feat(m3):` / `feat(m7):`.

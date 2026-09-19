@@ -1445,9 +1445,9 @@ stateDiagram-v2
 
 ---
 
-## 5. Sistema de diseño (en curso)
+## 5. Sistema de diseño
 
-No hay kit visual canónico. Paleta, tipografía y tokens están en diseño; no se copian ni se fijan en este repositorio. La web del bootstrap es un placeholder neutro.
+Kit visual canónico en `apps/web`: tokens CSS (shadcn/Tailwind), Geist, SaaS oscuro, acento cian. Composición lista + detalle para proyectos; lienzo del ciclo con `@xyflow/react`. Ver [apps/web/README.md](../apps/web/README.md).
 
 ## 6. ERD unificado
 

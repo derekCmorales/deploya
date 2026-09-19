@@ -17,4 +17,4 @@
 - [ ] Rama `feat/` `fix/` `docs/` o `chore/` — **no** `main`
 - [ ] Conventional Commit `feat(mN):` / `fix(mN):`
 - [ ] Spec OpenSpec actualizado o change enlazado
-- [ ] No se finge UI final ni se fija paleta (kit visual aún no es canon)
+- [ ] Si hay UI: sigue [docs/kit-visual.md](../docs/kit-visual.md) (tokens, AppShell, claro/oscuro) — no inventes paleta; los stubs del kit no son el producto de tu módulo

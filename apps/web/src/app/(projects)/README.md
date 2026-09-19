@@ -1,3 +1,3 @@
 # Projects (Eduardo)
 
-Panel de proyectos. Dueño: @Portillo17e. Placeholder neutro; no fingir UI final.
+Stub de `/projects`. Dueño: @Portillo17e. Kit: [docs/kit-visual.md](../../../../docs/kit-visual.md). Sin lista, detalle ni motor.

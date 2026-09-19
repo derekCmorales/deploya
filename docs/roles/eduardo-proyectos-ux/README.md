@@ -16,9 +16,9 @@ Web: `apps/web/src/app/(projects)/` y el resto de `apps/web` **salvo** `(auth)` 
 
 Auth real, pagos, cola M4, Docker, Prisma de planes.
 
-## Sistema de diseño — no hay canon
+## Sistema de diseño — kit canónico
 
-El sistema de diseño y los mockups **están en curso**. No hay paleta, tipografía ni tokens oficiales. No copies kits visuales al repo. La web actual es un **placeholder neutro** (fuentes del sistema); no fingir la UI final. Accesibilidad sí: semántica, foco, contraste razonable del UA.
+Canon en `apps/web`: Geist, tokens claro/oscuro, acento cian, shadcn + Lucide; xyflow y framer-motion en el package. Guía para todo el equipo: [kit-visual.md](../../kit-visual.md). README de archivos: [apps/web/README.md](../../../apps/web/README.md). Las rutas actuales son stubs; no son M3/M7 terminados ni pantallas de producto. Accesibilidad: semántica, foco, contraste en ambos temas.
 
 ## Diagramas tuyos primero
 

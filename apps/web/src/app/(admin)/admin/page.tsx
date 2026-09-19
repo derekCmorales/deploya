@@ -1,10 +1,11 @@
 export default function AdminPage() {
   return (
-    <main>
-      <h1>Administración</h1>
-      <p>Placeholder del panel M9 (usuarios, planes, infraestructura).</p>
-      <p>
-        <a href="/">Volver</a>
+    <main className="p-6">
+      <h1 className="text-xl font-semibold tracking-tight">Administración</h1>
+      <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+        Stub de administración (Javier). Reutiliza el kit de{" "}
+        <span className="font-medium text-foreground">docs/kit-visual.md</span>.
+        Sin panel de producto.
       </p>
     </main>
   );

@@ -1,33 +1,13 @@
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
 export default function HomePage() {
   return (
-    <main>
-      <h1>Deploya</h1>
-      <p>
-        Plataforma como servicio para publicar aplicaciones. Esta pantalla es un
-        placeholder neutro: el sistema de diseño y los mockups están en curso; no
-        hay UI canónica todavía.
+    <main className="p-6">
+      <h1 className="text-2xl font-semibold tracking-tight">Deploya</h1>
+      <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+        Kit visual mínimo (Geist, tokens claro/oscuro, primitivos en el
+        package). Guía para Eddy, Javier y Derek:{" "}
+        <span className="font-medium text-foreground">docs/kit-visual.md</span>.
+        Este PR no incluye pantallas de producto.
       </p>
-      <p>
-        API: <a href={`${api}/health`}>{api}/health</a>
-      </p>
-      <nav aria-label="Áreas del panel">
-        <ul>
-          <li>
-            <a href="/auth">Cuenta</a> — Eddy (M1)
-          </li>
-          <li>
-            <a href="/billing">Planes</a> — Javier (M2)
-          </li>
-          <li>
-            <a href="/projects">Proyectos</a> — Eduardo (M3)
-          </li>
-          <li>
-            <a href="/admin">Administración</a> — Javier (M9)
-          </li>
-        </ul>
-      </nav>
     </main>
   );
 }

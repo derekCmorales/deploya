@@ -1,13 +1,11 @@
 export default function AuthPage() {
   return (
-    <main>
-      <h1>Cuenta</h1>
-      <p>
-        Placeholder de registro e inicio de sesión (M1). No hay autenticación
-        real en el bootstrap.
-      </p>
-      <p>
-        <a href="/">Volver</a>
+    <main className="p-6">
+      <h1 className="text-xl font-semibold tracking-tight">Cuenta</h1>
+      <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+        Stub de identidad (Eddy). Reutiliza el kit de{" "}
+        <span className="font-medium text-foreground">docs/kit-visual.md</span>.
+        Sin autenticación real.
       </p>
     </main>
   );

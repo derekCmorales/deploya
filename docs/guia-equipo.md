@@ -20,6 +20,8 @@ El spec vive bajo el módulo: `openspec/specs/identidad/`, `notificaciones/`, `s
 
 Semillas = alcance §6.1. Extiéndelas; no las sustituyas por un spec único del producto.
 
+UI: si la historia pinta en `apps/web`, el spec delta **debe** reutilizar [kit-visual.md](kit-visual.md) (tokens, AppShell, tema claro/oscuro). No inventar paleta. Las rutas actuales son stubs del kit, no el producto de cada módulo.
+
 ## Ramas
 
 ```

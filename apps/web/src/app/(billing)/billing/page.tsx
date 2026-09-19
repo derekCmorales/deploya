@@ -1,13 +1,11 @@
 export default function BillingPage() {
   return (
-    <main>
-      <h1>Planes</h1>
-      <p>
-        Placeholder del catálogo y contratación (M2). Pago simulado; no hay cobro
-        real.
-      </p>
-      <p>
-        <a href="/">Volver</a>
+    <main className="p-6">
+      <h1 className="text-xl font-semibold tracking-tight">Planes</h1>
+      <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+        Stub de suscripciones (Javier). Reutiliza el kit de{" "}
+        <span className="font-medium text-foreground">docs/kit-visual.md</span>.
+        Sin cobro real.
       </p>
     </main>
   );

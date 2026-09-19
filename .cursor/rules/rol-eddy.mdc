@@ -10,4 +10,4 @@ Dueño: @EddyPoroj106. Kit: `docs/roles/eddy-cuentas-seguridad/`.
 
 Registro, verificación de correo, recuperación, sesiones, roles, auditoría. Notificaciones transaccionales vía `CorreoPuerto` (sin prefijo `I`).
 
-No implementes auth real en stubs: módulo + `GET /identidad/health` y `GET /notificaciones/health`. Specs: `openspec/specs/identidad`, `notificaciones`. Commits `feat(m1):` / `feat(m10):`.
+No implementes auth real en stubs: módulo + `GET /identidad/health` y `GET /notificaciones/health`. UI de `(auth)`: reutilizar [docs/kit-visual.md](../../docs/kit-visual.md); no paleta nueva. Specs: `openspec/specs/identidad`, `notificaciones`. Commits `feat(m1):` / `feat(m10):`.

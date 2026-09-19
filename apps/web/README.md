@@ -2,9 +2,9 @@
 
 Guía para el equipo: **[docs/kit-visual.md](../../docs/kit-visual.md)**. Este README es el mapa de archivos.
 
-Tipografía **Geist**. Tokens claro y oscuro (toggle en el rail; oscuro por defecto). Acento cian/teal. Copy en español. Dueño del kit: Eduardo (`@Portillo17e`), salvo `(auth)` (Eddy), `(billing)` y `(admin)` (Javier).
+Tipografía **Geist**. Tokens claro y oscuro (toggle sol/luna en el header; oscuro por defecto). Acento cian/teal. Copy en español. Dueño del kit: Eduardo (`@Portillo17e`), salvo `(auth)` (Eddy), `(billing)` y `(admin)` (Javier).
 
-Las rutas de abajo **validan** el kit con mock. No son historias de dominio terminadas.
+Este PR deja el **package listo** y stubs cortos. **No** hay pantallas de producto (lista/detalle, xyflow montado, operación, mocks).
 
 ## Tokens
 
@@ -21,23 +21,21 @@ Las rutas de abajo **validan** el kit con mock. No son historias de dominio term
 
 ## Componentes
 
-- Primitivos: `src/components/ui/`
+- Primitivos: `src/components/ui/` (Button, Badge, Card, Input, Tabs, ScrollArea, Separator, Tooltip)
 - Tema: `src/components/shell/theme-provider.tsx`, `theme-toggle.tsx`
-- Shell: `src/components/shell/app-shell.tsx`
-- Magic UI: `src/components/magic/border-beam.tsx`
-- Grafo: `@xyflow/react` en `src/components/panel/cycle-flow.tsx`
+- Shell mínimo: `src/components/shell/app-shell.tsx` (header: Deploya + toggle)
+- Magic UI (disponible, no montado como producto): `src/components/magic/border-beam.tsx`
+- Grafo: `@xyflow/react` en el package; **no** hay vista de flujo en este PR
 - Iconos: Lucide
 - `cn()`: `src/lib/utils.ts`
 
-## Rutas de validación (mock)
+## Rutas (stubs)
 
 | Ruta | Qué muestra |
 |---|---|
-| `/` | Inicio con el kit y el ciclo |
-| `/projects` | Redirige al primer proyecto |
-| `/projects/[id]` | Lista + detalle |
-| `/projects/[id]/flujo` | Lienzo de las cinco etapas |
-| `/projects/[id]/operacion` | Métricas y bitácoras mock |
-| `/auth` `/billing` `/admin` | Placeholders de dominio, mismo shell |
+| `/` | Stub de Deploya; apunta a `docs/kit-visual.md` |
+| `/projects` | Stub de proyectos (Eduardo) |
+| `/auth` | Stub de cuenta (Eddy) |
+| `/billing` `/admin` | Stubs de planes y admin (Javier) |
 
-Estados visibles = **despliegue** (§3.2), no suscripción (§4.4).
+Al implementar una historia, reutiliza este kit. No inventes paleta ni otro shell.

@@ -10,4 +10,4 @@ Dueño: @derekCmorales. Kit: `docs/roles/derek-motor-despliegue/`.
 
 Cola Redis (stub en bootstrap). Artefacto versionado e inmutable. Reversión = levantar artefacto previo.
 
-Puertos: `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto`. Specs: `motor-construccion`, `orquestacion`, `enrutamiento`, `herramientas`. Commits `feat(m4):` / `feat(m5):` / `feat(m6):` / `feat(m8):`.
+Puertos: `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto`. Si un tool M8 pinta en el panel: [docs/kit-visual.md](../../docs/kit-visual.md); no paleta nueva. Specs: `motor-construccion`, `orquestacion`, `enrutamiento`, `herramientas`. Commits `feat(m4):` / `feat(m5):` / `feat(m6):` / `feat(m8):`.

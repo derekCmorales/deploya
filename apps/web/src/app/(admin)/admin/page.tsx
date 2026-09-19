@@ -1,31 +1,12 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
 export default function AdminPage() {
   return (
     <main className="p-6">
-      <Card className="max-w-lg">
-        <CardHeader>
-          <CardTitle>Administración</CardTitle>
-          <CardDescription>
-            Placeholder del panel M9 (Javier): usuarios, planes,
-            infraestructura. Sin lógica de administración real.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant="outline" asChild>
-            <Link href="/">Volver al inicio</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <h1 className="text-xl font-semibold tracking-tight">Administración</h1>
+      <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+        Stub de administración (Javier). Reutiliza el kit de{" "}
+        <span className="font-medium text-foreground">docs/kit-visual.md</span>.
+        Sin panel de producto.
+      </p>
     </main>
   );
 }

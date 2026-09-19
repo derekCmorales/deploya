@@ -14,19 +14,7 @@ export function ThemeToggle() {
     setMontado(true);
   }, []);
 
-  const oscuro = resolvedTheme === "dark";
-
-  if (!montado) {
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label="Cambiar tema"
-        disabled
-      />
-    );
-  }
+  const oscuro = !montado || resolvedTheme !== "light";
 
   return (
     <Button
@@ -35,9 +23,11 @@ export function ThemeToggle() {
       size="icon"
       aria-label={oscuro ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
       aria-pressed={oscuro}
+      disabled={!montado}
       onClick={() => setTheme(oscuro ? "light" : "dark")}
     >
       {oscuro ? <Sun /> : <Moon />}
+      <span className="sr-only">Tema</span>
     </Button>
   );
 }

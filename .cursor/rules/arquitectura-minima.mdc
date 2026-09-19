@@ -11,4 +11,4 @@ Puertos (DIP, **sin** prefijo `I`): `ContenedorPuerto`, `EnrutamientoPuerto`, `V
 
 Estados de despliegue ≠ estados de suscripción §4.4.
 
-Kit visual canónico: [docs/kit-visual.md](../../docs/kit-visual.md) (Geist, claro/oscuro). Specs con UI reutilizan el kit. Auth, pagos y motor reales siguen fuera del bootstrap. Docs: `docs/arquitectura.md`.
+Kit visual canónico: [docs/kit-visual.md](../../docs/kit-visual.md) (Geist, claro/oscuro, header mínimo). Specs con UI reutilizan el kit; no paleta nueva ni pantallas de producto fingidas. Auth, pagos y motor reales siguen fuera del bootstrap. Docs: `docs/arquitectura.md`.

@@ -4,22 +4,22 @@ Change: `feat/m3-kit-visual`. Módulo dueño: **proyectos (M3)** — Eduardo. Sp
 
 ## Why
 
-El bootstrap deja `apps/web` como placeholder neutro y la documentación prohíbe paleta, tipografía y tokens. Hace falta un kit canónico para validar el look & feel del panel (lista + detalle, estilo SaaS oscuro) adaptado al ciclo Recepción → Construcción → Ejecución → Enrutamiento → Operación, sin clonar un producto inbox ni implementar motor, auth o pagos reales.
+El bootstrap deja `apps/web` como placeholder neutro y la documentación prohibía paleta y tokens. Hace falta un kit canónico (dependencias, tokens, Geist, toggle) y una guía para Eddy, Javier y Derek. Este change **no** entrega pantallas de producto ni mocks que finjan el panel.
 
 ## What Changes
 
-- Tokens, tipografía (Geist) y componentes canónicos en `apps/web` (shadcn/ui + Tailwind, Lucide, Magic UI mínimo, `@xyflow/react`).
-- Toggle **claro / oscuro** (oscuro por defecto) sobre los mismos tokens.
-- Shell y **pantallas de validación** con datos mock: demuestran el kit; no son el producto terminado de cada módulo.
-- Guía `docs/kit-visual.md` para que Eddy, Javier y Derek reutilicen el estilo en sus specs y PRs.
-- Documentación y reglas del repo: el kit **es** canon.
+- Tokens, tipografía (Geist) y primitivos en `apps/web` (shadcn/ui + Tailwind, Lucide, Magic UI mínimo en el package, `@xyflow/react` instalado).
+- Toggle **claro / oscuro** (oscuro por defecto) en un header mínimo (Deploya + tema).
+- Stubs cortos en `/`, `/projects`, `/auth`, `/billing`, `/admin` que apuntan a `docs/kit-visual.md`.
+- Guía `docs/kit-visual.md` y lineamientos del repo: specs con UI reutilizan el kit; no paleta nueva.
+- Se retiran lista/detalle, xyflow montado, operación/métricas y mocks de proyectos.
 
 ## Non-goals
 
+- Pantallas de producto o de validación (lista/detalle, flujo xyflow, operación, mocks).
 - Auth, pagos o motor reales (Docker, cola, TLS, Prisma de planes).
-- Clonar el producto de referencia (inbox omnicanal); solo look & feel.
 - Kit visual en la API Nest, ni un spec único de producto.
-- Sistema de diseño Figma ni paleta de marketing. Este PR deja el **kit listo para construir encima**, no pantallas de dominio production-ready.
+- Sistema de diseño Figma ni paleta de marketing.
 
 ## Capabilities
 
@@ -29,12 +29,12 @@ El bootstrap deja `apps/web` como placeholder neutro y la documentación prohíb
 
 ### Modified Capabilities
 
-- `proyectos`: el panel SHALL aplicar el kit canónico y mostrar alta/listado/detalle de proyectos y despliegues mock, con estados de **despliegue** (no de suscripción).
-- `observabilidad`: el panel SHALL mostrar bitácoras y métricas mock en la etapa Operación, con el mismo kit.
+- `proyectos`: la superficie web SHALL reutilizar el kit canónico; este change no implementa alta/listado/detalle de producto.
+- `observabilidad`: cuando haya UI, SHALL reutilizar el mismo kit; este change no implementa métricas ni bitácoras.
 
 ## Impact
 
-- Código: `apps/web` (layout, tokens, componentes, rutas de validación). Placeholders `(auth|billing|admin)` solo se envuelven en el shell; no se implementa su dominio.
-- Dependencias: Tailwind, shadcn/ui, Lucide, `@xyflow/react`, framer-motion (Magic UI).
-- Docs: `docs/kit-visual.md` (canon para el equipo), `AGENTS.md`, arquitectura, kits de rol, `openspec/config.yaml`, plantilla de PR.
+- Código: `apps/web` (layout, tokens, primitivos, shell mínimo, stubs). Sin `components/panel` ni `lib/mock`.
+- Dependencias: Tailwind, shadcn/ui, Lucide, `@xyflow/react`, framer-motion, next-themes (en el package; xyflow no montado).
+- Docs: `docs/kit-visual.md`, `AGENTS.md`, arquitectura, kits de rol, `openspec/config.yaml`, plantilla de PR.
 - API Nest: sin cambios de contrato.

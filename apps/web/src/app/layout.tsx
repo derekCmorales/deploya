@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/shell/app-shell";
 import { ThemeProvider } from "@/components/shell/theme-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
 
@@ -20,8 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Deploya",
-  description:
-    "PaaS de alojamiento — kit visual canónico (pantallas de validación, datos mock)",
+  description: "PaaS de alojamiento — kit visual canónico (tokens, Geist, tema)",
 };
 
 export default function RootLayout({
@@ -35,9 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-full font-sans`}
       >
         <ThemeProvider>
-          <TooltipProvider delayDuration={200}>
-            <AppShell>{children}</AppShell>
-          </TooltipProvider>
+          <AppShell>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>

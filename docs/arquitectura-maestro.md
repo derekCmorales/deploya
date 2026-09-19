@@ -1447,7 +1447,7 @@ stateDiagram-v2
 
 ## 5. Sistema de diseño
 
-Kit visual canónico: [kit-visual.md](kit-visual.md). Tokens CSS (shadcn/Tailwind), Geist, claro/oscuro, acento cian. Las pantallas actuales **validan** el kit; cada módulo construye encima. Ver también [apps/web/README.md](../apps/web/README.md).
+Kit visual canónico: [kit-visual.md](kit-visual.md). Tokens CSS (shadcn/Tailwind), Geist, claro/oscuro, acento cian. Las rutas actuales son **stubs**; cada módulo construye encima, sin paleta nueva. Ver también [apps/web/README.md](../apps/web/README.md).
 
 ## 6. ERD unificado
 

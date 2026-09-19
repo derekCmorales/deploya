@@ -2,44 +2,30 @@
 
 ## ADDED Requirements
 
-### Requirement: Kit visual canónico en el panel
+### Requirement: Kit visual canónico reutilizable
 
-El sistema SHALL presentar el panel de proyectos con el kit visual canónico de Deploya (tipografía Geist, tokens claros y oscuros, copy en español). Los estados visibles SHALL ser estados de despliegue, no de suscripción. Las pantallas mock SHALL servir para validar el kit, no como producto de dominio terminado.
+El sistema SHALL ofrecer en `apps/web` el kit visual canónico de Deploya (tipografía Geist, tokens claros y oscuros, primitivos shadcn, copy en español). Las rutas de este change SHALL ser stubs que apuntan a `docs/kit-visual.md`. SHALL NOT presentar pantallas de producto (lista/detalle, flujo montado, operación) ni mocks de proyectos.
 
-#### Scenario: Panel con kit aplicado
+#### Scenario: Home con kit y sin producto fingido
 
-- **WHEN** el cliente abre el panel de proyectos
-- **THEN** ve una composición lista + detalle, navegación por el ciclo Recepción → Construcción → Ejecución → Enrutamiento → Operación, y no un placeholder neutro de bootstrap
+- **WHEN** el cliente abre `/`
+- **THEN** ve «Deploya», el shell con toggle de tema, y una referencia a `docs/kit-visual.md`, sin lista de proyectos ni grafo
 
 #### Scenario: Toggle claro y oscuro
 
-- **WHEN** el cliente activa el control de tema
-- **THEN** el panel pasa entre modo claro y modo oscuro usando los mismos tokens, sin recargar ni cambiar de paleta inventada
+- **WHEN** el cliente activa el control de tema en el header
+- **THEN** la superficie pasa entre modo claro y modo oscuro usando los mismos tokens, sin recargar ni cambiar de paleta inventada
 
-#### Scenario: Estados de despliegue
+#### Scenario: Stub de proyectos
 
-- **WHEN** un proyecto mock está en curso
-- **THEN** el panel muestra un estado de despliegue (Encolado, Construyendo, Aprovisionando, Publicando, Saludable, Fallido, Revirtiendo o Detenido) y no un estado de suscripción
+- **WHEN** el cliente abre `/projects`
+- **THEN** ve un stub corto en español que apunta al kit, no un panel lista + detalle
 
-### Requirement: Lista y detalle de proyectos mock
+### Requirement: Specs con UI reutilizan el kit
 
-El sistema SHALL listar proyectos con fuente (`ProveedorFuente`: repositorio o archivo comprimido) y, al seleccionar uno, mostrar su detalle. En esta historia los datos SHALL ser mock; no encola construcción real (M4).
+Las historias posteriores de este módulo que pinten en `apps/web` SHALL reutilizar `docs/kit-visual.md` (tokens, AppShell, primitivos, Geist, toggle). SHALL NOT introducir otra paleta ni otro layout raíz.
 
-#### Scenario: Selección en la lista
+#### Scenario: Misma cromática
 
-- **WHEN** el cliente elige un proyecto de la lista
-- **THEN** el detalle muestra nombre, fuente, etapa del ciclo y estado de despliegue de ese proyecto
-
-#### Scenario: Fuente visible
-
-- **WHEN** el detalle de un proyecto está abierto
-- **THEN** indica si la fuente es repositorio o archivo comprimido
-
-### Requirement: Lienzo del ciclo de despliegue
-
-El sistema SHALL ofrecer una vista de flujo del ciclo Recepción → Construcción → Ejecución → Enrutamiento → Operación para el proyecto seleccionado, con datos mock.
-
-#### Scenario: Abrir el flujo
-
-- **WHEN** el cliente abre la vista de flujo de un proyecto
-- **THEN** ve los cinco nodos del ciclo y puede volver a la lista y al detalle
+- **WHEN** una historia de proyectos añade superficie web
+- **THEN** comparte shell, tipografía y tokens con el resto de `apps/web`, incluido el tema activo

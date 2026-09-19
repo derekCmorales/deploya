@@ -10,4 +10,4 @@ Dueño: @Portillo17e. Kit: `docs/roles/eduardo-proyectos-ux/`.
 
 Fuentes: `ProveedorFuente` (repositorio o archivo comprimido). M3 termina en proyecto persistido; encolar es M4.
 
-**Kit visual canónico** ([docs/kit-visual.md](../../docs/kit-visual.md)): Geist, tokens claro/oscuro, AppShell. Specs con UI reutilizan ese documento. Prioriza a11y. Specs de dominio: `openspec/specs/proyectos`, `observabilidad`. Commits `feat(m3):` / `feat(m7):`.
+**Kit visual canónico** ([docs/kit-visual.md](../../docs/kit-visual.md)): Geist, tokens claro/oscuro, AppShell mínimo. Specs con UI reutilizan ese documento; no paleta nueva. Este kit no incluye pantallas de producto. Prioriza a11y. Specs de dominio: `openspec/specs/proyectos`, `observabilidad`. Commits `feat(m3):` / `feat(m7):`.

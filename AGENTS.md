@@ -45,4 +45,4 @@ Specs: `openspec/specs/<modulo>/spec.md`.
 
 Stubs: módulo Nest registrado + `GET /<modulo>/health`. **No** implementar auth, pagos ni motor reales en PRs de andamiaje.
 
-La web usa el **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): tokens, AppShell, Geist, toggle claro/oscuro. Las pantallas actuales validan el kit (mock). Auth, pagos y motor reales siguen fuera del bootstrap. Specs con UI deben reutilizar ese documento.
+La web usa el **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): tokens, AppShell mínimo, Geist, toggle claro/oscuro. Rutas actuales = stubs; no hay pantallas de producto. Auth, pagos y motor reales siguen fuera del bootstrap. Specs con UI deben reutilizar ese documento; no paleta nueva.

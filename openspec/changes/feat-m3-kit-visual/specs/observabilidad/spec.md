@@ -2,21 +2,16 @@
 
 ## ADDED Requirements
 
-### Requirement: Superficie de operación en el panel
+### Requirement: Observabilidad reutiliza el kit visual
 
-El sistema SHALL mostrar, en la etapa Operación del panel y con el kit visual canónico, métricas de consumo y bitácoras del entorno seleccionado. En esta historia los valores SHALL ser mock; no se exige canal en vivo ni motor real.
+Cuando este módulo tenga superficie en `apps/web`, SHALL usar el kit visual canónico (`docs/kit-visual.md`): tokens, AppShell, primitivos shadcn, Geist, toggle claro/oscuro y copy en español. SHALL NOT introducir otra paleta. Este change SHALL NOT implementar métricas, bitácoras ni aviso de cuota en el panel.
 
-#### Scenario: Métricas mock del entorno
+#### Scenario: Sin pantalla de operación en este change
 
-- **WHEN** el cliente abre Operación de un proyecto
-- **THEN** ve CPU, memoria y transferencia comparadas con límites de plan (datos mock) y el mismo lenguaje visual que el resto del panel
+- **WHEN** el cliente navega las rutas de este PR
+- **THEN** no hay vista de operación con métricas o bitácoras mock
 
-#### Scenario: Bitácoras mock
+#### Scenario: Misma cromática en una historia futura
 
-- **WHEN** el cliente abre Operación de un proyecto en construcción o en runtime
-- **THEN** ve líneas de bitácora ordenadas (mock) etiquetadas como construcción o runtime
-
-#### Scenario: Aviso de cuota mock
-
-- **WHEN** el muestreo mock de un entorno se acerca al límite del plan
-- **THEN** el panel muestra un aviso de cuota en Operación
+- **WHEN** una historia de observabilidad añade superficie web
+- **THEN** comparte shell, tipografía y tokens con el resto de `apps/web`, incluido el tema activo

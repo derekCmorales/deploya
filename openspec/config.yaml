@@ -11,9 +11,9 @@ context: |
   Nunca commits a main. Ramas feat/m<n>-<slug>. Conventional Commits feat(m1):.
   OpenSpec primero: /opsx-propose → apply → archive. Un spec por módulo en openspec/specs/.
   Dueños: Eddy M1/M10+CI; Javier M2/M9+Prisma; Eduardo M3/M7+UI; Derek M4/M5/M6+tools M8.
-  Kit visual canónico: docs/kit-visual.md (Geist, tokens claro/oscuro, AppShell).
+  Kit visual canónico: docs/kit-visual.md (Geist, tokens claro/oscuro, AppShell mínimo).
   Specs con UI en apps/web SHALL reutilizar ese kit; no inventar paleta.
-  Las pantallas actuales validan el kit (mock). No implementar auth/pagos/motor reales.
+  Las rutas actuales son stubs; no hay pantallas de producto. No implementar auth/pagos/motor reales.
   Español de la propuesta. No usar IPasarelaPago ni ISourceProvider.
 
 rules:
@@ -31,7 +31,7 @@ rules:
 operations:
   apply:
     guidance:
-      - UI: reutilizar docs/kit-visual.md (shell, tokens, tema); no fingir otro look ni tratar los mocks como producto terminado
+      - UI: reutilizar docs/kit-visual.md (shell, tokens, tema); no inventar paleta ni fingir pantallas de producto
       - Keep module health endpoints working
   archive:
     guidance:

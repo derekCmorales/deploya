@@ -2,72 +2,56 @@
 
 ## Context
 
-`apps/web` es Next.js 15 placeholder (fuentes del sistema, sin Tailwind). Eduardo es dueño de `apps/web` salvo `(auth)`, `(billing)` y `(admin)`. El plan pide shadcn/ui + Tailwind, Magic UI o Aceternity, `@xyflow/react`, Lucide, Dark SaaS, Inter o Geist, mock, sin auth/pagos/motor. Referencias inbox omnicanal: composición lista + detalle, no el producto de mensajería. Ver proposal.md.
+`apps/web` era Next.js 15 placeholder (fuentes del sistema, sin Tailwind). Eduardo es dueño de `apps/web` salvo `(auth)`, `(billing)` y `(admin)`. El equipo necesita el kit instalado y documentado. El alcance **no** incluye pantallas de producto. Ver proposal.md.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- Tokens CSS + componentes primitivos reutilizables + shell.
-- Rutas de validación navegables del ciclo, con mock en cliente.
-- Dockerfile.web / `output: standalone` siguen construyendo.
-- Tests y docs alineados al nuevo canon.
+- Tokens CSS + primitivos reutilizables + header mínimo con toggle.
+- Librerías en el package: Tailwind, shadcn, Lucide, next-themes, `@xyflow/react`, framer-motion.
+- Stubs cortos en español que apuntan a `docs/kit-visual.md`.
+- Docs y reglas: specs con UI reutilizan el kit; no paleta nueva.
 
 **Non-Goals:**
 
+- Lista/detalle de proyectos, xyflow montado, operación/métricas, mocks.
 - Fetch a Nest, auth, pasarela, Docker.
 - Design tokens en la API.
-- Aceternity y Magic UI a la vez (se elige una).
+- Aceternity y Magic UI a la vez (se elige una; Magic UI queda en el package, no como producto).
 
 ## Decisions
 
 ### 1. Geist + tokens shadcn (claro y oscuro)
 
-- **Elección:** `next/font` Geist; CSS variables estilo shadcn; acento cian/teal; `next-themes` con toggle en el shell. Oscuro por defecto; `:root` = claro, `.dark` = oscuro.
+- **Elección:** `next/font` Geist; CSS variables estilo shadcn; acento cian/teal; `next-themes` con toggle en el header. Oscuro por defecto; `:root` = claro, `.dark` = oscuro.
 - **Alternativa:** Inter, o solo oscuro. El equipo pidió ambos modos sobre el mismo kit.
-
-### 8. El PR documenta el kit; las pantallas son ejemplos
-
-- **Elección:** `docs/kit-visual.md` es la fuente para specs de otros módulos. Lista/detalle/flujo/operación son **validación**, no M1–M10 terminados.
-- **Alternativa:** dejar solo código. Sin guía, cada dueño inventaría paleta.
 
 ### 2. Tailwind v4 + shadcn primitivos
 
 - **Elección:** Tailwind 4 + componentes shadcn (Button, Badge, Card, Input, Tabs, ScrollArea, Separator, Tooltip).
 - **Alternativa:** CSS a mano. El stack pedido es shadcn + Tailwind.
 
-### 3. Magic UI mínimo, no Aceternity
+### 3. Librerías en el package, no pantallas
 
-- **Elección:** 1–2 piezas copiadas (p. ej. BorderBeam / fondo particles) vía `framer-motion`, sin el catálogo entero.
-- **Alternativa:** Aceternity. Magic UI es más nativo a shadcn.
+- **Elección:** `@xyflow/react` y `framer-motion` instalados para historias futuras. Este PR no monta el grafo ni finge un panel.
+- **Alternativa:** pantallas mock de validación. Se recortaron: el PR no debe llevar producto fingido.
 
-### 4. Shell en layout raíz; dueños de ruta intactos
+### 4. Shell mínimo
 
-- **Elección:** `AppShell` en el layout; `(projects)` concentra lista/detalle/flujo/operación. Auth/billing/admin se envuelven y siguen siendo placeholders de dominio.
-- **Alternativa:** solo `(projects)`. El kit canónico es de `apps/web` entero.
+- **Elección:** header con «Deploya» + toggle. Stubs en `/`, `/projects`, `/auth`, `/billing`, `/admin`.
+- **Alternativa:** rail de producto con flujo/operación. Fuera de alcance.
 
-### 5. Mock en módulo cliente, no API
+### 5. El PR documenta el kit
 
-- **Elección:** `src/lib/mock/` con proyectos, despliegues (estados §3.2), métricas y bitácoras. Query `?id=` o segmento `[id]` para el seleccionado.
-- **Alternativa:** stubs Nest. Fuera de alcance (no motor ni persistencia de UI).
-
-### 6. `@xyflow/react` solo en Construcción→Enrutamiento (vista Flujo)
-
-- **Elección:** nodos = etapas del ciclo; aristas dirigidas; clic alinea lista/detalle.
-- **Alternativa:** stepper lineal. El stack pide xyflow y valida el look del pipeline.
-
-### 7. Composición inbox, dominio Deploya
-
-- Columna lista: proyectos/despliegues, búsqueda, filtro por etapa/estado.
-- Columna detalle: identidad, fuente (`ProveedorFuente`), timeline del ciclo, URL mock, acciones visuales inertes.
-- Sin hilos, canales ni agentes de inbox.
+- **Elección:** `docs/kit-visual.md` es la fuente para specs de otros módulos. Cada dueño construye su dominio encima.
+- **Alternativa:** dejar solo código. Sin guía, cada dueño inventaría paleta.
 
 ## Risks / Trade-offs
 
 - [Imagen Docker más pesada] → deps solo en `apps/web`; `pnpm-lock.yaml` actualizado; smoke sigue buscando "Deploya" en el HTML.
-- [CODEOWNERS en auth/billing/admin] → cambios mínimos (shell compartido); no lógica de esos módulos.
-- [Tests que exigen placeholder neutro] → reescribir a aserciones del kit (Geist/tokens/ciclo).
-- [Referencias visuales no montadas en este entorno] → look & feel SaaS oscuro lista+detalle; no clonar inbox.
+- [CODEOWNERS en auth/billing/admin] → stubs mínimos; no lógica de esos módulos.
+- [Tests que exigían mocks o ciclo en home] → aserciones de tokens, Geist, toggle y deps.
 
 ## Migration Plan
 
@@ -75,4 +59,4 @@ Sustitución del placeholder. Rollback = revertir el PR. Sin migración de datos
 
 ## Open Questions
 
-Ninguna que bloquee specs o tareas: Magic UI vs Aceternity queda resuelto (Magic UI mínimo).
+Ninguna que bloquee specs o tareas.

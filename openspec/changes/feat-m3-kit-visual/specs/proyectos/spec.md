@@ -4,12 +4,17 @@
 
 ### Requirement: Kit visual canónico en el panel
 
-El sistema SHALL presentar el panel de proyectos con el kit visual canónico de Deploya (SaaS oscuro, tipografía Geist, copy en español). Los estados visibles SHALL ser estados de despliegue, no de suscripción.
+El sistema SHALL presentar el panel de proyectos con el kit visual canónico de Deploya (tipografía Geist, tokens claros y oscuros, copy en español). Los estados visibles SHALL ser estados de despliegue, no de suscripción. Las pantallas mock SHALL servir para validar el kit, no como producto de dominio terminado.
 
 #### Scenario: Panel con kit aplicado
 
 - **WHEN** el cliente abre el panel de proyectos
 - **THEN** ve una composición lista + detalle, navegación por el ciclo Recepción → Construcción → Ejecución → Enrutamiento → Operación, y no un placeholder neutro de bootstrap
+
+#### Scenario: Toggle claro y oscuro
+
+- **WHEN** el cliente activa el control de tema
+- **THEN** el panel pasa entre modo claro y modo oscuro usando los mismos tokens, sin recargar ni cambiar de paleta inventada
 
 #### Scenario: Estados de despliegue
 

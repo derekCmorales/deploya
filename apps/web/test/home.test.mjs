@@ -31,6 +31,18 @@ test("los tokens canónicos definen fondo y acento", () => {
   assert.match(css, /--primary/);
 });
 
+test("el toggle de tema existe en el shell", () => {
+  const toggle = readFileSync(
+    join(root, "src/components/shell/theme-toggle.tsx"),
+    "utf8",
+  );
+  assert.match(toggle, /Cambiar a modo claro/);
+  assert.match(toggle, /Cambiar a modo oscuro/);
+  const css = readFileSync(join(root, "src/app/globals.css"), "utf8");
+  assert.match(css, /:root/);
+  assert.match(css, /\.dark/);
+});
+
 test("al menos un entorno mock dispara aviso de cuota", () => {
   const obs = readFileSync(
     join(root, "src/lib/mock/observabilidad.ts"),

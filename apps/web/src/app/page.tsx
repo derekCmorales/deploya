@@ -24,9 +24,10 @@ export default function HomePage() {
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Deploya</h1>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-          Plataforma como servicio para publicar aplicaciones. Esta pantalla
-          valida el look &amp; feel del panel: SaaS oscuro, Geist, acento cian.
-          Los datos son mock. No hay autenticación, pagos ni motor reales.
+          Plataforma como servicio para publicar aplicaciones. Estas pantallas
+          validan el kit (Geist, tokens claro/oscuro, acento cian) para que el
+          resto de módulos construya encima. Datos mock. No hay autenticación,
+          pagos ni motor reales.
         </p>
         <p className="mt-4 text-sm text-muted-foreground">
           Ciclo: Recepción → Construcción → Ejecución → Enrutamiento →

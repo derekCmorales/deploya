@@ -11,6 +11,8 @@
 
 Web: `apps/web/src/app/(auth)/` · CI: `.github/workflows/`
 
+UI de cuenta: mismo kit que el resto del panel — [kit-visual.md](../../kit-visual.md). Reutiliza `AppShell` (ya envuelve el layout), primitivos de `@/components/ui` y el toggle claro/oscuro. No inventes paleta. Las pantallas actuales de `/auth` son placeholder de dominio.
+
 ## Qué no tocas (salvo PR conjunta)
 
 Motor M4–M6, Prisma de producto (Javier), UI de proyectos, pagos, administración.

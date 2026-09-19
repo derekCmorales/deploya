@@ -17,4 +17,4 @@
 - [ ] Rama `feat/` `fix/` `docs/` o `chore/` — **no** `main`
 - [ ] Conventional Commit `feat(mN):` / `fix(mN):`
 - [ ] Spec OpenSpec actualizado o change enlazado
-- [ ] UI del panel usa el kit canónico (`apps/web`) o no toca superficies visuales
+- [ ] Si hay UI: sigue [docs/kit-visual.md](../docs/kit-visual.md) (tokens, AppShell, claro/oscuro) — las pantallas de validación no son el producto de tu módulo

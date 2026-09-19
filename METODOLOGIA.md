@@ -64,5 +64,5 @@ Kit de una pantalla: [docs/roles/](docs/roles/).
 
 ## Qué no es este repo (todavía)
 
-- Hay **kit visual canónico** en `apps/web` (Geist, SaaS oscuro, tokens shadcn). Las pantallas de producto de este bootstrap son de validación con datos mock.  
+- Hay **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): Geist, tokens claro/oscuro, AppShell. Las pantallas actuales **validan** el kit (mock); cada módulo construye su dominio encima.  
 - No hay auth, pagos ni motor de contenedores **reales** en el bootstrap: solo stubs + health.

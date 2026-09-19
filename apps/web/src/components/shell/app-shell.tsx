@@ -2,7 +2,6 @@
 
 import {
   CreditCard,
-  GitBranch,
   Inbox,
   LayoutDashboard,
   Route,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { proyectoPorDefecto } from "@/lib/mock/proyectos";
+import { ThemeToggle } from "@/components/shell/theme-toggle";
 
 const rail = [
   { href: "/", label: "Inicio", icon: LayoutDashboard, exact: true },
@@ -139,8 +139,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <div className="mt-auto text-[10px] text-muted-foreground">
-          <GitBranch className="size-3.5" aria-hidden />
+        <div className="mt-auto">
+          <ThemeToggle />
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">

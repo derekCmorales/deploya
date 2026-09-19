@@ -138,7 +138,7 @@ Fuente: [diagramas/compartido/c4-componentes-motor.mmd](diagramas/compartido/c4-
 
 ## Sistema de diseño
 
-Canon en `apps/web`: SaaS oscuro, tipografía Geist, acento cian/teal, primitivos shadcn + Lucide, grafo `@xyflow/react`. Documentado en [apps/web/README.md](../apps/web/README.md). Las pantallas de validación usan datos mock; no hay auth, pagos ni motor reales.
+Canon: [kit-visual.md](kit-visual.md). Geist, tokens claro/oscuro (toggle), acento cian/teal, primitivos shadcn + Lucide, grafo `@xyflow/react`. Las pantallas en `apps/web` **validan** el kit con mock; cada módulo construye su dominio encima, sin paleta propia.
 
 ## Fuera de alcance (no implementar)
 

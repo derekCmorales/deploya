@@ -12,6 +12,8 @@
 Web: `apps/web/src/app/(billing)/`, `apps/web/src/app/(admin)/`  
 Datos: `apps/api/prisma/` (CODEOWNERS: tú + Derek)
 
+UI de planes y admin: [kit-visual.md](../../kit-visual.md). Mismo shell y tokens; estados §4.4 en copy, no mezclarlos con Encolado/Saludable. `/billing` y `/admin` hoy son placeholders.
+
 ## Qué no tocas (salvo PR conjunta)
 
 Identidad M1, motor Docker, cola de construcción, UI de proyectos.

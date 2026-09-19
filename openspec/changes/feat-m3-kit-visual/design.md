@@ -21,10 +21,15 @@
 
 ## Decisions
 
-### 1. Geist + tokens shadcn (oscuro por defecto)
+### 1. Geist + tokens shadcn (claro y oscuro)
 
-- **Elección:** `next/font` Geist; CSS variables estilo shadcn; acento cian/teal (PaaS, no paleta de inbox).
-- **Alternativa:** Inter. Geist ya encaja en Next 15 y el pedido permite ambas.
+- **Elección:** `next/font` Geist; CSS variables estilo shadcn; acento cian/teal; `next-themes` con toggle en el shell. Oscuro por defecto; `:root` = claro, `.dark` = oscuro.
+- **Alternativa:** Inter, o solo oscuro. El equipo pidió ambos modos sobre el mismo kit.
+
+### 8. El PR documenta el kit; las pantallas son ejemplos
+
+- **Elección:** `docs/kit-visual.md` es la fuente para specs de otros módulos. Lista/detalle/flujo/operación son **validación**, no M1–M10 terminados.
+- **Alternativa:** dejar solo código. Sin guía, cada dueño inventaría paleta.
 
 ### 2. Tailwind v4 + shadcn primitivos
 

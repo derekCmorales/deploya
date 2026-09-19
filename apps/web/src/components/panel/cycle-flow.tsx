@@ -10,6 +10,7 @@ import {
   ReactFlow,
 } from "@xyflow/react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { useMemo } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +26,37 @@ import "@xyflow/react/dist/style.css";
 
 type Props = { proyecto: Proyecto };
 
+const paleta = {
+  oscuro: {
+    texto: "oklch(0.97 0.004 250)",
+    nodo: "oklch(0.185 0.012 250)",
+    nodoActual: "oklch(0.26 0.02 175)",
+    borde: "oklch(1 0 0 / 12%)",
+    acento: "oklch(0.78 0.12 175)",
+    minimapa: "oklch(0.185 0.012 250)",
+    mascara: "oklch(0.145 0.012 250 / 70%)",
+    grid: "oklch(1 0 0 / 8%)",
+  },
+  claro: {
+    texto: "oklch(0.22 0.02 250)",
+    nodo: "oklch(1 0 0)",
+    nodoActual: "oklch(0.94 0.03 175)",
+    borde: "oklch(0.22 0.02 250 / 14%)",
+    acento: "oklch(0.45 0.1 175)",
+    minimapa: "oklch(0.97 0.004 250)",
+    mascara: "oklch(0.985 0.004 250 / 70%)",
+    grid: "oklch(0.22 0.02 250 / 10%)",
+  },
+} as const;
+
 export function CycleFlow({ proyecto }: Props) {
-  const { nodes, edges } = useMemo(() => buildGraph(proyecto), [proyecto]);
+  const { resolvedTheme } = useTheme();
+  const oscuro = resolvedTheme !== "light";
+  const { nodes, edges } = useMemo(
+    () => buildGraph(proyecto, oscuro),
+    [proyecto, oscuro],
+  );
+  const colores = oscuro ? paleta.oscuro : paleta.claro;
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
@@ -53,20 +83,20 @@ export function CycleFlow({ proyecto }: Props) {
           nodes={nodes}
           edges={edges}
           fitView
-          colorMode="dark"
+          colorMode={oscuro ? "dark" : "light"}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable
           proOptions={{ hideAttribution: true }}
         >
-          <Background color="oklch(1 0 0 / 8%)" gap={18} />
+          <Background color={colores.grid} gap={18} />
           <Controls />
           <MiniMap
             pannable
             zoomable
-            bgColor="oklch(0.185 0.012 250)"
-            nodeColor="oklch(0.78 0.12 175)"
-            maskColor="oklch(0.145 0.012 250 / 70%)"
+            bgColor={colores.minimapa}
+            nodeColor={colores.acento}
+            maskColor={colores.mascara}
           />
         </ReactFlow>
       </div>
@@ -74,7 +104,11 @@ export function CycleFlow({ proyecto }: Props) {
   );
 }
 
-function buildGraph(proyecto: Proyecto): { nodes: Node[]; edges: Edge[] } {
+function buildGraph(
+  proyecto: Proyecto,
+  oscuro: boolean,
+): { nodes: Node[]; edges: Edge[] } {
+  const c = oscuro ? paleta.oscuro : paleta.claro;
   const nodes: Node[] = ETAPAS_CICLO.map((etapa, i) => {
     const actual = proyecto.etapa === etapa;
     const hecha = etapaCompletada(proyecto.etapa, etapa);
@@ -92,13 +126,9 @@ function buildGraph(proyecto: Proyecto): { nodes: Node[]; edges: Edge[] } {
         padding: 12,
         width: 180,
         fontSize: 13,
-        color: "oklch(0.97 0.004 250)",
-        background: actual
-          ? "oklch(0.26 0.02 175)"
-          : "oklch(0.185 0.012 250)",
-        borderColor: actual
-          ? "oklch(0.78 0.12 175)"
-          : "oklch(1 0 0 / 12%)",
+        color: c.texto,
+        background: actual ? c.nodoActual : c.nodo,
+        borderColor: actual ? c.acento : c.borde,
       },
     };
   });
@@ -108,7 +138,7 @@ function buildGraph(proyecto: Proyecto): { nodes: Node[]; edges: Edge[] } {
     source: etapa,
     target: ETAPAS_CICLO[i + 1],
     animated: proyecto.etapa === ETAPAS_CICLO[i + 1],
-    style: { stroke: "oklch(0.78 0.12 175)" },
+    style: { stroke: c.acento },
   }));
 
   return { nodes, edges };

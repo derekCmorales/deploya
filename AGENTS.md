@@ -38,11 +38,11 @@ Specs: `openspec/specs/<modulo>/spec.md`.
 |---|---|
 | Eddy | `identidad`, `notificaciones`, `apps/web` `(auth)`, `.github/workflows` |
 | Javier | `suscripciones`, `administracion`, `(billing)`, `(admin)`, `prisma` |
-| Eduardo | `proyectos`, `observabilidad`, `apps/web` (kit visual canónico: SaaS oscuro, Geist) |
+| Eduardo | `proyectos`, `observabilidad`, `apps/web` ([kit visual](docs/kit-visual.md): Geist, claro/oscuro) |
 | Derek | `construccion`, `orquestacion`, `enrutamiento`, `herramientas`, compose, `adapters` |
 
 ## Bootstrap
 
 Stubs: módulo Nest registrado + `GET /<modulo>/health`. **No** implementar auth, pagos ni motor reales en PRs de andamiaje.
 
-La web usa el **kit visual canónico** (tokens en `apps/web`, Geist, SaaS oscuro). Auth, pagos y motor reales siguen fuera del bootstrap.
+La web usa el **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): tokens, AppShell, Geist, toggle claro/oscuro. Las pantallas actuales validan el kit (mock). Auth, pagos y motor reales siguen fuera del bootstrap. Specs con UI deben reutilizar ese documento.

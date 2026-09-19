@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/shell/app-shell";
+import { ThemeProvider } from "@/components/shell/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
@@ -20,7 +21,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Deploya",
   description:
-    "PaaS de alojamiento — panel con kit visual canónico (datos mock)",
+    "PaaS de alojamiento — kit visual canónico (pantallas de validación, datos mock)",
 };
 
 export default function RootLayout({
@@ -29,13 +30,15 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es" className="dark" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-full font-sans`}
       >
-        <TooltipProvider delayDuration={200}>
-          <AppShell>{children}</AppShell>
-        </TooltipProvider>
+        <ThemeProvider>
+          <TooltipProvider delayDuration={200}>
+            <AppShell>{children}</AppShell>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

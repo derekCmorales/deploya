@@ -8,18 +8,18 @@ El bootstrap deja `apps/web` como placeholder neutro y la documentación prohíb
 
 ## What Changes
 
-- Tokens, tipografía (Geist) y componentes canónicos en `apps/web` (shadcn/ui + Tailwind, Lucide, un efecto tipo Magic UI, grafo `@xyflow/react`).
-- Shell del panel (navegación por etapas del ciclo) y pantallas de validación con **datos mock** en español.
-- Lista de proyectos/despliegues + detalle (composición tipo inbox, dominio Deploya).
-- Lienzo del flujo de despliegue y superficie de operación (bitácoras y métricas mock).
-- Documentación y reglas del repo: el kit **es** canon; se retira la prohibición de paleta.
+- Tokens, tipografía (Geist) y componentes canónicos en `apps/web` (shadcn/ui + Tailwind, Lucide, Magic UI mínimo, `@xyflow/react`).
+- Toggle **claro / oscuro** (oscuro por defecto) sobre los mismos tokens.
+- Shell y **pantallas de validación** con datos mock: demuestran el kit; no son el producto terminado de cada módulo.
+- Guía `docs/kit-visual.md` para que Eddy, Javier y Derek reutilicen el estilo en sus specs y PRs.
+- Documentación y reglas del repo: el kit **es** canon.
 
 ## Non-goals
 
 - Auth, pagos o motor reales (Docker, cola, TLS, Prisma de planes).
 - Clonar el producto de referencia (inbox omnicanal); solo look & feel.
 - Kit visual en la API Nest, ni un spec único de producto.
-- Sistema de diseño Figma ni paleta de marca “final de marketing”; este PR fija el canon de implementación.
+- Sistema de diseño Figma ni paleta de marketing. Este PR deja el **kit listo para construir encima**, no pantallas de dominio production-ready.
 
 ## Capabilities
 
@@ -36,5 +36,5 @@ El bootstrap deja `apps/web` como placeholder neutro y la documentación prohíb
 
 - Código: `apps/web` (layout, tokens, componentes, rutas de validación). Placeholders `(auth|billing|admin)` solo se envuelven en el shell; no se implementa su dominio.
 - Dependencias: Tailwind, shadcn/ui, Lucide, `@xyflow/react`, framer-motion (Magic UI).
-- Docs: `AGENTS.md`, `docs/arquitectura.md`, kits de Eduardo, plantilla de PR, tests que exigían placeholder neutro.
+- Docs: `docs/kit-visual.md` (canon para el equipo), `AGENTS.md`, arquitectura, kits de rol, `openspec/config.yaml`, plantilla de PR.
 - API Nest: sin cambios de contrato.

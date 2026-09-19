@@ -17,6 +17,8 @@ También: `apps/api/src/adapters/`, `docker-compose.yml`, Dockerfiles.
 
 Implementar auth (Eddy), pagos (Javier), pantallas de proyecto (Eduardo). Revisa esos PRs; no los sustituyas.
 
+Si un tool M8 pinta en el panel: [kit-visual.md](../../kit-visual.md) (no otro look).
+
 ## Diagramas tuyos primero
 
 1. [m4-m5-m6-estados-despliegue.mmd](../../diagramas/m1-m10/m4-m5-m6-estados-despliegue.mmd)

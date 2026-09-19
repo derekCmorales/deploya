@@ -18,7 +18,7 @@ Auth real, pagos, cola M4, Docker, Prisma de planes.
 
 ## Sistema de diseño — kit canónico
 
-Canon en `apps/web`: SaaS oscuro, Geist, acento cian, shadcn + Lucide + xyflow. README: [apps/web/README.md](../../../apps/web/README.md). Pantallas de validación con datos mock. Accesibilidad: semántica, foco, contraste del tema oscuro. No implementar auth, pagos ni motor reales.
+Canon en `apps/web`: Geist, tokens claro/oscuro, acento cian, shadcn + Lucide + xyflow. Guía para todo el equipo: [kit-visual.md](../../kit-visual.md). README de archivos: [apps/web/README.md](../../../apps/web/README.md). Las pantallas actuales validan el kit (mock); no son M3/M7 terminados. Accesibilidad: semántica, foco, contraste en ambos temas.
 
 ## Diagramas tuyos primero
 

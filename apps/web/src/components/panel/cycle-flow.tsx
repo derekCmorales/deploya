@@ -53,6 +53,7 @@ export function CycleFlow({ proyecto }: Props) {
           nodes={nodes}
           edges={edges}
           fitView
+          colorMode="dark"
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable
@@ -63,6 +64,8 @@ export function CycleFlow({ proyecto }: Props) {
           <MiniMap
             pannable
             zoomable
+            bgColor="oklch(0.185 0.012 250)"
+            nodeColor="oklch(0.78 0.12 175)"
             maskColor="oklch(0.145 0.012 250 / 70%)"
           />
         </ReactFlow>

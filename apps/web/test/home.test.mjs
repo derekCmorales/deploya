@@ -21,12 +21,13 @@ test("el layout declara Geist y lang es", () => {
   assert.match(layout, /--font-geist-sans/);
 });
 
-test("los tokens canónicos definen fondo y acento", () => {
+test("los tokens canónicos definen fondo y énfasis monocromático", () => {
   const css = readFileSync(join(root, "src/app/globals.css"), "utf8");
   assert.match(css, /--background/);
   assert.match(css, /--primary/);
   assert.match(css, /:root/);
   assert.match(css, /\.dark/);
+  assert.doesNotMatch(css, /175\)/);
 });
 
 test("el toggle de tema vive en el header mínimo", () => {

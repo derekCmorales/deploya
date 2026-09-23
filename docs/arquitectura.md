@@ -138,7 +138,7 @@ Fuente: [diagramas/compartido/c4-componentes-motor.mmd](diagramas/compartido/c4-
 
 ## Sistema de diseño
 
-Canon: [kit-visual.md](kit-visual.md). Geist, tokens claro/oscuro (toggle), acento cian/teal, primitivos shadcn + Lucide; `@xyflow/react` y framer-motion en el package. Las rutas en `apps/web` son **stubs** del kit; cada módulo construye su dominio encima, sin paleta propia ni pantallas fingidas.
+Canon: [kit-visual.md](kit-visual.md). Geist, tokens claro/oscuro (toggle), cromática monocromática, primitivos shadcn + Lucide; `@xyflow/react` y framer-motion en el package. Las rutas en `apps/web` son **stubs** del kit; cada módulo construye su dominio encima, sin paleta propia ni pantallas fingidas.
 
 ## Fuera de alcance (no implementar)
 

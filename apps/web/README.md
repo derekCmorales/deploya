@@ -2,7 +2,7 @@
 
 Guía para el equipo: **[docs/kit-visual.md](../../docs/kit-visual.md)**. Este README es el mapa de archivos.
 
-Tipografía **Geist**. Tokens claro y oscuro (toggle sol/luna en el header; oscuro por defecto). Acento cian/teal. Copy en español. Dueño del kit: Eduardo (`@Portillo17e`), salvo `(auth)` (Eddy), `(billing)` y `(admin)` (Javier).
+Tipografía **Geist**. Tokens claro y oscuro (toggle sol/luna en el header; oscuro por defecto). Cromática monocromática; el contraste lo marca el tema activo, no un acento de color. Copy en español. Dueño del kit: Eduardo (`@Portillo17e`), salvo `(auth)` (Eddy), `(billing)` y `(admin)` (Javier).
 
 Este PR deja el **package listo** y stubs cortos. **No** hay pantallas de producto (lista/detalle, xyflow montado, operación, mocks).
 
@@ -14,7 +14,7 @@ Este PR deja el **package listo** y stubs cortos. **No** hay pantallas de produc
 |---|---|
 | `--background` / `--foreground` | Lienzo y texto |
 | `--card` / `--border` | Paneles |
-| `--primary` | Acento (cian) |
+| `--primary` | Énfasis monocromático (invierte con el tema) |
 | `--font-geist-sans` / `--font-geist-mono` | UI y bitácoras |
 
 `:root` = claro. `.dark` = oscuro. Persistencia: `localStorage` clave `deploya-tema`.

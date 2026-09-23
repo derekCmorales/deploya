@@ -19,11 +19,11 @@ Este change deja el **package y los tokens listos**. Las rutas `/`, `/projects`,
 | Utilidad | `cn()` en `apps/web/src/lib/utils.ts` | Componer clases Tailwind |
 | Copy | Español | Textos de la propuesta; sin inglés de UI |
 
-Acento: cian/teal (PaaS). Radio `--radius`. Cuando construyas colas o inbox de trabajo (proyectos, tickets), usa composición lista + detalle — no un clon de mensajería. Eso es trabajo de **tu** historia, no de este kit.
+Cromática **monocromática** (blanco y negro / grises neutros). El contraste principal entre superficies lo marca el **modo claro u oscuro**, no un color de acento. Radio `--radius`. Cuando construyas colas o inbox de trabajo (proyectos, tickets), usa composición lista + detalle — no un clon de mensajería. Eso es trabajo de **tu** historia, no de este kit.
 
 ## Tema claro / oscuro
 
-- `:root` = modo claro; `.dark` = modo oscuro (mismas variables).
+- `:root` = modo claro; `.dark` = modo oscuro (mismas variables). En claro, `--primary` es texto oscuro sobre fondo claro; en oscuro, `--primary` invierte (texto claro sobre fondo oscuro).
 - El control vive en el **header** (icono sol/luna, `aria-label` «Cambiar a modo claro/oscuro»).
 - Componentes nuevos: solo clases semánticas (`bg-background`, `text-muted-foreground`, `border-border`, `bg-primary`). **Nada de hex sueltos** ni paletas por módulo.
 - Si montas `@xyflow/react`, el grafo debe seguir `colorMode` del tema.

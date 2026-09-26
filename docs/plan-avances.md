@@ -85,7 +85,7 @@ La versión visual de esta sección, con las pantallas de cada quien y la presen
 
 ### Regla de calidad para todas las historias
 
-Cada historia del avance entra con su diseño en SOLID y patrones en el `design.md` del change y con sus **pruebas unitarias** (una por escenario del spec) en verde en CI. Los mínimos por historia están en [ingenieria.md §5.3](ingenieria.md#53-pruebas-mínimas-del-avance-1). Sin eso la historia no suma puntos.
+La hoja **Entrega 1 · Calidad** del canvas resume esta regla. Cada historia del avance entra con su diseño en SOLID y patrones en el `design.md` del change y con sus **pruebas unitarias** (una por escenario del spec) en verde en CI. Los mínimos por historia están en [ingenieria.md §5.3](ingenieria.md#53-pruebas-mínimas-del-avance-1). Sin eso la historia no suma puntos.
 
 ### Qué se demuestra
 

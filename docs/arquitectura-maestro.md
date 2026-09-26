@@ -1924,6 +1924,12 @@ classDiagram
         <<interface>>
         +enviar(destinatario, plantilla, datos)
     }
+    class CorreoSmtpAdaptador {
+        +enviar(destinatario, plantilla, datos)
+    }
+    class CorreoConsolaAdaptador {
+        +enviar(destinatario, plantilla, datos)
+    }
 
     class ServicioSuscripciones {
         +crearSuscripcion(clienteId, planId, vigencia) Suscripcion
@@ -1962,6 +1968,8 @@ classDiagram
     }
     class ServicioNotificaciones {
         -correo CorreoPuerto
+        +notificarVerificacion(usuario, enlace)
+        +notificarRecuperacion(usuario, enlace)
         +notificarDespliegue(despliegue)
         +notificarVencimiento(suscripcion)
     }
@@ -2012,6 +2020,8 @@ classDiagram
     ServicioOrquestacion --> VerificacionEntornoPuerto
     ServicioEnrutamiento --> EnrutamientoPuerto
     ServicioNotificaciones --> CorreoPuerto
+    CorreoPuerto <|.. CorreoSmtpAdaptador
+    CorreoPuerto <|.. CorreoConsolaAdaptador
     CapaHerramientas --> ServicioProyectos
     CapaHerramientas --> ServicioConstruccion
     CapaHerramientas --> ServicioOrquestacion

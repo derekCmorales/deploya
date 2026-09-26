@@ -2,7 +2,7 @@
 
 Dueño: Eddy. Spec: [`openspec/specs/notificaciones/spec.md`](../../../../../openspec/specs/notificaciones/spec.md). Alcance: [docs/alcance.md](../../../../../docs/alcance.md).
 
-**Núcleo v4.1:** `CorreoPuerto` (adaptador Mailpit en desarrollo) y dos correos: verificación y recuperación.
+**Núcleo v4.1:** `CorreoPuerto` y dos correos: verificación y recuperación. Adaptadores: `CorreoSmtpAdaptador` (Mailpit en desarrollo, proveedor externo en producción; solo cambian variables) y `CorreoConsolaAdaptador` (pruebas). El binding vive en `notificaciones.module.ts`. Decisión: [ADR 0001](../../../../../docs/adr/0001-correo-por-smtp-configurable.md).
 
 **Pantallas:** 24.
 

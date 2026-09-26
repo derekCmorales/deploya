@@ -68,7 +68,7 @@ Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que 
 
 | Prioridad | Qué | Pantalla |
 |---|---|---|
-| Debe | `CorreoPuerto` con adaptador de desarrollo (Mailpit o consola) y uno real (proveedor externo) | — |
+| Debe | `CorreoPuerto` con adaptador SMTP elegido por configuración: Mailpit en desarrollo, proveedor externo (Resend, Brevo…) en el VPS; más un adaptador de consola para pruebas. Cambiar de proveedor = cambiar variables, no código ([ADR 0001](adr/0001-correo-por-smtp-configurable.md)) | — |
 | Debe | Correo de verificación de cuenta | 24 |
 | Debería | Correo de recuperación de contraseña | 24 |
 

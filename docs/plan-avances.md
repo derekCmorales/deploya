@@ -33,7 +33,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | H-01 | Monorepo, compose, CI y stubs `health` | — | Derek | 3 | Hecho |
 | H-02 | Kit visual canónico en `apps/web` | — | Eduardo | 3 | Hecho |
 | H-03 | Diagramas UML, ERD y C4 + specs OpenSpec | — | Todos | 5 | Hecho |
-| M10-01 | `CorreoPuerto` + adaptador Mailpit + correo de verificación | 24 | Eddy | 2 | **A1** |
+| M10-01 | `CorreoPuerto` + adaptador SMTP configurable (Mailpit en desarrollo) + adaptador de consola + correo de verificación | 24 | Eddy | 2 | **A1** |
 | M1-01 | Registro (cuenta pendiente de verificación) | 01, 01b | Eddy | 3 | **A1** |
 | M1-02 | Verificación de correo por enlace | 02 | Eddy | 2 | **A1** |
 | M1-03 | Iniciar y cerrar sesión + guard de sesión | 03 | Eddy | 3 | **A1** |
@@ -70,7 +70,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M5-02 | Conmutación sin corte, reiniciar y detener | 12b, 13 | Derek | 3 | A2 |
 | M5-03 | Bloqueos por suscripción y cuota de construcciones | 10c | Derek | 2 | A2 |
 | M4-02 | Cancelar, reintentar y redesplegar | 12, 12c, 14 | Derek | 3 | A3 |
-| M6-02 | VPS con `*.deploya.app` y HTTPS comodín | — | Derek | 5 | A3 |
+| M6-02 | VPS con `*.deploya.app`, HTTPS comodín y credenciales SMTP del proveedor de correo (SPF/DKIM) | — | Derek | 5 | A3 |
 | ADR | ADR: Dockerfile, cola, polling, Traefik | — | Derek | 2 | A3 |
 | DOC-03 | Documento de diseño final y manual técnico | — | Derek | 3 | Final |
 | EST-01 | Estabilización, corrección de errores y ensayo | — | Todos | 8 | Final |
@@ -97,7 +97,7 @@ La contratación con pago, la vista rica de despliegue (riel + bitácora) y el s
 
 | Id | Entrega | Terminado cuando |
 |---|---|---|
-| M10-01 | `CorreoPuerto` + adaptador Mailpit + plantilla de verificación (pantalla 24) | El correo aparece en Mailpit con el enlace |
+| M10-01 | `CorreoPuerto` + adaptador SMTP configurable (apunta a Mailpit) + plantilla de verificación (pantalla 24) | El correo aparece en Mailpit con el enlace; con `CORREO_ADAPTADOR=consola` sale en el log |
 | M1-01 | Registro (01, 01b): validación de contraseña, correo único, cuenta *pendiente* | Correo repetido muestra el error de 01b |
 | M1-02 | Verificación (02): token de 24 h y un solo uso; estados válido y expirado | El enlace activa la cuenta una sola vez |
 | M1-03 | Iniciar y cerrar sesión (03) + `SesionGuard` y `@UsuarioActual()` para el resto de módulos | Cuenta sin verificar no entra; `/projects` exige sesión |

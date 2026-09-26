@@ -16,4 +16,5 @@ Cuando la decisión es difícil de revertir o afecta a más de un módulo: elegi
 
 | # | Decisión | Estado |
 |---|---|---|
+| [0001](0001-correo-por-smtp-configurable.md) | Correo por un adaptador SMTP configurable; Mailpit solo en desarrollo | Propuesto |
 | — | Pendientes del plan (Derek, A1–A3): `Dockerfile` obligatorio, BullMQ para la cola, polling en vez de WebSocket, Traefik con certificado comodín | Por escribir |

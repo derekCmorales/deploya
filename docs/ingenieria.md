@@ -73,7 +73,7 @@ Cada change de OpenSpec **nombra** en su `design.md` qué patrones usa y por qu�
 | Todos | **Adapter** (GoF) | `apps/api/src/adapters/*`, correo SMTP, GitHub | Traducir una API externa al puerto |
 | M1 Identidad | **Strategy** + objeto valor | `PoliticaContrasena`, `HashContrasena` (puerto) | Cambiar el algoritmo de hash sin tocar el registro |
 | M1 Identidad | **Chain of Responsibility / Decorator** de Nest | `SesionGuard`, `@UsuarioActual()` | Autorización transversal fuera de los controladores |
-| M10 Notificaciones | **Adapter** + **Template Method** | `CorreoPuerto` → SMTP Mailpit; plantilla base de correo | Cambiar de proveedor sin tocar M1 |
+| M10 Notificaciones | **Adapter** + **Template Method** | `CorreoPuerto` ← `CorreoSmtpAdaptador` (Mailpit en desarrollo, proveedor externo en producción) y `CorreoConsolaAdaptador`; binding por variables de entorno en `notificaciones.module.ts`; plantilla base de correo | Cambiar de proveedor con variables de entorno, sin tocar M1 ni el servicio de M10 ([ADR 0001](adr/0001-correo-por-smtp-configurable.md)) |
 | M2 Suscripciones | **Strategy** | `PasarelaPago` ← `PasarelaSimulada` | Tarjetas de prueba hoy, pasarela real mañana |
 | M2 Suscripciones | **State / política pura** | `PoliticaCicloSuscripcion.avanzar(suscripcion, ahora)` | Ciclo §4.4 probable sin base ni reloj |
 | M2 Suscripciones | **Facade** | `SuscripcionesService.asignarSandbox`, `cuotaDe` | Una sola puerta para los demás módulos |
@@ -119,7 +119,7 @@ Anti-patrones que el revisor rechaza: *God object* (servicio de 600 líneas), *S
 
 | Historia | Dueño | Pruebas unitarias mínimas |
 |---|---|---|
-| M10-01 | Eddy | `CorreoPuerto` doble: el registro llama a `enviar` con el enlace; la plantilla incluye botón y enlace en texto plano |
+| M10-01 | Eddy | `CorreoPuerto` doble: el registro llama a `enviar` con el enlace; la plantilla incluye botón y enlace en texto plano; el binding elige `CorreoConsolaAdaptador` o `CorreoSmtpAdaptador` según `CORREO_ADAPTADOR`; un fallo de envío llega como `CorreoNoEnviado` |
 | M1-01 | Eddy | `PoliticaContrasena` (longitud, mayúscula, minúscula, número, símbolo); correo repetido → `CorreoYaRegistrado`; la contraseña se guarda con hash, nunca en claro; se pide Sandbox a M2 |
 | M1-02 | Eddy | Token válido activa; token vencido (24 h con `Reloj` falso) y token usado se rechazan; se guarda el hash del token |
 | M1-03 | Eddy | Credenciales incorrectas → error genérico; cuenta pendiente no entra; `SesionGuard` rechaza sin cookie y deja pasar con sesión vigente |

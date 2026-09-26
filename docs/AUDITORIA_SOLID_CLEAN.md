@@ -41,6 +41,7 @@ Los diagramas **sí respetan SOLID en lo esencial**: DIP con puertos sin `I` (`C
 | C5 | Solo hay pruebas de `health`; no hay pruebas de dominio todavía (esperado: el dominio entra desde el Avance 1) | Todos | Cada historia |
 | C6 | `apps/api` no tenía script de cobertura | — | **Corregido:** `pnpm --filter @deploya/api test:cov` |
 | C7 | `apps/web` solo prueba el home con `node --test`; no hay arnés para lógica de pantallas | Eduardo | Probar funciones puras con `node --test` en cada historia con UI |
+| C8 | M10 nombraba el adaptador por la herramienta («adaptador Mailpit») y el spec solo exigía el de desarrollo: no había requisito para el proveedor real ni para cambiarlo sin tocar código | Eddy | **Corregido** en docs y spec: `CorreoSmtpAdaptador` + `CorreoConsolaAdaptador`, binding por variables de entorno ([ADR 0001](adr/0001-correo-por-smtp-configurable.md)); el código entra en M10-01 |
 
 ### D. Canvas Deploya v4.1 — página *Entrega 1 · guía y presentación*
 

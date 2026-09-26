@@ -44,7 +44,7 @@ Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eddy](../../plan-av
 
 Regla general: [ingenieria.md](../../ingenieria.md). Lo tuyo:
 
-- **Patrones:** `CorreoPuerto` (Adapter a SMTP/Mailpit), `PoliticaContrasena` (objeto valor / Strategy), `HashContrasena` como puerto, `SesionGuard` y `@UsuarioActual()` (Decorator de Nest), repositorio de usuarios y tokens.
+- **Patrones:** `CorreoPuerto` (Adapter: `CorreoSmtpAdaptador` para Mailpit y el proveedor real, `CorreoConsolaAdaptador` para pruebas; binding por variables de entorno, [ADR 0001](../../adr/0001-correo-por-smtp-configurable.md)), `PoliticaContrasena` (objeto valor / Strategy), `HashContrasena` como puerto, `SesionGuard` y `@UsuarioActual()` (Decorator de Nest), repositorio de usuarios y tokens.
 - **SOLID:** el registro no arma HTML ni habla SMTP (S, D); el tiempo de expiración viene de un `Reloj` inyectado (D).
 - **Pruebas mínimas A1:** política de contraseña; correo repetido; hash (nunca en claro); token válido, vencido (24 h con reloj falso) y usado; login con credenciales malas y cuenta pendiente; guard con y sin sesión; el registro llama a `CorreoPuerto.enviar` y pide Sandbox a M2.
 

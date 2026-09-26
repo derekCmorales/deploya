@@ -10,4 +10,6 @@ Un solo artefacto por vista. Nadie duplica ERD ni C4 en su módulo.
 | [erd-unificado.mmd](erd-unificado.mmd) | ERD único |
 | [clases-unificado.mmd](clases-unificado.mmd) | Clases únicas (puertos sin prefijo `I`) |
 
+El C4 y el ERD muestran el diseño completo; M8, el modelo de lenguaje, complementos, dominios y miembros están fuera del núcleo v4.1 ([alcance.md](../../alcance.md)).
+
 Versión pulida: `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto`, `PasarelaPago`, `ProveedorFuente`.

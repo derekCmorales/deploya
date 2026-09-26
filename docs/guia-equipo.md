@@ -18,7 +18,7 @@ Nombre del change = rama: `feat/m1-verificacion-correo`.
 
 El spec vive bajo el módulo: `openspec/specs/identidad/`, `notificaciones/`, `suscripciones/`, `administracion/`, `proyectos/`, `observabilidad/`, `motor-construccion/`, `orquestacion/`, `enrutamiento/`, `herramientas/`.
 
-Semillas = alcance §6.1. Extiéndelas; no las sustituyas por un spec único del producto.
+Los specs base ya reflejan el **alcance núcleo v4.1** ([alcance.md](alcance.md)); cada uno tiene su sección *Fuera de alcance · solo si da el tiempo*. Extiéndelos con changes; no los sustituyas por un spec único del producto. Tomar algo de esa sección exige un change propio y haber terminado lo **Debe** del módulo.
 
 UI: si la historia pinta en `apps/web`, el spec delta **debe** reutilizar [kit-visual.md](kit-visual.md) (tokens, AppShell, tema claro/oscuro). No inventar paleta. Las rutas actuales son stubs del kit, no el producto de cada módulo.
 
@@ -61,7 +61,8 @@ CODEOWNERS: [../CODEOWNERS](../CODEOWNERS).
 ## Primer día
 
 1. [README.md](../README.md) — cinco pasos Compose.  
-2. [METODOLOGIA.md](../METODOLOGIA.md).  
-3. Tu kit en [roles/](roles/).  
-4. [arquitectura.md](arquitectura.md) (C4 + ciclo).  
-5. Tu spec en `openspec/specs/…`.
+2. [alcance.md](alcance.md) y [plan-avances.md](plan-avances.md) — qué entra y qué te toca en cada avance.  
+3. [METODOLOGIA.md](../METODOLOGIA.md).  
+4. Tu kit en [roles/](roles/).  
+5. [arquitectura.md](arquitectura.md) (C4 + ciclo).  
+6. Tu spec en `openspec/specs/…`.

@@ -39,3 +39,5 @@ Este PR deja el **package listo** y stubs cortos. **No** hay pantallas de produc
 | `/billing` `/admin` | Stubs de planes y admin (Javier) |
 
 Al implementar una historia, reutiliza este kit. No inventes paleta ni otro shell.
+
+Pantallas de referencia: canvas **Deploya v4.1**; qué ruta implementa cada pantalla en [docs/alcance.md](../../docs/alcance.md). La alineación de tokens al v4.1 (claro por defecto, acento Señal) es la historia WEB-01 de Eduardo.

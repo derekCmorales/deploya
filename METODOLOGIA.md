@@ -1,6 +1,6 @@
 # Cómo trabajamos
 
-Una pasada. Detalle de producto: [docs/propuesta.md](docs/propuesta.md) §10. Git y OpenSpec: [docs/guia-equipo.md](docs/guia-equipo.md).
+Una pasada. Alcance: [docs/alcance.md](docs/alcance.md). Entregas y porcentajes: [docs/plan-avances.md](docs/plan-avances.md). Git y OpenSpec: [docs/guia-equipo.md](docs/guia-equipo.md).
 
 ## Scrum — ciclos de dos semanas
 
@@ -13,6 +13,10 @@ El equipo usa Scrum adaptado a cuatro personas con dedicación parcial. Cada cic
 | Revisión | Cierre de ciclo | Demo del incremento |
 | Retrospectiva | Cierre de ciclo | Acta de una página con acuerdos |
 
+### Avances del curso
+
+Cada entrega evaluada (30 %, 50 %, 80 %, final) cierra un ciclo. El porcentaje se calcula con los puntos de [docs/plan-avances.md](docs/plan-avances.md): solo cuentan historias que cumplen la definición de terminado. Lo de *fuera de alcance* no suma.
+
 ### Definición de terminado
 
 Una historia **no está terminada** hasta que el código está:
@@ -21,7 +25,8 @@ Una historia **no está terminada** hasta que el código está:
 2. Probado  
 3. Documentado  
 4. Revisado en un PR  
-5. Desplegado en el entorno de pruebas  
+5. Desplegado en el entorno de pruebas (compose en `main`; desde el Avance 3, el VPS)  
+6. Demostrable con la pantalla v4.1 que le corresponde  
 
 ## OpenSpec antes de codear
 
@@ -55,14 +60,15 @@ Specs semilla: `openspec/specs/<modulo>/`. Guía: [docs/guia-equipo.md](docs/gui
 
 | Rol | Persona | GitHub | Toca | No toca (salvo PR conjunta) |
 |---|---|---|---|---|
-| Arquitecto | Derek | [@derekCmorales](https://github.com/derekCmorales) | M4 M5 M6 + tools M8, compose, adaptadores | UI de producto, auth, pagos |
+| Arquitecto | Derek | [@derekCmorales](https://github.com/derekCmorales) | M4 M5 M6, compose, adaptadores, VPS | UI de producto, auth, pagos |
 | Cuentas | Eddy | [@EddyPoroj106](https://github.com/EddyPoroj106) | M1 M10, `(auth)`, CI | Motor, Prisma de producto, UI de proyectos |
 | Monetización | Javier | [@Javier-r04](https://github.com/Javier-r04) | M2 M9, `(billing)` `(admin)`, Prisma | Motor Docker, identidad |
-| Proyectos | Eduardo | [@Portillo17e](https://github.com/Portillo17e) | M3 M7 + UI M8, `(projects)`, `apps/web` | Auth real, pagos, cola M4 |
+| Proyectos | Eduardo | [@Portillo17e](https://github.com/Portillo17e) | M3 M7, `(projects)`, `apps/web` | Auth real, pagos, cola M4 |
 
 Kit de una pantalla: [docs/roles/](docs/roles/).
 
-## Qué no es este repo (todavía)
+## Estado del repo
 
 - Hay **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): Geist, tokens claro/oscuro, AppShell mínimo. Las rutas actuales son **stubs**; cada módulo construye su dominio encima, sin paleta nueva.  
-- No hay auth, pagos ni motor de contenedores **reales** en el bootstrap: solo stubs + health.
+- Terminó el bootstrap: stubs + health por módulo. Desde el Avance 1 entra el dominio real, historia por historia ([docs/plan-avances.md](docs/plan-avances.md)).  
+- Lo que no es ni será (salvo que sobre tiempo): la lista *fuera de alcance* de [docs/alcance.md](docs/alcance.md).

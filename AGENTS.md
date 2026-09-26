@@ -9,6 +9,10 @@ Instrucciones para humanos y agentes que tocan este repo.
 - pnpm workspaces
 - OpenSpec (`openspec/`) con harness en `.cursor/commands` (`opsx-*`) y skills — **no reescribir esas skills**
 
+## Alcance
+
+Núcleo v4.1: [docs/alcance.md](docs/alcance.md) (manda sobre la propuesta). Pantallas de referencia: canvas **Deploya v4.1**. Lo que está en *fuera de alcance · solo si da el tiempo* **no** se implementa sin un change de OpenSpec aprobado y sin haber terminado lo **Debe** del módulo. M8 (asistente e integración) queda como stub. Fuente: solo repositorio público de GitHub con `Dockerfile` (sin zip ni detección de stack).
+
 ## Arquitectura mínima
 
 - Ciclo: Recepción → Construcción → Ejecución → Enrutamiento → Operación
@@ -39,10 +43,10 @@ Specs: `openspec/specs/<modulo>/spec.md`.
 | Eddy | `identidad`, `notificaciones`, `apps/web` `(auth)`, `.github/workflows` |
 | Javier | `suscripciones`, `administracion`, `(billing)`, `(admin)`, `prisma` |
 | Eduardo | `proyectos`, `observabilidad`, `apps/web` ([kit visual](docs/kit-visual.md): Geist, claro/oscuro) |
-| Derek | `construccion`, `orquestacion`, `enrutamiento`, `herramientas`, compose, `adapters` |
+| Derek | `construccion`, `orquestacion`, `enrutamiento`, `herramientas` (stub), compose, `adapters` |
 
 ## Bootstrap
 
-Stubs: módulo Nest registrado + `GET /<modulo>/health`. **No** implementar auth, pagos ni motor reales en PRs de andamiaje.
+El andamiaje ya está en `main`: módulo Nest registrado + `GET /<modulo>/health` por módulo. Los PRs de andamiaje (`chore/`) no implementan dominio; desde el Avance 1 cada historia de [docs/plan-avances.md](docs/plan-avances.md) implementa el dominio real con su change de OpenSpec. Los `health` se mantienen.
 
-La web usa el **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): tokens, AppShell mínimo, Geist, toggle claro/oscuro. Rutas actuales = stubs; no hay pantallas de producto. Auth, pagos y motor reales siguen fuera del bootstrap. Specs con UI deben reutilizar ese documento; no paleta nueva.
+La web usa el **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): tokens, AppShell mínimo, Geist, toggle claro/oscuro. Rutas actuales = stubs; cada historia con UI implementa su pantalla del canvas v4.1 encima del kit. Specs con UI deben reutilizar ese documento; no paleta nueva.

@@ -10,16 +10,20 @@ context: |
   Estados de despliegue ≠ estados de suscripción §4.4.
   Nunca commits a main. Ramas feat/m<n>-<slug>. Conventional Commits feat(m1):.
   OpenSpec primero: /opsx-propose → apply → archive. Un spec por módulo en openspec/specs/.
-  Dueños: Eddy M1/M10+CI; Javier M2/M9+Prisma; Eduardo M3/M7+UI; Derek M4/M5/M6+tools M8.
+  Dueños: Eddy M1/M10+CI; Javier M2/M9+Prisma; Eduardo M3/M7+UI; Derek M4/M5/M6 (+ stub M8).
+  Alcance núcleo v4.1: docs/alcance.md (manda sobre docs/propuesta.md). Solo repo público de GitHub con Dockerfile.
+  M8 fuera de alcance (stub). Lo de "fuera de alcance · solo si da el tiempo" requiere change propio.
+  Plan de entregas y dueños por historia: docs/plan-avances.md.
   Kit visual canónico: docs/kit-visual.md (Geist, tokens claro/oscuro, AppShell mínimo).
   Specs con UI en apps/web SHALL reutilizar ese kit; no inventar paleta.
-  Las rutas actuales son stubs; no hay pantallas de producto. No implementar auth/pagos/motor reales.
+  Las pantallas de referencia son las del canvas Deploya v4.1 (mapa en docs/alcance.md).
   Español de la propuesta. No usar IPasarelaPago ni ISourceProvider.
 
 rules:
   proposal:
     - Keep proposals under 500 words
     - Always include a Non-goals section
+    - Check docs/alcance.md; do not pull items from "fuera de alcance" unless the change is explicitly for one
     - Name the change feat/m<n>-<slug> and the owning module
   specs:
     - Write requirements in Spanish; SHALL/WHEN/THEN as in existing seeds

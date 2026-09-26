@@ -8,6 +8,6 @@ alwaysApply: false
 
 Dueño: @derekCmorales. Kit: `docs/roles/derek-motor-despliegue/`.
 
-Cola Redis (stub en bootstrap). Artefacto versionado e inmutable. Reversión = levantar artefacto previo.
+Alcance núcleo v4.1 ([docs/alcance.md](../../docs/alcance.md)): cola BullMQ, `docker build` con el `Dockerfile` del cliente, artefacto versionado, contenedor con límites del plan, subdominio con HTTPS y conmutación sin corte. Redesplegar reconstruye; reversión sin reconstruir y M8 están fuera de alcance (M8 queda como stub).
 
-Puertos: `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto`. Si un tool M8 pinta en el panel: [docs/kit-visual.md](../../docs/kit-visual.md); no paleta nueva. Specs: `motor-construccion`, `orquestacion`, `enrutamiento`, `herramientas`. Commits `feat(m4):` / `feat(m5):` / `feat(m6):` / `feat(m8):`.
+Puertos: `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto`. Specs: `motor-construccion`, `orquestacion`, `enrutamiento`, `herramientas`. Commits `feat(m4):` / `feat(m5):` / `feat(m6):` / `feat(m8):`.

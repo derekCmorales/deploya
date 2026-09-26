@@ -1,6 +1,8 @@
 # Deploya
 
-PaaS de alojamiento web: de un repositorio (o un zip) a un contenedor con subdominio HTTPS. Monolito modular **NestJS + Next.js**, cola Redis, PostgreSQL.
+PaaS de alojamiento web: de un repositorio público de GitHub con `Dockerfile` a un contenedor con los límites de tu plan y subdominio HTTPS. Monolito modular **NestJS + Next.js**, cola Redis, PostgreSQL.
+
+**Alcance núcleo v4.1** (recortado por el curso): [docs/alcance.md](docs/alcance.md). Qué entrega cada quien y cuándo: [docs/plan-avances.md](docs/plan-avances.md). Lo demás está documentado como *fuera de alcance · solo si da el tiempo*.
 
 Ciclo de despliegue: **Recepción → Construcción → Ejecución → Enrutamiento → Operación**.
 
@@ -20,17 +22,19 @@ Sin Docker, en local: `pnpm install && pnpm build && pnpm test` (API en `3001` c
 
 | Eres | Kit | Módulos |
 |---|---|---|
-| Derek — arquitecto | [docs/roles/derek-motor-despliegue/](docs/roles/derek-motor-despliegue/) | M4 M5 M6 + tools M8 |
+| Derek — arquitecto | [docs/roles/derek-motor-despliegue/](docs/roles/derek-motor-despliegue/) | M4 M5 M6 (M8 fuera de alcance) |
 | Eddy — cuentas | [docs/roles/eddy-cuentas-seguridad/](docs/roles/eddy-cuentas-seguridad/) | M1 M10 |
 | Javier — monetización | [docs/roles/javier-monetizacion-admin/](docs/roles/javier-monetizacion-admin/) | M2 M9 |
-| Eduardo — proyectos | [docs/roles/eduardo-proyectos-ux/](docs/roles/eduardo-proyectos-ux/) | M3 M7 + UI M8 |
+| Eduardo — proyectos | [docs/roles/eduardo-proyectos-ux/](docs/roles/eduardo-proyectos-ux/) | M3 M7 + web |
 
 ## Documentación común
 
 | Qué | Dónde |
 |---|---|
+| **Alcance núcleo v4.1** (qué entra y qué no) | [docs/alcance.md](docs/alcance.md) |
+| **Plan de avances** (30 / 50 / 80 / 100 %) | [docs/plan-avances.md](docs/plan-avances.md) |
 | Cómo trabajamos (Scrum, OpenSpec, git) | [METODOLOGIA.md](METODOLOGIA.md) |
-| Propuesta de producto | [docs/propuesta.md](docs/propuesta.md) |
+| Propuesta de producto (histórica, alcance completo) | [docs/propuesta.md](docs/propuesta.md) |
 | Arquitectura C4 + ciclo | [docs/arquitectura.md](docs/arquitectura.md) |
 | ERD / clases / C4 únicos | [docs/diagramas/compartido/](docs/diagramas/compartido/) |
 | Git, ramas, PRs | [docs/guia-equipo.md](docs/guia-equipo.md) |

@@ -8,6 +8,6 @@ alwaysApply: false
 
 Dueño: @Javier-r04. Kit: `docs/roles/javier-monetizacion-admin/`.
 
-Pagos **simulados** (`PasarelaPago`, sin `I`). Estados §4.4: Activa, Por vencer, Vencida, Suspendida, Cancelada — distintos a los de despliegue.
+Alcance núcleo v4.1 ([docs/alcance.md](../../docs/alcance.md)): catálogo fijo por seed, contratación simulada, renovación manual, cambio de plan sin prorrateo, historial, ciclo §4.4, admin de usuarios y suspensión. Pantallas 06–09 y 25. Pagos **simulados** (`PasarelaPago`, sin `I`). Estados §4.4: Activa, Por vencer, Vencida, Suspendida, Cancelada — distintos a los de despliegue.
 
-Prisma (`usuario`, `plan`, `proyecto`, `despliegue` mínimo) es tuyo; Derek es segundo reviewer. UI de `(billing)` y `(admin)`: reutilizar [docs/kit-visual.md](../../docs/kit-visual.md); no paleta nueva. Specs: `openspec/specs/suscripciones`, `administracion`. Commits `feat(m2):` / `feat(m9):`.
+Prisma (schema de todo el núcleo) es tuyo; Derek es segundo reviewer. UI de `(billing)` y `(admin)`: reutilizar [docs/kit-visual.md](../../docs/kit-visual.md); no paleta nueva. Specs: `openspec/specs/suscripciones`, `administracion`. Commits `feat(m2):` / `feat(m9):`.

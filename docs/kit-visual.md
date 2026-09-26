@@ -4,6 +4,20 @@ Fuente de verdad para **toda** superficie en `apps/web`. Dueño del kit: Eduardo
 
 Este change deja el **package y los tokens listos**. Las rutas `/`, `/projects`, `/auth`, `/billing` y `/admin` son **stubs cortos** que apuntan aquí. **No** hay pantallas de producto (lista/detalle, xyflow montado, operación, mocks). Al implementar una historia, reutiliza este kit; no inventes paleta, tipografía ni otro shell.
 
+## Pantallas de referencia: canvas Deploya v4.1
+
+Las pantallas del producto están diseñadas en el canvas **Deploya v4.1** (Claude Design); el mapa pantalla → módulo está en [alcance.md](alcance.md#mapa-de-pantallas-v41--módulo--dueño). Cada historia con UI implementa **su** pantalla del canvas con los primitivos de este kit.
+
+**Diferencia pendiente (WEB-01, Eduardo, Avance 1).** El canvas v4.1 es posterior a este kit y cambia tres cosas:
+
+| | Kit actual | Canvas v4.1 |
+|---|---|---|
+| Tema por defecto | Oscuro | **Claro** (oscuro disponible siempre) |
+| Neutros | Grises puros | Neutros cálidos (papel / grafito) |
+| Color | Monocromático | Un solo acento, **Señal** (azul), solo para lo que está en curso; estados `--ok` (Saludable, Activa), `--warn` (Por vencer), `--bad` (Fallido, Suspendida); `--destructive` solo para eliminar |
+
+Además define el **riel de etapas** (cinco segmentos, siempre en el mismo orden) como único motivo recurrente, Geist Mono para todo lo que se copia (hashes, dominios, variables, tiempos) y la marca como la palabra `deploya` en Geist 700 con la última «a» en Señal. WEB-01 lleva estos tokens a `globals.css` y actualiza esta guía. Hasta entonces, las reglas de abajo siguen vigentes.
+
 ## Qué reutilizar (obligatorio)
 
 | Pieza | Dónde | Uso |
@@ -52,10 +66,10 @@ Un spec por módulo (§6.1). El kit no es un spec de producto aparte. No invente
 
 | Dueño | Rutas web | Qué construir encima del kit |
 |---|---|---|
-| Eddy | `(auth)` | Registro, sesión, recuperación — **sin** auth real en bootstrap |
-| Javier | `(billing)`, `(admin)` | Planes y admin — **sin** cobro real; estados §4.4 ≠ despliegue |
-| Eduardo | `(projects)` y resto de `apps/web` | Alta, lista, flujo, operación — en **sus** historias, no en este PR |
-| Derek | (sin UI de producto) | Si un tool M8 pinta en el panel, misma guía |
+| Eddy | `(auth)` | Pantallas 01–05 del canvas v4.1 |
+| Javier | `(billing)`, `(admin)` | Pantallas 06–09 y 25 del canvas v4.1 — pago simulado; estados §4.4 ≠ despliegue |
+| Eduardo | `(projects)` y resto de `apps/web` | Pantallas 10–19 y 28 del canvas v4.1, en **sus** historias |
+| Derek | (sin UI de producto) | El motor alimenta las pantallas 12–14 de Eduardo |
 
 Checklist de PR con UI:
 

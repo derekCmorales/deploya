@@ -1,41 +1,33 @@
-# Web Next.js — kit visual canónico
+# Web Next.js — design system Deploya v4.1
 
-Guía para el equipo: **[docs/kit-visual.md](../../docs/kit-visual.md)**. Este README es el mapa de archivos.
+Fuente madre: **[docs/diseno/](../../docs/diseno/README.md)** (principios, guía de construcción y una ficha por pantalla). Este README es el mapa de archivos. Dueño del sistema: Eduardo (`@Portillo17e`); `(auth)` es de Eddy, `(billing)` y `(admin)` de Javier.
 
-Tipografía **Geist**. Tokens claro y oscuro (toggle sol/luna en el header; oscuro por defecto). Cromática monocromática; el contraste lo marca el tema activo, no un acento de color. Copy en español. Dueño del kit: Eduardo (`@Portillo17e`), salvo `(auth)` (Eddy), `(billing)` y `(admin)` (Javier).
+Claro por defecto (toggle sol/luna en el header, `storageKey=deploya-tema`). Neutros cálidos y un solo acento, **Señal**, para lo que está en curso. Geist y Geist Mono. Lucide.
 
-Este PR deja el **package listo** y stubs cortos. **No** hay pantallas de producto (lista/detalle, xyflow montado, operación, mocks).
+## Archivos
 
-## Tokens
-
-`src/app/globals.css` (CSS variables shadcn + Tailwind v4):
-
-| Token | Uso |
+| Qué | Dónde |
 |---|---|
-| `--background` / `--foreground` | Lienzo y texto |
-| `--card` / `--border` | Paneles |
-| `--primary` | Énfasis monocromático (invierte con el tema) |
-| `--font-geist-sans` / `--font-geist-mono` | UI y bitácoras |
+| Tokens (CSS variables + Tailwind v4) y movimiento | `src/app/globals.css` |
+| Primitivos | `src/components/ui/` — Button, Badge, Card (+ Sunken), Input, Field, Checkbox, Switch, Segmented, Tabs (+ TabsNav), Banner, Meter, Table, CopyField, Dialog, Skeleton, Kbd, Avatar, Tooltip, Separator, ScrollArea |
+| Componentes Deploya | `src/components/deploya/` — Wordmark, RielEtapas, EstadoDespliegue, EstadoSuscripcion, Bitacora, Pasos, RequisitosContrasena, LineaTiempo, MapaActividad, PuntoVivo, `estados.ts` |
+| Shell | `src/components/shell/` — AppShell (56px), NavPrincipal, NavPanel, ThemeProvider, ThemeToggle |
+| Efecto puntual | `src/components/magic/border-beam.tsx` (uno por pantalla) |
+| `cn()` | `src/lib/utils.ts` |
+| Catálogo vivo | ruta `/sistema` |
 
-`:root` = claro. `.dark` = oscuro. Persistencia: `localStorage` clave `deploya-tema`.
+## Rutas
 
-## Componentes
-
-- Primitivos: `src/components/ui/` (Button, Badge, Card, Input, Tabs, ScrollArea, Separator, Tooltip)
-- Tema: `src/components/shell/theme-provider.tsx`, `theme-toggle.tsx`
-- Shell mínimo: `src/components/shell/app-shell.tsx` (header: Deploya + toggle)
-- Magic UI (disponible, no montado como producto): `src/components/magic/border-beam.tsx`
-- Grafo: `@xyflow/react` en el package; **no** hay vista de flujo en este PR
-- Iconos: Lucide
-- `cn()`: `src/lib/utils.ts`
-
-## Rutas (stubs)
-
-| Ruta | Qué muestra |
+| Ruta | Estado |
 |---|---|
-| `/` | Stub de Deploya; apunta a `docs/kit-visual.md` |
-| `/projects` | Stub de proyectos (Eduardo) |
-| `/auth` | Stub de cuenta (Eddy) |
-| `/billing` `/admin` | Stubs de planes y admin (Javier) |
+| `/` | Portada mínima con enlace al sistema |
+| `/sistema` | Catálogo de componentes en claro y oscuro |
+| `/projects`, `/auth`, `/billing`, `/admin` | Stubs; cada dueño los reemplaza por sus rutas reales (tabla en `docs/diseno/guia-construccion.md`) |
 
-Al implementar una historia, reutiliza este kit. No inventes paleta ni otro shell.
+## Comandos
+
+```bash
+pnpm --filter @deploya/web dev    # http://localhost:3000/sistema
+pnpm --filter @deploya/web test
+pnpm --filter @deploya/web build
+```

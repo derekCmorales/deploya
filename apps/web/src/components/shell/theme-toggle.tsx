@@ -14,7 +14,7 @@ export function ThemeToggle() {
     setMontado(true);
   }, []);
 
-  const oscuro = !montado || resolvedTheme !== "light";
+  const oscuro = montado && resolvedTheme === "dark";
 
   return (
     <Button

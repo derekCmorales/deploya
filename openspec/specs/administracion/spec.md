@@ -1,31 +1,33 @@
 # administracion (M9)
 
-Alcance §6.1: panel administrativo de usuarios, planes y estado de la infraestructura. Dueño: Javier.
+Alcance núcleo v4.1 ([docs/alcance.md](../../../docs/alcance.md)): lista de usuarios y suspensión de cuentas. Pantallas 25 y 25b. Dueño: Javier.
 
 ## Purpose
 
-Permitir al administrador gestionar cuentas, el catálogo de planes y ver el estado de la infraestructura sin mezclar tres controladores en uno.
+Permitir al administrador encontrar una cuenta, ver su suscripción, proyectos y pagos, y suspenderla con un motivo registrado.
 
 ## Requirements
 
 ### Requirement: Usuarios
 
-El administrador SHALL listar usuarios y suspender cuentas.
+El administrador SHALL listar usuarios con búsqueda por correo y filtro por estado de suscripción, y ver el detalle de uno: rol, alta, suscripción, proyectos con su estado de despliegue y pagos.
+
+#### Scenario: Filtrar por suscripción
+
+- **WHEN** el administrador filtra por Vencida
+- **THEN** solo ve cuentas cuya suscripción está Vencida
+
+### Requirement: Suspender cuenta
+
+El administrador SHALL suspender una cuenta indicando motivo y detalle. La suspensión SHALL quedar registrada como acción administrativa.
 
 #### Scenario: Suspender cuenta
 
-- **WHEN** el administrador suspende un usuario
-- **THEN** se registra una acción administrativa y el usuario no inicia sesión
+- **WHEN** el administrador confirma la suspensión
+- **THEN** el usuario no puede iniciar sesión (ve el motivo), M5 detiene sus contenedores y el código, las variables y el historial se conservan
 
-### Requirement: Planes
+## Fuera de alcance · solo si da el tiempo
 
-El administrador SHALL crear, actualizar y descontinuar planes del catálogo M2.
-
-#### Scenario: Descontinuar plan
-
-- **WHEN** un plan se descontinúa
-- **THEN** deja de ofrecerse a nuevas contrataciones; las suscripciones vigentes siguen hasta el fin de vigencia
-
-### Requirement: Estado de infraestructura
-
-El administrador SHALL consultar un resumen de entornos y salud del nodo (datos que proveen M5 y M7). El módulo no orquesta contenedores.
+- Reactivar una cuenta suspendida desde el panel.
+- Crear, editar y descontinuar planes (el catálogo es fijo por seed).
+- Estado de la infraestructura (nodo, cola, consumo agregado).

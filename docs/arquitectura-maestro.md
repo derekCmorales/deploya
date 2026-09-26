@@ -2,6 +2,8 @@
 
 # Documento maestro — Arquitectura de Deploya
 
+> **Alcance reducido.** Este anexo describe el diseño completo de la propuesta. Lo que se implementa es el núcleo v4.1: [alcance.md](alcance.md). M8, reversión sin reconstruir, dominios personalizados, métricas en vivo, zip y gestión de planes quedan como *fuera de alcance · solo si da el tiempo*.
+
 > Insumo para el documento formal de diseño (otro agente). Diagramas Mermaid **embebidos**, no solo enlaces.
 > Fuente de producto: `00_GUIA_GENERAL_Propuesta_Deploya.md`. Originales de compañeros intactos; este maestro usa versiones pulidas (sin prefijo `I`, español de la propuesta).
 > ERD y clases: **un solo artefacto** cada uno (`DEPLOYA_erd_unificado.mmd`, `DEPLOYA_diagrama_clases_unificado.mmd`).

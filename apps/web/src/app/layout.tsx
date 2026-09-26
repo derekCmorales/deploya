@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/shell/app-shell";
+import { NavPanel } from "@/components/shell/nav-panel";
 import { ThemeProvider } from "@/components/shell/theme-provider";
 
 import "./globals.css";
@@ -19,7 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Deploya",
-  description: "PaaS de alojamiento — kit visual canónico (tokens, Geist, tema)",
+  description: "PaaS de alojamiento: de un repositorio a un servicio en línea con HTTPS.",
 };
 
 export default function RootLayout({
@@ -28,12 +29,12 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html lang="es" className="dark" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-full font-sans`}
       >
         <ThemeProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell nav={<NavPanel />}>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>

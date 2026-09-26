@@ -8,6 +8,6 @@ alwaysApply: false
 
 Dueño: @Portillo17e. Kit: `docs/roles/eduardo-proyectos-ux/`.
 
-Fuentes: `ProveedorFuente` (repositorio o archivo comprimido). M3 termina en proyecto persistido; encolar es M4.
+Alcance núcleo v4.1 ([docs/alcance.md](../../docs/alcance.md)): fuente solo `FuenteRepositorio` (repo público de GitHub con `Dockerfile`); zip, métricas en vivo y UI de M8 están fuera de alcance. M3 persiste el proyecto y pide el despliegue a M4. Pantallas 10–19 y 28 del canvas v4.1.
 
-**Kit visual canónico** ([docs/kit-visual.md](../../docs/kit-visual.md)): Geist, tokens claro/oscuro, AppShell mínimo. Specs con UI reutilizan ese documento; no paleta nueva. Este kit no incluye pantallas de producto. Prioriza a11y. Specs de dominio: `openspec/specs/proyectos`, `observabilidad`. Commits `feat(m3):` / `feat(m7):`.
+**Design system v4.1** ([docs/diseno/README.md](../../docs/diseno/README.md)), eres su dueño: tokens en `globals.css`, componentes en `apps/web/src/components`, catálogo `/sistema`. Specs con UI reutilizan ese documento; no paleta nueva. Este kit no incluye pantallas de producto. Prioriza a11y. Specs de dominio: `openspec/specs/proyectos`, `observabilidad`. Commits `feat(m3):` / `feat(m7):`.

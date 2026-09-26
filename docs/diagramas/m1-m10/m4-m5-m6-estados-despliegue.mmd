@@ -1,51 +1,55 @@
 ---
-title: Estados del despliegue — dominio §3.2 (no son los de suscripción)
+title: Estados del despliegue — núcleo v4.1 (no son los de suscripción)
 ---
 stateDiagram-v2
     [*] --> Encolado : API registra y encola la construcción
 
     Encolado --> Construyendo : trabajador toma el trabajo
+    Encolado --> Cancelado : el cliente cancela
     Construyendo --> Aprovisionando : imagen versionada registrada
-    Construyendo --> Fallido : falla la construcción
+    Construyendo --> Fallido : falla docker build o excede el tiempo
+    Construyendo --> Cancelado : el cliente cancela
 
-    Aprovisionando --> Publicando : contenedor con límites en ejecución
-    Aprovisionando --> Fallido : no se levantó el contenedor
+    Aprovisionando --> Publicando : contenedor con límites responde a la verificación de salud
+    Aprovisionando --> Fallido : el contenedor no arranca o no responde
 
-    Publicando --> Saludable : subdominio TLS y healthcheck correctos
-    Publicando --> Fallido : falla enrutamiento o healthcheck
+    Publicando --> Saludable : subdominio apunta al contenedor nuevo y se detiene el anterior
+    Publicando --> Fallido : falla el enrutamiento
 
-    Saludable --> Encolado : nuevo despliegue
-    Saludable --> Revirtiendo : reversión a artefacto previo
-    Saludable --> Detenido : suscripción Suspendida o parada
+    Saludable --> Detenido : el cliente detiene, suscripción Suspendida o cuenta suspendida
 
-    Revirtiendo --> Publicando : se levanta el artefacto previo
-    Revirtiendo --> Fallido : no se pudo revertir
-
-    Detenido --> Aprovisionando : reanudar entorno
-    Fallido --> Encolado : reintentar construcción
-    Fallido --> Revirtiendo : revertir a versión anterior
+    Detenido --> Aprovisionando : el cliente reinicia
+    Fallido --> Encolado : reintentar (nuevo despliegue del mismo commit)
 
     note right of Encolado
-        Recepción §3.2
+        Recepción
         El despliegue queda registrado.
+        Redesplegar un commit anterior
+        crea un despliegue nuevo.
     end note
     note right of Construyendo
-        Construcción §3.2
-        Detector de stack e imagen.
+        Construcción
+        docker build con el Dockerfile del cliente.
     end note
     note right of Aprovisionando
-        Ejecución §3.2
-        Contenedor aislado con cuota.
+        Ejecución
+        Contenedor aislado con la cuota del plan.
     end note
     note right of Publicando
-        Enrutamiento §3.2
-        Subdominio, TLS, conmutación.
+        Enrutamiento
+        Subdominio, TLS, conmutación sin corte.
     end note
     note right of Saludable
-        Operación §3.2
-        Bitácoras y métricas al panel.
+        Operación
+        Estado y bitácora al panel.
     end note
     note right of Detenido
-        Distinto de Cancelada.
+        Distinto de Cancelada (suscripción).
         Datos conservados.
+    end note
+    note left of Fallido
+        La versión anterior sigue
+        sirviendo tráfico.
+        Revirtiendo sin reconstruir:
+        fuera de alcance.
     end note

@@ -1,48 +1,75 @@
 # Kit — Eduardo (proyectos y experiencia)
 
-[@Portillo17e](https://github.com/Portillo17e) · extra: accesibilidad, guion de demo. **UI M8** (panel del asistente).
+[@Portillo17e](https://github.com/Portillo17e) · extra: kit visual, accesibilidad, guion de demo.
+
+Alcance: [alcance.md](../../alcance.md) · Entregas: [plan-avances.md](../../plan-avances.md).
 
 ## Tus módulos
 
-| Id | Qué | Código |
+| Id | Qué entra (núcleo v4.1) | Código |
 |---|---|---|
-| M3 | Proyectos y fuentes: alta, repo o zip, receta, variables cifradas | `apps/api/src/modules/proyectos` |
-| M7 | Observabilidad: bitácoras en vivo, métricas, avisos de cuota | `apps/api/src/modules/observabilidad` |
-| M8 UI | Superficie del asistente en el panel | `apps/web` (rutas de producto) |
+| M3 | Lista y alta de proyectos desde repo público de GitHub con `Dockerfile`, variables cifradas, configuración y eliminación | `apps/api/src/modules/proyectos` |
+| M7 | Vista de despliegue (riel + bitácora por polling), resumen, historial, consumo y actividad | `apps/api/src/modules/observabilidad` |
+| Web | Kit visual y todas las rutas de producto | `apps/web` **salvo** `(auth)` (Eddy), `(billing)` y `(admin)` (Javier) |
 
-Web: `apps/web/src/app/(projects)/` y el resto de `apps/web` **salvo** `(auth)` (Eddy), `(billing)` y `(admin)` (Javier).
+M8 (UI del asistente) quedó **fuera de alcance**.
+
+## Tus pantallas (canvas Deploya v4.1)
+
+| # | Pantalla | Historia |
+|---|---|---|
+| Main | Identidad visual v4.1 | WEB-01 (hecho) |
+| 10, 10b | Proyectos y primer proyecto | M3-01 |
+| 11a, 11d, 11e | Nuevo proyecto: Repositorio, Revisar, errores | M3-02 |
+| 11c, 17 | Variables (alta y proyecto) | M3-03 |
+| 12, 12b, 12c | Despliegue en curso, Saludable, Fallido | M7-01 (motor: Derek) |
+| 13, 14 | Resumen e historial | M7-02 |
+| 19, 19b | Configuración y eliminar | M3-04 |
+| 10c, 28 | Suscripción vencida y estados del sistema | WEB-02 |
+| 08 (consumo), 13 (actividad) | Consumo del período y actividad | M7-03 |
+
+## Design system v4.1 — ya migrado
+
+El sistema del canvas v4.1 ya está en el repo (WEB-01, hecho): tokens en `globals.css` (claro por defecto, Señal, `ok`/`warn`/`bad`), componentes en `apps/web/src/components` y catálogo en `/sistema`. La fuente madre para ti y para cualquier agente es [docs/diseno/](../../diseno/README.md): principios, [guía de construcción](../../diseno/guia-construccion.md) y [fichas por pantalla](../../diseno/pantallas/).
+
+Eres su dueño: revisa que cada PR con UI use los componentes y no estilos sueltos. Si falta una variante, se agrega al componente y a `/sistema`.
+
+Accesibilidad: semántica, foco visible, contraste en ambos temas, botones reales.
+
+## Qué entregas
+
+| Avance | Historias | Pts |
+|---|---|---|
+| **A1 (30 %)** | M3-01 lista · M3-02 alta, revisar y desplegar (WEB-01, el design system, ya está hecho) | 8 |
+| A2 (50 %) | M7-01 vista de despliegue · M3-03 variables cifradas | 8 |
+| A3 (80 %) | M7-02 resumen e historial · M3-04 configuración y eliminar · WEB-02 estados del sistema · M7-03 consumo y actividad | 10 |
+| Final | DOC-02 guion, video y accesibilidad | 3 |
+
+Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eduardo](../../plan-avances.md#eduardo--proyectos-8-pts).
+
+**Dependencias:** schema de Javier (lunes), contrato de despliegues ([docs/contratos/despliegues.md](../../contratos/despliegues.md), ya publicado), guard de sesión de Eddy (martes 12:00; antes usa el usuario del seed).
+
+## Fuera de alcance · solo si da el tiempo
+
+Carga por zip · repos privados · recetas sin `Dockerfile` · métricas de CPU/memoria en vivo · bitácoras de runtime · WebSocket/SSE · UI del asistente M8.
 
 ## Qué no tocas (salvo PR conjunta)
 
-Auth real, pagos, cola M4, Docker, Prisma de planes.
+Auth real, pagos, cola M4, Docker, schema de planes.
 
-## Sistema de diseño — kit canónico
+## Diagramas
 
-Canon en `apps/web`: Geist, tokens claro/oscuro, cromática monocromática, shadcn + Lucide; xyflow y framer-motion en el package. Guía para todo el equipo: [kit-visual.md](../../kit-visual.md). README de archivos: [apps/web/README.md](../../../apps/web/README.md). Las rutas actuales son stubs; no son M3/M7 terminados ni pantallas de producto. Accesibilidad: semántica, foco, contraste en ambos temas.
-
-## Diagramas tuyos primero
-
-1. [m3-actividad-crear-proyecto.mmd](../../diagramas/m1-m10/m3-actividad-crear-proyecto.mmd)
-2. [m7-actividad-consultar-metricas.mmd](../../diagramas/m1-m10/m7-actividad-consultar-metricas.mmd)
-3. [m3-m7-componentes.mmd](../../diagramas/m1-m10/m3-m7-componentes.mmd)
-4. [m3-m7-clases.mmd](../../diagramas/m1-m10/m3-m7-clases.mmd) — `ProveedorFuente` (no `ISourceProvider`)
-
-El resto: [C4 / ERD](../../diagramas/compartido/). M3 termina en proyecto persistido; encolar construcción es M4.
+1. [m3-actividad-crear-proyecto.mmd](../../diagramas/m1-m10/m3-actividad-crear-proyecto.mmd) — la rama de zip queda fuera
+2. [m3-m7-componentes.mmd](../../diagramas/m1-m10/m3-m7-componentes.mmd)
+3. [m3-m7-clases.mmd](../../diagramas/m1-m10/m3-m7-clases.mmd) — `ProveedorFuente`; en el núcleo solo `FuenteRepositorio`
+4. [m7-actividad-consultar-metricas.mmd](../../diagramas/m1-m10/m7-actividad-consultar-metricas.mmd) — fuera de alcance (métricas en vivo)
 
 ## Specs OpenSpec
 
 - [openspec/specs/proyectos/spec.md](../../../openspec/specs/proyectos/spec.md)
 - [openspec/specs/observabilidad/spec.md](../../../openspec/specs/observabilidad/spec.md)
 
-## Primeras historias (no las implementes en el bootstrap)
-
-1. Alta de proyecto con fuente repositorio.  
-2. Alta con archivo comprimido.  
-3. Variables de entorno cifradas.  
-4. Panel de métricas (placeholder accesible).  
-5. Guion de demo del recorrido §3.1.
-
-Rama: `feat/m3-<slug>`. Commit: `feat(m3):`.
+Rama `feat/m3-<slug>` o `feat/m7-<slug>`. Commit `feat(m3):`.
 
 ## Reviewer
 

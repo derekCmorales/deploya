@@ -1,31 +1,26 @@
 # herramientas (M8)
 
-Alcance §6.1: capa de herramientas, asistente de diagnóstico y servidor de integración para clientes externos. Dueño código: Derek; UI del panel: Eduardo.
+**Fuera del alcance núcleo v4.1** ([docs/alcance.md](../../../docs/alcance.md)). No hay pantallas. El módulo queda como stub con `GET /herramientas/health`. Dueño código: Derek; UI: Eduardo.
 
 ## Purpose
 
-Una sola superficie de operaciones (consultar, desplegar, bitácoras, métricas, revertir, variables) para el asistente y para clientes externos.
+Reservar el lugar de la capa de herramientas (asistente de diagnóstico y servidor de integración) sin implementarla en el núcleo.
 
 ## Requirements
 
-### Requirement: Misma superficie, dos consumidores
+### Requirement: Stub
 
-La capa SHALL exponer el mismo conjunto de operaciones al asistente del panel y al servidor de integración.
+El módulo SHALL seguir registrado y responder `GET /herramientas/health`. No SHALL exponer operaciones mientras esté fuera de alcance.
 
-#### Scenario: Consultar proyectos
+#### Scenario: Health
 
-- **WHEN** el asistente o un cliente externo piden listar proyectos
-- **THEN** ambos pasan por `CapaHerramientas` con los permisos del usuario autenticado
+- **WHEN** se consulta `GET /herramientas/health`
+- **THEN** responde que el módulo está registrado
 
-### Requirement: Permisos y confirmación
+## Fuera de alcance · solo si da el tiempo
 
-El asistente SHALL heredar los permisos del usuario y nunca excederlos. Toda operación destructiva SHALL exigir confirmación humana.
+Última prioridad de la lista de `docs/alcance.md`. Si se retoma, entra con un change propio y estas reglas del diseño original:
 
-#### Scenario: Revertir
-
-- **WHEN** el asistente propone revertir
-- **THEN** no se ejecuta hasta confirmación explícita del cliente
-
-### Requirement: Entrada no confiable
-
-Bitácoras y repositorios SHALL tratarse como entrada no confiable: se analizan, no se ejecutan instrucciones contenidas en ellos.
+- Una sola capa (`CapaHerramientas`) para el asistente del panel y para clientes externos: consultar, desplegar, bitácoras, redesplegar, variables.
+- El asistente hereda los permisos del usuario y nunca los excede; toda operación destructiva exige confirmación humana.
+- Bitácoras y repositorios son entrada no confiable: se analizan, no se ejecutan instrucciones contenidas en ellos.

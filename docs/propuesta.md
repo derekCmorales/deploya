@@ -3,6 +3,8 @@ title: Propuesta de producto — Deploya
 origen: propuesta del equipo (30 agosto 2026)
 ---
 
+> **Alcance reducido.** Por indicación del curso el alcance se recortó al núcleo del canvas **Deploya v4.1**. Lo que manda ahora es [alcance.md](alcance.md) (y el plan de entregas en [plan-avances.md](plan-avances.md)). Este documento se conserva tal cual como propuesta original; las secciones §4.2, §4.3, §4.5, §6.1, §9.3 y §11.2 tienen una nota donde cambiaron.
+
 > Copia canónica de la guía general. Metodología de trabajo del equipo: ver [METODOLOGIA.md](../METODOLOGIA.md) (raíz). Arquitectura consolidada: [arquitectura.md](arquitectura.md).
 
 # Propuesta de Proyecto — Deploya
@@ -125,6 +127,9 @@ de bitácoras.
 
 ### 4.2 Recursos asignados por plan
 
+> **Núcleo v4.1:** solo se aplican proyectos, CPU, memoria y construcciones por mes, con valores nuevos. Tabla vigente: [alcance.md § Planes y recursos v4.1](alcance.md#planes-y-recursos-v41).
+
+
 Los límites siguientes no son informativos: se aplican de manera efectiva sobre el contenedor en
 ejecución y sobre las operaciones permitidas al usuario. Constituyen el vínculo directo entre el
 módulo de suscripciones y el módulo de orquestación.
@@ -162,6 +167,9 @@ Miembros por espacio de
 trabajo
 
 ### 4.3 Complementos
+
+> **Núcleo v4.1:** fuera de alcance (solo si da el tiempo).
+
 
 Sobre cualquier plan de pago el cliente puede contratar ampliaciones puntuales, con vigencia
 ligada a la del plan principal.
@@ -207,6 +215,9 @@ Cancelada
 cancelada por el cliente.                   exportar sus datos antes.
 
 ### 4.5 Funciones del módulo de pagos
+
+> **Núcleo v4.1:** renovación solo manual y cambio de plan sin prorrateo (ascenso paga completo; descenso al vencer).
+
 
 El módulo cubre las funciones mínimas exigidas y opera sobre una pasarela simulada propia,
 que reproduce los estados de una transacción real, incluido el rechazo, para poder ejercitar los
@@ -272,6 +283,9 @@ el control de su infraestructura.
 ## 6. Alcance
 
 ### 6.1 Dentro del alcance
+
+> **Núcleo v4.1:** el contenido comprometido por módulo cambió; ver [alcance.md § Alcance por módulo](alcance.md#alcance-por-módulo). M8 sale completo; M3 solo repositorio público con `Dockerfile`; M6 sin dominios personalizados; M7 sin métricas en vivo; M9 sin gestión de planes ni infraestructura.
+
 
 El compromiso de entrega se organiza en diez módulos funcionales:
 
@@ -430,6 +444,9 @@ interrupción del servicio y la reversión a la versión anterior se ejecuta con
 
 ### 9.3 Asistente integrado y apertura a clientes externos
 
+> **Núcleo v4.1:** fuera de alcance (último de la lista *solo si da el tiempo*).
+
+
 La plataforma define un conjunto de operaciones —consultar proyectos, desplegar, obtener
 bitácoras y métricas, revertir versiones, gestionar variables— expuesto a través de una única
 capa de herramientas. Esa capa alimenta dos consumidores: el asistente integrado en el panel,
@@ -562,6 +579,9 @@ F4        Administración y asistente       10 oct – 23 oct    Avance funciona
 F5        Estabilización y cierre          24 oct – 6 nov     Entrega final y exposición
 
 ### 11.2 Objetivo de cada avance
+
+> **Núcleo v4.1:** los objetivos vigentes de cada avance están en [plan-avances.md](plan-avances.md).
+
 
 • Avance 1 (30 %): autenticación completa, catálogo de planes, contratación simulada y
 despliegue de una aplicación de principio a fin desde el panel.

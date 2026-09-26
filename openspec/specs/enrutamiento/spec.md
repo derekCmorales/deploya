@@ -1,31 +1,40 @@
 # enrutamiento (M6)
 
-Alcance §6.1: subdominios, certificados automáticos, conmutación de tráfico y dominios personalizados. Dueño: Derek.
+Alcance núcleo v4.1 ([docs/alcance.md](../../../docs/alcance.md)): subdominio automático con HTTPS y conmutación de tráfico sin corte. Pantallas 12b y 13. Dueño: Derek.
 
 ## Purpose
 
-Exponer el contenedor en un FQDN con TLS, vía `EnrutamientoPuerto`. La API no habla con el enrutador de borde.
+Exponer el contenedor en `https://<proyecto>.deploya.app` vía `EnrutamientoPuerto` (Traefik). La API no habla con el enrutador de borde.
 
 ## Requirements
 
-### Requirement: Subdominio y TLS
+### Requirement: Subdominio automático
 
-Cada entorno Saludable SHALL tener subdominio y certificado TLS.
+Cada proyecto SHALL publicarse en `<proyecto>.deploya.app` (en desarrollo, `<proyecto>.localhost`). Cambiar el nombre del proyecto no cambia el subdominio.
 
 #### Scenario: Publicación
 
-- **WHEN** el contenedor responde al healthcheck
-- **THEN** se asigna FQDN, se emite certificado y se conmuta el tráfico
+- **WHEN** el contenedor pasa la verificación de salud (M5)
+- **THEN** el subdominio apunta al contenedor nuevo
 
-### Requirement: Dominios personalizados
+### Requirement: HTTPS
 
-Según el plan, el cliente MAY asociar un dominio propio (DNS del cliente). Sandbox no incluye dominio personalizado.
+En el VPS, el tráfico SHALL servirse con HTTPS usando un certificado comodín de `*.deploya.app`. El panel SHALL mostrar hasta cuándo es válido.
 
-#### Scenario: Dominio del plan Starter
+#### Scenario: Certificado comodín
 
-- **WHEN** el cliente declara un dominio y el DNS es correcto
-- **THEN** el certificado cubre ese FQDN
+- **WHEN** un proyecto se publica en el VPS
+- **THEN** responde por HTTPS con el certificado de `*.deploya.app`
 
 ### Requirement: Conmutación sin interrupción
 
-Un nuevo despliegue saludable SHALL conmutar el tráfico al nuevo contenedor antes de retirar el anterior.
+Un nuevo despliegue saludable SHALL recibir el tráfico antes de que se retire el contenedor anterior.
+
+#### Scenario: Nuevo despliegue
+
+- **WHEN** la versión #14 pasa la verificación de salud mientras #13 sirve tráfico
+- **THEN** el subdominio apunta a #14 y solo después se detiene #13
+
+## Fuera de alcance · solo si da el tiempo
+
+- Dominios personalizados del cliente y su certificado.

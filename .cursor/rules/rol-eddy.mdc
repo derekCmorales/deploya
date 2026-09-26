@@ -8,6 +8,6 @@ alwaysApply: false
 
 Dueño: @EddyPoroj106. Kit: `docs/roles/eddy-cuentas-seguridad/`.
 
-Registro, verificación de correo, recuperación, sesiones, roles, auditoría. Notificaciones transaccionales vía `CorreoPuerto` (sin prefijo `I`).
+Alcance núcleo v4.1 ([docs/alcance.md](../../docs/alcance.md)): registro, verificación de correo, login, recuperación, Mi cuenta, roles Cliente / Administrador. Auditoría completa, roles Operador/Soporte y correos de despliegue o plan están fuera de alcance. Pantallas 01–05 y 24. Notificaciones transaccionales vía `CorreoPuerto` (sin prefijo `I`).
 
-No implementes auth real en stubs: módulo + `GET /identidad/health` y `GET /notificaciones/health`. UI de `(auth)`: reutilizar [docs/kit-visual.md](../../docs/kit-visual.md); no paleta nueva. Specs: `openspec/specs/identidad`, `notificaciones`. Commits `feat(m1):` / `feat(m10):`.
+Mantén `GET /identidad/health` y `GET /notificaciones/health`. UI de `(auth)`: reutilizar [docs/diseno/README.md](../../docs/diseno/README.md); no paleta nueva. Specs: `openspec/specs/identidad`, `notificaciones`. Commits `feat(m1):` / `feat(m10):`.

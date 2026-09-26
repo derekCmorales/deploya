@@ -23,6 +23,17 @@ Núcleo v4.1: [docs/alcance.md](docs/alcance.md) (manda sobre la propuesta). Pan
 - **Sin prefijo `I`** en puertos ni interfaces de dominio (`PasarelaPago`, `ProveedorFuente`, `CorreoPuerto`).
 - Estados de **despliegue** ≠ estados de **suscripción** (§4.4). No mezclarlos.
 
+## Calidad — SOLID, clean code, patrones y pruebas (base del curso)
+
+Estándar completo y referencias: [docs/ingenieria.md](docs/ingenieria.md). Auditoría: [docs/AUDITORIA_SOLID_CLEAN.md](docs/AUDITORIA_SOLID_CLEAN.md). Aplica a **cada historia**, la escriba una persona o un agente:
+
+- **SOLID:** controlador adapta, servicio orquesta, política decide, adaptador habla con el exterior (S). Se extiende con una nueva implementación de un puerto, no con `if/switch` por tipo (O). Stubs, dobles y adaptadores reales cumplen el mismo contrato (L). Puertos estrechos (I). Servicios reciben puertos por constructor; nunca `new` de Docker, Prisma, SMTP ni `Date.now()` en el dominio (D).
+- **Puertos como `abstract class`** (token de Nest), sin prefijo `I`. Un módulo solo usa lo que otro exporta en su `*.module.ts`.
+- **Clean code:** nombres del dominio en español, funciones cortas, sin números mágicos, errores de dominio con nombre, sin `any`, sin código comentado.
+- **Patrones nombrados** en el `design.md` del change (Repository, Adapter, Strategy, State, Facade, Observer…) con su porqué.
+- **Pruebas unitarias obligatorias:** cada `Scenario` del spec delta tiene su `it(...)`; sin Docker, red, base ni reloj reales; AAA; ≥ 80 % de líneas en dominio y servicios tocados (`pnpm --filter @deploya/api test:cov`). `pnpm test` en verde antes de cerrar una tarea.
+- Si cambias un puerto, clase o estado, actualiza `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR.
+
 ## OpenSpec primero
 
 Antes de codear una historia: `/opsx-propose` en el chat del repo, change `feat/m<n>-<slug>` bajo el spec del módulo. Luego `/opsx-apply`. Al merge: `/opsx-archive`.

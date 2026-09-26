@@ -18,6 +18,8 @@ context: |
   Specs con UI en apps/web SHALL reutilizar ese kit; no inventar paleta.
   Las pantallas de referencia son las del canvas Deploya v4.1 (mapa en docs/alcance.md).
   Español de la propuesta. No usar IPasarelaPago ni ISourceProvider.
+  Calidad (base del curso): docs/ingenieria.md. SOLID, clean code, patrones nombrados y
+  pruebas unitarias por cada escenario son obligatorios en cada change.
 
 rules:
   proposal:
@@ -29,14 +31,21 @@ rules:
     - Write requirements in Spanish; SHALL/WHEN/THEN as in existing seeds
     - Do not introduce I-prefixed ports
     - UI in apps/web must reuse docs/diseno/README.md; do not invent palettes or a second shell
+  design:
+    - Include a section "Diseño: SOLID y patrones" naming the classes, ports (abstract class, no I prefix) and design patterns used, and which SOLID principle each decision serves (docs/ingenieria.md §2 and §4)
+    - List any change to a port, class or state and update docs/diagramas/compartido/clases-unificado.mmd in the same change
   tasks:
     - Break tasks into chunks a teammate can finish in one PR
+    - Every code task has a matching unit-test task; every Scenario in the spec delta maps to at least one named unit test (docs/ingenieria.md §5)
 
 operations:
   apply:
     guidance:
       - UI: seguir docs/diseno/guia-construccion.md y la ficha de la pantalla; solo componentes de apps/web/src/components; no inventar paleta
       - Keep module health endpoints working
+      - Follow docs/ingenieria.md: SOLID, clean code, named patterns; services depend on ports injected by constructor
+      - Write the unit test for each Scenario alongside the code (Jest *.spec.ts); no real Docker, network, DB or clock; pnpm test must be green before marking a task done
   archive:
     guidance:
       - Summarize what landed in the main spec before finishing
+      - Confirm unit tests for every archived Scenario exist and pass

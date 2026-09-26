@@ -7,6 +7,7 @@
     "start": "nest start",
     "start:prod": "node dist/main.js",
     "test": "jest",
+    "test:cov": "jest --coverage",
     "prisma:generate": "prisma generate",
     "prisma:seed": "prisma db seed"
   },
@@ -40,6 +41,8 @@
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "collectCoverageFrom": ["**/*.ts", "!**/*.spec.ts", "!main.ts", "!**/*.module.ts"],
+    "coverageDirectory": "../coverage"
   }
 }

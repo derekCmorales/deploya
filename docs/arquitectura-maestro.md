@@ -2299,7 +2299,7 @@ flowchart TB
 
 ## 11. Auditoría resumida
 
-Informe completo: `M4_M5_M6_Motor_Despliegue/AUDITORIA_SOLID_CLEAN.md`.
+Informe completo: [AUDITORIA_SOLID_CLEAN.md](AUDITORIA_SOLID_CLEAN.md). Reglas vigentes: [ingenieria.md](ingenieria.md).
 
 | Antes | Después |
 |---|---|

@@ -128,8 +128,9 @@ classDiagram
         PUBLICANDO
         SALUDABLE
         FALLIDO
-        REVIRTIENDO
+        CANCELADO
         DETENIDO
+        REVIRTIENDO_fuera_de_alcance
     }
     class TipoTransaccion {
         <<enumeration>>
@@ -177,6 +178,17 @@ classDiagram
     class VerificacionEntornoPuerto {
         <<interface>>
         +comprobarSalud(contenedor) ResultadoSalud
+    }
+    class ColaConstruccionPuerto {
+        <<interface>>
+        +encolar(trabajo TrabajoConstruccion)
+        +cancelar(despliegueId)
+    }
+    class RepositorioDespliegues {
+        <<interface>>
+        +guardar(despliegue) Despliegue
+        +porId(despliegueId) Despliegue
+        +agregarBitacora(despliegueId, lineas)
     }
     class CorreoPuerto {
         <<interface>>
@@ -263,6 +275,8 @@ classDiagram
     ServicioProyectos --> ProveedorFuente
     ProveedorFuente <|.. FuenteRepositorio
     ProveedorFuente <|.. FuenteArchivoComprimido
+    ServicioConstruccion --> ColaConstruccionPuerto
+    ServicioConstruccion --> RepositorioDespliegues
     ServicioConstruccion --> ServicioOrquestacion
     ServicioOrquestacion --> ContenedorPuerto
     ServicioOrquestacion --> VerificacionEntornoPuerto

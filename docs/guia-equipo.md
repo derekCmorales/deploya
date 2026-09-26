@@ -52,7 +52,7 @@ chore: actualizar workflow de CI
 
 1. Rama desde `main` actualizado.  
 2. PR con la plantilla: módulo, dueño, change OpenSpec, cómo probar.  
-3. CI verde (Eddy es dueño de workflows).  
+3. CI verde (Eddy es dueño de workflows), con las pruebas unitarias de la historia ([ingenieria.md](ingenieria.md)).  
 4. Review: **dueño del módulo**. Derek revisa infra, compose, adaptadores y motor.  
 5. Squash o merge según lo que active Derek en GitHub; la protección de `main` la activa él.
 
@@ -64,5 +64,5 @@ CODEOWNERS: [../CODEOWNERS](../CODEOWNERS).
 2. [alcance.md](alcance.md) y [plan-avances.md](plan-avances.md) — qué entra y qué te toca en cada avance.  
 3. [METODOLOGIA.md](../METODOLOGIA.md).  
 4. Tu kit en [roles/](roles/).  
-5. [arquitectura.md](arquitectura.md) (C4 + ciclo).  
+5. [arquitectura.md](arquitectura.md) (C4 + ciclo) e [ingenieria.md](ingenieria.md) (SOLID, clean code, patrones, pruebas).  
 6. Tu spec en `openspec/specs/…`.

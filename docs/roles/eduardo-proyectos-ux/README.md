@@ -49,6 +49,14 @@ Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eduardo](../../plan
 
 **Dependencias:** schema de Javier (lunes), contrato de despliegues ([docs/contratos/despliegues.md](../../contratos/despliegues.md), ya publicado), guard de sesión de Eddy (martes 12:00; antes usa el usuario del seed).
 
+## SOLID, patrones y pruebas
+
+Regla general: [ingenieria.md](../../ingenieria.md). Lo tuyo:
+
+- **Patrones:** `ProveedorFuente` (Adapter a la API pública de GitHub), repositorio de proyectos, lectura por polling (CQRS ligero) en M7; en web, Container / Presentational y hooks (`useProyectos`, `useDespliegue`).
+- **SOLID:** el controlador no sabe que existe GitHub (D); el parser de `EXPOSE` es una función pura (S); los componentes no hacen `fetch` (S).
+- **Pruebas mínimas A1:** parser de `EXPOSE` (uno, varios, ausente); repo privado y sin `Dockerfile` con `ProveedorFuente` doble; límite de Sandbox con `cuotaDe` doble; `POST /proyectos` llama a `crearDespliegue`. Lógica web pura con `node --test`.
+
 ## Fuera de alcance · solo si da el tiempo
 
 Carga por zip · repos privados · recetas sin `Dockerfile` · métricas de CPU/memoria en vivo · bitácoras de runtime · WebSocket/SSE · UI del asistente M8.

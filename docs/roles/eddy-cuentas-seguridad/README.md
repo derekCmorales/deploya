@@ -40,6 +40,14 @@ Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eddy](../../plan-av
 
 **Dependencia crítica:** el resto de módulos necesita `SesionGuard` y `@UsuarioActual()`. Publícalos pronto, aunque el login todavía no tenga todos los estados.
 
+## SOLID, patrones y pruebas
+
+Regla general: [ingenieria.md](../../ingenieria.md). Lo tuyo:
+
+- **Patrones:** `CorreoPuerto` (Adapter a SMTP/Mailpit), `PoliticaContrasena` (objeto valor / Strategy), `HashContrasena` como puerto, `SesionGuard` y `@UsuarioActual()` (Decorator de Nest), repositorio de usuarios y tokens.
+- **SOLID:** el registro no arma HTML ni habla SMTP (S, D); el tiempo de expiración viene de un `Reloj` inyectado (D).
+- **Pruebas mínimas A1:** política de contraseña; correo repetido; hash (nunca en claro); token válido, vencido (24 h con reloj falso) y usado; login con credenciales malas y cuenta pendiente; guard con y sin sesión; el registro llama a `CorreoPuerto.enviar` y pide Sandbox a M2.
+
 ## Fuera de alcance · solo si da el tiempo
 
 Bitácora de auditoría completa · roles Operador y Soporte · cambio de correo · segundo factor · correos de despliegue y de vencimiento de plan.

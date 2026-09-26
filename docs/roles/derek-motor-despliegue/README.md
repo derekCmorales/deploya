@@ -66,6 +66,14 @@ C4 (tú lo mantienes único): [compartido/](../../diagramas/compartido/).
 
 `ContenedorPuerto`, `EnrutamientoPuerto`, `VerificacionEntornoPuerto` — sin `I`. Los stubs actuales se quedan para pruebas; el adaptador real habla con Docker y Traefik.
 
+## SOLID, patrones y pruebas
+
+Regla general: [ingenieria.md](../../ingenieria.md). Hallazgos pendientes del motor: [AUDITORIA_SOLID_CLEAN.md](../../AUDITORIA_SOLID_CLEAN.md) (C1–C3, B4–B6).
+
+- **Patrones:** cola detrás de `ColaConstruccionPuerto` (productor / consumidor, trabajo como Command), `TransicionesDespliegue` (State, función pura), adaptadores dockerode y Traefik (Adapter), `RepositorioDespliegues`, evento `DespliegueTerminado` (Observer) hacia M10.
+- **SOLID:** clone y `docker build` detrás de un puerto (D); una sola firma por puerto en código, diagrama y canvas (L); binding stub/real en un solo lugar (O).
+- **Pruebas mínimas A1:** transiciones válidas e inválidas; trabajador con stubs → Fallido con código de salida; bitácora con `desde=`; límites de `cuotaDe` llegan a `ContenedorPuerto.crear`; salud falsa → Fallido, verdadera → Saludable.
+
 ## ADR que tocan
 
 `docs/adr/`: `Dockerfile` obligatorio, BullMQ para la cola, polling en vez de WebSocket, Traefik con certificado comodín.

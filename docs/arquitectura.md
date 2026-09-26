@@ -1,6 +1,6 @@
 # Arquitectura de Deploya
 
-Lectura corta (C4 + ciclo). Anexo largo: [arquitectura-maestro.md](arquitectura-maestro.md). Producto: [propuesta.md](propuesta.md). Auditoría de nombres: [AUDITORIA_SOLID_CLEAN.md](AUDITORIA_SOLID_CLEAN.md).
+Lectura corta (C4 + ciclo). Anexo largo: [arquitectura-maestro.md](arquitectura-maestro.md). Producto: [propuesta.md](propuesta.md). Auditoría SOLID: [AUDITORIA_SOLID_CLEAN.md](AUDITORIA_SOLID_CLEAN.md). Estándar de código (SOLID, clean code, patrones, pruebas): [ingenieria.md](ingenieria.md).
 
 Archivos Mermaid únicos: [diagramas/compartido/](diagramas/compartido/).
 

@@ -1,13 +1,32 @@
-# CODEOWNERS — dueños de módulo (propuesta §10.3)
-# El último patrón que coincide gana.
+# CODEOWNERS — dueños de módulo (propuesta §10.3). Único archivo: GitHub lee este antes que uno en la raíz.
+# El último patrón que coincide gana: lo general arriba, lo específico abajo.
 
 * @derekCmorales
+
+# Documentación común y reglas del equipo (Derek + todos revisan)
+/AGENTS.md @derekCmorales
+/CLAUDE.md @derekCmorales
+/METODOLOGIA.md @derekCmorales
+/docs/ @derekCmorales
+/openspec/config.yaml @derekCmorales
+/.cursor/rules/ @derekCmorales
+
+# Eduardo — proyectos, observabilidad, web y design system
+/apps/web/ @Portillo17e
+/docs/diseno/ @Portillo17e @derekCmorales
+/apps/api/src/modules/proyectos/ @Portillo17e
+/apps/api/src/modules/observabilidad/ @Portillo17e
+/openspec/specs/proyectos/ @Portillo17e
+/openspec/specs/observabilidad/ @Portillo17e
 
 # Eddy — cuentas, notificaciones, CI
 /apps/api/src/modules/identidad/ @EddyPoroj106
 /apps/api/src/modules/notificaciones/ @EddyPoroj106
 /apps/web/src/app/(auth)/ @EddyPoroj106
+/openspec/specs/identidad/ @EddyPoroj106
+/openspec/specs/notificaciones/ @EddyPoroj106
 /.github/workflows/ @EddyPoroj106 @derekCmorales
+/e2e/ @EddyPoroj106
 
 # Javier — monetización, admin, modelo de datos
 /apps/api/src/modules/suscripciones/ @Javier-r04
@@ -15,16 +34,10 @@
 /apps/web/src/app/(billing)/ @Javier-r04
 /apps/web/src/app/(admin)/ @Javier-r04
 /apps/api/prisma/ @Javier-r04 @derekCmorales
+/openspec/specs/suscripciones/ @Javier-r04
+/openspec/specs/administracion/ @Javier-r04
 
-# Eduardo — proyectos, observabilidad, UI
-/apps/api/src/modules/proyectos/ @Portillo17e
-/apps/api/src/modules/observabilidad/ @Portillo17e
-/apps/web/ @Portillo17e
-/apps/web/src/app/(auth)/ @EddyPoroj106
-/apps/web/src/app/(billing)/ @Javier-r04
-/apps/web/src/app/(admin)/ @Javier-r04
-
-# Derek — motor, tools, compose, adapters
+# Derek — motor, herramientas (stub), compose, adaptadores, contratos y diagramas
 /apps/api/src/modules/construccion/ @derekCmorales
 /apps/api/src/modules/orquestacion/ @derekCmorales
 /apps/api/src/modules/enrutamiento/ @derekCmorales
@@ -33,5 +46,10 @@
 /docker-compose.yml @derekCmorales
 /Dockerfile.api @derekCmorales
 /Dockerfile.web @derekCmorales
-/docs/diagramas/compartido/ @derekCmorales
-/openspec/config.yaml @derekCmorales
+/docs/contratos/ @derekCmorales
+/docs/adr/ @derekCmorales
+/docs/diagramas/ @derekCmorales
+/openspec/specs/motor-construccion/ @derekCmorales
+/openspec/specs/orquestacion/ @derekCmorales
+/openspec/specs/enrutamiento/ @derekCmorales
+/openspec/specs/herramientas/ @derekCmorales

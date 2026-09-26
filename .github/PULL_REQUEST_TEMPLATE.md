@@ -5,10 +5,12 @@
 - Módulo:
 - Dueño:
 - Change OpenSpec (`feat/m<n>-<slug>`):
+- Historia (`M<n>-<nn>`) e issue:
 
 ## Cómo probar
 
-- [ ] `docker compose up --build` (o `pnpm --filter @deploya/api test` + web)
+- [ ] `pnpm check` en verde (pruebas, build y diagramas; lo mismo que CI)
+- [ ] `docker compose up --build` levanta y la historia se puede demostrar
 - [ ] `GET /health` y health del módulo tocado
 - [ ] Pasos extra:
 

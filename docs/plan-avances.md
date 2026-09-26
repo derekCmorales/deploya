@@ -111,7 +111,7 @@ La contratación con pago, la vista rica de despliegue (riel + bitácora) y el s
 | Id | Entrega | Terminado cuando |
 |---|---|---|
 | DB-01 | Schema Prisma del núcleo: `Usuario`, `TokenCuenta`, `Sesion`, `Plan`, `Suscripcion`, `Pago`, `Proyecto`, `VariableEntorno`, `Despliegue`, `LineaBitacora`. Seed de los cuatro planes v4.1 y del admin. Suscripción Sandbox al crear la cuenta | Migración aplicada en compose; seed idempotente |
-| M2-01 | Catálogo público de planes (06) con la tabla de recursos y el cambio 30 / 365 días | `/billing/planes` lee de la base, no de constantes |
+| M2-01 | Catálogo público de planes (06) con la tabla de recursos y el cambio 30 / 365 días | `/planes` lee de la base, no de constantes |
 
 **Presenta:** el ERD del núcleo frente al schema real, la página de planes y cómo un usuario nuevo queda en Sandbox. Si le da el tiempo, adelanta M2-02 (contratación) sin prometerla.
 

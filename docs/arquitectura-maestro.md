@@ -4,9 +4,9 @@
 
 > **Alcance reducido.** Este anexo describe el diseño completo de la propuesta. Lo que se implementa es el núcleo v4.1: [alcance.md](alcance.md). M8, reversión sin reconstruir, dominios personalizados, métricas en vivo, zip y gestión de planes quedan como *fuera de alcance · solo si da el tiempo*.
 
-> Insumo para el documento formal de diseño (otro agente). Diagramas Mermaid **embebidos**, no solo enlaces.
-> Fuente de producto: `00_GUIA_GENERAL_Propuesta_Deploya.md`. Originales de compañeros intactos; este maestro usa versiones pulidas (sin prefijo `I`, español de la propuesta).
-> ERD y clases: **un solo artefacto** cada uno (`DEPLOYA_erd_unificado.mmd`, `DEPLOYA_diagrama_clases_unificado.mmd`).
+> Insumo para el documento formal de diseño. Los diagramas van **embebidos**, pero la fuente es cada `.mmd` de [diagramas/](diagramas/): cada bloque lleva un comentario `<!-- diagrama: … -->` y se copia con `pnpm diagramas:sync`. CI falla si alguno queda desfasado. No edites un diagrama aquí: edita el `.mmd`.
+> Fuente de producto: [propuesta.md](propuesta.md); alcance vigente: [alcance.md](alcance.md). Nombres pulidos: sin prefijo `I`, español de la propuesta.
+> ERD y clases: **un solo artefacto** cada uno ([erd-unificado.mmd](diagramas/compartido/erd-unificado.mmd), [clases-unificado.mmd](diagramas/compartido/clases-unificado.mmd)).
 
 ## Índice
 
@@ -14,7 +14,7 @@
 2. Arquitectura C4
 3. Capa de herramientas M8
 4. UML por módulo (compañeros, nombres corregidos)
-5. Sistema de diseño (en curso)
+5. Sistema de diseño
 6. ERD unificado
 7. Diagrama de clases unificado
 8. Estados
@@ -45,6 +45,7 @@ Actores: Cliente, Administrador, Operador de infraestructura, Soporte técnico.
 Externos: Git, motor de contenedores, DNS, autoridad certificadora, correo, pasarela simulada, modelo de lenguaje (M8).
 
 
+<!-- diagrama: docs/diagramas/compartido/c4-contexto.mmd -->
 ```mermaid
 ---
 title: C4 Nivel 1 — Contexto de Deploya
@@ -95,6 +96,7 @@ flowchart TB
 Web Next.js, API NestJS, motor de despliegue (trabajadores M4–M6), capa de herramientas M8, observabilidad M7, Redis, PostgreSQL. Fuera: Docker, enrutador de borde, Git, correo, pagos, LLM.
 
 
+<!-- diagrama: docs/diagramas/compartido/c4-contenedores.mmd -->
 ```mermaid
 ---
 title: C4 Nivel 2 — Contenedores de Deploya
@@ -152,6 +154,7 @@ flowchart TB
 El contenedor «motor» se descompone en M4 (cola, detector, constructor, registro de artefactos), M5 (orquestador, límites, reversión) y M6 (subdominio, TLS, conmutación). Puertos sin prefijo `I`.
 
 
+<!-- diagrama: docs/diagramas/compartido/c4-componentes-motor.mmd -->
 ```mermaid
 ---
 title: C4 Nivel 3 — Componentes del motor de despliegue
@@ -238,6 +241,7 @@ flowchart TB
 ### 2.4 Componentes M4–M6 (detalle de servicios)
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m4-m5-m6-componentes.mmd -->
 ```mermaid
 ---
 title: Componentes M4 M5 M6 — motor de despliegue
@@ -345,6 +349,7 @@ flowchart TB
 Derek integra M4–M6 **y** la capa de herramientas de M8. Misma superficie para el asistente del panel y para clientes externos. Hereda permisos del usuario; operaciones destructivas piden confirmación humana; bitácoras y repositorios son entrada no confiable.
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m8-herramientas-componentes.mmd -->
 ```mermaid
 ---
 title: M8 Capa de herramientas — asistente e integración §9.3 §10.3
@@ -405,13 +410,14 @@ Los `.mmd` originales no se borran. Aquí va la versión pulida de clases (sin `
 #### Casos de uso de autenticación
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m1-m10-casos-de-uso-autenticacion.mmd -->
 ```mermaid
 ---
 config:
   layout: fixed
 ---
 flowchart LR
- subgraph DEPLOYA["."]
+ subgraph DEPLOYA["Deploya"]
         REG(("Registrarse"))
         VERIFY(("Verificar correo"))
         LOGIN(("Iniciar sesión"))
@@ -477,6 +483,7 @@ flowchart LR
 El puerto de correo ya no lleva prefijo `I`. En el unificado se nombra `CorreoPuerto`.
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m1-m10-componentes.mmd -->
 ```mermaid
 ---
 config:
@@ -485,7 +492,7 @@ config:
 flowchart TB
     USER["Usuario"] --> UI["Interfaz web<br/>Next.js"]
 
-    subgraph DEPLOYA["."]
+    subgraph DEPLOYA["Deploya"]
         direction TB
 
         subgraph API["Capa de entrada"]
@@ -511,7 +518,7 @@ flowchart TB
         subgraph M10["M10 · Notificaciones"]
             direction TB
             NOTIFICATION["Servicio de notificaciones"]
-            EMAIL_PORT["Puerto de correo"]
+            CORREO_PUERTO["CorreoPuerto"]
         end
 
         subgraph ADAPTERS["Capa de adaptadores"]
@@ -557,8 +564,8 @@ flowchart TB
     VERIFY --> NOTIFICATION
     RECOVERY --> NOTIFICATION
 
-    NOTIFICATION --> EMAIL_PORT
-    EMAIL_PORT --> EMAIL_ADAPTER
+    NOTIFICATION --> CORREO_PUERTO
+    CORREO_PUERTO --> EMAIL_ADAPTER
     EMAIL_ADAPTER --> EMAIL
 
     classDef external fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px;
@@ -571,7 +578,7 @@ flowchart TB
     class USER,UI,EMAIL external;
     class ACCOUNT_CTRL,AUTH_CTRL,SESSION_CTRL,RECOVERY_CTRL,VERIFY_CTRL entry;
     class ACCOUNT,AUTH,SESSION,AUTHZ,RECOVERY,VERIFY,AUDIT identity;
-    class NOTIFICATION,EMAIL_PORT notification;
+    class NOTIFICATION,CORREO_PUERTO notification;
     class EMAIL_ADAPTER adapter;
     class DB data;
 ```
@@ -579,6 +586,7 @@ flowchart TB
 #### Actividad: registro
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m1-actividad-registro.mmd -->
 ```mermaid
 ---
 config:
@@ -633,6 +641,7 @@ flowchart TB
 #### Actividad: verificación de correo
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m1-actividad-verificacion-correo.mmd -->
 ```mermaid
 ---
 config:
@@ -697,6 +706,7 @@ flowchart TD
 #### Actividad: recuperación de contraseña
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m1-actividad-recuperacion-contrasena.mmd -->
 ```mermaid
 ---
 config:
@@ -788,6 +798,7 @@ flowchart TD
 #### Componentes M2 + M9
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m2-m9-componentes.mmd -->
 ```mermaid
 ---
 config:
@@ -797,7 +808,7 @@ flowchart TB
     USER["Cliente"] --> UI["Interfaz web<br/>Next.js"]
     ADMIN_USER["Administrador"] --> UI
 
-    subgraph DEPLOYA["."]
+    subgraph DEPLOYA["Deploya"]
         direction TB
 
         subgraph API["Capa de entrada"]
@@ -891,9 +902,8 @@ flowchart TB
 
 #### Clases M2 + M9 (pulido: `IPasarelaPago` → `PasarelaPago`)
 
-Original conservado: `M2_M9_propuesta_diagrama_clases.mmd`.
 
-
+<!-- diagrama: docs/diagramas/m1-m10/m2-m9-clases.mmd -->
 ```mermaid
 classDiagram
     direction LR
@@ -1061,6 +1071,7 @@ classDiagram
 #### Secuencia: contratación de plan
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m2-secuencia-contratacion-plan.mmd -->
 ```mermaid
 sequenceDiagram
     actor Cliente
@@ -1116,6 +1127,7 @@ sequenceDiagram
 #### Secuencia: renovación
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m2-secuencia-renovacion.mmd -->
 ```mermaid
 sequenceDiagram
     actor Cliente
@@ -1171,6 +1183,7 @@ sequenceDiagram
 #### Actividad: contratación y activación
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m2-actividad-contratacion-activacion.mmd -->
 ```mermaid
 flowchart TB
     START(("Inicio")) --> A["Cliente consulta<br>catalogo de planes"]
@@ -1221,6 +1234,7 @@ flowchart TB
 #### Actividad: renovación
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m2-actividad-renovacion.mmd -->
 ```mermaid
 flowchart TB
     START(("Inicio")) --> A{"Origen"}
@@ -1275,6 +1289,7 @@ flowchart TB
 #### Actividad: gestión de planes (M9)
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m9-actividad-gestion-planes.mmd -->
 ```mermaid
 flowchart TB
     START(("Inicio")) --> A["Administrador inicia sesion<br>en el panel"]
@@ -1315,6 +1330,7 @@ flowchart TB
 #### Componentes M3 + M7
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m3-m7-componentes.mmd -->
 ```mermaid
 flowchart TD
     %% Interfaz
@@ -1339,14 +1355,15 @@ flowchart TD
     UI -->|Abre conexión WSS| B
 ```
 
-#### Clases M3 + M7 (pulido: `ISourceProvider` → `SourceProvider`; `ProjectController` → `ControladorProyecto`)
+#### Clases M3 + M7 (pulido: `ISourceProvider` → `ProveedorFuente`; `ProjectController` → `ControladorProyecto`)
 
-Original conservado: `M3_M7_propuesta_diagrama_clases.mmd`. El ERD/clases **canónico** es el unificado (§6 y §7). En el unificado el puerto pasa a `ProveedorFuente` (español de la propuesta).
+El ERD y las clases **canónicos** son los unificados (§6 y §7).
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m3-m7-clases.mmd -->
 ```mermaid
 classDiagram
-    class SourceProvider {
+    class ProveedorFuente {
         <<interface>>
         +obtenerCodigoFuente() CodigoFuente
     }
@@ -1356,14 +1373,14 @@ classDiagram
     class FuenteArchivoComprimido {
         +obtenerCodigoFuente() CodigoFuente
     }
-    SourceProvider <|.. FuenteRepositorio
-    SourceProvider <|.. FuenteArchivoComprimido
+    ProveedorFuente <|.. FuenteRepositorio
+    ProveedorFuente <|.. FuenteArchivoComprimido
 
     class ControladorProyecto {
-        -proveedorFuente: SourceProvider
+        -proveedorFuente: ProveedorFuente
         +crearProyecto(nombre, variablesEntorno) Proyecto
     }
-    ControladorProyecto --> SourceProvider
+    ControladorProyecto --> ProveedorFuente
 
     class ControladorObservabilidad {
         +consultarMetricasEnVivo(proyectoId) List~MetricaConsumo~
@@ -1371,39 +1388,10 @@ classDiagram
     }
 ```
 
-#### Propuesta ERD de compañeros (parcial; no usar como fuente — ver §6)
-
-
-```mermaid
-erDiagram
-    PROYECTO {
-        uuid id_proyecto PK
-        string nombre
-        string tipo_fuente
-        string url_repositorio
-    }
-
-    VARIABLE_ENTORNO {
-        uuid id_variable PK
-        uuid id_proyecto FK
-        string clave
-        string valor
-    }
-
-    METRICA_CONSUMO {
-        uuid id_metrica PK
-        uuid id_proyecto FK
-        float porcentaje_cpu
-        int uso_ram_mb
-    }
-
-    PROYECTO ||--o{ VARIABLE_ENTORNO : configura
-    PROYECTO ||--o{ METRICA_CONSUMO : registra
-```
-
 #### Actividad: crear proyecto (original de compañeros; es `stateDiagram-v2`)
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m3-actividad-crear-proyecto.mmd -->
 ```mermaid
 stateDiagram-v2
     [*] --> IniciarFormulario
@@ -1425,6 +1413,7 @@ stateDiagram-v2
 #### Actividad: consultar métricas (original de compañeros)
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m7-actividad-consultar-metricas.mmd -->
 ```mermaid
 stateDiagram-v2
     [*] --> EntrarDashboardProyecto
@@ -1449,13 +1438,14 @@ stateDiagram-v2
 
 ## 5. Sistema de diseño
 
-Kit visual canónico: [kit-visual.md](kit-visual.md). Tokens CSS (shadcn/Tailwind), Geist, claro/oscuro, cromática monocromática. Las rutas actuales son **stubs**; cada módulo construye encima, sin paleta nueva. Ver también [apps/web/README.md](../apps/web/README.md).
+Design system v4.1: [diseno/](diseno/README.md) (principios, tokens, [guía de construcción](diseno/guia-construccion.md) y una ficha por pantalla). Claro por defecto, neutros cálidos, acento Señal, Geist / Geist Mono, Lucide; componentes en `apps/web/src/components` y catálogo en `/sistema`. Mapa de archivos: [apps/web/README.md](../apps/web/README.md).
 
 ## 6. ERD unificado
 
 Única fuente. Incluye identidad, planes, proyecto, **imagen, artefacto, contenedor, certificado, subdominio**, métricas, notificaciones y administración.
 
 
+<!-- diagrama: docs/diagramas/compartido/erd-unificado.mmd -->
 ```mermaid
 ---
 title: ERD unificado Deploya — un solo artefacto
@@ -1736,6 +1726,7 @@ erDiagram
 Única fuente. Puertos sin `I`. Dominio en español. Tres adaptadores de infraestructura (§7) + `PasarelaPago` + `ProveedorFuente` + `CorreoPuerto` + `CapaHerramientas`.
 
 
+<!-- diagrama: docs/diagramas/compartido/clases-unificado.mmd -->
 ```mermaid
 ---
 title: Diagrama de clases unificado Deploya — un solo artefacto
@@ -1867,8 +1858,9 @@ classDiagram
         PUBLICANDO
         SALUDABLE
         FALLIDO
-        REVIRTIENDO
+        CANCELADO
         DETENIDO
+        REVIRTIENDO_fuera_de_alcance
     }
     class TipoTransaccion {
         <<enumeration>>
@@ -1916,6 +1908,17 @@ classDiagram
     class VerificacionEntornoPuerto {
         <<interface>>
         +comprobarSalud(contenedor) ResultadoSalud
+    }
+    class ColaConstruccionPuerto {
+        <<interface>>
+        +encolar(trabajo TrabajoConstruccion)
+        +cancelar(despliegueId)
+    }
+    class RepositorioDespliegues {
+        <<interface>>
+        +guardar(despliegue) Despliegue
+        +porId(despliegueId) Despliegue
+        +agregarBitacora(despliegueId, lineas)
     }
     class CorreoPuerto {
         <<interface>>
@@ -2002,6 +2005,8 @@ classDiagram
     ServicioProyectos --> ProveedorFuente
     ProveedorFuente <|.. FuenteRepositorio
     ProveedorFuente <|.. FuenteArchivoComprimido
+    ServicioConstruccion --> ColaConstruccionPuerto
+    ServicioConstruccion --> RepositorioDespliegues
     ServicioConstruccion --> ServicioOrquestacion
     ServicioOrquestacion --> ContenedorPuerto
     ServicioOrquestacion --> VerificacionEntornoPuerto
@@ -2025,6 +2030,7 @@ classDiagram
 No copiar estos cinco estados al despliegue.
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m2-estados-suscripcion.mmd -->
 ```mermaid
 stateDiagram-v2
     [*] --> Activa : contratacion con pago aprobado
@@ -2064,60 +2070,65 @@ stateDiagram-v2
 
 ### 8.2 Despliegue / contenedor — dominio §3.2
 
-Encolado → Construyendo → Aprovisionando → Publicando → Saludable. Fallido, Revirtiendo y Detenido son estados de error, reversión y parada (p. ej. suscripción Suspendida). **No** son Activa / Por vencer / Vencida / Suspendida / Cancelada.
+Encolado → Construyendo → Aprovisionando → Publicando → Saludable. Fallido, Cancelado y Detenido son estados de error, cancelación por el cliente y parada (p. ej. suscripción Suspendida). Revirtiendo queda fuera de alcance. **No** son Activa / Por vencer / Vencida / Suspendida / Cancelada.
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m4-m5-m6-estados-despliegue.mmd -->
 ```mermaid
 ---
-title: Estados del despliegue — dominio §3.2 (no son los de suscripción)
+title: Estados del despliegue — núcleo v4.1 (no son los de suscripción)
 ---
 stateDiagram-v2
     [*] --> Encolado : API registra y encola la construcción
 
     Encolado --> Construyendo : trabajador toma el trabajo
+    Encolado --> Cancelado : el cliente cancela
     Construyendo --> Aprovisionando : imagen versionada registrada
-    Construyendo --> Fallido : falla la construcción
+    Construyendo --> Fallido : falla docker build o excede el tiempo
+    Construyendo --> Cancelado : el cliente cancela
 
-    Aprovisionando --> Publicando : contenedor con límites en ejecución
-    Aprovisionando --> Fallido : no se levantó el contenedor
+    Aprovisionando --> Publicando : contenedor con límites responde a la verificación de salud
+    Aprovisionando --> Fallido : el contenedor no arranca o no responde
 
-    Publicando --> Saludable : subdominio TLS y healthcheck correctos
-    Publicando --> Fallido : falla enrutamiento o healthcheck
+    Publicando --> Saludable : subdominio apunta al contenedor nuevo y se detiene el anterior
+    Publicando --> Fallido : falla el enrutamiento
 
-    Saludable --> Encolado : nuevo despliegue
-    Saludable --> Revirtiendo : reversión a artefacto previo
-    Saludable --> Detenido : suscripción Suspendida o parada
+    Saludable --> Detenido : el cliente detiene, suscripción Suspendida o cuenta suspendida
 
-    Revirtiendo --> Publicando : se levanta el artefacto previo
-    Revirtiendo --> Fallido : no se pudo revertir
-
-    Detenido --> Aprovisionando : reanudar entorno
-    Fallido --> Encolado : reintentar construcción
-    Fallido --> Revirtiendo : revertir a versión anterior
+    Detenido --> Aprovisionando : el cliente reinicia
+    Fallido --> Encolado : reintentar (nuevo despliegue del mismo commit)
 
     note right of Encolado
-        Recepción §3.2
+        Recepción
         El despliegue queda registrado.
+        Redesplegar un commit anterior
+        crea un despliegue nuevo.
     end note
     note right of Construyendo
-        Construcción §3.2
-        Detector de stack e imagen.
+        Construcción
+        docker build con el Dockerfile del cliente.
     end note
     note right of Aprovisionando
-        Ejecución §3.2
-        Contenedor aislado con cuota.
+        Ejecución
+        Contenedor aislado con la cuota del plan.
     end note
     note right of Publicando
-        Enrutamiento §3.2
-        Subdominio, TLS, conmutación.
+        Enrutamiento
+        Subdominio, TLS, conmutación sin corte.
     end note
     note right of Saludable
-        Operación §3.2
-        Bitácoras y métricas al panel.
+        Operación
+        Estado y bitácora al panel.
     end note
     note right of Detenido
-        Distinto de Cancelada.
+        Distinto de Cancelada (suscripción).
         Datos conservados.
+    end note
+    note left of Fallido
+        La versión anterior sigue
+        sirviendo tráfico.
+        Revirtiendo sin reconstruir:
+        fuera de alcance.
     end note
 ```
 
@@ -2128,6 +2139,7 @@ stateDiagram-v2
 ### 9.1 Despliegue completo (§3.2) hasta Saludable / Fallido + notificaciones
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m4-m5-m6-secuencia-despliegue.mmd -->
 ```mermaid
 ---
 title: Secuencia del despliegue completo — propuesta §3.2
@@ -2198,6 +2210,7 @@ sequenceDiagram
 ### 9.2 Reversión (sin reconstruir)
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m4-m5-m6-secuencia-reversion.mmd -->
 ```mermaid
 ---
 title: Secuencia de reversión — artefacto previo, sin reconstruir
@@ -2247,6 +2260,7 @@ sequenceDiagram
 Construcción, aprovisionamiento, publicación, comprobación de salud y reversión.
 
 
+<!-- diagrama: docs/diagramas/m1-m10/m4-m5-m6-actividad-motor.mmd -->
 ```mermaid
 ---
 title: Actividades del motor — construcción, aprovisionamiento, publicación, salud, reversión

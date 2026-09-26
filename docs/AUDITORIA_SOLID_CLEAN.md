@@ -56,6 +56,20 @@ Los diagramas **sí respetan SOLID en lo esencial**: DIP con puertos sin `I` (`C
 - El anexo de abajo cita rutas de la carpeta local original (`/Users/derekmorales/Desktop/DOCSDEPLOYA`, `internal/docsdeploya-local-inventory.md`); se conservan como registro histórico. Los artefactos vigentes son [diagramas/compartido/](diagramas/compartido/).
 - `arquitectura-maestro.md §11` apuntaba a `M4_M5_M6_Motor_Despliegue/AUDITORIA_SOLID_CLEAN.md`: **corregido** a este archivo.
 
+### F. Orden del repo para el trabajo en equipo
+
+| Hallazgo | Estado |
+|---|---|
+| Dos `CODEOWNERS` (raíz y `.github/`) distintos; GitHub solo lee el de `.github/`, que no cubría `docs/diseno` ni `docs/contratos` | **Corregido:** uno solo en `.github/CODEOWNERS`, con specs, docs y `e2e` |
+| Change `feat-m3-kit-visual` abierto y reemplazado por el design system v4.1 (oscuro por defecto, cian) | **Archivado** como histórico sin fusionar sus deltas |
+| `docs/kit-visual.md` solo redirigía | **Borrado**; enlaces apuntan a `docs/diseno/` |
+| `arquitectura-maestro.md` con 8 diagramas embebidos desfasados de sus `.mmd`, rutas a archivos fuera del repo y un ERD parcial «no usar» | **Corregido:** `pnpm diagramas:sync` + chequeo en CI; rutas del repo; ERD parcial retirado |
+| `.env.example` apuntaba a `postgres` también para desarrollo fuera de Docker | **Corregido:** secciones compose / local |
+| Sin plantilla de ADR ni de issues; sin `dev` en la API ni comando único de verificación | **Corregido:** `docs/adr/0000-plantilla.md`, `.github/ISSUE_TEMPLATE/`, `pnpm dev:api`, `pnpm check` |
+| Plan de avances decía `/billing/planes`; las fichas dicen `/planes` | **Corregido** |
+
+Lo que está *fuera de alcance · solo si da el tiempo* se conserva: diagramas, specs y secciones de alcance.
+
 ---
 
 ## Anexo histórico — consolidación de diagramas (bootstrap)

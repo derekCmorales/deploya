@@ -70,5 +70,6 @@ Kit de una pantalla: [docs/roles/](docs/roles/).
 ## Estado del repo
 
 - El **design system v4.1** está migrado ([docs/diseno/](docs/diseno/README.md)): tokens, componentes y catálogo en `/sistema`. Las rutas de producto aún son stubs; cada historia construye su pantalla encima, sin paleta nueva.  
-- Terminó el bootstrap: stubs + health por módulo. Desde el Avance 1 entra el dominio real, historia por historia ([docs/plan-avances.md](docs/plan-avances.md)).  
+- Terminó el bootstrap: stubs + health por módulo. Desde el Avance 1 entra el dominio real, historia por historia ([docs/plan-avances.md](docs/plan-avances.md)), con el estándar de [docs/ingenieria.md](docs/ingenieria.md).  
+- Antes de pedir revisión, `pnpm check` corre lo mismo que CI (pruebas, build y diagramas).  
 - Lo que no es ni será (salvo que sobre tiempo): la lista *fuera de alcance* de [docs/alcance.md](docs/alcance.md).

@@ -6,9 +6,14 @@
     "node": ">=22"
   },
   "scripts": {
+    "dev:api": "pnpm --filter @deploya/api dev",
+    "dev:web": "pnpm --filter @deploya/web dev",
     "build": "pnpm --filter @deploya/api --filter @deploya/web build",
     "test": "pnpm --filter @deploya/api --filter @deploya/web test",
+    "test:cov": "pnpm --filter @deploya/api test:cov",
     "test:smoke": "pnpm --filter @deploya/e2e test",
-    "validate:mermaid": "node scripts/validate-mermaid.mjs"
+    "validate:mermaid": "node scripts/validate-mermaid.mjs && node scripts/sync-diagramas.mjs --check",
+    "diagramas:sync": "node scripts/sync-diagramas.mjs",
+    "check": "pnpm test && pnpm build && pnpm validate:mermaid"
   }
 }

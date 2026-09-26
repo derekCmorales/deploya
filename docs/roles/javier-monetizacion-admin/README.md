@@ -14,14 +14,6 @@ Alcance: [alcance.md](../../alcance.md) · Entregas: [plan-avances.md](../../pla
 
 Web: `apps/web/src/app/(billing)/`, `apps/web/src/app/(admin)/`
 
-## SOLID, patrones y pruebas
-
-Regla general: [ingenieria.md](../../ingenieria.md). Lo tuyo:
-
-- **Patrones:** `PasarelaPago` ← `PasarelaSimulada` (Strategy), `PoliticaCicloSuscripcion` (State como función pura), `SuscripcionesService` como Facade (`asignarSandbox`, `cuotaDe`), repositorios de planes y suscripciones.
-- **SOLID:** el ciclo §4.4 no vive en el servicio (S); nueva pasarela = nueva clase (O); la simulada y una real devuelven el mismo `ResultadoPago` (L).
-- **Pruebas mínimas A1:** seed idempotente; `asignarSandbox` crea Activa; `cuotaDe` para los 4 planes; precio 30 / 365 días. A2–A3: tarjetas `4242`/`0002`/`3220`, cada transición del ciclo con fecha inyectada.
-
 ## Tus pantallas (canvas Deploya v4.1)
 
 | # | Pantalla | Historia |
@@ -61,6 +53,14 @@ Activa → Por vencer (≤ 7 días) → Vencida (gracia 5 días; entornos en lí
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Javier](../../plan-avances.md#javier--monetización-5-pts).
 
 **Dependencia crítica:** tu schema bloquea a todos. PR el lunes; pide antes los campos a cada módulo. Si te sobra tiempo en el Avance 1, adelanta M2-02.
+
+## SOLID, patrones y pruebas
+
+Regla general: [ingenieria.md](../../ingenieria.md). Lo tuyo:
+
+- **Patrones:** `PasarelaPago` ← `PasarelaSimulada` (Strategy), `PoliticaCicloSuscripcion` (State como función pura), `SuscripcionesService` como Facade (`asignarSandbox`, `cuotaDe`), repositorios de planes y suscripciones.
+- **SOLID:** el ciclo §4.4 no vive en el servicio (S); nueva pasarela = nueva clase (O); la simulada y una real devuelven el mismo `ResultadoPago` (L).
+- **Pruebas mínimas A1:** seed idempotente; `asignarSandbox` crea Activa; `cuotaDe` para los 4 planes; precio 30 / 365 días. A2–A3: tarjetas `4242`/`0002`/`3220`, cada transición del ciclo con fecha inyectada.
 
 ## Fuera de alcance · solo si da el tiempo
 

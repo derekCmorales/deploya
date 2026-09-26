@@ -136,7 +136,7 @@ Anti-patrones que el revisor rechaza: *God object* (servicio de 600 líneas), *S
 ## 6. Cómo se aplica en el flujo
 
 1. **`/opsx-propose`**: el `design.md` del change trae la sección *Diseño: SOLID y patrones* (qué clases, qué puerto, qué patrón y por qué) y `tasks.md` incluye una tarea de pruebas por cada tarea de código. Lo exige `openspec/config.yaml`.
-2. **`/opsx-apply`**: se escribe la prueba del escenario junto al código; `pnpm test` en verde antes de marcar la tarea.
+2. **`/opsx-apply`**: se escribe la prueba del escenario junto al código; `pnpm test` en verde antes de marcar la tarea y `pnpm check` antes de pedir revisión.
 3. **PR**: la plantilla pide marcar SOLID, clean code y pruebas; el revisor rechaza si falta alguna.
 4. **Definición de terminado** ([METODOLOGIA.md](../METODOLOGIA.md)): *Probado* significa lo de la sección 5, no «lo probé a mano».
 5. **Diagramas**: si la historia cambia un puerto, una clase o un estado, actualiza `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm validate:mermaid`).

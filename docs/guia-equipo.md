@@ -4,7 +4,7 @@ Cómo entra el código. Producto: [propuesta.md](propuesta.md). Rituales: [METOD
 
 ## OpenSpec
 
-El harness ya está (comandos `opsx-*` y skills). **No reescribir** `.cursor/skills/openspec-*`.
+El harness ya está: comandos `opsx-*` y skills generados por OpenSpec para cada herramienta (`.agents/`, `.claude/`, `.cursor/`, `.github/`, `.opencode/`). **No se editan a mano.**
 
 Flujo en el chat del **repositorio**:
 
@@ -50,13 +50,24 @@ chore: actualizar workflow de CI
 
 ## Pull requests
 
-1. Rama desde `main` actualizado.  
-2. PR con la plantilla: módulo, dueño, change OpenSpec, cómo probar.  
-3. CI verde (Eddy es dueño de workflows), con las pruebas unitarias de la historia ([ingenieria.md](ingenieria.md)).  
-4. Review: **dueño del módulo**. Derek revisa infra, compose, adaptadores y motor.  
-5. Squash o merge según lo que active Derek en GitHub; la protección de `main` la activa él.
+1. Rama desde `main` actualizado: `git fetch origin && git switch -c feat/m1-registro origin/main`.
+2. Para ponerte al día a mitad de camino: `git merge origin/main` (no `rebase` sobre una rama que otro ya revisó; nunca force-push a `main`).
+3. Antes de pedir revisión: `pnpm check` (pruebas, build y diagramas, lo mismo que CI).
+4. PR con la plantilla: módulo, dueño, change OpenSpec, cómo probar y el checklist de calidad ([ingenieria.md](ingenieria.md)).
+5. CI verde (Eddy es dueño de workflows), con las pruebas unitarias de la historia.
+6. Review: **dueño del módulo**. Derek revisa infra, compose, adaptadores, motor, contratos y diagramas. CODEOWNERS los asigna solo.
+7. Squash o merge según lo que active Derek en GitHub; la protección de `main` la activa él.
 
-CODEOWNERS: [../CODEOWNERS](../CODEOWNERS).
+Buenas prácticas del equipo:
+
+- **PR pequeño:** una historia por PR; si pasa de ~400 líneas de código (sin lockfile ni generados), pártelo por tarea del change.
+- **PR en borrador** apenas tengas algo que mostrar; así los demás ven por dónde vas y el contrato que usas.
+- **Revisión en menos de 24 h** (en semana de entrega, el mismo día). El revisor usa el checklist de la plantilla y comenta con propuesta, no solo con el problema.
+- **Contratos primero:** si tu historia cambia algo que otro consume (`docs/contratos/`, schema de Prisma, `SesionGuard`, `cuotaDe`), avisa en la sincronización y en el PR antes de mergear.
+- **Bloqueado más de 2 horas:** avisa en el grupo con qué necesitas y de quién.
+- **Issues:** plantillas *Historia* y *Error* en `.github/ISSUE_TEMPLATE/`; el título lleva el id de la historia (`M1-01: …`).
+
+CODEOWNERS: [../.github/CODEOWNERS](../.github/CODEOWNERS).
 
 ## Primer día
 
@@ -65,4 +76,4 @@ CODEOWNERS: [../CODEOWNERS](../CODEOWNERS).
 3. [METODOLOGIA.md](../METODOLOGIA.md).  
 4. Tu kit en [roles/](roles/).  
 5. [arquitectura.md](arquitectura.md) (C4 + ciclo) e [ingenieria.md](ingenieria.md) (SOLID, clean code, patrones, pruebas).  
-6. Tu spec en `openspec/specs/…`.
+6. Tu spec en `openspec/specs/…` y, si hay UI, la ficha de tu pantalla en [diseno/pantallas/](diseno/pantallas/).  

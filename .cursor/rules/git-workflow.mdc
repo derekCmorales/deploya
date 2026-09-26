@@ -8,4 +8,6 @@ alwaysApply: true
 - Nunca commits ni push a `main`. Ramas: `feat/m<n>-<slug>`, `fix/`, `docs/`, `chore/`.
 - Conventional Commits con ámbito: `feat(m1):`, `fix(m4):`, `docs:`, `chore:`.
 - Integración solo por PR. Plantilla en `.github/PULL_REQUEST_TEMPLATE.md`.
-- Dueños: CODEOWNERS. Derek revisa infra/motor; el dueño del módulo revisa lo suyo.
+- Dueños: `.github/CODEOWNERS`. Derek revisa infra/motor; el dueño del módulo revisa lo suyo.
+- Ponerse al día con `git merge origin/main`; nada de force-push a ramas compartidas.
+- Antes de pedir revisión: `pnpm check`. Una historia por PR, pequeño y con sus pruebas.

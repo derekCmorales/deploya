@@ -39,7 +39,7 @@ GET  /despliegues/:id/bitacora?desde=<n>
 - `desde` es el último `n` recibido (0 al empezar). El panel pregunta cada 3 s mientras `terminado` sea `false`.
 - `marca` es ISO 8601 con milisegundos; la web la muestra como `HH:mm:ss.SSS`.
 - `etapas` siempre trae las cinco, en orden, para `RielEtapas`.
-- Los valores de `estado` coinciden con `components/deploya/estados.ts`.
+- Los valores de `estado` coinciden con `components/deploya/estados.ts`. El schema de Prisma (DB-01) guarda los mismos valores en minúscula; hoy el bootstrap usa `"Encolado"` y se alinea en esa historia.
 
 ## Lista de proyectos (M3)
 

@@ -34,6 +34,7 @@ Cada despliegue produce un **artefacto versionado e inmutable** (`#n`, digest). 
 
 Fuente: [diagramas/compartido/c4-contexto.mmd](diagramas/compartido/c4-contexto.mmd).
 
+<!-- diagrama: docs/diagramas/compartido/c4-contexto.mmd -->
 ```mermaid
 ---
 title: C4 Nivel 1 — Contexto de Deploya
@@ -70,12 +71,20 @@ flowchart TB
     DEPLOYA --> CORREO
     DEPLOYA --> PAGOS
     DEPLOYA --> LLM
+
+    classDef actor fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
+    classDef sistema fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef externo fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
+    class CLIENTE,ADMIN,OPERADOR,SOPORTE actor
+    class DEPLOYA sistema
+    class GIT,NUBE,DNS,CA,CORREO,PAGOS,LLM externo
 ```
 
 ## C4 nivel 2 — contenedores
 
 Fuente: [diagramas/compartido/c4-contenedores.mmd](diagramas/compartido/c4-contenedores.mmd).
 
+<!-- diagrama: docs/diagramas/compartido/c4-contenedores.mmd -->
 ```mermaid
 ---
 title: C4 Nivel 2 — Contenedores de Deploya
@@ -117,6 +126,15 @@ flowchart TB
     API --> PAGOS
     API --> GIT
     EDGE --> NUBE
+
+    classDef persona fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
+    classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
+    classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
+    class CLIENTE persona
+    class WEB,API,MOTOR,HERR,OBS app
+    class COLA,BD data
+    class NUBE,EDGE,GIT,CORREO,PAGOS,LLM ext
 ```
 
 ## C4 nivel 3 — motor (M4–M6)

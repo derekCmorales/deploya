@@ -1,3 +1,9 @@
+/*
+ * Design system Deploya v4.1 — tokens canónicos.
+ * Fuente madre: docs/diseno/README.md y docs/diseno/tokens.json.
+ * :root = claro (predeterminado). .dark = oscuro.
+ * Neutros cálidos (papel / grafito) y un solo acento, «Señal», para lo que está en curso.
+ */
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -23,57 +29,94 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* v4.1 */
+  --color-sunken: var(--sunken);
+  --color-faint: var(--faint);
+  --color-border-strong: var(--border-strong);
+  --color-border-stronger: var(--border-stronger);
+  --color-signal: var(--signal);
+  --color-signal-soft: var(--signal-soft);
+  --color-signal-line: var(--signal-line);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --shadow-elev: var(--elev);
+  --ease-out-dy: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.14 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.14 0 0);
+
+  --background: oklch(0.974 0.006 85);
+  --sunken: oklch(0.952 0.008 85);
+  --card: oklch(0.995 0.003 85);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.14 0 0);
-  --primary: oklch(0.14 0 0);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0 0);
-  --secondary-foreground: oklch(0.14 0 0);
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.94 0 0);
-  --accent-foreground: oklch(0.14 0 0);
+  --foreground: oklch(0.2 0.012 70);
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+  --muted-foreground: oklch(0.465 0.012 70);
+  --faint: oklch(0.66 0.01 70);
+  --muted: oklch(0.935 0.008 85);
+  --accent: oklch(0.918 0.009 85);
+  --accent-foreground: var(--foreground);
+  --secondary: var(--muted);
+  --secondary-foreground: var(--foreground);
+  --border: oklch(0.25 0.02 70 / 0.11);
+  --border-strong: oklch(0.25 0.02 70 / 0.2);
+  --border-stronger: oklch(0.25 0.02 70 / 0.4);
+  --input: oklch(0.25 0.02 70 / 0.2);
+  --primary: oklch(0.2 0.012 70);
+  --primary-foreground: oklch(0.974 0.006 85);
+  --signal: oklch(0.5 0.15 250);
+  --signal-soft: oklch(0.5 0.15 250 / 0.09);
+  --signal-line: oklch(0.5 0.15 250 / 0.4);
+  --ring: var(--signal);
+  --ok: oklch(0.5 0.12 163);
+  --warn: oklch(0.52 0.12 70);
+  --bad: oklch(0.52 0.19 18);
   --destructive: oklch(0.55 0.2 25);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.14 0 0 / 12%);
-  --input: oklch(0.14 0 0 / 14%);
-  --ring: oklch(0.14 0 0);
+  --dot: oklch(0.25 0.02 70 / 0.1);
+  --elev: 0 1px 2px rgba(60, 45, 30, 0.06), 0 12px 32px -14px rgba(60, 45, 30, 0.22);
+  --overlay: rgba(52, 44, 36, 0.3);
 }
 
 .dark {
-  --background: oklch(0.12 0 0);
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0 0);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.16 0 0);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.98 0 0);
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.22 0 0);
-  --secondary-foreground: oklch(0.92 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.72 0 0);
-  --accent: oklch(0.24 0 0);
-  --accent-foreground: oklch(0.98 0 0);
+  --background: oklch(0.155 0.006 70);
+  --sunken: oklch(0.128 0.006 70);
+  --card: oklch(0.183 0.006 70);
+  --popover: oklch(0.205 0.006 70);
+  --foreground: oklch(0.965 0.006 85);
+  --muted-foreground: oklch(0.745 0.008 80);
+  --faint: oklch(0.56 0.008 80);
+  --muted: oklch(0.225 0.006 70);
+  --accent: oklch(0.245 0.006 70);
+  --border: oklch(0.96 0.01 85 / 0.085);
+  --border-strong: oklch(0.96 0.01 85 / 0.15);
+  --border-stronger: oklch(0.96 0.01 85 / 0.3);
+  --input: oklch(0.96 0.01 85 / 0.13);
+  --primary: oklch(0.965 0.006 85);
+  --primary-foreground: oklch(0.155 0.006 70);
+  --signal: oklch(0.78 0.12 232);
+  --signal-soft: oklch(0.78 0.12 232 / 0.13);
+  --signal-line: oklch(0.78 0.12 232 / 0.45);
+  --ok: oklch(0.765 0.177 163.223);
+  --warn: oklch(0.828 0.189 84.429);
+  --bad: oklch(0.712 0.194 13.428);
   --destructive: oklch(0.65 0.18 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.98 0 0);
+  --dot: oklch(0.96 0.01 85 / 0.075);
+  --elev: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --overlay: rgba(10, 9, 8, 0.66);
 }
 
 @layer base {
@@ -88,5 +131,112 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-variant-ligatures: none;
+  }
+}
+
+@layer utilities {
+  /* Retícula de puntos del «plano» (fondos de ilustración y lienzo). */
+  .puntos {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 16px 16px;
+    background-position: 8px 8px;
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Etapa en curso: barrido de Señal. */
+  .dy-barrido {
+    background: linear-gradient(
+      90deg,
+      var(--signal) 0 35%,
+      color-mix(in oklab, var(--signal) 35%, var(--background)) 50%,
+      var(--signal) 65% 100%
+    );
+    background-size: 300% 100%;
+    animation: dy-barrido 1.6s linear infinite;
+  }
+
+  .dy-vivo {
+    animation: dy-pulso 1.8s ease-out infinite;
+  }
+
+  .dy-cursor {
+    animation: dy-parpadeo 1.05s steps(1) infinite;
+  }
+
+  .dy-entrada {
+    animation: dy-entrada 0.45s var(--ease-out-dy) both;
+  }
+
+  .dy-esqueleto {
+    background: linear-gradient(90deg, var(--muted) 0%, var(--accent) 45%, var(--muted) 90%);
+    background-size: 220% 100%;
+    animation: dy-brillo 1.5s linear infinite;
+  }
+}
+
+@keyframes dy-barrido {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes dy-pulso {
+  0% {
+    box-shadow: 0 0 0 0 var(--signal-line);
+  }
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+@keyframes dy-parpadeo {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes dy-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dy-brillo {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dy-barrido,
+  .dy-vivo,
+  .dy-cursor,
+  .dy-entrada,
+  .dy-esqueleto,
+  .animate-spin {
+    animation: none;
   }
 }

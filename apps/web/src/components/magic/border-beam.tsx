@@ -16,7 +16,7 @@ export function BorderBeam({
   className,
   size = 80,
   duration = 8,
-  colorFrom = "oklch(0.75 0 0)",
+  colorFrom = "var(--signal)",
   colorTo = "transparent",
 }: BorderBeamProps) {
   return (

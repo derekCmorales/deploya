@@ -83,6 +83,10 @@ Rama por historia: `feat/m<n>-<slug>` (p. ej. `feat/m1-registro`). Cada historia
 
 La versión visual de esta sección, con las pantallas de cada quien y la presentación, está en la página **Entrega 1 · guía y presentación** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>).
 
+### Regla de calidad para todas las historias
+
+La hoja **Entrega 1 · Calidad** del canvas resume esta regla. Cada historia del avance entra con su diseño en SOLID y patrones en el `design.md` del change y con sus **pruebas unitarias** (una por escenario del spec) en verde en CI. Los mínimos por historia están en [ingenieria.md §5.3](ingenieria.md#53-pruebas-mínimas-del-avance-1). Sin eso la historia no suma puntos.
+
 ### Qué se demuestra
 
 > Un usuario nuevo se registra, verifica su correo, inicia sesión, ve los planes, crea un proyecto desde un repositorio público con `Dockerfile` y lo ve pasar de *Construyendo* a *Saludable*; la aplicación responde en el navegador.
@@ -107,7 +111,7 @@ La contratación con pago, la vista rica de despliegue (riel + bitácora) y el s
 | Id | Entrega | Terminado cuando |
 |---|---|---|
 | DB-01 | Schema Prisma del núcleo: `Usuario`, `TokenCuenta`, `Sesion`, `Plan`, `Suscripcion`, `Pago`, `Proyecto`, `VariableEntorno`, `Despliegue`, `LineaBitacora`. Seed de los cuatro planes v4.1 y del admin. Suscripción Sandbox al crear la cuenta | Migración aplicada en compose; seed idempotente |
-| M2-01 | Catálogo público de planes (06) con la tabla de recursos y el cambio 30 / 365 días | `/billing/planes` lee de la base, no de constantes |
+| M2-01 | Catálogo público de planes (06) con la tabla de recursos y el cambio 30 / 365 días | `/planes` lee de la base, no de constantes |
 
 **Presenta:** el ERD del núcleo frente al schema real, la página de planes y cómo un usuario nuevo queda en Sandbox. Si le da el tiempo, adelanta M2-02 (contratación) sin prometerla.
 
@@ -150,7 +154,7 @@ El design system ya está migrado (WEB-01): usa `docs/diseno/` y los componentes
 3. **Planes y datos (Javier, 2 min):** ERD → schema → planes; Sandbox automático.
 4. **Proyecto (Eduardo, 3 min):** alta desde el repo de ejemplo; errores; **Desplegar**.
 5. **Motor (Derek, 2 min):** bitácora, límites aplicados, app en línea.
-6. **Proceso (Eddy, 1 min):** PRs revisados, CI verde, changes de OpenSpec archivados, porcentaje con la tabla de arriba.
+6. **Proceso y calidad (Eddy, 1 min):** PRs revisados, CI verde con las pruebas unitarias de cada historia, SOLID y patrones por módulo ([ingenieria.md](ingenieria.md)), changes de OpenSpec archivados, porcentaje con la tabla de arriba.
 
 Plan B: el video grabado el martes en el ensayo, por si falla la red o Docker durante la presentación.
 

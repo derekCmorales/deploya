@@ -1,6 +1,6 @@
 # Cómo trabajamos
 
-Una pasada. Alcance: [docs/alcance.md](docs/alcance.md). Entregas y porcentajes: [docs/plan-avances.md](docs/plan-avances.md). Git y OpenSpec: [docs/guia-equipo.md](docs/guia-equipo.md).
+Una pasada. Alcance: [docs/alcance.md](docs/alcance.md). Calidad (SOLID, clean code, patrones, pruebas): [docs/ingenieria.md](docs/ingenieria.md). Entregas y porcentajes: [docs/plan-avances.md](docs/plan-avances.md). Git y OpenSpec: [docs/guia-equipo.md](docs/guia-equipo.md).
 
 ## Scrum — ciclos de dos semanas
 
@@ -22,8 +22,8 @@ Cada entrega evaluada (30 %, 50 %, 80 %, final) cierra un ciclo. El porcentaje s
 Una historia **no está terminada** hasta que el código está:
 
 1. Implementado  
-2. Probado  
-3. Documentado  
+2. Probado: pruebas unitarias por cada escenario del spec, en verde en CI ([docs/ingenieria.md §5](docs/ingenieria.md#5-pruebas-unitarias--regla-por-historia))  
+3. Documentado, con el diseño explicado en SOLID y patrones en el `design.md` del change  
 4. Revisado en un PR  
 5. Desplegado en el entorno de pruebas (compose en `main`; desde el Avance 3, el VPS)  
 6. Demostrable con la pantalla v4.1 que le corresponde  
@@ -70,5 +70,6 @@ Kit de una pantalla: [docs/roles/](docs/roles/).
 ## Estado del repo
 
 - El **design system v4.1** está migrado ([docs/diseno/](docs/diseno/README.md)): tokens, componentes y catálogo en `/sistema`. Las rutas de producto aún son stubs; cada historia construye su pantalla encima, sin paleta nueva.  
-- Terminó el bootstrap: stubs + health por módulo. Desde el Avance 1 entra el dominio real, historia por historia ([docs/plan-avances.md](docs/plan-avances.md)).  
+- Terminó el bootstrap: stubs + health por módulo. Desde el Avance 1 entra el dominio real, historia por historia ([docs/plan-avances.md](docs/plan-avances.md)), con el estándar de [docs/ingenieria.md](docs/ingenieria.md).  
+- Antes de pedir revisión, `pnpm check` corre lo mismo que CI (pruebas, build y diagramas).  
 - Lo que no es ni será (salvo que sobre tiempo): la lista *fuera de alcance* de [docs/alcance.md](docs/alcance.md).

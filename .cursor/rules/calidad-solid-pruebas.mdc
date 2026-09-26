@@ -1,0 +1,17 @@
+---
+description: Calidad — SOLID, clean code, patrones y pruebas unitarias por historia
+alwaysApply: true
+---
+
+# Calidad (base del curso)
+
+Estándar: [docs/ingenieria.md](../../docs/ingenieria.md). Auditoría: [docs/AUDITORIA_SOLID_CLEAN.md](../../docs/AUDITORIA_SOLID_CLEAN.md).
+
+Antes de escribir código de una historia:
+
+1. **Capas** por módulo: dominio puro → servicio (caso de uso) → puertos (`abstract class`, sin `I`) → adaptadores. Controladores y trabajadores solo adaptan la entrada.
+2. **SOLID**: una responsabilidad por clase; extender con implementaciones nuevas de un puerto, no con `switch` por tipo; stubs y adaptadores intercambiables; puertos estrechos; dependencias por constructor (nada de `new Docker()`, `new PrismaClient()`, `Date.now()` en el dominio: inyecta `Reloj`).
+3. **Clean code**: nombres del dominio en español; funciones ≤ 20 líneas y ≤ 3 parámetros; constantes con nombre; errores de dominio con nombre traducidos a HTTP en el borde; sin `any`; comentarios solo para el porqué.
+4. **Patrones**: nombra en `design.md` los que usas (Repository, Adapter, Strategy, State, Facade, Observer, Command) y por qué.
+5. **Pruebas unitarias en el mismo PR**: una por cada `Scenario` del spec delta, nombrada con el escenario; dobles de los puertos, nunca Docker, red, base ni reloj reales; AAA; ramas de error cubiertas; ≥ 80 % de líneas en dominio/servicios tocados (`pnpm --filter @deploya/api test:cov`). Lógica web pura con `node --test`.
+6. No marques una tarea como hecha con `pnpm test` en rojo. Mantén los `health` y sus pruebas.

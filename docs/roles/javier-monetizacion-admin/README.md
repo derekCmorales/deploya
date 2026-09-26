@@ -54,6 +54,14 @@ Detalle del Avance 1 y lo que presentas: [plan-avances.md § Javier](../../plan-
 
 **Dependencia crítica:** tu schema bloquea a todos. PR el lunes; pide antes los campos a cada módulo. Si te sobra tiempo en el Avance 1, adelanta M2-02.
 
+## SOLID, patrones y pruebas
+
+Regla general: [ingenieria.md](../../ingenieria.md). Lo tuyo:
+
+- **Patrones:** `PasarelaPago` ← `PasarelaSimulada` (Strategy), `PoliticaCicloSuscripcion` (State como función pura), `SuscripcionesService` como Facade (`asignarSandbox`, `cuotaDe`), repositorios de planes y suscripciones.
+- **SOLID:** el ciclo §4.4 no vive en el servicio (S); nueva pasarela = nueva clase (O); la simulada y una real devuelven el mismo `ResultadoPago` (L).
+- **Pruebas mínimas A1:** seed idempotente; `asignarSandbox` crea Activa; `cuotaDe` para los 4 planes; precio 30 / 365 días. A2–A3: tarjetas `4242`/`0002`/`3220`, cada transición del ciclo con fecha inyectada.
+
 ## Fuera de alcance · solo si da el tiempo
 
 Reactivar cuenta suspendida · renovación automática · prorrateo · complementos §4.3 · CRUD de planes · estado de infraestructura · cancelación por el cliente y exportar datos · límites de almacenamiento, transferencia, retención y miembros.

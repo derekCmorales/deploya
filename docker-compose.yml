@@ -31,7 +31,7 @@ services:
       dockerfile: Dockerfile.api
     environment:
       PORT: 3000
-      DATABASE_URL: postgresql://deploya:deploya@postgres:5432/deploya
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deploya}:${POSTGRES_PASSWORD:-deploya}@postgres:5432/${POSTGRES_DB:-deploya}
       REDIS_URL: redis://redis:6379
     ports:
       - "${API_PORT:-3001}:3000"
@@ -46,7 +46,7 @@ services:
       context: .
       dockerfile: Dockerfile.web
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-3001}
     ports:
       - "${WEB_PORT:-3000}:3000"
     depends_on:

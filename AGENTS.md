@@ -42,11 +42,13 @@ Specs: `openspec/specs/<modulo>/spec.md`.
 |---|---|
 | Eddy | `identidad`, `notificaciones`, `apps/web` `(auth)`, `.github/workflows` |
 | Javier | `suscripciones`, `administracion`, `(billing)`, `(admin)`, `prisma` |
-| Eduardo | `proyectos`, `observabilidad`, `apps/web` ([kit visual](docs/kit-visual.md): Geist, claro/oscuro) |
+| Eduardo | `proyectos`, `observabilidad`, `apps/web` ([design system v4.1](docs/diseno/README.md)) |
 | Derek | `construccion`, `orquestacion`, `enrutamiento`, `herramientas` (stub), compose, `adapters` |
 
 ## Bootstrap
 
 El andamiaje ya está en `main`: módulo Nest registrado + `GET /<modulo>/health` por módulo. Los PRs de andamiaje (`chore/`) no implementan dominio; desde el Avance 1 cada historia de [docs/plan-avances.md](docs/plan-avances.md) implementa el dominio real con su change de OpenSpec. Los `health` se mantienen.
 
-La web usa el **kit visual canónico** ([docs/kit-visual.md](docs/kit-visual.md)): tokens, AppShell mínimo, Geist, toggle claro/oscuro. Rutas actuales = stubs; cada historia con UI implementa su pantalla del canvas v4.1 encima del kit. Specs con UI deben reutilizar ese documento; no paleta nueva.
+## Diseño — fuente madre
+
+Toda la UI sale de **`docs/diseno/`** (design system v4.1): principios y componentes en `docs/diseno/README.md`, cómo armar una pantalla y el prompt para agentes en `docs/diseno/guia-construccion.md`, y una ficha por pantalla en `docs/diseno/pantallas/`. Código: tokens en `apps/web/src/app/globals.css`, componentes en `apps/web/src/components` (catálogo en `/sistema`). Un agente que construya una pantalla **debe** leer esos tres documentos antes de escribir código. Nada de hex, paletas por módulo, otro shell ni otro set de iconos. El canvas de Claude Design es solo para mirar.

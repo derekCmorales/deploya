@@ -18,7 +18,7 @@ M8 (UI del asistente) quedó **fuera de alcance**.
 
 | # | Pantalla | Historia |
 |---|---|---|
-| Main | Identidad visual v4.1 | WEB-01 |
+| Main | Identidad visual v4.1 | WEB-01 (hecho) |
 | 10, 10b | Proyectos y primer proyecto | M3-01 |
 | 11a, 11d, 11e | Nuevo proyecto: Repositorio, Revisar, errores | M3-02 |
 | 11c, 17 | Variables (alta y proyecto) | M3-03 |
@@ -28,9 +28,11 @@ M8 (UI del asistente) quedó **fuera de alcance**.
 | 10c, 28 | Suscripción vencida y estados del sistema | WEB-02 |
 | 08 (consumo), 13 (actividad) | Consumo del período y actividad | M7-03 |
 
-## Kit visual — alinear a v4.1
+## Design system v4.1 — ya migrado
 
-El kit del repo es monocromático y oscuro por defecto; el canvas v4.1 (posterior) es **claro por defecto**, con neutros cálidos, un azul **Señal** solo para lo que está en curso y colores de estado (`--ok`, `--warn`, `--bad`, `--destructive`). WEB-01 lleva esos tokens a `apps/web/src/app/globals.css` y actualiza [kit-visual.md](../../kit-visual.md). Si el equipo prefiere quedarse monocromático, anótalo en un ADR y sigue.
+El sistema del canvas v4.1 ya está en el repo (WEB-01, hecho): tokens en `globals.css` (claro por defecto, Señal, `ok`/`warn`/`bad`), componentes en `apps/web/src/components` y catálogo en `/sistema`. La fuente madre para ti y para cualquier agente es [docs/diseno/](../../diseno/README.md): principios, [guía de construcción](../../diseno/guia-construccion.md) y [fichas por pantalla](../../diseno/pantallas/).
+
+Eres su dueño: revisa que cada PR con UI use los componentes y no estilos sueltos. Si falta una variante, se agrega al componente y a `/sistema`.
 
 Accesibilidad: semántica, foco visible, contraste en ambos temas, botones reales.
 
@@ -38,14 +40,14 @@ Accesibilidad: semántica, foco visible, contraste en ambos temas, botones reale
 
 | Avance | Historias | Pts |
 |---|---|---|
-| **A1 (30 %)** | WEB-01 kit v4.1 + shell del panel · M3-01 lista · M3-02 alta, revisar y desplegar | 10 |
+| **A1 (30 %)** | M3-01 lista · M3-02 alta, revisar y desplegar (WEB-01, el design system, ya está hecho) | 8 |
 | A2 (50 %) | M7-01 vista de despliegue · M3-03 variables cifradas | 8 |
 | A3 (80 %) | M7-02 resumen e historial · M3-04 configuración y eliminar · WEB-02 estados del sistema · M7-03 consumo y actividad | 10 |
 | Final | DOC-02 guion, video y accesibilidad | 3 |
 
-Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eduardo](../../plan-avances.md#eduardo--proyectos-10-pts).
+Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eduardo](../../plan-avances.md#eduardo--proyectos-8-pts).
 
-**Dependencias:** schema de Javier (lunes), contrato de la API de despliegues de Derek (martes), guard de sesión de Eddy (miércoles; antes usa el usuario del seed).
+**Dependencias:** schema de Javier (lunes), contrato de despliegues ([docs/contratos/despliegues.md](../../contratos/despliegues.md), ya publicado), guard de sesión de Eddy (martes 12:00; antes usa el usuario del seed).
 
 ## Fuera de alcance · solo si da el tiempo
 

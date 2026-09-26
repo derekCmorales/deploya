@@ -20,7 +20,7 @@ El spec vive bajo el módulo: `openspec/specs/identidad/`, `notificaciones/`, `s
 
 Los specs base ya reflejan el **alcance núcleo v4.1** ([alcance.md](alcance.md)); cada uno tiene su sección *Fuera de alcance · solo si da el tiempo*. Extiéndelos con changes; no los sustituyas por un spec único del producto. Tomar algo de esa sección exige un change propio y haber terminado lo **Debe** del módulo.
 
-UI: si la historia pinta en `apps/web`, el spec delta **debe** reutilizar [kit-visual.md](kit-visual.md) (tokens, AppShell, tema claro/oscuro). No inventar paleta. Las rutas actuales son stubs del kit, no el producto de cada módulo.
+UI: si la historia pinta en `apps/web`, el spec delta **debe** reutilizar el design system ([diseno/README.md](diseno/README.md)) y construirse con la [guía](diseno/guia-construccion.md) y la ficha de su pantalla. No inventar paleta. Las rutas actuales son stubs del kit, no el producto de cada módulo.
 
 ## Ramas
 

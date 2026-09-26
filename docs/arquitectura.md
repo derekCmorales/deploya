@@ -140,7 +140,7 @@ Fuente: [diagramas/compartido/c4-componentes-motor.mmd](diagramas/compartido/c4-
 
 ## Sistema de diseño
 
-Canon: [kit-visual.md](kit-visual.md). Geist, tokens claro/oscuro (toggle), cromática monocromática, primitivos shadcn + Lucide; `@xyflow/react` y framer-motion en el package. Las rutas en `apps/web` son **stubs** del kit; cada módulo construye su dominio encima, sin paleta propia ni pantallas fingidas.
+Fuente madre: [diseno/](diseno/README.md). Design system v4.1: claro por defecto, neutros cálidos, acento Señal solo para lo que está en curso, Geist / Geist Mono, Lucide, componentes propios en `apps/web/src/components` (catálogo en `/sistema`). Cada pantalla tiene su ficha en `diseno/pantallas/`.
 
 ## Fuera de alcance
 

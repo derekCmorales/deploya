@@ -14,7 +14,7 @@ context: |
   Alcance núcleo v4.1: docs/alcance.md (manda sobre docs/propuesta.md). Solo repo público de GitHub con Dockerfile.
   M8 fuera de alcance (stub). Lo de "fuera de alcance · solo si da el tiempo" requiere change propio.
   Plan de entregas y dueños por historia: docs/plan-avances.md.
-  Kit visual canónico: docs/kit-visual.md (Geist, tokens claro/oscuro, AppShell mínimo).
+  Design system v4.1 (fuente madre de UI): docs/diseno/README.md, docs/diseno/guia-construccion.md y docs/diseno/pantallas/<pantalla>.md.
   Specs con UI en apps/web SHALL reutilizar ese kit; no inventar paleta.
   Las pantallas de referencia son las del canvas Deploya v4.1 (mapa en docs/alcance.md).
   Español de la propuesta. No usar IPasarelaPago ni ISourceProvider.
@@ -28,14 +28,14 @@ rules:
   specs:
     - Write requirements in Spanish; SHALL/WHEN/THEN as in existing seeds
     - Do not introduce I-prefixed ports
-    - UI in apps/web must reuse docs/kit-visual.md; do not invent palettes or a second shell
+    - UI in apps/web must reuse docs/diseno/README.md; do not invent palettes or a second shell
   tasks:
     - Break tasks into chunks a teammate can finish in one PR
 
 operations:
   apply:
     guidance:
-      - UI: reutilizar docs/kit-visual.md (shell, tokens, tema); no inventar paleta ni fingir pantallas de producto
+      - UI: seguir docs/diseno/guia-construccion.md y la ficha de la pantalla; solo componentes de apps/web/src/components; no inventar paleta
       - Keep module health endpoints working
   archive:
     guidance:

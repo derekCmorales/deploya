@@ -38,7 +38,7 @@ Sin Docker, en local: `pnpm install && pnpm build && pnpm test` (API en `3001` c
 | Arquitectura C4 + ciclo | [docs/arquitectura.md](docs/arquitectura.md) |
 | ERD / clases / C4 únicos | [docs/diagramas/compartido/](docs/diagramas/compartido/) |
 | Git, ramas, PRs | [docs/guia-equipo.md](docs/guia-equipo.md) |
-| Kit visual (UI de todos los módulos) | [docs/kit-visual.md](docs/kit-visual.md) |
+| **Design system v4.1** (fuente madre de UI, guía de construcción, fichas por pantalla) | [docs/diseno/](docs/diseno/README.md) |
 | Agentes y Cursor | [AGENTS.md](AGENTS.md) |
 
 ## Nunca a `main`

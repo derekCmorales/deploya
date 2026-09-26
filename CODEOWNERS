@@ -34,4 +34,6 @@
 /Dockerfile.api @derekCmorales
 /Dockerfile.web @derekCmorales
 /docs/diagramas/compartido/ @derekCmorales
+/docs/diseno/ @Portillo17e @derekCmorales
+/docs/contratos/ @derekCmorales
 /openspec/config.yaml @derekCmorales

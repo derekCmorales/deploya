@@ -41,7 +41,7 @@ Estados de despliegue: Encolado, Construyendo, Aprovisionando, Publicando, Salud
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Derek](../../plan-avances.md#derek--motor-10-pts).
 
-**Dependencia crítica:** el contrato de la API de despliegues el martes, para que Eduardo conecte el botón **Desplegar**.
+**Dependencia crítica:** el contrato ya está en [docs/contratos/despliegues.md](../../contratos/despliegues.md); tu implementación debe cumplirlo para que Eduardo conecte **Desplegar** el martes. También migraste el design system v4.1 (WEB-01, hecho).
 
 ## Fuera de alcance · solo si da el tiempo
 

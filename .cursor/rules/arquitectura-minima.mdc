@@ -13,4 +13,4 @@ Estados de despliegue ≠ estados de suscripción §4.4.
 
 Alcance: núcleo v4.1 en `docs/alcance.md` (manda sobre la propuesta). No implementar nada de *fuera de alcance · solo si da el tiempo* sin un change de OpenSpec.
 
-Kit visual canónico: [docs/kit-visual.md](../../docs/kit-visual.md) (Geist, claro/oscuro, header mínimo). Specs con UI reutilizan el kit y la pantalla del canvas v4.1 que les toca; no paleta nueva. Docs: `docs/arquitectura.md`.
+Design system v4.1: [docs/diseno/README.md](../../docs/diseno/README.md), [guía de construcción](../../docs/diseno/guia-construccion.md) y fichas en `docs/diseno/pantallas/`. Specs con UI reutilizan el kit y la pantalla del canvas v4.1 que les toca; no paleta nueva. Docs: `docs/arquitectura.md`.

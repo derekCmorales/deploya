@@ -4,7 +4,7 @@
 
 Por indicación del curso, el alcance se limita a lo **más core**, que es lo que se califica. Lo que se diseñó en la propuesta y ya no entra queda abajo en [Fuera de alcance · solo si da el tiempo](#fuera-de-alcance--solo-si-da-el-tiempo): no se borra, se pospone.
 
-Referencia visual: canvas **Deploya v4.1** en Claude Design (34 pantallas). Si una pantalla y un documento no coinciden, **manda la pantalla** y se corrige el documento.
+Referencia visual: canvas **Deploya v4.1** en Claude Design (34 pantallas, <https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Para construir se usa su traducción al repo: [diseno/](diseno/README.md) (design system, guía y una ficha por pantalla). Si una pantalla y un documento no coinciden, **manda la pantalla** y se corrige el documento.
 
 ## En una frase
 
@@ -43,7 +43,7 @@ Un cliente se registra, verifica su correo, contrata un plan con pago simulado, 
 | 19, 19b | Proyecto · Configuración y eliminar | M3 (+ M5) | Eduardo |
 | 12, 12b, 12c | Despliegue en curso, Saludable, Fallido | UI: Eduardo · motor: Derek | Eduardo + Derek |
 | 28 | Estados del sistema (404, 403, sesión expirada, suscripción suspendida, error de API, carga) | transversal web | Eduardo (+ Javier: suspendida) |
-| Main | Identidad visual v4.1 (tokens, riel de etapas, tipografía) | kit visual | Eduardo |
+| Main | Identidad visual v4.1 → migrada a [diseno/](diseno/README.md) y `apps/web/src/components` | design system | Eduardo (hecho) |
 
 Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que hace **reales** las pantallas 10–14 y 19. La numeración tiene huecos (15, 16, 18, 20–23, 26, 27): son pantallas que se recortaron con el alcance.
 

@@ -8,8 +8,8 @@ Cada historia del núcleo tiene puntos (1 = medio día, 5 = casi una semana a ti
 
 | Entrega | Puntos nuevos | Acumulado | % del sistema |
 |---|---|---|---|
-| Ya entregado (bootstrap, kit, diagramas) | 11 | 11 | 8 % |
-| **Avance 1** | 35 | 46 | **34 %** |
+| Ya entregado (bootstrap, diagramas, design system v4.1) | 13 | 13 | 9 % |
+| **Avance 1** | 33 | 46 | **34 %** |
 | Avance 2 | 32 | 78 | 57 % |
 | Avance 3 | 37 | 115 | 84 % |
 | Entrega final | 22 | 137 | 100 % |
@@ -20,8 +20,8 @@ El Avance 1 queda en 34 % a propósito: si una historia no llega, el equipo sigu
 |---|---|---|---|---|---|---|
 | Eddy | — | 10 | 6 | 4 | 5 | 25 |
 | Javier | — | 5 | 11 | 13 | 3 | 32 |
-| Eduardo | 3 | 10 | 8 | 10 | 3 | 34 |
-| Derek | 3 | 10 | 7 | 10 | 3 | 33 |
+| Eduardo | 3 | 8 | 8 | 10 | 3 | 32 |
+| Derek | 5 | 10 | 7 | 10 | 3 | 35 |
 | Todos | 5 | — | — | — | 8 | 13 |
 
 Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene que estar en `main` el lunes.
@@ -53,7 +53,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M9-01 | Admin · Usuarios | 25 | Javier | 3 | A3 |
 | M9-02 | Admin · Suspender cuenta | 25b | Javier | 2 | A3 |
 | DOC-01 | Documento de requisitos y manual de usuario | — | Javier | 3 | Final |
-| WEB-01 | Kit alineado a v4.1 + shell del panel autenticado | Main | Eduardo | 2 | **A1** |
+| WEB-01 | Design system v4.1 migrado: tokens, componentes, shell, `/sistema` y `docs/diseno` | Main | Derek | 2 | Hecho |
 | M3-01 | Lista de proyectos y primer proyecto | 10, 10b | Eduardo | 3 | **A1** |
 | M3-02 | Nuevo proyecto: repositorio, revisar y desplegar | 11a, 11d, 11e | Eduardo | 5 | **A1** |
 | M7-01 | Vista de despliegue: riel de etapas y bitácora | 12, 12b, 12c | Eduardo | 5 | A2 |
@@ -79,7 +79,9 @@ Rama por historia: `feat/m<n>-<slug>` (p. ej. `feat/m1-registro`). Cada historia
 
 ---
 
-## Avance 1 — 30 % (semana del 28 de septiembre)
+## Avance 1 — 30 % (miércoles 30 de septiembre)
+
+La versión visual de esta sección, con las pantallas de cada quien y la presentación, está en la página **Entrega 1 · guía y presentación** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>).
 
 ### Qué se demuestra
 
@@ -98,7 +100,7 @@ La contratación con pago, la vista rica de despliegue (riel + bitácora) y el s
 
 **Presenta:** registro en vivo → correo en Mailpit → cuenta activa → login. Muestra el intento con contraseña débil y con cuenta sin verificar. Enseña las pruebas unitarias del servicio de identidad.
 
-**Entrega a otros:** el guard y el decorador el **miércoles** a más tardar. Hasta entonces Eduardo usa el usuario del seed.
+**Entrega a otros:** el guard y el decorador el **martes a las 12:00** a más tardar. Hasta entonces Eduardo usa el usuario del seed.
 
 ### Javier — monetización (5 pts)
 
@@ -111,13 +113,14 @@ La contratación con pago, la vista rica de despliegue (riel + bitácora) y el s
 
 **Entrega a otros:** PR del schema **lunes 28**. Antes de abrirlo, pide a Eddy, Eduardo y Derek sus campos (15 minutos en la sincronización).
 
-### Eduardo — proyectos (10 pts)
+### Eduardo — proyectos (8 pts)
 
 | Id | Entrega | Terminado cuando |
 |---|---|---|
-| WEB-01 | Kit alineado a v4.1: tokens (claro por defecto, `--signal`, `--ok`/`--warn`/`--bad`), shell del panel con navegación Proyectos · Planes · Cuenta | Las pantallas nuevas no usan hex sueltos |
 | M3-01 | Lista de proyectos (10) y primer proyecto (10b), con contador frente al límite del plan | Con 0 proyectos se ve 10b; con Sandbox el botón se bloquea al llegar a 1 |
 | M3-02 | Nuevo proyecto (11a → 11d): URL, rama, nombre, puerto desde `EXPOSE`; errores de 11e; **Desplegar** llama a la API de Derek | Repo privado y repo sin `Dockerfile` muestran 11e; un repo válido queda desplegando |
+
+El design system ya está migrado (WEB-01): usa `docs/diseno/` y los componentes de `apps/web/src/components`; revisa los PRs con UI de los demás.
 
 **Presenta:** el flujo del panel de punta a punta con un repositorio de ejemplo, los dos errores de 11e y la lista actualizando el estado por polling.
 
@@ -126,23 +129,21 @@ La contratación con pago, la vista rica de despliegue (riel + bitácora) y el s
 | Id | Entrega | Terminado cuando |
 |---|---|---|
 | ENG-01 | Compose con trabajador, Traefik y Mailpit; repositorio de ejemplo con `Dockerfile` para la demo | `docker compose up` levanta todo con un comando |
-| M4-01 | Cola BullMQ, trabajador: clonar rama → `docker build` → artefacto `#n` con digest → líneas de bitácora en la base. API: `POST /proyectos/:id/despliegues`, `GET /despliegues/:id`, `GET /despliegues/:id/bitacora?desde=` | Contrato publicado el **martes** para Eduardo |
+| M4-01 | Cola BullMQ, trabajador: clonar rama → `docker build` → artefacto `#n` con digest → líneas de bitácora en la base. API: `POST /proyectos/:id/despliegues`, `GET /despliegues/:id`, `GET /despliegues/:id/bitacora?desde=` | Contrato ya publicado en `docs/contratos/despliegues.md`; la implementación lo respeta |
 | M5-01 | Correr la imagen vía `ContenedorPuerto` con `--cpus` y `--memory` del plan (Sandbox), sin privilegios; verificación de salud HTTP → Saludable o Fallido | `docker inspect` muestra los límites |
 
 **Presenta:** el diagrama de estados de despliegue y la secuencia contra lo que corre, la bitácora en la base, `docker inspect` con los límites y la app respondiendo. Si M6-01 llega antes, la URL `<proyecto>.localhost`.
 
-### Calendario de la semana
+### Calendario hasta el miércoles
 
 | Día | Qué |
 |---|---|
-| Sáb 26 – dom 27 | Cada quien abre su change con `/opsx-propose` (un change por historia o uno por persona para el avance) |
-| Lun 28 | PR del schema (Javier) → merge. Compose (Derek) |
-| Mar 29 | Contrato de la API de despliegues (Derek). Registro (Eddy) |
-| Mié 30 | Guard de sesión (Eddy). Alta de proyecto contra la API real (Eduardo) |
-| Jue 1 | Todo en `main`. Ensayo del guion completo sobre `main` limpio. Congelar |
-| Presentación | Guion de abajo |
+| Sáb 26 – dom 27 | Cada quien lee su guía y abre su change con `/opsx-propose`. Javier sube el schema en PR borrador. El contrato de despliegues ya está en `docs/contratos/despliegues.md` |
+| Lun 28 | **12:00** schema en `main`. Compose con trabajador, Traefik y Mailpit (Derek). Registro y verificación (Eddy). Lista de proyectos contra el contrato (Eduardo). Catálogo (Javier) |
+| Mar 29 | **12:00** guard de sesión en `main` (Eddy). Alta contra la API real (Eduardo). Contenedor con límites y salud (Derek). **20:00** todo en `main`. **21:00** ensayo completo y video de respaldo |
+| Mié 30 | Ensayo corto en la mañana sobre `main` limpio. **Presentación** |
 
-### Guion de la presentación (≈ 12 min)
+### Guion de la presentación (≈ 12 min, 14 diapositivas en el canvas)
 
 1. **Contexto (Derek, 1 min):** qué es Deploya y el recorte de alcance ([alcance.md](alcance.md)): núcleo + lista "solo si da el tiempo".
 2. **Cuentas (Eddy, 3 min):** registro → Mailpit → verificación → login; errores.
@@ -151,7 +152,7 @@ La contratación con pago, la vista rica de despliegue (riel + bitácora) y el s
 5. **Motor (Derek, 2 min):** bitácora, límites aplicados, app en línea.
 6. **Proceso (Eddy, 1 min):** PRs revisados, CI verde, changes de OpenSpec archivados, porcentaje con la tabla de arriba.
 
-Plan B: grabar el recorrido el jueves por si falla la red o Docker durante la presentación.
+Plan B: el video grabado el martes en el ensayo, por si falla la red o Docker durante la presentación.
 
 ---
 

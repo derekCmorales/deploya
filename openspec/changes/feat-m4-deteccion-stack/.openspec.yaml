@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-09-27
+goal: Detectar el stack (Node, Python, Go, estático) cuando no hay Dockerfile y construir
+  con una receta de Deploya; misma detección en el alta (M3) y en el trabajador (M4)

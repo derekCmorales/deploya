@@ -1,0 +1,13 @@
+# Configuración estática de Traefik (ADR 0005). Las rutas de cada proyecto las
+# escribe el worker en /traefik/dinamico/<subdominio>.yml (proveedor de archivo).
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  file:
+    directory: /traefik/dinamico
+    watch: true
+
+log:
+  level: INFO

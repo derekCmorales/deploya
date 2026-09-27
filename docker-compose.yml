@@ -33,6 +33,7 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-deploya}:${POSTGRES_PASSWORD:-deploya}@postgres:5432/${POSTGRES_DB:-deploya}
       REDIS_URL: redis://redis:6379
+      MOTOR_ADAPTADORES: docker
     ports:
       - "${API_PORT:-3001}:3000"
     depends_on:
@@ -40,6 +41,49 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  # Motor (ADR 0002): misma imagen que la API; el único proceso con docker.sock y git.
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: deploya-worker
+    command: ["node", "dist/trabajador.js"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deploya}:${POSTGRES_PASSWORD:-deploya}@postgres:5432/${POSTGRES_DB:-deploya}
+      REDIS_URL: redis://redis:6379
+      MOTOR_ADAPTADORES: docker
+      DOMINIO_APPS: ${DOMINIO_APPS:-localhost}
+      ESQUEMA_APPS: ${ESQUEMA_APPS:-http}
+      TRAEFIK_DINAMICO: /traefik/dinamico
+      TRAEFIK_CONTENEDOR: deploya-traefik
+      TRABAJADOR_CONTENEDOR: deploya-worker
+      TRABAJADOR_CONCURRENCIA: ${TRABAJADOR_CONCURRENCIA:-1}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - traefik_dinamico:/traefik/dinamico
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Enrutador de borde (ADR 0005): <proyecto>.localhost en desarrollo.
+  traefik:
+    image: traefik:v3.3
+    container_name: deploya-traefik
+    ports:
+      - "${APPS_PORT:-80}:80"
+    volumes:
+      - ./infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - traefik_dinamico:/traefik/dinamico
+
+  # Bandeja de correo de desarrollo (ADR 0001): SMTP en 1025, interfaz en 8025.
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
 
   web:
     build:
@@ -54,3 +98,4 @@ services:
 
 volumes:
   deploya_pg:
+  traefik_dinamico:

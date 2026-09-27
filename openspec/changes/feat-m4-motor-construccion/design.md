@@ -150,7 +150,7 @@ Cambios a puertos, clases y estados: todos reflejados en `clases-unificado.mmd` 
 
 ### 11. Puertos estrechos hacia otros módulos (decidido al implementar)
 
-M2 (`cuotaDe`) y M3 (alta de proyectos) todavía no existen. En vez de depender de sus servicios completos, el motor declara lo mínimo que necesita: `CuotaPlanPuerto.recursosDe` y `ProyectosLecturaPuerto.porId` (ISP). Sus adaptadores reales envuelven lo que exporten `SuscripcionesModule` y `ProyectosModule`; mientras tanto, stubs y memoria. Sesión: `@UsuarioSolicitante()` responde 401 si no hay usuario en la solicitud, hasta que llegue `@UsuarioActual()` de M1.
+M2 (`cuotaDe`) y M3 (alta de proyectos) todavía no existen. En vez de depender de sus servicios completos, el motor declara lo mínimo que necesita: `CuotaPlanPuerto.recursosDe` y `ProyectosLecturaPuerto.porId` (ISP). Sus adaptadores reales envuelven lo que exporten `SuscripcionesModule` y `ProyectosModule`; mientras tanto, stubs y memoria. Sesión: `@UsuarioSolicitante()` responde 401 si no hay usuario en la solicitud, hasta que llegue `@UsuarioActual()` de M1; en desarrollo acepta `USUARIO_DESARROLLO` (nunca con `NODE_ENV=production`). Para la lista de M3, `ConstruccionService.ultimosDespliegues(proyectoIds)`.
 
 ### 12. Compensación
 

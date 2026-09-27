@@ -14,7 +14,7 @@ import { HerramientasModule } from "./modules/herramientas/herramientas.module";
 
 @Module({
   imports: [
-    AdaptersModule,
+    AdaptersModule.paraApi(),
     IdentidadModule,
     NotificacionesModule,
     SuscripcionesModule,

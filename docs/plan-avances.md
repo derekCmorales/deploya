@@ -9,19 +9,19 @@ Cada historia del núcleo tiene puntos (1 = medio día, 5 = casi una semana a ti
 | Entrega | Puntos nuevos | Acumulado | % del sistema |
 |---|---|---|---|
 | Ya entregado (bootstrap, diagramas, design system v4.1) | 13 | 13 | 9 % |
-| **Avance 1** | 33 | 46 | **34 %** |
-| Avance 2 | 32 | 78 | 57 % |
-| Avance 3 | 37 | 115 | 84 % |
-| Entrega final | 22 | 137 | 100 % |
+| **Avance 1** | 33 | 46 | **32 %** |
+| Avance 2 | 37 | 83 | 57 % |
+| Avance 3 | 40 | 123 | 85 % |
+| Entrega final | 22 | 145 | 100 % |
 
-El Avance 1 queda en 34 % a propósito: si una historia no llega, el equipo sigue por encima del 30 %.
+El Avance 1 queda por encima del 30 % a propósito. Con la detección de stack (M4-03, 5 pts) y la reversión sin reconstruir (M5-04, 3 pts), que volvieron al núcleo por la retroalimentación de la entrega 1, el total pasa de 137 a 145 puntos y el Avance 1 baja de 34 % a 32 %: sigue habiendo margen, pero ahora es de una historia pequeña.
 
 | Persona | Hecho | A1 | A2 | A3 | Final | Total |
 |---|---|---|---|---|---|---|
 | Eddy | — | 10 | 6 | 4 | 5 | 25 |
 | Javier | — | 5 | 11 | 13 | 3 | 32 |
 | Eduardo | 3 | 8 | 8 | 10 | 3 | 32 |
-| Derek | 5 | 10 | 7 | 10 | 3 | 35 |
+| Derek | 5 | 10 | 12 | 13 | 3 | 43 |
 | Todos | 5 | — | — | — | 8 | 13 |
 
 Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene que estar en `main` el lunes.
@@ -69,7 +69,9 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M6-01 | Subdominio `<proyecto>.localhost` vía `EnrutamientoPuerto` | 12b | Derek | 2 | A2 |
 | M5-02 | Conmutación sin corte, reiniciar y detener | 12b, 13 | Derek | 3 | A2 |
 | M5-03 | Bloqueos por suscripción y cuota de construcciones | 10c | Derek | 2 | A2 |
+| M4-03 | Detección de stack sin `Dockerfile` (Node, Python, Go, estático) con recetas de Deploya | 11a, 11e, 12 | Derek (+ Eduardo en 11a/11e) | 5 | A2 |
 | M4-02 | Cancelar, reintentar y redesplegar | 12, 12c, 14 | Derek | 3 | A3 |
+| M5-04 | Versionado con retención (5 artefactos) y reversión sin reconstruir (estado Revirtiendo) | 13, 14 | Derek (+ Eduardo en 14) | 3 | A3 |
 | M6-02 | VPS con `*.deploya.app`, HTTPS comodín y credenciales SMTP del proveedor de correo (SPF/DKIM) | — | Derek | 5 | A3 |
 | ADR | ADR: Dockerfile, cola, polling, Traefik | — | Derek | 2 | A3 |
 | DOC-03 | Documento de diseño final y manual técnico | — | Derek | 3 | Final |
@@ -136,7 +138,9 @@ El design system ya está migrado (WEB-01): usa `docs/diseno/` y los componentes
 | M4-01 | Cola BullMQ, trabajador: clonar rama → `docker build` → artefacto `#n` con digest → líneas de bitácora en la base. API: `POST /proyectos/:id/despliegues`, `GET /despliegues/:id`, `GET /despliegues/:id/bitacora?desde=` | Contrato ya publicado en `docs/contratos/despliegues.md`; la implementación lo respeta |
 | M5-01 | Correr la imagen vía `ContenedorPuerto` con `--cpus` y `--memory` del plan (Sandbox), sin privilegios; verificación de salud HTTP → Saludable o Fallido | `docker inspect` muestra los límites |
 
-**Presenta:** el diagrama de estados de despliegue y la secuencia contra lo que corre, la bitácora en la base, `docker inspect` con los límites y la app respondiendo. Si M6-01 llega antes, la URL `<proyecto>.localhost`.
+**Presenta:** el diagrama de estados de despliegue y la secuencia contra lo que corre, la bitácora en la base, `docker inspect` con los límites y la app respondiendo en `hola-deploya.localhost` (Traefik por archivo dinámico, [ADR 0005](adr/0005-traefik-proveedor-de-archivo.md)). Cierra con el diseño ya firmado de la detección de stack y la reversión sin reconstruir (lo que pidió el curso): diagramas de actividad y de secuencia, y cuándo llega cada una.
+
+**Entrega a otros:** el contrato de datos del núcleo ([contratos/datos-nucleo.md](contratos/datos-nucleo.md)) a Javier el **domingo 27**, para que DB-01 salga el lunes sin idas y vueltas; el contrato de despliegues v2 ([contratos/despliegues.md](contratos/despliegues.md)) a Eduardo (v1 no cambia para el Avance 1).
 
 ### Calendario hasta el miércoles
 
@@ -162,25 +166,25 @@ Plan B: el video grabado el martes en el ensayo, por si falla la red o Docker du
 
 ## Avance 2 — 50 %
 
-Recorrido: todo lo del Avance 1 + contratar un plan con la tarjeta de prueba, ver el despliegue en el riel de cinco etapas con bitácora, abrirlo en su subdominio, cambiar variables y redesplegar sin corte.
+Recorrido: todo lo del Avance 1 + contratar un plan con la tarjeta de prueba, ver el despliegue en el riel de cinco etapas con bitácora, abrirlo en su subdominio, cambiar variables y redesplegar sin corte, y desplegar un repositorio **sin `Dockerfile`** gracias a la detección de stack.
 
 | Persona | Historias |
 |---|---|
 | Eddy | M1-04 estados de login, reenviar, roles y 403 · M1-05 recuperar contraseña · M10-02 correo de recuperación |
 | Javier | M2-02 contratación · M2-03 Mi suscripción · M2-04 cambiar plan |
 | Eduardo | M7-01 vista de despliegue · M3-03 variables cifradas |
-| Derek | M6-01 subdominio · M5-02 conmutación sin corte, reiniciar, detener · M5-03 bloqueos por suscripción y cuota de construcciones |
+| Derek | M6-01 subdominio · M5-02 conmutación sin corte, reiniciar, detener · M5-03 bloqueos por suscripción y cuota de construcciones · **M4-03 detección de stack** |
 
 ## Avance 3 — 80 %
 
-Recorrido: todo + ciclo §4.4 (vencida bloquea, suspendida detiene), historial de pagos, administración de usuarios con suspensión, configuración y borrado de proyecto, plataforma en el VPS con HTTPS.
+Recorrido: todo + ciclo §4.4 (vencida bloquea, suspendida detiene), historial de pagos, administración de usuarios con suspensión, configuración y borrado de proyecto, **revertir a una versión anterior en segundos sin reconstruir**, plataforma en el VPS con HTTPS.
 
 | Persona | Historias |
 |---|---|
 | Eddy | M1-06 Perfil · M1-07 Seguridad |
 | Javier | M2-05 ciclo §4.4 · M2-06 historial · M9-01 usuarios · M9-02 suspender |
 | Eduardo | M7-02 resumen e historial · M3-04 configuración y eliminar · WEB-02 estados del sistema · M7-03 consumo y actividad |
-| Derek | M4-02 cancelar, reintentar, redesplegar · M6-02 VPS con HTTPS · ADR |
+| Derek | M4-02 cancelar, reintentar, redesplegar · **M5-04 reversión sin reconstruir** · M6-02 VPS con HTTPS · ADR |
 
 ## Entrega final — 100 %
 

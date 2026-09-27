@@ -8,7 +8,7 @@ Referencia visual: canvas **Deploya v4.1** en Claude Design (34 pantallas, <http
 
 ## En una frase
 
-Un cliente se registra, verifica su correo, contrata un plan con pago simulado, pega la URL de un **repositorio público de GitHub con `Dockerfile`**, y la plataforma lo construye, lo corre en un contenedor con los límites de su plan y lo publica en `https://<proyecto>.deploya.app`. Un administrador puede ver usuarios y suspender cuentas.
+Un cliente se registra, verifica su correo, contrata un plan con pago simulado, pega la URL de un **repositorio público de GitHub con `Dockerfile` o con un stack que Deploya reconoce** (Node, Python, Go o sitio estático), y la plataforma lo construye, lo corre en un contenedor con los límites de su plan y lo publica en `https://<proyecto>.deploya.app`. Cada versión queda guardada y se puede volver a una anterior sin reconstruir. Un administrador puede ver usuarios y suspender cuentas.
 
 ## Recorrido que se evalúa
 
@@ -16,7 +16,7 @@ Un cliente se registra, verifica su correo, contrata un plan con pago simulado, 
 2. Ver planes → contratar con la pasarela simulada (aprobado / rechazado).
 3. Crear proyecto: repositorio, variables, revisar → **Desplegar**.
 4. Ver el despliegue avanzar por las cinco etapas con su bitácora → Saludable → abrir la URL HTTPS.
-5. Operar: redesplegar, reiniciar, detener, cambiar variables o rama, eliminar.
+5. Operar: redesplegar, **revertir a una versión anterior sin reconstruir**, reiniciar, detener, cambiar variables o rama, eliminar.
 6. Ciclo de la suscripción: vence → bloquea despliegues → suspende (contenedores detenidos).
 7. Administración: listar usuarios y suspender una cuenta.
 
@@ -97,8 +97,8 @@ Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que 
 | Prioridad | Qué | Pantalla |
 |---|---|---|
 | Debe | Lista de proyectos con búsqueda y contador frente al límite del plan; estado vacío | 10, 10b |
-| Debe | Alta paso 1: URL de repo **público de GitHub**, rama, nombre (define el subdominio), puerto tomado de `EXPOSE`, `Dockerfile` detectado | 11a |
-| Debe | Errores de alta: repo no accesible, falta `Dockerfile` (con ejemplo) | 11e |
+| Debe | Alta paso 1: URL de repo **público de GitHub**, rama, nombre (define el subdominio), puerto tomado de `EXPOSE`, `Dockerfile` detectado; desde A2, si no hay `Dockerfile`, muestra el stack detectado por M4 (`DeteccionStackService`) | 11a |
+| Debe | Errores de alta: repo no accesible, falta `Dockerfile` (con ejemplo); desde A2 el segundo error es «falta `Dockerfile` y no se reconoce el stack» | 11e |
 | Debe | Variables de entorno cifradas en reposo (paso 2, opcional) | 11c |
 | Debe | Revisar y **Desplegar** (crea el despliegue #1) | 11d |
 | Debe | Bloqueo de alta si se alcanzó el límite o la suscripción está Vencida | 10, 10c |
@@ -111,7 +111,7 @@ Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que 
 |---|---|---|
 | Debe | Vista de despliegue: riel de cinco etapas con duración, estado y bitácora de construcción (polling cada 3 s, copiar) | 12, 12b, 12c |
 | Debe | Resumen del proyecto: estado actual, URL, versión activa, imagen, recursos aplicados | 13 |
-| Debe | Historial de despliegues con filtros (todos / saludables / fallidos) | 14 |
+| Debe | Historial de despliegues con filtros (todos / saludables / fallidos); por fila, **Revertir a esta versión** si su artefacto sigue disponible (A3, contrato v2) | 14 |
 | Debería | Consumo del período (proyectos y construcciones) para Mi suscripción | 08 |
 | Debería | Actividad de despliegues de 12 semanas | 13 |
 
@@ -123,6 +123,7 @@ Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que 
 | Debe | Recepción: clonar la rama, registrar commit |
 | Debe | Construcción: `docker build` con el `Dockerfile` del repo; tiempo máximo; artefacto versionado (`#n`, digest, tamaño) |
 | Debe | Bitácora de construcción persistida por líneas |
+| Debe | **Detección de stack** (M4-03): si la rama no trae `Dockerfile`, se reconoce Node, Python, Go o sitio estático y se construye con una receta de Deploya ([ADR 0003](adr/0003-construccion-dockerfile-o-receta.md)) |
 | Debería | Cancelar despliegue en curso; reintentar un fallido; redesplegar un commit anterior (**reconstruye**) |
 
 ### M5 Orquestación y ejecución — Derek
@@ -133,7 +134,10 @@ Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que 
 | Debe | Verificación de salud HTTP al puerto interno antes de publicar |
 | Debe | Si falla, la versión anterior sigue sirviendo |
 | Debe | Detener contenedores cuando la suscripción pasa a Suspendida o se suspende la cuenta |
+| Debe | **Versionado y reversión instantánea** (M5-04): cada construcción deja un artefacto inmutable; se conservan los últimos 5 por proyecto y se puede volver a uno **sin reconstruir** (estado *Revirtiendo*) ([ADR 0004](adr/0004-versionado-y-reversion-sin-reconstruir.md)) |
 | Debería | Reiniciar y detener desde el panel; eliminar contenedor e imágenes al borrar el proyecto |
+
+> **Por qué volvieron detección de stack y reversión.** En la retroalimentación de la primera entrega el curso pidió concentrar esfuerzo en detectar el stack y en el versionamiento con reversión. Salen de *Fuera de alcance* (puntos 6 y 10) y entran al núcleo de M4 y M5, cada uno con su change de OpenSpec (`feat/m4-deteccion-stack`, `feat/m5-reversion-instantanea`). Se implementan después de lo del Avance 1 (A2 y A3) y no cambian lo que se demuestra el miércoles.
 
 ### M6 Enrutamiento y TLS — Derek
 
@@ -174,7 +178,7 @@ Sustituye la tabla §4.2 de la propuesta. Solo se aplican estos cuatro recursos.
 
 ## Estados
 
-**Despliegue** (≠ suscripción): Encolado, Construyendo, Aprovisionando, Publicando, Saludable, Fallido, Cancelado, Detenido. *Revirtiendo* queda fuera junto con la reversión instantánea.
+**Despliegue** (≠ suscripción): Encolado, Construyendo, Aprovisionando, Publicando, Saludable, Fallido, Cancelado, Detenido y Revirtiendo (vuelve con la reversión instantánea, M5-04).
 
 **Suscripción** (§4.4): Activa, Por vencer, Vencida, Suspendida, Cancelada.
 
@@ -191,11 +195,11 @@ Nada de esta lista se empieza hasta que todo lo **Debe** de tu módulo esté ter
 | 3 | Bitácoras de ejecución del contenedor (runtime) | M7 | Solo se muestra la bitácora de construcción |
 | 4 | Correos de resultado de despliegue y de vencimiento de plan | M10 | v4.1 solo diseña verificación y recuperación |
 | 5 | Renovación automática | M2 | v4.1 solo muestra renovación manual |
-| 6 | Reversión instantánea sin reconstruir (estado Revirtiendo) | M4 M5 | v4.1 redespliega reconstruyendo el commit |
+| ~~6~~ | ~~Reversión instantánea sin reconstruir (estado Revirtiendo)~~ | M4 M5 | **Entró al núcleo** como M5-04 (retroalimentación de la entrega 1) |
 | 7 | Dominios personalizados | M6 | Sin pantalla |
 | 8 | Carga por archivo comprimido | M3 | Solo repositorio público |
 | 9 | Repositorios privados (OAuth de GitHub) | M3 | Solo repositorio público |
-| 10 | Detección de stack sin `Dockerfile` (recetas, buildpacks) | M4 | `Dockerfile` en la raíz es requisito |
+| ~~10~~ | ~~Detección de stack sin `Dockerfile` (recetas, buildpacks)~~ | M4 | **Entró al núcleo** como M4-03 (retroalimentación de la entrega 1); buildpacks siguen fuera |
 | 11 | Transmisión en vivo por WebSocket/SSE | M7 | Polling cada 3 s alcanza |
 | 12 | Prorrateo al cambiar de plan | M2 | Ascenso paga completo; descenso al vencer |
 | 13 | Complementos (§4.3) | M2 | Sin pantalla |
@@ -214,8 +218,8 @@ Fuera de alcance **siempre** (ya excluido en la propuesta §6.2): varios nodos y
 
 | Propuesta | Ahora |
 |---|---|
-| Repositorio público **o** zip; detección de stack | Solo repo público de GitHub con `Dockerfile` |
-| Reversión inmediata sin reconstruir | Redesplegar un commit anterior (reconstruye) |
+| Repositorio público **o** zip; detección de stack | Solo repo público de GitHub, con `Dockerfile` o stack reconocido (Node, Python, Go, estático) |
+| Reversión inmediata sin reconstruir | Se mantiene: reversión sin reconstruir a uno de los últimos 5 artefactos; además, redesplegar un commit (reconstruye) |
 | Límites: 12 recursos por plan | 4 recursos: proyectos, CPU, memoria, construcciones |
 | Pro 2 GB, Business 4 GB y 30 proyectos | Pro 1 GB, Business 2 GB y 25 proyectos |
 | Construcciones 20 / 100 / sin límite | 30 / 150 / 500 / 2 000 |

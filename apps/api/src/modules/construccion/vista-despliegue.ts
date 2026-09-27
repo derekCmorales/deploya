@@ -19,6 +19,15 @@ export interface VistaDespliegue {
   etapas: { nombre: Etapa; estado: EstadoEtapa; duracionMs: number | null }[];
 }
 
+/** `ultimoDespliegue` de cada proyecto en `GET /proyectos` (contrato de despliegues). */
+export interface ResumenDespliegue {
+  id: string;
+  numero: number;
+  estado: EstadoDespliegue;
+  etapas: VistaDespliegue["etapas"];
+  creado: string;
+}
+
 export interface ImagenDeVista {
   numero: number;
   digest: string;
@@ -48,6 +57,16 @@ export function vistaDespliegue(despliegue: Despliegue, imagen: ImagenDeVista | 
     creado: despliegue.creado.toISOString(),
     terminado: despliegue.terminado?.toISOString() ?? null,
     etapas: despliegue.etapas.map(vistaEtapa),
+  };
+}
+
+export function resumenDespliegue(despliegue: Despliegue): ResumenDespliegue {
+  return {
+    id: despliegue.id,
+    numero: despliegue.numero,
+    estado: despliegue.estado,
+    etapas: despliegue.etapas.map(vistaEtapa),
+    creado: despliegue.creado.toISOString(),
   };
 }
 

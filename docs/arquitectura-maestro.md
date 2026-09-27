@@ -1755,6 +1755,7 @@ classDiagram
         +crearDespliegue(proyectoId, disparador) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
         +bitacoraDesde(despliegueId, usuarioId, desde) PaginaBitacora
+        +ultimosDespliegues(proyectoIds) Map~ResumenDespliegue~
     }
     class DeteccionStackService {
         -recetas List~RecetaStack~
@@ -1889,6 +1890,7 @@ classDiagram
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
         +lineasDesde(id, desde, limite) List~LineaBitacora~
+        +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
         +marcarActivo(proyectoId, despliegueId) void
         +construccionesDesde(usuarioId, desde) Integer

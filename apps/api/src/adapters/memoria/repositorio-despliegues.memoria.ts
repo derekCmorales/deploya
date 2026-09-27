@@ -71,6 +71,16 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return structuredClone(todas.filter((l) => l.n > desde).slice(0, limite));
   }
 
+  async ultimosDe(proyectoIds: string[]): Promise<Despliegue[]> {
+    const ultimos = new Map<string, Despliegue>();
+    for (const despliegue of this.despliegues.values()) {
+      if (!proyectoIds.includes(despliegue.proyectoId)) continue;
+      const actual = ultimos.get(despliegue.proyectoId);
+      if (!actual || despliegue.numero > actual.numero) ultimos.set(despliegue.proyectoId, despliegue);
+    }
+    return structuredClone([...ultimos.values()]);
+  }
+
   async activoDe(proyectoId: string): Promise<Despliegue | null> {
     const id = this.activos.get(proyectoId);
     return id ? this.porId(id) : null;

@@ -13,6 +13,10 @@ ConstruccionService.crearDespliegue(
   disparador: "alta" | "manual" | "variables" = "manual",
 ): Promise<{ id: string; numero: number; estado: "encolado" }>
 
+// v1 · A1 — para `ultimoDespliegue` de GET /proyectos (pantalla 10). Proyectos sin despliegues no vienen.
+ConstruccionService.ultimosDespliegues(proyectoIds: string[]):
+  Promise<Record<string, { id; numero; estado; etapas: [{ nombre, estado, duracionMs }]; creado }>>
+
 // v2 · A2 — M3 lo usa en el paso 11a para mostrar «Dockerfile detectado» o «Stack detectado»
 DeteccionStackService.detectar(fuente: LectorFuente): Promise<ResultadoDeteccion>
 
@@ -33,6 +37,8 @@ export interface ResultadoDeteccion {
 `POST /proyectos` de M3 llama a `crearDespliegue(id, "alta")` después de persistir el proyecto. Rechaza con **409** si la suscripción está Vencida o Suspendida o se agotaron las construcciones del mes (A2, M5-03), con cuerpo `{ codigo: "suscripcion-no-permite" | "cuota-construcciones-agotada", mensaje }`.
 
 ## HTTP (requiere sesión; solo el dueño del proyecto; si no, 404)
+
+Sesión: las rutas leen `request.usuario.id`, que pone el `SesionGuard` de M1. Hasta que llegue (martes), en desarrollo (`pnpm dev:api`, `NODE_ENV` distinto de `production`) se puede definir `USUARIO_DESARROLLO=<id del usuario del seed>`; en compose y en el VPS no aplica y sin sesión responde 401.
 
 ### v1 · Avance 1
 
@@ -108,4 +114,5 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1 | 2026-09-20 | Contrato del Avance 1 |
+| 1.1 | 2026-09-27 | Agrega `ultimosDespliegues` (ya estaba prometido en «Lista de proyectos») y `USUARIO_DESARROLLO` |
 | 2 | 2026-09-27 | Solo agrega: detección de stack, acciones, artefactos, reversión y `revirtiendo`; campos `disparador`, `recursos`, `motivoFallo`, `imagen.numero`, `imagen.receta` |

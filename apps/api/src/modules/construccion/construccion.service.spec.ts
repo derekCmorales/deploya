@@ -119,4 +119,23 @@ describe("ConstruccionService", () => {
 
     expect((await motor.despliegues.porId(id))?.rama).toBe("roto");
   });
+
+  it("ultimosDespliegues devuelve el más reciente de cada proyecto para la lista (pantalla 10)", async () => {
+    const motor = motorDePrueba();
+    motor.proyectos.agregar(proyectoDemo({ id: "proyecto-2", subdominio: "otro" }));
+    await motor.servicio.crearDespliegue("proyecto-1");
+    const segundo = await motor.servicio.crearDespliegue("proyecto-1");
+
+    const ultimos = await motor.servicio.ultimosDespliegues(["proyecto-1", "proyecto-2"]);
+
+    expect(Object.keys(ultimos)).toEqual(["proyecto-1"]);
+    expect(ultimos["proyecto-1"]).toEqual(expect.objectContaining({ id: segundo.id, numero: 2, estado: "encolado" }));
+    expect(ultimos["proyecto-1"].etapas).toHaveLength(5);
+  });
+
+  it("ultimosDespliegues sin proyectos no consulta nada", async () => {
+    const motor = motorDePrueba();
+
+    expect(await motor.servicio.ultimosDespliegues([])).toEqual({});
+  });
 });

@@ -8,7 +8,14 @@ import { ColaConstruccionPuerto } from "./puertos/cola-construccion.puerto";
 import { ProyectosLecturaPuerto } from "./puertos/proyectos-lectura.puerto";
 import { RepositorioArtefactos } from "./puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "./puertos/repositorio-despliegues.puerto";
-import { paginaBitacora, vistaDespliegue, type PaginaBitacora, type VistaDespliegue } from "./vista-despliegue";
+import {
+  paginaBitacora,
+  resumenDespliegue,
+  vistaDespliegue,
+  type PaginaBitacora,
+  type ResumenDespliegue,
+  type VistaDespliegue,
+} from "./vista-despliegue";
 
 /**
  * Facade de M4: única puerta que usan M3 y la web. Registra y encola; nunca construye
@@ -50,6 +57,16 @@ export class ConstruccionService {
     const despliegue = await this.despliegueDe(despliegueId, usuarioId);
     const lineas = await this.despliegues.lineasDesde(despliegue.id, desde, LINEAS_POR_PAGINA);
     return paginaBitacora(lineas, desde, despliegue.estado);
+  }
+
+  /**
+   * Contrato M3 → M4 para la lista (pantalla 10): el último despliegue de cada proyecto.
+   * M3 ya filtró los proyectos del usuario; los que nunca se desplegaron no vienen.
+   */
+  async ultimosDespliegues(proyectoIds: string[]): Promise<Record<string, ResumenDespliegue>> {
+    if (proyectoIds.length === 0) return {};
+    const ultimos = await this.despliegues.ultimosDe(proyectoIds);
+    return Object.fromEntries(ultimos.map((d) => [d.proyectoId, resumenDespliegue(d)]));
   }
 
   private async registrarYEncolar(proyecto: ProyectoDesplegable, disparador: DisparadorDespliegue): Promise<DespliegueCreado> {

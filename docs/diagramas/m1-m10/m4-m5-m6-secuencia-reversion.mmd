@@ -1,39 +1,40 @@
 ---
-title: Secuencia de reversión — artefacto previo, sin reconstruir
+title: Secuencia de reversión — vuelve a un artefacto anterior sin reconstruir (M5-04)
 ---
 sequenceDiagram
+    autonumber
     actor Cliente
-    participant UI as Interfaz web
-    participant API as API de control
+    participant Web as web (pantalla 14)
+    participant Rev as ReversionService (api)
     participant BD as PostgreSQL
-    participant M5 as Orquestador de contenedores
-    participant Salud as VerificacionEntornoPuerto
-    participant M6 as Enrutador de borde
-    participant M10 as Notificaciones
+    participant Cola as ColaBullMq (Redis)
+    participant W as PipelineDespliegue (worker)
+    participant Orq as OrquestacionService
+    participant Cont as ContenedorDocker
+    participant Salud as VerificacionHttp
+    participant Ruta as EnrutamientoTraefikArchivo
 
-    Cliente->>UI: Revertir a versión anterior
-    UI->>API: POST despliegues reversión
-    API->>BD: obtener Artefacto previo del proyecto
-    API->>BD: Despliegue Revirtiendo
-    Note over API,M5: No se reconstruye. Se levanta un artefacto ya registrado.
-
-    alt Hay versión para reversión según el plan
-        API->>M5: levantar artefacto previo
-        M5->>M5: reemplazar contenedor con límites vigentes
-        M5->>M6: conmutar tráfico al contenedor revertido
-        M5->>Salud: comprobar salud HTTP
-        alt Healthcheck correcto
-            M5->>BD: Despliegue Saludable
-            M5->>M10: reversión correcta
-            M10-->>Cliente: correo
-            API-->>UI: 200 revertido
-        else Healthcheck fallido
-            M5->>BD: Despliegue Fallido
-            M5->>M10: reversión fallida
-            M10-->>Cliente: correo
-            API-->>UI: 409 reversión fallida
+    Cliente->>Web: Revertir a la versión #13
+    Web->>Rev: POST /proyectos/:id/reversiones {artefactoId}
+    Rev->>BD: artefacto #13 del proyecto
+    alt no disponible, ya activo o hay un despliegue en curso
+        Rev-->>Web: 409 artefacto-no-disponible · artefacto-ya-activo · despliegue-en-curso
+    else disponible
+        Rev->>BD: Despliegue #16 revirtiendo · disparador reversion · artefacto #13 · recepción y construcción omitidas
+        Rev->>Cola: encolar(TrabajoDespliegue{despliegueId, plan: reversion})
+        Rev-->>Web: 201 {id, numero: 16, estado: revirtiendo}
+        Note over Rev,W: No se clona ni se construye. No consume construcciones del mes.
+        Cola->>W: trabajo
+        W->>BD: aprovisionando · ejecución en curso
+        W->>Orq: aprovisionar(contexto con la imagen deploya/p:13)
+        Orq->>Cont: crear(imagen deploya/p:13, límites vigentes, variables vigentes)
+        Orq->>Salud: saludable(host, puerto, 60 s)
+        alt responde
+            W->>Ruta: publicar(subdominio → contenedor #16)
+            W->>BD: saludable · Proyecto.despliegueActivo = #16
+            W->>Cont: detener(contenedor de #15)
+        else no responde
+            W->>Cont: eliminar(contenedor #16)
+            W->>BD: fallido · #15 sigue activo
         end
-    else No hay artefacto previo o el plan no incluye reversión
-        API-->>UI: 409 no hay versión para revertir
-        UI-->>Cliente: informar límite del plan
     end

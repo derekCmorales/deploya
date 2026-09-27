@@ -17,4 +17,9 @@ Cuando la decisión es difícil de revertir o afecta a más de un módulo: elegi
 | # | Decisión | Estado |
 |---|---|---|
 | [0001](0001-correo-por-smtp-configurable.md) | Correo por un adaptador SMTP configurable; Mailpit solo en desarrollo | Propuesto |
-| — | Pendientes del plan (Derek, A1–A3): `Dockerfile` obligatorio, BullMQ para la cola, polling en vez de WebSocket, Traefik con certificado comodín | Por escribir |
+| [0002](0002-cola-bullmq-y-trabajador-aparte.md) | Cola BullMQ y un trabajador aparte con la misma imagen | Propuesto |
+| [0003](0003-construccion-dockerfile-o-receta.md) | Construcción con el `Dockerfile` del repo o con una receta por stack detectado | Propuesto |
+| [0004](0004-versionado-y-reversion-sin-reconstruir.md) | Versionado inmutable y reversión sin reconstruir (retención de 5) | Propuesto |
+| [0005](0005-traefik-proveedor-de-archivo.md) | Traefik v3 con proveedor de archivo y una red por proyecto | Propuesto |
+| [0006](0006-polling-en-vez-de-websocket.md) | Polling cada 3 s en vez de WebSocket o SSE | Propuesto |
+| — | Pendiente (A3): certificado comodín por DNS-01 en el VPS | Por escribir |

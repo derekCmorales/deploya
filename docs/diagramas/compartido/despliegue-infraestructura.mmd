@@ -1,0 +1,53 @@
+---
+title: Despliegue — servicios de docker compose, redes y volúmenes (desarrollo y VPS)
+---
+flowchart LR
+    subgraph HOST["Nodo único · Docker Engine"]
+        subgraph RED_INTERNA["red deploya_interna"]
+            PG[("postgres:16<br/>:5432 · volumen deploya_pg")]
+            RD[("redis:7<br/>:6379")]
+            API["api<br/>Dockerfile.api · node dist/main.js<br/>:3001 → 3000"]
+            WK["worker<br/>Dockerfile.api · node dist/trabajador.js<br/>git + docker.sock"]
+            WEB["web<br/>Dockerfile.web<br/>:3000"]
+            MP["mailpit<br/>:1025 SMTP · :8025 UI"]
+            TR["traefik:v3<br/>:80 (:443 en el VPS)"]
+        end
+
+        subgraph RED_P1["red deploya-p-hola-deploya"]
+            C1["deploya-hola-deploya-3<br/>imagen deploya/hola-deploya:3<br/>NanoCpus 0.25e9 · Memory 256 MiB<br/>sin privilegios · CapDrop ALL"]
+        end
+
+        subgraph RED_P2["red deploya-p-api-tienda"]
+            C2["deploya-api-tienda-14"]
+        end
+
+        SOCK["/var/run/docker.sock"]
+        VOL["volumen traefik_dinamico<br/>/traefik/dinamico/*.yml"]
+    end
+
+    NAV["Navegador"]
+
+    NAV -->|"localhost:3000"| WEB
+    NAV -->|"localhost:3001"| API
+    NAV -->|"hola-deploya.localhost"| TR
+    NAV -->|"localhost:8025"| MP
+    API --> PG
+    API --> RD
+    API -->|SMTP| MP
+    WK --> RD
+    WK --> PG
+    WK --> SOCK
+    WK -->|escribe| VOL
+    TR -->|"vigila"| VOL
+    TR -->|"conectado por el worker"| RED_P1
+    TR --> RED_P2
+    WK -.->|"salud HTTP · conectado por el worker"| RED_P1
+
+    classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
+    classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef cliente fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
+    classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
+    class PG,RD,VOL data
+    class API,WK,WEB,MP,TR app
+    class C1,C2 cliente
+    class SOCK,NAV ext

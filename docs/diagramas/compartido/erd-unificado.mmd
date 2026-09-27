@@ -1,270 +1,148 @@
 ---
-title: ERD unificado Deploya — un solo artefacto
+title: ERD del núcleo v4.1 — fuente del schema Prisma (docs/contratos/datos-nucleo.md)
 ---
 erDiagram
-    USUARIO ||--o{ SESION : abre
-    USUARIO }o--|{ ROL : posee
-    USUARIO ||--o{ EVENTO_AUDITORIA : origina
     USUARIO ||--o{ TOKEN_CUENTA : recibe
-    USUARIO ||--o{ SUSCRIPCION : contrata
-    USUARIO ||--o{ ESPACIO_TRABAJO : posee
-    USUARIO ||--o{ MIEMBRO_ESPACIO : participa
-    USUARIO ||--o{ ACCION_ADMINISTRATIVA : ejecuta
-
-    ROL {
-        uuid id PK
-        string nombre
-        string descripcion
-    }
+    USUARIO ||--o{ SESION : abre
+    USUARIO ||--|| SUSCRIPCION : tiene
+    USUARIO ||--o{ PAGO : realiza
+    USUARIO ||--o{ PROYECTO : posee
+    USUARIO ||--o{ ACCION_ADMINISTRATIVA : "ejecuta (admin)"
+    USUARIO ||--o{ ACCION_ADMINISTRATIVA : "recibe"
+    PLAN ||--o{ SUSCRIPCION : "plan actual"
+    PLAN |o--o{ SUSCRIPCION : "descenso programado"
+    PLAN ||--o{ PAGO : cobra
+    SUSCRIPCION ||--o{ PAGO : genera
+    PROYECTO ||--o{ VARIABLE_ENTORNO : configura
+    PROYECTO ||--o{ DESPLIEGUE : tiene
+    PROYECTO ||--o{ ARTEFACTO : versiona
+    PROYECTO |o--o| DESPLIEGUE : "activo"
+    ARTEFACTO |o--o{ DESPLIEGUE : "construido o reusado por"
+    DESPLIEGUE ||--|{ ETAPA_DESPLIEGUE : "cinco etapas"
+    DESPLIEGUE ||--o{ LINEA_BITACORA : produce
 
     USUARIO {
-        uuid id PK
+        string id PK
         string correo UK
         string nombre
         string hashContrasena
-        string estadoCuenta
-        datetime fechaAlta
+        Rol rol "cliente | administrador"
+        EstadoCuenta estadoCuenta "pendiente | activa | suspendida"
+        string motivoSuspension
+        datetime creado
     }
-
-    SESION {
-        uuid id PK
-        uuid usuarioId FK
-        datetime expiracion
-        string origen
-    }
-
     TOKEN_CUENTA {
-        uuid id PK
-        uuid usuarioId FK
-        string tipo
-        string hashToken
-        datetime expiracion
-        boolean utilizado
+        string id PK
+        string usuarioId FK
+        TipoTokenCuenta tipo "verificacion 24 h | recuperacion 30 min"
+        string hashToken UK
+        datetime expira
+        datetime usadoEn "un solo uso"
     }
-
-    EVENTO_AUDITORIA {
-        uuid id PK
-        uuid usuarioId FK
-        string accion
-        string entidad
-        uuid entidadId
-        datetime fecha
+    SESION {
+        string id PK
+        string usuarioId FK
+        string hashToken UK
+        datetime ultimaActividad "expira a los 7 días sin actividad"
+        datetime revocadaEn
     }
-
-    PLAN ||--o{ LIMITE_PLAN : define
-    PLAN ||--o{ SUSCRIPCION : cubre
-    COMPLEMENTO ||--o{ SUSCRIPCION_COMPLEMENTO : aplica
-    SUSCRIPCION ||--o{ SUSCRIPCION_COMPLEMENTO : incluye
-    SUSCRIPCION ||--o{ TRANSACCION : genera
-
     PLAN {
-        uuid id PK
-        string nombre
-        string descripcion
-        decimal precio
-        int vigenciaDias
-        boolean activo
-    }
-
-    LIMITE_PLAN {
-        uuid id PK
-        uuid planId FK
-        string recurso
-        decimal cantidad
-        string unidad
-    }
-
-    COMPLEMENTO {
-        uuid id PK
-        string nombre
-        string descripcion
-        decimal precio
-    }
-
-    SUSCRIPCION {
-        uuid id PK
-        uuid usuarioId FK
-        uuid planId FK
-        string estado
-        boolean renovacionAutomatica
-        datetime fechaInicio
-        datetime fechaFin
-    }
-
-    SUSCRIPCION_COMPLEMENTO {
-        uuid suscripcionId FK
-        uuid complementoId FK
-        int cantidad
-        datetime fechaInicio
-        datetime fechaFin
-    }
-
-    TRANSACCION {
-        uuid id PK
-        uuid suscripcionId FK
-        string tipo
-        decimal monto
-        string estado
-        datetime fecha
-        string comprobante
-    }
-
-    ESPACIO_TRABAJO ||--o{ MIEMBRO_ESPACIO : agrupa
-    ESPACIO_TRABAJO ||--o{ PROYECTO : contiene
-    PROYECTO ||--o{ VARIABLE_ENTORNO : configura
-    PROYECTO ||--o{ DESPLIEGUE : tiene
-    PROYECTO ||--o{ DOMINIO_PERSONALIZADO : declara
-    PROYECTO ||--o{ METRICA_CONSUMO : registra
-    PROYECTO ||--o{ SUBDOMINIO : expone
-
-    ESPACIO_TRABAJO {
-        uuid id PK
-        uuid propietarioId FK
-        string nombre
-    }
-
-    MIEMBRO_ESPACIO {
-        uuid espacioId FK
-        uuid usuarioId FK
-        string rolEspacio
-    }
-
-    PROYECTO {
-        uuid id PK
-        uuid espacioId FK
-        string nombre
-        string tipoFuente
-        string urlRepositorio
-        string rutaArchivoComprimido
-        string recetaConstruccion
-        string comandoArranque
-        int puertoHttp
-    }
-
-    VARIABLE_ENTORNO {
-        uuid id PK
-        uuid proyectoId FK
-        string clave
-        string valorCifrado
-    }
-
-    TRABAJO_CONSTRUCCION {
-        uuid id PK
-        uuid despliegueId FK
-        string estado
-        string stackDetectado
-        text bitacora
-        datetime inicio
-        datetime fin
-    }
-
-    IMAGEN {
-        uuid id PK
-        string digest UK
-        string referencia
-        datetime creacion
-    }
-
-    ARTEFACTO {
-        uuid id PK
-        uuid proyectoId FK
-        uuid imagenId FK
-        int numeroVersion
-        boolean inmutable
-        datetime creacion
-    }
-
-    DESPLIEGUE {
-        uuid id PK
-        uuid proyectoId FK
-        uuid artefactoId FK
-        uuid trabajoId FK
-        string estado
-        string disparador
-        datetime creacion
-        datetime actualizacion
-    }
-
-    CONTENEDOR {
-        uuid id PK
-        uuid despliegueId FK
-        string identificadorRuntime
-        decimal cpu
+        string id PK
+        string codigo UK "sandbox | starter | pro | business"
+        decimal precio30
+        decimal precio365
+        int maxProyectos
+        decimal cpus
         int memoriaMb
-        string estadoRuntime
+        int construccionesMes
     }
-
-    SUBDOMINIO {
-        uuid id PK
-        uuid proyectoId FK
-        uuid certificadoId FK
-        string fqdn UK
+    SUSCRIPCION {
+        string id PK
+        string usuarioId FK,UK "una por cuenta"
+        string planId FK
+        EstadoSuscripcion estado "activa | por-vencer | vencida | suspendida | cancelada"
+        datetime estadoDesde
+        int vigenciaDias "30 | 365 | null"
+        datetime vence "null en Sandbox"
+        string planSiguienteId FK
     }
-
-    DOMINIO_PERSONALIZADO {
-        uuid id PK
-        uuid proyectoId FK
-        uuid certificadoId FK
-        string fqdn UK
-        string estadoDns
+    PAGO {
+        string id PK
+        string usuarioId FK
+        string suscripcionId FK
+        string planId FK
+        ConceptoPago concepto
+        decimal monto
+        EstadoPago estado "aprobado | rechazado"
+        string tarjetaUltimos4
+        string numeroComprobante UK
     }
-
-    CERTIFICADO_TLS {
-        uuid id PK
-        string dominio
-        datetime emision
-        datetime vencimiento
-        string emisor
-    }
-
-    METRICA_CONSUMO {
-        uuid id PK
-        uuid proyectoId FK
-        uuid contenedorId FK
-        float porcentajeCpu
-        int usoRamMb
-        decimal transferenciaGb
-        datetime captura
-    }
-
-    ENTRADA_BITACORA {
-        uuid id PK
-        uuid contenedorId FK
-        uuid despliegueId FK
-        string flujo
-        text mensaje
-        datetime fecha
-    }
-
-    NOTIFICACION {
-        uuid id PK
-        uuid usuarioId FK
-        uuid despliegueId FK
-        string tipo
-        string canal
-        datetime fecha
-    }
-
     ACCION_ADMINISTRATIVA {
-        uuid id PK
-        uuid adminId FK
-        string accion
-        string entidadAfectada
-        uuid entidadId
-        datetime fecha
+        string id PK
+        string adminId FK
+        string usuarioAfectadoId FK
+        string accion "suspender-cuenta"
+        string motivo
         string detalle
     }
-
-    DESPLIEGUE ||--o| TRABAJO_CONSTRUCCION : dispara
-    DESPLIEGUE }o--|| ARTEFACTO : usa
-    ARTEFACTO }o--|| IMAGEN : empaqueta
-    PROYECTO ||--o{ ARTEFACTO : versiona
-    DESPLIEGUE ||--o| CONTENEDOR : ejecuta
-    CONTENEDOR ||--o{ ENTRADA_BITACORA : emite
-    DESPLIEGUE ||--o{ ENTRADA_BITACORA : produce
-    CONTENEDOR ||--o{ METRICA_CONSUMO : genera
-    SUBDOMINIO }o--|| CERTIFICADO_TLS : protege
-    DOMINIO_PERSONALIZADO }o--|| CERTIFICADO_TLS : protege
-    CONTENEDOR }o--o| SUBDOMINIO : publica
-    DESPLIEGUE ||--o{ NOTIFICACION : dispara
-    USUARIO ||--o{ NOTIFICACION : recibe
+    PROYECTO {
+        string id PK
+        string usuarioId FK
+        string nombre
+        string subdominio UK "inmutable"
+        string urlRepositorio
+        string rama
+        string rutaDockerfile
+        int puertoInterno
+        RecetaConstruccion receta "dockerfile | node | python | go | estatica"
+        string despliegueActivoId FK,UK
+    }
+    VARIABLE_ENTORNO {
+        string id PK
+        string proyectoId FK
+        string clave "UK con proyectoId"
+        string valorCifrado "AES-256-GCM"
+    }
+    ARTEFACTO {
+        string id PK
+        string proyectoId FK
+        int numero "UK con proyectoId"
+        string imagen "deploya/subdominio:n"
+        string digest
+        bigint tamanoBytes
+        string commitSha
+        RecetaConstruccion receta
+        boolean disponible "retención: últimos 5"
+    }
+    DESPLIEGUE {
+        string id PK
+        string proyectoId FK
+        int numero "UK con proyectoId"
+        EstadoDespliegue estado
+        DisparadorDespliegue disparador
+        string commitSha
+        string artefactoId FK
+        string contenedorId
+        string url
+        decimal cpus
+        int memoriaMb
+        int codigoSalida
+        string motivoFallo
+        datetime creado
+        datetime terminado
+    }
+    ETAPA_DESPLIEGUE {
+        string despliegueId PK,FK
+        Etapa etapa PK "recepcion..operacion"
+        EstadoEtapa estado "pendiente | en-curso | completada | fallida | omitida"
+        datetime iniciada
+        datetime terminada
+    }
+    LINEA_BITACORA {
+        string despliegueId PK,FK
+        int n PK "consecutivo; desde= filtra n mayor"
+        datetime marca
+        Etapa etapa
+        NivelBitacora nivel "info | aviso | error"
+        string texto
+    }

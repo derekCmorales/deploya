@@ -1,42 +1,35 @@
 ---
-title: C4 Nivel 1 — Contexto de Deploya
+title: C4 Nivel 1 — Contexto de Deploya (núcleo v4.1)
 ---
 flowchart TB
     subgraph ACTORES["Actores"]
-        CLIENTE["Cliente"]
-        ADMIN["Administrador"]
-        OPERADOR["Operador de infraestructura"]
-        SOPORTE["Soporte técnico"]
+        CLIENTE["Cliente<br/>despliega sus aplicaciones"]
+        ADMIN["Administrador<br/>ve usuarios y suspende cuentas"]
     end
 
-    DEPLOYA["Deploya<br/>PaaS de alojamiento web<br/>panel, API, motor de despliegue"]
+    DEPLOYA["Deploya<br/>PaaS de un solo nodo<br/>panel, API y motor de despliegue"]
 
     subgraph EXTERNOS["Sistemas externos"]
-        GIT["Proveedor de repositorios<br/>código fuente"]
-        NUBE["Motor de contenedores<br/>nodo Docker / nube"]
-        DNS["Proveedor DNS<br/>registro comodín"]
-        CA["Autoridad certificadora<br/>certificados TLS"]
-        CORREO["Correo transaccional"]
-        PAGOS["Pasarela de pagos<br/>simulada"]
-        LLM["Proveedor de modelo<br/>de lenguaje"]
+        GIT["GitHub<br/>repositorios públicos"]
+        DOCKER["Docker Engine<br/>nodo único (VPS)"]
+        DNS["DNS comodín<br/>*.deploya.app"]
+        CA["Let's Encrypt<br/>certificado comodín"]
+        CORREO["Proveedor SMTP<br/>Mailpit en desarrollo"]
     end
 
-    CLIENTE --> DEPLOYA
-    ADMIN --> DEPLOYA
-    OPERADOR --> DEPLOYA
-    SOPORTE --> DEPLOYA
+    CLIENTE -->|"panel web, HTTPS"| DEPLOYA
+    ADMIN -->|"panel web, HTTPS"| DEPLOYA
+    CLIENTE -.->|"visita su app<br/>https://proyecto.deploya.app"| DOCKER
 
-    DEPLOYA --> GIT
-    DEPLOYA --> NUBE
-    DEPLOYA --> DNS
-    DEPLOYA --> CA
-    DEPLOYA --> CORREO
-    DEPLOYA --> PAGOS
-    DEPLOYA --> LLM
+    DEPLOYA -->|"lee archivos y clona"| GIT
+    DEPLOYA -->|"construye y corre contenedores"| DOCKER
+    DEPLOYA -->|"resuelve subdominios"| DNS
+    DEPLOYA -->|"desafío DNS-01"| CA
+    DEPLOYA -->|"verificación y recuperación"| CORREO
 
     classDef actor fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
     classDef sistema fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef externo fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
-    class CLIENTE,ADMIN,OPERADOR,SOPORTE actor
+    class CLIENTE,ADMIN actor
     class DEPLOYA sistema
-    class GIT,NUBE,DNS,CA,CORREO,PAGOS,LLM externo
+    class GIT,DOCKER,DNS,CA,CORREO externo

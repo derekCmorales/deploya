@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-09-27
+goal: Motor del Avance 1 — compose con worker, Traefik y Mailpit; cola BullMQ, clonar,
+  docker build, artefacto y bitácora; contenedor con límites del plan y salud; ruta local

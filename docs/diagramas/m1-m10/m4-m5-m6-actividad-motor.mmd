@@ -1,45 +1,45 @@
 ---
-title: Actividades del motor — construcción, aprovisionamiento, publicación, salud, reversión
+title: Actividad del motor — construcción o reversión, hasta Saludable o Fallido
 ---
 flowchart TB
-    START(("Inicio")) --> ORIGEN{"Origen"}
+    START(("Trabajo de la cola")) --> PLAN{"¿Plan del trabajo?"}
 
-    ORIGEN -->|Desplegar| BUILD["Detectar stack y construir imagen"]
-    ORIGEN -->|Revertir| SKIP["Tomar artefacto previo<br/>sin reconstruir"]
+    PLAN -->|construccion| CLON["Recepción<br/>git clone --depth 1 de la rama<br/>registrar commit"]
+    PLAN -->|reversion| OMITIR["Marcar Recepción y Construcción<br/>como omitida"]
 
+    CLON --> CLON_OK{"¿Clonó?"}
+    CLON_OK -->|No| FALLO["Marcar Fallido<br/>codigoSalida y motivo<br/>la versión activa sigue"]
+    CLON_OK -->|Sí| DETECTAR["Detectar stack<br/>ver m4-actividad-deteccion-stack"]
+    DETECTAR --> DET_OK{"¿Dockerfile o<br/>receta reconocida?"}
+    DET_OK -->|No| FALLO
+    DET_OK -->|Sí| BUILD["Construcción<br/>docker build · máx. 10 min<br/>cada línea a la bitácora"]
     BUILD --> BUILD_OK{"¿Imagen lista?"}
-    BUILD_OK -->|No| FAIL1["Marcar Fallido"]
-    FAIL1 --> MAIL1["Notificar fallo de construcción"]
-    MAIL1 --> FIN1(("Fin"))
+    BUILD_OK -->|No| FALLO
+    BUILD_OK -->|Sí| ART["Registrar Artefacto #n<br/>imagen deploya/p:n, digest, tamaño"]
 
-    BUILD_OK -->|Sí| ART["Registrar artefacto inmutable"]
-    ART --> PROV
-    SKIP --> PROV["Aprovisionar contenedor<br/>con límites de CPU y memoria"]
+    OMITIR --> DISP{"¿Imagen del artefacto<br/>disponible en el nodo?"}
+    DISP -->|No| FALLO
+    DISP -->|Sí| PROV
 
-    PROV --> PROV_OK{"¿Contenedor en ejecución?"}
-    PROV_OK -->|No| FAIL2["Marcar Fallido"]
-    FAIL2 --> MAIL2["Notificar fallo de ejecución"]
-    MAIL2 --> FIN2(("Fin"))
-
-    PROV_OK -->|Sí| REL["Asignar subdominio y certificado TLS<br/>conmutar tráfico"]
-    REL --> HEALTH["Comprobar salud HTTP"]
-    HEALTH --> HEALTH_OK{"¿Respuesta saludable?"}
-    HEALTH_OK -->|No| FAIL3["Marcar Fallido"]
-    FAIL3 --> MAIL3["Notificar fallo de publicación"]
-    MAIL3 --> FIN3(("Fin"))
-
-    HEALTH_OK -->|Sí| OK["Marcar Saludable"]
-    OK --> OBS["Transmitir bitácoras y métricas"]
-    OBS --> MAIL4["Notificar resultado de despliegue"]
-    MAIL4 --> FIN4(("Fin"))
+    ART --> PROV["Ejecución<br/>red del proyecto · límites de cuotaDe<br/>sin privilegios · variables descifradas"]
+    PROV --> SALUD{"¿Responde HTTP<br/>en 60 s?"}
+    SALUD -->|No| LIMPIAR["Eliminar el contenedor nuevo"]
+    LIMPIAR --> FALLO
+    SALUD -->|Sí| RUTA["Enrutamiento<br/>ruta dinámica de Traefik<br/>subdominio → contenedor nuevo"]
+    RUTA --> RUTA_OK{"¿Ruta escrita?"}
+    RUTA_OK -->|No| LIMPIAR
+    RUTA_OK -->|Sí| OPER["Operación<br/>Saludable · despliegueActivo = #n<br/>detener el contenedor anterior"]
+    OPER --> RET["Publicar DespliegueTerminado<br/>retención: conservar 5 artefactos"]
+    RET --> FIN_OK(("Saludable"))
+    FALLO --> FIN_KO(("Fallido"))
 
     classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef process fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px,color:#134e4a
     classDef decision fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
     classDef error fill:#fff1f2,stroke:#fb7185,stroke-width:2px,color:#881337
     classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
-    class START,FIN1,FIN2,FIN3,FIN4 startEnd
-    class BUILD,SKIP,ART,PROV,REL,HEALTH,OBS process
-    class ORIGEN,BUILD_OK,PROV_OK,HEALTH_OK decision
-    class FAIL1,MAIL1,FAIL2,MAIL2,FAIL3,MAIL3 error
-    class OK,MAIL4 success
+    class START startEnd
+    class CLON,OMITIR,DETECTAR,BUILD,ART,PROV,RUTA,RET process
+    class PLAN,CLON_OK,DET_OK,BUILD_OK,DISP,SALUD,RUTA_OK decision
+    class FALLO,LIMPIAR,FIN_KO error
+    class OPER,FIN_OK success

@@ -1,301 +1,380 @@
 ---
-title: Diagrama de clases unificado Deploya — un solo artefacto
+title: Diagrama de clases unificado — núcleo v4.1 (firma única de puertos; abstract class sin I)
 ---
 classDiagram
     direction TB
 
-    class Usuario {
-        +id UUID
-        +correo String
-        +nombre String
-        +estadoCuenta String
+    %% ───────── Transversal ─────────
+    class Reloj {
+        <<abstract>>
+        +ahora() Date
     }
-    class Rol {
-        +nombre String
+
+    %% ───────── M1 Identidad · M10 Notificaciones (Eddy) ─────────
+    class IdentidadService {
+        -hash HashContrasena
+        -correo CorreoPuerto
+        -reloj Reloj
+        +registrar(correo, nombre, clave) Usuario
+        +verificar(token) void
+        +iniciarSesion(correo, clave) Sesion
+        +cerrarSesion(sesionId) void
     }
-    class Sesion {
-        +expiracion DateTime
+    class PoliticaContrasena {
+        +validar(clave) ResultadoPolitica
     }
-    class Plan {
-        +nombre String
-        +precio Decimal
-        +vigenciaDias Integer
-        +activo Boolean
+    class HashContrasena {
+        <<abstract>>
+        +calcular(clave) String
+        +coincide(clave, hash) Boolean
     }
-    class LimitePlan {
-        +recurso String
-        +cantidad Decimal
-        +unidad String
+    class SesionGuard {
+        +canActivate(contexto) Boolean
     }
-    class Complemento {
-        +nombre String
-        +precio Decimal
+    class CorreoPuerto {
+        <<abstract>>
+        +enviar(destinatario, plantilla, datos) void
     }
-    class Suscripcion {
+    class CorreoSmtpAdaptador
+    class CorreoConsolaAdaptador
+
+    %% ───────── M2 Suscripciones · M9 Administración (Javier) ─────────
+    class SuscripcionesService {
+        <<Facade>>
+        -pasarela PasarelaPago
+        -reloj Reloj
+        +asignarSandbox(usuarioId) void
+        +cuotaDe(usuarioId) Cuota
+        +contratar(usuarioId, planCodigo, vigenciaDias, tarjeta) Pago
+        +renovar(usuarioId, tarjeta) Pago
+        +cambiarPlan(usuarioId, planCodigo, tarjeta) Pago
+    }
+    class Cuota {
+        <<valor>>
+        +plan PlanResumen
         +estado EstadoSuscripcion
-        +renovacionAutomatica Boolean
-        +fechaInicio DateTime
-        +fechaFin DateTime
+        +vence Date
+        +maxProyectos Integer
+        +cpus Decimal
+        +memoriaMb Integer
+        +construccionesMes Integer
     }
     class PoliticaCicloSuscripcion {
         +avanzar(suscripcion, ahora) EstadoSuscripcion
     }
-    class Transaccion {
-        +tipo TipoTransaccion
-        +monto Decimal
-        +estado EstadoTransaccion
-        +comprobante String
+    class PasarelaPago {
+        <<abstract>>
+        +cobrar(monto, tarjeta) ResultadoPago
     }
-    class EspacioTrabajo {
-        +nombre String
-    }
-    class Proyecto {
-        +nombre String
-        +tipoFuente String
-        +urlRepositorio String
-        +recetaConstruccion String
-        +comandoArranque String
-        +puertoHttp Integer
-    }
-    class VariableEntorno {
-        +clave String
-        +valorCifrado String
-    }
-    class TrabajoConstruccion {
-        +estado String
-        +stackDetectado String
-    }
-    class Imagen {
-        +digest String
-        +referencia String
-    }
-    class Artefacto {
-        +numeroVersion Integer
-        +inmutable Boolean
-    }
-    class Despliegue {
-        +estado EstadoDespliegue
-        +disparador String
-    }
-    class Contenedor {
-        +identificadorRuntime String
-        +cpu Decimal
-        +memoriaMb Integer
-    }
-    class Subdominio {
-        +fqdn String
-    }
-    class DominioPersonalizado {
-        +fqdn String
-        +estadoDns String
-    }
-    class CertificadoTls {
-        +dominio String
-        +emision DateTime
-        +vencimiento DateTime
-    }
-    class MetricaConsumo {
-        +porcentajeCpu Float
-        +usoRamMb Integer
-        +transferenciaGb Decimal
-    }
-    class EntradaBitacora {
-        +flujo String
-        +mensaje String
-    }
-    class Notificacion {
-        +tipo String
-        +canal String
-    }
-    class AccionAdministrativa {
-        +accion String
-        +entidadAfectada String
+    class PasarelaSimulada
+    class AdministracionService {
+        +suspender(adminId, usuarioId, motivo, detalle) void
     }
 
-    class EstadoSuscripcion {
-        <<enumeration>>
-        ACTIVA
-        POR_VENCER
-        VENCIDA
-        SUSPENDIDA
-        CANCELADA
+    %% ───────── M3 Proyectos · M7 Observabilidad (Eduardo) ─────────
+    class ProyectosService {
+        -fuente ProveedorFuente
+        +validarRepositorio(url, rama) RepositorioValidado
+        +crear(usuarioId, alta) Proyecto
+    }
+    class ProveedorFuente {
+        <<abstract>>
+        +inspeccionar(url, rama) RepositorioInspeccionado
+        +lector(url, rama) LectorFuente
+    }
+    class FuenteGitHubPublica
+    class ParserExpose {
+        +puertos(dockerfile) List~Integer~
+    }
+
+    %% ───────── M4 Construcción (Derek) ─────────
+    class ConstruccionService {
+        <<Facade>>
+        -cola ColaConstruccionPuerto
+        -despliegues RepositorioDespliegues
+        -suscripciones SuscripcionesService
+        -reloj Reloj
+        +crearDespliegue(proyectoId, disparador) DespliegueCreado
+        +consultar(despliegueId, usuarioId) VistaDespliegue
+        +bitacoraDesde(despliegueId, usuarioId, desde) PaginaBitacora
+    }
+    class DeteccionStackService {
+        -recetas List~RecetaStack~
+        +detectar(fuente LectorFuente) ResultadoDeteccion
+    }
+    class RecetaStack {
+        <<abstract>>
+        +receta RecetaConstruccion
+        +archivosQueLee List~String~
+        +reconoce(archivos MapaArchivos) Boolean
+        +dockerfile(archivos MapaArchivos) String
+        +puertoSugerido(archivos MapaArchivos) Integer
+    }
+    class RecetaDockerfile
+    class RecetaNode
+    class RecetaPython
+    class RecetaGo
+    class RecetaEstatica
+    class PipelineDespliegue {
+        -despliegues RepositorioDespliegues
+        -eventos PublicadorEventos
+        -reloj Reloj
+        +ejecutar(trabajo TrabajoDespliegue) void
+    }
+    class PasoPipeline {
+        <<abstract>>
+        +etapa Etapa
+        +ejecutar(contexto ContextoDespliegue) void
+    }
+    class PasoRecepcion {
+        -clonador ClonadorRepositorioPuerto
+        -deteccion DeteccionStackService
+    }
+    class PasoConstruccion {
+        -constructor ConstructorImagenPuerto
+        -artefactos RepositorioArtefactos
+    }
+    class TrabajoDespliegue {
+        <<Command>>
+        +despliegueId String
+        +plan PlanPipeline
+    }
+    class TransicionesDespliegue {
+        <<State>>
+        +transicionar(de, a) EstadoDespliegue
+        +etapaDe(estado) Etapa
+    }
+    class PoliticaDespliegue {
+        +puedeConstruir(cuota, construccionesDelMes) Decision
+    }
+
+    %% ───────── M5 Orquestación (Derek) ─────────
+    class OrquestacionService {
+        -contenedores ContenedorPuerto
+        -salud VerificacionEntornoPuerto
+        -suscripciones SuscripcionesService
+        +aprovisionar(contexto) ContenedorCreado
+        +detener(proyectoId) void
+        +reiniciar(proyectoId) void
+        +detenerTodosDe(usuarioId) void
+    }
+    class ReversionService {
+        -artefactos RepositorioArtefactos
+        -despliegues RepositorioDespliegues
+        -cola ColaConstruccionPuerto
+        +revertir(proyectoId, artefactoId, usuarioId) DespliegueCreado
+    }
+    class PasoEjecucion {
+        -orquestacion OrquestacionService
+    }
+    class PasoOperacion {
+        -contenedores ContenedorPuerto
+    }
+    class RetencionArtefactos {
+        <<Observer>>
+        +alTerminar(evento DespliegueTerminado) void
+    }
+    class PoliticaRetencion {
+        +aRetirar(artefactos, activoId) List~Artefacto~
+    }
+    class LimitesContenedor {
+        <<valor>>
+        +nanoCpus Integer
+        +memoriaBytes Integer
+        +desde(cuota) LimitesContenedor
+    }
+
+    %% ───────── M6 Enrutamiento (Derek) ─────────
+    class EnrutamientoService {
+        -enrutamiento EnrutamientoPuerto
+        +publicar(subdominio, contenedor) String
+        +retirar(subdominio) void
+    }
+    class PasoEnrutamiento {
+        -enrutamiento EnrutamientoService
+    }
+
+    %% ───────── Puertos del motor ─────────
+    class ColaConstruccionPuerto {
+        <<abstract>>
+        +encolar(trabajo TrabajoDespliegue) void
+        +retirar(despliegueId) Boolean
+    }
+    class ClonadorRepositorioPuerto {
+        <<abstract>>
+        +clonar(solicitud SolicitudClon) CommitClonado
+    }
+    class ConstructorImagenPuerto {
+        <<abstract>>
+        +construir(solicitud SolicitudConstruccion, alLinea) ImagenConstruida
+    }
+    class LectorFuente {
+        <<abstract>>
+        +existe(ruta) Boolean
+        +leer(ruta) String
+    }
+    class RepositorioDespliegues {
+        <<abstract>>
+        +crear(nuevo NuevoDespliegue) Despliegue
+        +porId(id) Despliegue
+        +cambiarEstado(id, estado, cambios) void
+        +marcarEtapa(id, etapa, estadoEtapa, marca) void
+        +agregarLineas(id, lineas) void
+        +lineasDesde(id, desde, limite) List~LineaBitacora~
+        +construccionesDesde(usuarioId, desde) Integer
+    }
+    class RepositorioArtefactos {
+        <<abstract>>
+        +registrar(artefacto) Artefacto
+        +porId(id) Artefacto
+        +disponiblesDe(proyectoId) List~Artefacto~
+        +marcarNoDisponible(id) void
+    }
+    class ContenedorPuerto {
+        <<abstract>>
+        +crear(espec EspecContenedor) ContenedorCreado
+        +detener(contenedorId) void
+        +reiniciar(contenedorId) void
+        +eliminar(contenedorId) void
+        +eliminarImagen(imagen) void
+    }
+    class VerificacionEntornoPuerto {
+        <<abstract>>
+        +saludable(objetivo ObjetivoSalud) ResultadoSalud
+    }
+    class EnrutamientoPuerto {
+        <<abstract>>
+        +publicar(ruta RutaPublica) UrlPublicada
+        +retirar(subdominio) void
+    }
+
+    %% ───────── Adaptadores (y stubs con la misma firma) ─────────
+    class ColaBullMq
+    class ClonadorGit
+    class ConstructorDocker
+    class LectorFuenteLocal
+    class RepositorioDesplieguesPrisma
+    class ContenedorDocker
+    class VerificacionHttp
+    class EnrutamientoTraefikArchivo
+
+    %% ───────── Entidades y enumeraciones ─────────
+    class Despliegue {
+        +id String
+        +numero Integer
+        +estado EstadoDespliegue
+        +disparador DisparadorDespliegue
+        +commitSha String
+        +codigoSalida Integer
+    }
+    class Artefacto {
+        +numero Integer
+        +imagen String
+        +digest String
+        +tamanoBytes Integer
+        +receta RecetaConstruccion
+        +disponible Boolean
     }
     class EstadoDespliegue {
         <<enumeration>>
-        ENCOLADO
-        CONSTRUYENDO
-        APROVISIONANDO
-        PUBLICANDO
-        SALUDABLE
-        FALLIDO
-        CANCELADO
-        DETENIDO
-        REVIRTIENDO_fuera_de_alcance
+        encolado
+        construyendo
+        aprovisionando
+        publicando
+        saludable
+        fallido
+        cancelado
+        detenido
+        revirtiendo
     }
-    class TipoTransaccion {
+    class EstadoSuscripcion {
         <<enumeration>>
-        CONTRATACION
-        RENOVACION
-        CAMBIO_PLAN
-        COMPLEMENTO
+        activa
+        por-vencer
+        vencida
+        suspendida
+        cancelada
     }
-    class EstadoTransaccion {
+    class Etapa {
         <<enumeration>>
-        APROBADA
-        RECHAZADA
-        PENDIENTE
+        recepcion
+        construccion
+        ejecucion
+        enrutamiento
+        operacion
+    }
+    class PlanPipeline {
+        <<enumeration>>
+        construccion
+        reversion
     }
 
-    class PasarelaPago {
-        <<interface>>
-        +cobrar(monto, metodo) ResultadoPago
-    }
-    class PasarelaSimulada {
-        +cobrar(monto, metodo) ResultadoPago
-    }
-    class ProveedorFuente {
-        <<interface>>
-        +obtenerCodigoFuente() CodigoFuente
-    }
-    class FuenteRepositorio {
-        +obtenerCodigoFuente() CodigoFuente
-    }
-    class FuenteArchivoComprimido {
-        +obtenerCodigoFuente() CodigoFuente
-    }
-    class ContenedorPuerto {
-        <<interface>>
-        +crear(imagen, limites) Contenedor
-        +detener(contenedorId)
-        +reemplazar(contenedorId, artefacto) Contenedor
-    }
-    class EnrutamientoPuerto {
-        <<interface>>
-        +asignarSubdominio(proyecto) Subdominio
-        +emitirCertificado(dominio) CertificadoTls
-        +conmutarTrafico(contenedor)
-    }
-    class VerificacionEntornoPuerto {
-        <<interface>>
-        +comprobarSalud(contenedor) ResultadoSalud
-    }
-    class ColaConstruccionPuerto {
-        <<interface>>
-        +encolar(trabajo TrabajoConstruccion)
-        +cancelar(despliegueId)
-    }
-    class RepositorioDespliegues {
-        <<interface>>
-        +guardar(despliegue) Despliegue
-        +porId(despliegueId) Despliegue
-        +agregarBitacora(despliegueId, lineas)
-    }
-    class CorreoPuerto {
-        <<interface>>
-        +enviar(destinatario, plantilla, datos)
-    }
-    class CorreoSmtpAdaptador {
-        +enviar(destinatario, plantilla, datos)
-    }
-    class CorreoConsolaAdaptador {
-        +enviar(destinatario, plantilla, datos)
-    }
+    %% ───────── Relaciones ─────────
+    IdentidadService --> PoliticaContrasena
+    IdentidadService --> HashContrasena
+    IdentidadService --> CorreoPuerto
+    IdentidadService --> SuscripcionesService : asignarSandbox
+    CorreoPuerto <|-- CorreoSmtpAdaptador
+    CorreoPuerto <|-- CorreoConsolaAdaptador
+    SuscripcionesService --> PoliticaCicloSuscripcion
+    SuscripcionesService --> PasarelaPago
+    SuscripcionesService ..> Cuota
+    PasarelaPago <|-- PasarelaSimulada
+    AdministracionService --> OrquestacionService : detenerTodosDe
+    ProyectosService --> ProveedorFuente
+    ProyectosService --> ParserExpose
+    ProyectosService --> DeteccionStackService : detectar
+    ProyectosService --> ConstruccionService : crearDespliegue
+    ProveedorFuente <|-- FuenteGitHubPublica
 
-    class ServicioSuscripciones {
-        +crearSuscripcion(clienteId, planId, vigencia) Suscripcion
-        +renovar(suscripcionId) Suscripcion
-        +cambiarPlan(suscripcionId, planNuevoId) Suscripcion
-        +cancelar(suscripcionId) Suscripcion
-    }
-    class ServicioPagos {
-        -pasarela PasarelaPago
-        +procesarCargo(suscripcion, monto) Transaccion
-    }
-    class ServicioProyectos {
-        -proveedorFuente ProveedorFuente
-        +crearProyecto(nombre, variablesEntorno) Proyecto
-    }
-    class ServicioConstruccion {
-        +encolar(proyecto) TrabajoConstruccion
-        +construir(trabajo) Artefacto
-    }
-    class ServicioOrquestacion {
-        -contenedores ContenedorPuerto
-        -salud VerificacionEntornoPuerto
-        +aprovisionar(artefacto, limites) Contenedor
-        +revertir(despliegueId) Despliegue
-        +detener(contenedorId)
-    }
-    class ServicioEnrutamiento {
-        -enrutamiento EnrutamientoPuerto
-        +publicar(proyecto, contenedor) Subdominio
-    }
-    class ServicioMetricas {
-        +consultarEnVivo(proyectoId) List~MetricaConsumo~
-    }
-    class ServicioBitacoras {
-        +transmitir(proyectoId)
-    }
-    class ServicioNotificaciones {
-        -correo CorreoPuerto
-        +notificarVerificacion(usuario, enlace)
-        +notificarRecuperacion(usuario, enlace)
-        +notificarDespliegue(despliegue)
-        +notificarVencimiento(suscripcion)
-    }
-    class CapaHerramientas {
-        +consultarProyectos()
-        +desplegar(proyectoId)
-        +obtenerBitacoras(proyectoId)
-        +obtenerMetricas(proyectoId)
-        +revertir(despliegueId)
-        +gestionarVariables(proyectoId)
-    }
+    ConstruccionService --> ColaConstruccionPuerto
+    ConstruccionService --> RepositorioDespliegues
+    ConstruccionService --> PoliticaDespliegue
+    ConstruccionService --> TransicionesDespliegue
+    ConstruccionService --> SuscripcionesService : cuotaDe
+    DeteccionStackService --> RecetaStack
+    DeteccionStackService --> LectorFuente
+    RecetaStack <|-- RecetaDockerfile
+    RecetaStack <|-- RecetaNode
+    RecetaStack <|-- RecetaPython
+    RecetaStack <|-- RecetaGo
+    RecetaStack <|-- RecetaEstatica
+    PipelineDespliegue --> PasoPipeline
+    PipelineDespliegue --> TransicionesDespliegue
+    PipelineDespliegue ..> TrabajoDespliegue
+    PasoPipeline <|-- PasoRecepcion
+    PasoPipeline <|-- PasoConstruccion
+    PasoPipeline <|-- PasoEjecucion
+    PasoPipeline <|-- PasoEnrutamiento
+    PasoPipeline <|-- PasoOperacion
+    PasoRecepcion --> ClonadorRepositorioPuerto
+    PasoRecepcion --> DeteccionStackService
+    PasoConstruccion --> ConstructorImagenPuerto
+    PasoConstruccion --> RepositorioArtefactos
+    PasoEjecucion --> OrquestacionService
+    PasoEnrutamiento --> EnrutamientoService
+    PasoOperacion --> ContenedorPuerto
+    OrquestacionService --> ContenedorPuerto
+    OrquestacionService --> VerificacionEntornoPuerto
+    OrquestacionService --> LimitesContenedor
+    ReversionService --> RepositorioArtefactos
+    ReversionService --> ColaConstruccionPuerto
+    RetencionArtefactos --> PoliticaRetencion
+    RetencionArtefactos --> ContenedorPuerto
+    RetencionArtefactos --> RepositorioArtefactos
+    EnrutamientoService --> EnrutamientoPuerto
 
-    Usuario "1" --> "*" Sesion
-    Usuario "*" --> "*" Rol
-    Usuario "1" --> "*" Suscripcion
-    Usuario "1" --> "*" EspacioTrabajo
-    Plan "1" --> "*" LimitePlan
-    Plan "1" --> "*" Suscripcion
-    Suscripcion "1" --> "*" Transaccion
-    Suscripcion --> EstadoSuscripcion
-    ServicioSuscripciones --> PoliticaCicloSuscripcion
-    ServicioSuscripciones --> ServicioPagos
-    ServicioPagos --> PasarelaPago
-    PasarelaPago <|.. PasarelaSimulada
-    EspacioTrabajo "1" --> "*" Proyecto
-    Proyecto "1" --> "*" VariableEntorno
-    Proyecto "1" --> "*" Despliegue
-    Proyecto "1" --> "*" Artefacto
+    ColaConstruccionPuerto <|-- ColaBullMq
+    ClonadorRepositorioPuerto <|-- ClonadorGit
+    ConstructorImagenPuerto <|-- ConstructorDocker
+    LectorFuente <|-- LectorFuenteLocal
+    RepositorioDespliegues <|-- RepositorioDesplieguesPrisma
+    ContenedorPuerto <|-- ContenedorDocker
+    VerificacionEntornoPuerto <|-- VerificacionHttp
+    EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo
+
     Despliegue --> EstadoDespliegue
-    Despliegue "1" --> "0..1" TrabajoConstruccion
-    Despliegue "*" --> "1" Artefacto
-    Artefacto "*" --> "1" Imagen
-    Despliegue "1" --> "0..1" Contenedor
-    Proyecto "1" --> "1" Subdominio
-    Proyecto "1" --> "*" DominioPersonalizado
-    Subdominio --> CertificadoTls
-    DominioPersonalizado --> CertificadoTls
-    Contenedor "1" --> "*" MetricaConsumo
-    Contenedor "1" --> "*" EntradaBitacora
-    Despliegue "1" --> "*" Notificacion
-    ServicioProyectos --> ProveedorFuente
-    ProveedorFuente <|.. FuenteRepositorio
-    ProveedorFuente <|.. FuenteArchivoComprimido
-    ServicioConstruccion --> ColaConstruccionPuerto
-    ServicioConstruccion --> RepositorioDespliegues
-    ServicioConstruccion --> ServicioOrquestacion
-    ServicioOrquestacion --> ContenedorPuerto
-    ServicioOrquestacion --> VerificacionEntornoPuerto
-    ServicioEnrutamiento --> EnrutamientoPuerto
-    ServicioNotificaciones --> CorreoPuerto
-    CorreoPuerto <|.. CorreoSmtpAdaptador
-    CorreoPuerto <|.. CorreoConsolaAdaptador
-    CapaHerramientas --> ServicioProyectos
-    CapaHerramientas --> ServicioConstruccion
-    CapaHerramientas --> ServicioOrquestacion
-    CapaHerramientas --> ServicioMetricas
-    CapaHerramientas --> ServicioBitacoras
-    ServicioOrquestacion --> ServicioEnrutamiento
-    ServicioOrquestacion --> ServicioNotificaciones
+    Despliegue "*" --> "0..1" Artefacto
+    TrabajoDespliegue --> PlanPipeline
+    PasoPipeline --> Etapa
+    Cuota --> EstadoSuscripcion

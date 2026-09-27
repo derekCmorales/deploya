@@ -8,8 +8,8 @@ Alcance: [alcance.md](../../alcance.md) · Entregas: [plan-avances.md](../../pla
 
 | Id | Qué entra (núcleo v4.1) | Código |
 |---|---|---|
-| M4 | Cola BullMQ, clonar, `docker build` con el `Dockerfile` del cliente, artefacto `#n` con digest, bitácora; cancelar, reintentar, redesplegar (reconstruye) | `apps/api/src/modules/construccion` |
-| M5 | Contenedor con `--cpus` / `--memory` del plan, sin privilegios, red propia; verificación de salud; reiniciar, detener, borrar; detener por suspensión | `apps/api/src/modules/orquestacion` |
+| M4 | Cola BullMQ, clonar, **detección de stack** (Dockerfile o receta Node/Python/Go/estática), `docker build`, artefacto `#n` con digest, bitácora; cancelar, reintentar, redesplegar (reconstruye) | `apps/api/src/modules/construccion` |
+| M5 | Contenedor con `--cpus` / `--memory` del plan, sin privilegios, red propia; verificación de salud; **versionado con retención y reversión sin reconstruir**; reiniciar, detener, borrar; detener por suspensión | `apps/api/src/modules/orquestacion` |
 | M6 | `<proyecto>.deploya.app` vía Traefik, HTTPS comodín, conmutación sin corte | `apps/api/src/modules/enrutamiento` |
 | M8 | **Fuera de alcance**: queda el stub `health` | `apps/api/src/modules/herramientas` |
 
@@ -28,15 +28,15 @@ El motor no tiene pantallas propias: hace **reales** las de Eduardo. Lo que tu A
 | 14 | Historial con digest y duración, redesplegar |
 | 19b | Borrar contenedor e imágenes |
 
-Estados de despliegue: Encolado, Construyendo, Aprovisionando, Publicando, Saludable, Fallido, Cancelado, Detenido (≠ §4.4 de suscripción).
+Estados de despliegue: Encolado, Construyendo, Aprovisionando, Publicando, Saludable, Fallido, Cancelado, Detenido y Revirtiendo (≠ §4.4 de suscripción).
 
 ## Qué entregas
 
 | Avance | Historias | Pts |
 |---|---|---|
 | **A1 (30 %)** | ENG-01 compose con trabajador, Traefik y Mailpit · M4-01 cola + build + bitácora + API · M5-01 contenedor con límites + salud | 10 |
-| A2 (50 %) | M6-01 subdominio · M5-02 conmutación, reiniciar, detener · M5-03 bloqueos por suscripción y cuota | 7 |
-| A3 (80 %) | M4-02 cancelar, reintentar, redesplegar · M6-02 VPS con HTTPS · ADR | 10 |
+| A2 (50 %) | M6-01 subdominio · M5-02 conmutación, reiniciar, detener · M5-03 bloqueos por suscripción y cuota · **M4-03 detección de stack** | 12 |
+| A3 (80 %) | M4-02 cancelar, reintentar, redesplegar · **M5-04 reversión sin reconstruir** · M6-02 VPS con HTTPS · ADR | 13 |
 | Final | DOC-03 diseño final y manual técnico | 3 |
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Derek](../../plan-avances.md#derek--motor-10-pts).
@@ -45,7 +45,7 @@ Detalle del Avance 1 y lo que presentas: [plan-avances.md § Derek](../../plan-a
 
 ## Fuera de alcance · solo si da el tiempo
 
-Reversión instantánea sin reconstruir · detección de stack sin `Dockerfile` · dominios personalizados · métricas en vivo (`docker stats`) · asistente e integración M8.
+Buildpacks · dominios personalizados · métricas en vivo (`docker stats`) · asistente e integración M8. (Detección de stack y reversión sin reconstruir **volvieron al núcleo**: M4-03 y M5-04.)
 
 ## Qué no tocas en solitario
 
@@ -53,12 +53,13 @@ Auth (Eddy), pagos (Javier), pantallas de proyecto (Eduardo). Revisa esos PRs; n
 
 ## Diagramas
 
-1. [m4-m5-m6-estados-despliegue.mmd](../../diagramas/m1-m10/m4-m5-m6-estados-despliegue.mmd) — Revirtiendo queda fuera; se agrega Cancelado
+1. [m4-m5-m6-estados-despliegue.mmd](../../diagramas/m1-m10/m4-m5-m6-estados-despliegue.mmd) — con Cancelado y Revirtiendo
 2. [m4-m5-m6-secuencia-despliegue.mmd](../../diagramas/m1-m10/m4-m5-m6-secuencia-despliegue.mmd)
-3. [m4-m5-m6-secuencia-reversion.mmd](../../diagramas/m1-m10/m4-m5-m6-secuencia-reversion.mmd) — fuera de alcance
-4. [m4-m5-m6-actividad-motor.mmd](../../diagramas/m1-m10/m4-m5-m6-actividad-motor.mmd)
-5. [m4-m5-m6-componentes.mmd](../../diagramas/m1-m10/m4-m5-m6-componentes.mmd)
-6. [m8-herramientas-componentes.mmd](../../diagramas/m1-m10/m8-herramientas-componentes.mmd) — fuera de alcance
+3. [m4-m5-m6-secuencia-reversion.mmd](../../diagramas/m1-m10/m4-m5-m6-secuencia-reversion.mmd) — M5-04
+4. [m4-actividad-deteccion-stack.mmd](../../diagramas/m1-m10/m4-actividad-deteccion-stack.mmd) — M4-03
+5. [m4-m5-m6-actividad-motor.mmd](../../diagramas/m1-m10/m4-m5-m6-actividad-motor.mmd)
+6. [m4-m5-m6-componentes.mmd](../../diagramas/m1-m10/m4-m5-m6-componentes.mmd) — módulos Nest y binding de adaptadores
+7. [m8-herramientas-componentes.mmd](../../diagramas/m1-m10/m8-herramientas-componentes.mmd) — fuera de alcance
 
 C4 (tú lo mantienes único): [compartido/](../../diagramas/compartido/).
 
@@ -76,7 +77,11 @@ Regla general: [ingenieria.md](../../ingenieria.md). Hallazgos pendientes del mo
 
 ## ADR que tocan
 
-`docs/adr/`: `Dockerfile` obligatorio, BullMQ para la cola, polling en vez de WebSocket, Traefik con certificado comodín.
+[0002](../../adr/0002-cola-bullmq-y-trabajador-aparte.md) cola y worker · [0003](../../adr/0003-construccion-dockerfile-o-receta.md) Dockerfile o receta · [0004](../../adr/0004-versionado-y-reversion-sin-reconstruir.md) versionado y reversión · [0005](../../adr/0005-traefik-proveedor-de-archivo.md) Traefik por archivo · [0006](../../adr/0006-polling-en-vez-de-websocket.md) polling. Pendiente (A3): certificado comodín.
+
+## Changes de OpenSpec
+
+`openspec/changes/feat-m4-motor-construccion` (A1) · `feat-m4-deteccion-stack` (A2) · `feat-m5-reversion-instantanea` (A3). Contratos: [despliegues v2](../../contratos/despliegues.md), [datos del núcleo](../../contratos/datos-nucleo.md).
 
 ## Specs OpenSpec
 

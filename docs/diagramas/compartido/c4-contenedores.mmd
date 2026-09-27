@@ -1,49 +1,46 @@
 ---
-title: C4 Nivel 2 — Contenedores de Deploya
+title: C4 Nivel 2 — Contenedores de Deploya (núcleo v4.1, docker compose)
 ---
 flowchart TB
-    CLIENTE["Cliente / Administrador /<br/>Operador / Soporte"]
+    CLIENTE["Cliente / Administrador"]
+    VISITANTE["Visitante de una app desplegada"]
 
-    subgraph DEPLOYA["Deploya — monolito modular con trabajadores"]
-        WEB["Interfaz web<br/>Next.js"]
-        API["API de control<br/>NestJS<br/>M1–M3, M8, M9, M10"]
-        MOTOR["Motor de despliegue<br/>trabajadores M4 M5 M6"]
-        HERR["Capa de herramientas M8<br/>asistente e integración"]
-        OBS["Observabilidad M7<br/>métricas y bitácoras en vivo"]
-        COLA["Cola y caché<br/>Redis"]
-        BD[("PostgreSQL")]
+    subgraph DEPLOYA["Deploya — monolito modular + trabajador"]
+        WEB["web<br/>Next.js · design system v4.1<br/>polling cada 3 s"]
+        API["api<br/>NestJS · M1 M2 M3 M7 M9 M10<br/>+ productor de M4<br/>no habla con Docker"]
+        WORKER["worker<br/>misma imagen de la API<br/>M4 construye · M5 ejecuta · M6 publica"]
+        REDIS[("redis<br/>cola BullMQ «despliegues»")]
+        BD[("postgres<br/>Prisma · schema del núcleo")]
+        EDGE["traefik v3<br/>proveedor de archivo<br/>*.localhost / *.deploya.app"]
+        MAILPIT["mailpit<br/>SMTP de desarrollo · :8025"]
     end
 
-    NUBE["Motor de contenedores<br/>Docker"]
-    EDGE["Enrutador de borde<br/>TLS automático"]
-    GIT["Proveedor de repositorios"]
-    CORREO["Correo transaccional"]
-    PAGOS["Pasarela de pagos simulada"]
-    LLM["Modelo de lenguaje"]
+    DOCKER["Docker Engine<br/>/var/run/docker.sock"]
+    APPS["Contenedores de clientes<br/>límites del plan · red por proyecto"]
+    GIT["GitHub"]
+    SMTP["Proveedor SMTP (VPS)"]
 
-    CLIENTE --> WEB
-    WEB --> API
+    CLIENTE -->|HTTPS| WEB
+    WEB -->|"REST JSON, cookie de sesión"| API
     API --> BD
-    API --> COLA
-    API --> HERR
-    API --> OBS
-    MOTOR --> COLA
-    MOTOR --> BD
-    MOTOR --> NUBE
-    MOTOR --> EDGE
-    OBS --> COLA
-    HERR --> API
-    HERR --> LLM
-    API --> CORREO
-    API --> PAGOS
-    API --> GIT
-    EDGE --> NUBE
+    API -->|"encola TrabajoDespliegue"| REDIS
+    API -->|"lee archivos (11a)"| GIT
+    API -->|"SMTP"| MAILPIT
+    API -.->|"SMTP en el VPS"| SMTP
+    WORKER -->|"consume"| REDIS
+    WORKER -->|"estado, etapas, bitácora, artefactos"| BD
+    WORKER -->|"git clone --depth 1"| GIT
+    WORKER -->|"build, run, stop"| DOCKER
+    WORKER -->|"escribe rutas dinámicas"| EDGE
+    DOCKER --> APPS
+    VISITANTE -->|"http(s)://proyecto.dominio"| EDGE
+    EDGE -->|"red del proyecto"| APPS
 
     classDef persona fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
     classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
     classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
-    class CLIENTE persona
-    class WEB,API,MOTOR,HERR,OBS app
-    class COLA,BD data
-    class NUBE,EDGE,GIT,CORREO,PAGOS,LLM ext
+    class CLIENTE,VISITANTE persona
+    class WEB,API,WORKER,EDGE,MAILPIT app
+    class REDIS,BD data
+    class DOCKER,APPS,GIT,SMTP ext

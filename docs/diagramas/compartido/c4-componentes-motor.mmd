@@ -1,80 +1,122 @@
 ---
-title: C4 Nivel 3 — Componentes del motor de despliegue
+title: C4 Nivel 3 — Componentes del motor de despliegue (M4 M5 M6), hexagonal
 ---
 flowchart TB
-    API["API de control"]
+    WEB["web · pantallas 11a, 12, 13, 14"]
+    M3["M3 ProyectosService"]
+    M2["M2 SuscripcionesService<br/>cuotaDe(usuarioId)"]
 
-    subgraph M4["M4 Motor de construcción"]
-        COLA_C["Consumidor de cola<br/>de construcción"]
-        DETECTOR["Detector de stack"]
-        CONSTRUCTOR["Constructor de imágenes"]
-        REGISTRO["Registro de artefactos<br/>versionados e inmutables"]
+    subgraph ENTRADA["Entrada"]
+        CTRL["DesplieguesController<br/>POST /proyectos/:id/despliegues<br/>GET /despliegues/:id · /bitacora?desde="]
+        CTRL_V2["AccionesController (v2)<br/>reversiones · cancelar · reintentar<br/>reiniciar · detener · artefactos"]
+        PROC["ProcesadorDespliegues<br/>consumidor BullMQ (worker)"]
     end
 
-    subgraph M5["M5 Orquestación y ejecución"]
-        ORQ["Orquestador de contenedores"]
-        LIMITES["Aplicador de límites<br/>CPU memoria procesos"]
-        REVERSION["Reversión de versión"]
+    subgraph APLICACION["Aplicación"]
+        CONS["ConstruccionService<br/>Facade exportada: crearDespliegue,<br/>consultar, bitacoraDesde"]
+        DETS["DeteccionStackService<br/>exportado a M3"]
+        PIPE["PipelineDespliegue<br/>recorre los pasos del plan"]
+        ORQ["OrquestacionService<br/>aprovisionar, activar, detener,<br/>detenerTodosDe"]
+        REV["ReversionService (v2)<br/>valida y crea el despliegue"]
+        ENR["EnrutamientoService<br/>publicar, retirar"]
+        RET["RetencionArtefactos<br/>escucha DespliegueTerminado"]
+        PASOS["PasoRecepcion · PasoConstruccion<br/>PasoEjecucion · PasoEnrutamiento<br/>PasoOperacion<br/>Chain of Responsibility"]
     end
 
-    subgraph M6["M6 Enrutamiento y TLS"]
-        SUBDOM["Asignador de subdominio"]
-        CERT["Gestor de certificados TLS"]
-        TRAFICO["Conmutador de tráfico"]
-        DOMINIO["Dominios personalizados"]
+    subgraph DOMINIO["Dominio puro"]
+        TRANS["TransicionesDespliegue<br/>State"]
+        RECETAS["RecetaStack (Strategy)<br/>Dockerfile · Node · Python · Go · Estática<br/>decide sobre un mapa de archivos"]
+        POL["PoliticaDespliegue<br/>PoliticaRetencion · LimitesContenedor"]
     end
 
-    subgraph PUERTOS["Capa de adaptadores — la API no llama a Docker"]
-        P_FUENTE["ProveedorFuente"]
+    subgraph PUERTOS["Puertos (abstract class, sin I)"]
+        P_COLA["ColaConstruccionPuerto"]
+        P_CLON["ClonadorRepositorioPuerto"]
+        P_BUILD["ConstructorImagenPuerto"]
+        P_LECT["LectorFuente"]
+        P_REPO["RepositorioDespliegues<br/>RepositorioArtefactos"]
         P_CONT["ContenedorPuerto"]
-        P_RUTA["EnrutamientoPuerto"]
         P_SALUD["VerificacionEntornoPuerto"]
+        P_RUTA["EnrutamientoPuerto"]
+        P_RELOJ["Reloj"]
     end
 
-    subgraph M8["M8 Capa de herramientas"]
-        HERR["CapaHerramientas<br/>consultar desplegar bitácoras<br/>métricas revertir variables"]
+    subgraph ADAPTADORES["Adaptadores (y un stub por puerto para pruebas)"]
+        A_BULL["ColaBullMq"]
+        A_GIT["ClonadorGit"]
+        A_DBUILD["ConstructorDocker (dockerode)"]
+        A_FS["LectorFuenteLocal · LectorFuenteGitHub (M3)"]
+        A_PRISMA["RepositorioDesplieguesPrisma"]
+        A_DRUN["ContenedorDocker (dockerode)"]
+        A_HTTP["VerificacionHttp"]
+        A_TRAEFIK["EnrutamientoTraefikArchivo"]
     end
 
-    DOCKER["Docker"]
-    EDGE["Enrutador de borde"]
-    GIT["Repositorio / archivo comprimido"]
-    NOTIF["M10 Notificaciones"]
-    OBS["M7 Observabilidad"]
+    REDIS[("Redis")]
+    PG[("PostgreSQL")]
+    DOCKER["Docker Engine"]
+    GIT["GitHub"]
+    TRAEFIK["Traefik"]
 
-    API --> COLA_C
-    API --> HERR
-    COLA_C --> DETECTOR
-    DETECTOR --> CONSTRUCTOR
-    CONSTRUCTOR --> REGISTRO
-    REGISTRO --> ORQ
-    ORQ --> LIMITES
-    ORQ --> REVERSION
-    ORQ --> SUBDOM
-    SUBDOM --> CERT
-    CERT --> TRAFICO
-    TRAFICO --> DOMINIO
-
-    DETECTOR --> P_FUENTE
-    P_FUENTE --> GIT
-    LIMITES --> P_CONT
+    WEB --> CTRL
+    WEB --> CTRL_V2
+    M3 --> CONS
+    M3 --> DETS
+    CTRL --> CONS
+    CTRL_V2 --> REV
+    CTRL_V2 --> ORQ
+    CONS --> M2
+    CONS --> TRANS
+    CONS --> POL
+    CONS --> P_COLA
+    CONS --> P_REPO
+    REV --> P_REPO
+    REV --> P_COLA
+    PROC --> PIPE
+    PIPE --> PASOS
+    PIPE --> TRANS
+    PASOS --> P_CLON
+    PASOS --> DETS
+    PASOS --> P_BUILD
+    PASOS --> ORQ
+    PASOS --> ENR
+    DETS --> RECETAS
+    DETS --> P_LECT
+    ORQ --> POL
+    ORQ --> M2
     ORQ --> P_CONT
-    REVERSION --> P_CONT
-    P_CONT --> DOCKER
-    SUBDOM --> P_RUTA
-    CERT --> P_RUTA
-    TRAFICO --> P_RUTA
-    P_RUTA --> EDGE
     ORQ --> P_SALUD
-    P_SALUD --> DOCKER
+    ENR --> P_RUTA
+    RET --> POL
+    RET --> P_CONT
+    PIPE --> P_REPO
+    PIPE --> P_RELOJ
 
-    ORQ --> NOTIF
-    COLA_C --> NOTIF
-    ORQ --> OBS
-    HERR --> API
+    P_COLA -.-> A_BULL
+    P_CLON -.-> A_GIT
+    P_BUILD -.-> A_DBUILD
+    P_LECT -.-> A_FS
+    P_REPO -.-> A_PRISMA
+    P_CONT -.-> A_DRUN
+    P_SALUD -.-> A_HTTP
+    P_RUTA -.-> A_TRAEFIK
 
-    classDef mod fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    A_BULL --> REDIS
+    A_PRISMA --> PG
+    A_GIT --> GIT
+    A_DBUILD --> DOCKER
+    A_DRUN --> DOCKER
+    A_TRAEFIK --> TRAEFIK
+
+    classDef entry fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
+    classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef dom fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
     classDef port fill:#fff7ed,stroke:#fb923c,stroke-width:2px,color:#7c2d12
+    classDef adapter fill:#fdf4ff,stroke:#e879f9,stroke-width:2px,color:#701a75
     classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
-    class COLA_C,DETECTOR,CONSTRUCTOR,REGISTRO,ORQ,LIMITES,REVERSION,SUBDOM,CERT,TRAFICO,DOMINIO,HERR,API mod
-    class P_FUENTE,P_CONT,P_RUTA,P_SALUD port
-    class DOCKER,EDGE,GIT,NOTIF,OBS ext
+    class CTRL,CTRL_V2,PROC entry
+    class CONS,DETS,PIPE,ORQ,REV,ENR,RET,PASOS app
+    class TRANS,RECETAS,POL dom
+    class P_COLA,P_CLON,P_BUILD,P_LECT,P_REPO,P_CONT,P_SALUD,P_RUTA,P_RELOJ port
+    class A_BULL,A_GIT,A_DBUILD,A_FS,A_PRISMA,A_DRUN,A_HTTP,A_TRAEFIK adapter
+    class WEB,M3,M2,REDIS,PG,DOCKER,GIT,TRAEFIK ext

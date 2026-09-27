@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-09-27
+goal: Versionado inmutable con retención de 5 artefactos y reversión a uno de ellos sin
+  reconstruir (estado Revirtiendo), con la misma conmutación sin corte

@@ -11,7 +11,8 @@ context: |
   Nunca commits a main. Ramas feat/m<n>-<slug>. Conventional Commits feat(m1):.
   OpenSpec primero: /opsx-propose → apply → archive. Un spec por módulo en openspec/specs/.
   Dueños: Eddy M1/M10+CI; Javier M2/M9+Prisma; Eduardo M3/M7+UI; Derek M4/M5/M6 (+ stub M8).
-  Alcance núcleo v4.1: docs/alcance.md (manda sobre docs/propuesta.md). Solo repo público de GitHub con Dockerfile.
+  Alcance núcleo v4.1: docs/alcance.md (manda sobre docs/propuesta.md). Solo repo público de GitHub, con Dockerfile o stack detectado por M4 (Node, Python, Go, estático).
+  Detección de stack (M4-03) y reversión sin reconstruir (M5-04, estado Revirtiendo) están en el núcleo.
   M8 fuera de alcance (stub). Lo de "fuera de alcance · solo si da el tiempo" requiere change propio.
   Plan de entregas y dueños por historia: docs/plan-avances.md.
   Design system v4.1 (fuente madre de UI): docs/diseno/README.md, docs/diseno/guia-construccion.md y docs/diseno/pantallas/<pantalla>.md.

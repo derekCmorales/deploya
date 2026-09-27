@@ -1,64 +1,77 @@
 ---
-title: Secuencia del despliegue completo — propuesta §3.2
+title: Secuencia de un despliegue por construcción — Recepción → Construcción → Ejecución → Enrutamiento → Operación
 ---
 sequenceDiagram
+    autonumber
     actor Cliente
-    participant UI as Interfaz web
-    participant API as API de control
+    participant Web as web (pantallas 11d, 12)
+    participant API as ConstruccionService (api)
+    participant M2 as SuscripcionesService
     participant BD as PostgreSQL
-    participant Cola as Cola Redis
-    participant M4 as Trabajador de construcción
-    participant M5 as Orquestador de contenedores
-    participant Salud as VerificacionEntornoPuerto
-    participant M6 as Enrutador de borde
-    participant M7 as Observabilidad
-    participant M10 as Notificaciones
+    participant Cola as ColaBullMq (Redis)
+    participant W as PipelineDespliegue (worker)
+    participant Git as ClonadorGit
+    participant Det as DeteccionStackService
+    participant Img as ConstructorDocker
+    participant Orq as OrquestacionService
+    participant Cont as ContenedorDocker
+    participant Salud as VerificacionHttp
+    participant Ruta as EnrutamientoTraefikArchivo
 
-    Note over Cliente,M10: 1. Recepción
-    Cliente->>UI: Desplegar proyecto
-    UI->>API: POST despliegues
-    API->>BD: registrar Despliegue Encolado
-    API->>Cola: encolar construcción
-    API-->>UI: 202 aceptado
+    Cliente->>Web: Desplegar
+    Web->>API: POST /proyectos/:id/despliegues
+    API->>M2: cuotaDe(usuarioId)
+    API->>BD: Despliegue #n encolado + 5 etapas pendientes
+    API->>Cola: encolar(TrabajoDespliegue{despliegueId, plan: construccion})
+    API-->>Web: 201 {id, numero, estado: encolado}
 
-    Note over Cliente,M10: 2. Construcción
-    Cola->>M4: entregar trabajo
-    M4->>M4: detectar stack
-    M4->>M4: construir imagen versionada
+    loop cada 3 s mientras terminado = false
+        Web->>API: GET /despliegues/:id y /bitacora?desde=n
+        API->>BD: estado, etapas, líneas n > desde
+        API-->>Web: riel de etapas + líneas nuevas
+    end
 
-    alt Construcción correcta
-        M4->>BD: registrar Artefacto inmutable
-        M4->>Cola: encolar ejecución
+    Cola->>W: trabajo
+    W->>BD: construyendo · recepción en curso
+    Note over W,Det: 1 · Recepción
+    W->>Git: clonar(url, rama, destino) --depth 1
+    Git-->>W: commit {sha, mensaje, autor}
+    W->>Det: detectar(LectorFuenteLocal)
+    Det-->>W: receta dockerfile o node/python/go/estatica
+    W->>BD: commit, receta, líneas de bitácora
 
-        Note over Cliente,M10: 3. Ejecución
-        Cola->>M5: entregar artefacto
-        M5->>M5: crear contenedor con límites del plan
-        M5->>BD: Despliegue Aprovisionando
+    Note over W,Img: 2 · Construcción
+    W->>Img: construir(directorio, etiqueta deploya/p:n, 10 min, alLinea)
+    loop cada línea de docker build
+        Img-->>W: alLinea(texto)
+        W->>BD: LineaBitacora n, marca, etapa construccion
+    end
 
-        alt Contenedor en ejecución
-            Note over Cliente,M10: 4. Enrutamiento
-            M5->>M6: asignar subdominio y certificado TLS
-            M6->>M6: conmutar tráfico
-            M5->>Salud: comprobar salud HTTP
-            alt Healthcheck correcto
-                Note over Cliente,M10: 5. Operación
-                M5->>BD: Despliegue Saludable
-                M5->>M7: transmitir bitácoras y métricas
-                M5->>M10: resultado de despliegue correcto
-                M10-->>Cliente: correo de publicación
-                M7-->>UI: métricas y bitácoras en vivo
-            else Healthcheck fallido
-                M5->>BD: Despliegue Fallido
-                M5->>M10: resultado de despliegue fallido
-                M10-->>Cliente: correo de fallo
-            end
-        else No se pudo levantar el contenedor
-            M5->>BD: Despliegue Fallido
-            M5->>M10: resultado de despliegue fallido
-            M10-->>Cliente: correo de fallo
+    alt build correcto
+        Img-->>W: {digest, tamanoBytes}
+        W->>BD: Artefacto #n · aprovisionando
+        Note over W,Salud: 3 · Ejecución
+        W->>Orq: aprovisionar(contexto)
+        Orq->>M2: cuotaDe(usuarioId)
+        Orq->>Cont: crear({nombre, imagen, red del proyecto, cpus, memoriaMb, variables})
+        Cont-->>Orq: {id, host}
+        Orq->>Salud: saludable({host, puerto, ruta /, 60 s})
+        alt responde
+            Salud-->>Orq: ok, 200 en 38 ms
+            Note over W,Ruta: 4 · Enrutamiento
+            W->>BD: publicando
+            W->>Ruta: publicar({subdominio, host, puerto})
+            Ruta-->>W: url http(s)://p.dominio
+            Note over W,Cont: 5 · Operación
+            W->>BD: saludable · Proyecto.despliegueActivo = #n
+            W->>Cont: detener(contenedor anterior)
+            W->>W: publica DespliegueTerminado (retención de artefactos)
+        else no responde en 60 s
+            Salud-->>Orq: falla
+            Orq->>Cont: eliminar(contenedor nuevo)
+            W->>BD: fallido · la versión activa no cambia
         end
-    else Construcción fallida
-        M4->>BD: Despliegue Fallido
-        M4->>M10: resultado de despliegue fallido
-        M10-->>Cliente: correo de fallo
+    else build falla o pasa de 10 min
+        Img-->>W: ConstruccionFallida(codigoSalida)
+        W->>BD: fallido · codigoSalida · motivo · construcción fallida
     end

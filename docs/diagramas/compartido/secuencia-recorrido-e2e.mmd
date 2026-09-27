@@ -1,0 +1,58 @@
+---
+title: Recorrido de punta a punta del Avance 1 — de registrarse a ver la app Saludable
+---
+sequenceDiagram
+    autonumber
+    actor Cliente
+    participant Web as web
+    participant M1 as M1 Identidad
+    participant M10 as M10 CorreoPuerto
+    participant Mail as Mailpit
+    participant M2 as M2 Suscripciones
+    participant M3 as M3 Proyectos
+    participant GH as GitHub
+    participant M4 as M4 Construcción (api)
+    participant W as worker M4 M5 M6
+    participant Edge as Traefik
+
+    Note over Cliente,Edge: Eddy · pantallas 01, 02, 03
+    Cliente->>Web: Registro (01)
+    Web->>M1: POST /identidad/registro
+    M1->>M2: asignarSandbox(usuarioId)
+    M1->>M10: enviar(verificacion, enlace 24 h)
+    M10->>Mail: SMTP
+    Cliente->>Mail: abre el correo (localhost:8025)
+    Cliente->>Web: enlace de verificación (02)
+    Web->>M1: POST /identidad/verificar
+    Cliente->>Web: Iniciar sesión (03)
+    Web->>M1: POST /identidad/sesion
+    M1-->>Web: cookie de sesión (SesionGuard)
+
+    Note over Cliente,Edge: Javier · pantalla 06
+    Cliente->>Web: Planes
+    Web->>M2: GET /suscripciones/planes
+    M2-->>Web: 4 planes · Sandbox es el plan actual
+
+    Note over Cliente,Edge: Eduardo · pantallas 10b, 11a, 11d
+    Cliente->>Web: Nuevo proyecto: URL, rama, nombre
+    Web->>M3: POST /proyectos/validar
+    M3->>GH: API pública: repo, rama, último commit, Dockerfile
+    M3->>M4: DeteccionStackService.detectar(LectorFuenteGitHub) · desde A2
+    M3-->>Web: Dockerfile detectado · puerto de EXPOSE
+    Cliente->>Web: Revisar → Desplegar
+    Web->>M3: POST /proyectos
+    M3->>M2: cuotaDe · 0 de 1 proyectos
+    M3->>M4: crearDespliegue(proyectoId, alta)
+    M4-->>Web: despliegue #1 encolado
+
+    Note over Cliente,Edge: Derek · motor, pantallas 10 y 12
+    M4->>W: TrabajoDespliegue por Redis
+    W->>W: clonar → detectar → docker build → artefacto #1
+    W->>W: contenedor 0.25 vCPU · 256 MB → salud OK
+    W->>Edge: ruta hola-deploya.localhost → contenedor
+    loop cada 3 s
+        Web->>M4: GET /despliegues/:id y /bitacora?desde=n
+    end
+    M4-->>Web: saludable · url
+    Cliente->>Edge: http://hola-deploya.localhost
+    Edge-->>Cliente: la app responde

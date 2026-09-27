@@ -1,0 +1,34 @@
+---
+title: Actividad — detección de stack (M4-03, Strategy de recetas en orden fijo)
+---
+flowchart TB
+    START(("LectorFuente<br/>GitHub en 11a · disco en el trabajador")) --> LEER["Leer solo los archivos que piden las recetas<br/>Dockerfile, package.json, requirements.txt,<br/>pyproject.toml, go.mod, index.html"]
+    LEER --> D{"¿Dockerfile en<br/>rutaDockerfile?"}
+    D -->|Sí| R_DF["RecetaDockerfile<br/>usa el del repo<br/>puerto = primer EXPOSE o 8080"]
+    D -->|No| N{"¿package.json<br/>con script start?"}
+    N -->|Sí| R_N["RecetaNode<br/>node:22-alpine · npm ci · build si existe<br/>npm start · PORT=8080"]
+    N -->|No| P{"¿requirements.txt o<br/>pyproject.toml, y main.py o app.py?"}
+    P -->|Sí| R_P["RecetaPython<br/>python:3.12-slim · pip install<br/>gunicorn si está, si no python main.py"]
+    P -->|No| G{"¿go.mod?"}
+    G -->|Sí| R_G["RecetaGo<br/>golang:1.23 → distroless<br/>binario estático · PORT=8080"]
+    G -->|No| E{"¿index.html<br/>en la raíz?"}
+    E -->|Sí| R_E["RecetaEstatica<br/>nginx-unprivileged · :8080"]
+    E -->|No| NO["StackNoReconocido<br/>11e: falta Dockerfile y no se reconoce el stack"]
+
+    R_N --> GEN["Generar Dockerfile.deploya en el clon<br/>bitácora: Stack detectado · receta Deploya"]
+    R_P --> GEN
+    R_G --> GEN
+    R_E --> GEN
+    R_DF --> RES(("ResultadoDeteccion<br/>receta, descripcion,<br/>puertoSugerido, evidencia"))
+    GEN --> RES
+
+    classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
+    classDef process fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px,color:#134e4a
+    classDef decision fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
+    classDef error fill:#fff1f2,stroke:#fb7185,stroke-width:2px,color:#881337
+    classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
+    class START,RES startEnd
+    class LEER,GEN process
+    class D,N,P,G,E decision
+    class NO error
+    class R_DF,R_N,R_P,R_G,R_E success

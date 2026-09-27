@@ -1750,7 +1750,7 @@ classDiagram
         <<Facade>>
         -cola ColaConstruccionPuerto
         -despliegues RepositorioDespliegues
-        -suscripciones SuscripcionesService
+        -proyectos ProyectosLecturaPuerto
         -reloj Reloj
         +crearDespliegue(proyectoId, disparador) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
@@ -1810,7 +1810,7 @@ classDiagram
     class OrquestacionService {
         -contenedores ContenedorPuerto
         -salud VerificacionEntornoPuerto
-        -suscripciones SuscripcionesService
+        -cuota CuotaPlanPuerto
         +aprovisionar(contexto) ContenedorCreado
         +detener(proyectoId) void
         +reiniciar(proyectoId) void
@@ -1860,7 +1860,17 @@ classDiagram
     }
     class ClonadorRepositorioPuerto {
         <<abstract>>
-        +clonar(solicitud SolicitudClon) CommitClonado
+        +clonar(solicitud SolicitudClon) ClonListo
+        +existeArchivo(directorio, ruta) Boolean
+        +limpiar(directorio) void
+    }
+    class ProyectosLecturaPuerto {
+        <<abstract>>
+        +porId(proyectoId) ProyectoDesplegable
+    }
+    class CuotaPlanPuerto {
+        <<abstract>>
+        +recursosDe(usuarioId) RecursosPlan
     }
     class ConstructorImagenPuerto {
         <<abstract>>
@@ -1879,6 +1889,8 @@ classDiagram
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
         +lineasDesde(id, desde, limite) List~LineaBitacora~
+        +activoDe(proyectoId) Despliegue
+        +marcarActivo(proyectoId, despliegueId) void
         +construccionesDesde(usuarioId, desde) Integer
     }
     class RepositorioArtefactos {
@@ -1989,7 +2001,8 @@ classDiagram
     ConstruccionService --> RepositorioDespliegues
     ConstruccionService --> PoliticaDespliegue
     ConstruccionService --> TransicionesDespliegue
-    ConstruccionService --> SuscripcionesService : cuotaDe
+    ConstruccionService --> ProyectosLecturaPuerto
+    ProyectosLecturaPuerto ..> ProyectosService : adaptador sobre M3
     DeteccionStackService --> RecetaStack
     DeteccionStackService --> LectorFuente
     RecetaStack <|-- RecetaDockerfile
@@ -2015,6 +2028,8 @@ classDiagram
     OrquestacionService --> ContenedorPuerto
     OrquestacionService --> VerificacionEntornoPuerto
     OrquestacionService --> LimitesContenedor
+    OrquestacionService --> CuotaPlanPuerto
+    CuotaPlanPuerto ..> SuscripcionesService : adaptador sobre cuotaDe
     ReversionService --> RepositorioArtefactos
     ReversionService --> ColaConstruccionPuerto
     RetencionArtefactos --> PoliticaRetencion

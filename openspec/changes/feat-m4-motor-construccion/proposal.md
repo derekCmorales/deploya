@@ -37,7 +37,7 @@ Hoy el motor es solo `health` y stubs. Para el Avance 1 el botón **Desplegar** 
 ## Impact
 
 - Código: `apps/api/src/modules/{construccion,orquestacion,enrutamiento}`, `apps/api/src/adapters`, `apps/api/src/trabajador.ts`, `apps/api/src/compartido/reloj.ts`.
-- Dependencias: `bullmq`, `@nestjs/bullmq`, `dockerode`, `tar-fs`, `@nestjs/event-emitter`.
+- Dependencias: `bullmq` + `ioredis`, `dockerode`, `tar-fs` (sin `@nestjs/bullmq` ni `@nestjs/event-emitter`: el consumidor se arma en `trabajador.ts` y `DespliegueTerminado` llega con M5-04).
 - Infra: `docker-compose.yml`, `Dockerfile.api` (+ `git`), `infra/traefik/`.
 - Datos: depende de DB-01 ([datos-nucleo.md](../../../docs/contratos/datos-nucleo.md)); hasta que entre, el repositorio en memoria cubre las pruebas.
 - Docs: ADR 0002, 0005, 0006.

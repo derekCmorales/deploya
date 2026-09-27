@@ -27,16 +27,16 @@ Los diagramas **sí respetan SOLID en lo esencial**: DIP con puertos sin `I` (`C
 | B3 | Este informe prometía «repositorios por agregado en el unificado», pero el diagrama de clases no tenía ninguno | DIP / SRP | **Corregido:** `RepositorioDespliegues` como ejemplo del patrón; cada módulo agrega el suyo en su change |
 | B4 | `ServicioOrquestacion` depende de contenedores, salud, enrutamiento **y** notificaciones, y además revierte: varios motivos de cambio | SRP | Recomendación para M5: notificar con un evento de dominio (`DespliegueTerminado`, Observer) en vez de llamar a `ServicioNotificaciones` |
 | B5 | Firmas de los puertos distintas en tres lugares (ver tabla C) | LSP / consistencia | Se decide en el change de M4-01 / M5-01 y se actualiza el diagrama en el mismo PR |
-| B6 | Clone y `docker build` no tienen puerto en ningún diagrama; si el trabajador llama a Docker directo se rompe la regla §7 | DIP | Recomendación para M4-01: `ConstructorImagenPuerto` (o `construir` en `ContenedorPuerto`) con stub para pruebas |
+| B6 | Clone y `docker build` no tienen puerto en ningún diagrama; si el trabajador llama a Docker directo se rompe la regla §7 | DIP | **Corregido** en `feat/m4-motor-construccion`: `ClonadorRepositorioPuerto` y `ConstructorImagenPuerto`, cada uno con stub |
 | B7 | `CapaHerramientas` (M8) es una interfaz ancha | ISP | Aceptado a propósito (misma superficie para asistente y clientes); fuera de alcance |
 
 ### C. Código (`apps/api`)
 
 | # | Hallazgo | Dueño | Cuándo |
 |---|---|---|---|
-| C1 | `ColaConstruccionStub` se exporta como clase concreta, sin puerto, y usa `unknown` | Derek | M4-01 |
-| C2 | Firmas divergentes: código `ContenedorPuerto.crear/detener`, `EnrutamientoPuerto.publicar`, `VerificacionEntornoPuerto.saludable`; diagrama `crear/detener/reemplazar`, `asignarSubdominio/emitirCertificado/conmutarTrafico`, `comprobarSalud`; canvas `ejecutar(...)`, `esperarSalud(url, 60 s)` | Derek | M4-01 / M5-01: una sola firma, en código y diagrama |
-| C3 | `AdaptersModule` enlaza los stubs de forma global; cuando llegue el adaptador Docker, el binding debe elegirse en un solo punto y los stubs quedar para pruebas | Derek | M5-01 |
+| C1 | `ColaConstruccionStub` se exporta como clase concreta, sin puerto, y usa `unknown` | Derek | **Corregido** en `feat/m4-motor-construccion`: `ColaConstruccionPuerto` con `ColaBullMq` y `ColaMemoria`, trabajo tipado `TrabajoDespliegue` |
+| C2 | Firmas divergentes: código `ContenedorPuerto.crear/detener`, `EnrutamientoPuerto.publicar`, `VerificacionEntornoPuerto.saludable`; diagrama `crear/detener/reemplazar`, `asignarSubdominio/emitirCertificado/conmutarTrafico`, `comprobarSalud`; canvas `ejecutar(...)`, `esperarSalud(url, 60 s)` | Derek | **Corregido** en `feat/m4-motor-construccion`: una sola firma en código, `clases-unificado.mmd` y el design del change |
+| C3 | `AdaptersModule` enlaza los stubs de forma global; cuando llegue el adaptador Docker, el binding debe elegirse en un solo punto y los stubs quedar para pruebas | Derek | **Corregido** en `feat/m4-motor-construccion`: `AdaptersModule.paraApi()` / `paraTrabajador()` eligen por `MOTOR_ADAPTADORES`; la API no recibe adaptadores de Docker |
 | C4 | Puertos como `abstract class`: **correcto** (sirven de token de Nest). El canvas mostraba `interface CorreoPuerto`, que no sirve como token | Eddy | M10-01 (el canvas ya se corrigió) |
 | C5 | Solo hay pruebas de `health`; no hay pruebas de dominio todavía (esperado: el dominio entra desde el Avance 1) | Todos | Cada historia |
 | C6 | `apps/api` no tenía script de cobertura | — | **Corregido:** `pnpm --filter @deploya/api test:cov` |

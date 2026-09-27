@@ -44,7 +44,9 @@ export abstract class ColaConstruccionPuerto {
   abstract encolar(trabajo: TrabajoDespliegue): Promise<void>;
 }
 export abstract class ClonadorRepositorioPuerto {
-  abstract clonar(s: { url: string; rama: string; commitSha?: string; destino: string }): Promise<CommitClonado>;
+  abstract clonar(s: { url: string; rama: string; despliegueId: string; commitSha?: string }): Promise<{ directorio: string; commit: Commit }>;
+  abstract existeArchivo(directorio: string, ruta: string): Promise<boolean>;
+  abstract limpiar(directorio: string): Promise<void>;
 }
 export abstract class ConstructorImagenPuerto {
   // lanza ConstruccionFallida(codigoSalida, detalle) o TiempoConstruccionAgotado
@@ -60,9 +62,15 @@ export abstract class RepositorioDespliegues {
   abstract marcarEtapa(id: string, etapa: Etapa, estado: EstadoEtapa, marca: Date): Promise<void>;
   abstract agregarLineas(id: string, lineas: LineaNueva[]): Promise<void>;
   abstract lineasDesde(id: string, desde: number, limite: number): Promise<LineaBitacora[]>;
+  abstract activoDe(proyectoId: string): Promise<Despliegue | null>;       // Proyecto.despliegueActivoId
+  abstract marcarActivo(proyectoId: string, despliegueId: string): Promise<void>;
 }
 export abstract class RepositorioArtefactos {
   abstract registrar(a: NuevoArtefacto): Promise<Artefacto>;
+  abstract porId(id: string): Promise<Artefacto | null>;
+}
+export abstract class ProyectosLecturaPuerto {      // sobre lo que exporte M3; memoria hasta entonces
+  abstract porId(proyectoId: string): Promise<ProyectoDesplegable | null>;
 }
 
 // M5
@@ -73,6 +81,9 @@ export abstract class ContenedorPuerto {
   }): Promise<{ id: string; host: string }>;
   abstract detener(contenedorId: string): Promise<void>;
   abstract eliminar(contenedorId: string): Promise<void>;
+}
+export abstract class CuotaPlanPuerto {             // puerto estrecho sobre cuotaDe de M2 (ISP)
+  abstract recursosDe(usuarioId: string): Promise<{ plan: string; cpus: number; memoriaMb: number }>;
 }
 export abstract class VerificacionEntornoPuerto {
   abstract saludable(o: { host: string; puerto: number; ruta: string; tiempoMaximoMs: number }):
@@ -90,7 +101,7 @@ export abstract class EnrutamientoPuerto {
 
 ### 4. Un solo punto de binding (cierra C3)
 
-`AdaptersModule.forRoot()` lee `MOTOR_ADAPTADORES=docker|stub`. `docker` en compose y en el VPS; `stub` en pruebas y en el smoke de CI si no hay socket. Los stubs viven junto a su puerto y se usan en las pruebas unitarias.
+`AdaptersModule.paraApi()` y `AdaptersModule.paraTrabajador()` leen `MOTOR_ADAPTADORES=docker|stub` (la API nunca recibe adaptadores de Docker). `docker` en compose y en el VPS; `stub` en pruebas y en el smoke de CI si no hay socket. Los stubs viven junto a su puerto y se usan en las pruebas unitarias.
 
 ### 5. Construcción con dockerode
 
@@ -132,10 +143,18 @@ export abstract class EnrutamientoPuerto {
 | `ClonadorRepositorioPuerto`, `ConstructorImagenPuerto`, `ContenedorPuerto`, `VerificacionEntornoPuerto`, `EnrutamientoPuerto` | Adapter | D, I | Git, dockerode, HTTP y Traefik detrás de puertos estrechos |
 | `RepositorioDespliegues` → Prisma / memoria | Repository | D, L | Mismo contrato para producción y pruebas |
 | `DespliegueTerminado` | Observer | S | La operación no conoce a quien reacciona (retención en M5-04; M10 si algún día hay correo) (cierra B4) |
-| `AdaptersModule.forRoot()` | Factory | O | Stub o real se elige en un solo lugar (cierra C3) |
+| `AdaptersModule.paraApi()` / `paraTrabajador()` | Factory | O | Stub o real se elige en un solo lugar (cierra C3) |
 | `Reloj` | Inyección de dependencias | D | Sin `Date.now()` en dominio ni servicios |
 
 Cambios a puertos, clases y estados: todos reflejados en `clases-unificado.mmd` y `erd-unificado.mmd` en este change.
+
+### 11. Puertos estrechos hacia otros módulos (decidido al implementar)
+
+M2 (`cuotaDe`) y M3 (alta de proyectos) todavía no existen. En vez de depender de sus servicios completos, el motor declara lo mínimo que necesita: `CuotaPlanPuerto.recursosDe` y `ProyectosLecturaPuerto.porId` (ISP). Sus adaptadores reales envuelven lo que exporten `SuscripcionesModule` y `ProyectosModule`; mientras tanto, stubs y memoria. Sesión: `@UsuarioSolicitante()` responde 401 si no hay usuario en la solicitud, hasta que llegue `@UsuarioActual()` de M1.
+
+### 12. Compensación
+
+Si una etapa falla después de crear el contenedor (salud o enrutamiento), el contenedor nuevo se elimina (`PasoEjecucion.compensar`) y la versión activa no cambia. El clon se borra siempre (`PasoRecepcion.liberar`).
 
 ## Risks / Trade-offs
 

@@ -7,7 +7,7 @@ Cada tarea de código tiene su tarea de pruebas. Pruebas sin Docker, red, base n
 - [ ] 1.1 `docker-compose.yml`: servicio `worker` (misma imagen, `command: node dist/trabajador.js`, `docker.sock`, volumen `traefik_dinamico`, `MOTOR_ADAPTADORES=docker`), `traefik:v3` (proveedor de archivo en `/traefik/dinamico`, `:80`), `mailpit` (`1025`, `8025`); `container_name` fijos para `deploya-traefik` y `deploya-worker`
 - [ ] 1.2 `Dockerfile.api`: `apk add --no-cache git` en la etapa final; `infra/traefik/traefik.yml`
 - [ ] 1.3 `.env.example` con `MOTOR_ADAPTADORES`, `DOMINIO_APPS`, `ESQUEMA_APPS`, `TRAEFIK_DINAMICO`, `TRAEFIK_CONTENEDOR`, `TRABAJADOR_CONTENEDOR`, `TRABAJADOR_CONCURRENCIA`
-- [ ] 1.4 Publicar `ejemplos/hola-deploya` con `scripts/publicar-hola-deploya.sh` (ramas `main`, `roto`, `sin-dockerfile`)
+- [ ] 1.4 Publicar `ejemplos/hola-deploya` a mano como repo público (pasos en su README; ramas `main`, `roto`, `sin-dockerfile`)
 - [ ] 1.5 Verificar: `docker compose up --build` levanta los 7 servicios; smoke de CI sigue verde
 
 ## 2. Dominio del motor (lunes)

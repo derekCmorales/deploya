@@ -3,7 +3,7 @@
 - **Estado:** Propuesto
 - **Fecha:** 2026-09-26
 - **Autor:** @derekCmorales · **Módulos:** M10 (consumidor: M1)
-- **Change de OpenSpec:** el de M10-01 (por crear), que enlaza este ADR
+- **Change de OpenSpec:** [`feat-m10-correo-verificacion`](../../openspec/changes/feat-m10-correo-verificacion/proposal.md) (M10-01)
 
 ## Contexto
 

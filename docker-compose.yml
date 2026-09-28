@@ -34,6 +34,12 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-deploya}:${POSTGRES_PASSWORD:-deploya}@postgres:5432/${POSTGRES_DB:-deploya}
       REDIS_URL: redis://redis:6379
       MOTOR_ADAPTADORES: docker
+      # Correo (M10, ADR 0001): Mailpit en desarrollo; en el VPS, las credenciales del proveedor.
+      CORREO_ADAPTADOR: smtp
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      CORREO_REMITENTE: Deploya <no-responder@deploya.localhost>
+      URL_WEB: http://localhost:${WEB_PORT:-3000}
     ports:
       - "${API_PORT:-3001}:3000"
     depends_on:

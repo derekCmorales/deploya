@@ -11,7 +11,7 @@ import { NavPrincipal, type ItemNav } from "@/components/shell/nav-principal";
 export const NAV_PANEL: ItemNav[] = [
   { href: "/projects", texto: "Proyectos", icono: FolderGit2 },
   { href: "/billing", texto: "Planes", icono: CreditCard },
-  { href: "/auth", texto: "Cuenta", icono: UserRound },
+  { href: "/registro", texto: "Cuenta", icono: UserRound },
   { href: "/sistema", texto: "Sistema", icono: LayoutTemplate },
 ];
 

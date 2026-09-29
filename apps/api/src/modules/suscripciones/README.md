@@ -8,4 +8,8 @@ Dueño: Javier. Spec: [`openspec/specs/suscripciones/spec.md`](../../../../../op
 
 **Fuera de alcance (solo si da el tiempo):** Renovación automática, prorrateo, complementos, cancelación por el cliente.
 
-Hoy: stub con `GET /suscripciones/health`. Cada historia entra con su change de OpenSpec.
+**Exporta** `SuscripcionesService`: `asignarSandbox(usuarioId)` (idempotente, lo llama M1 al registrar) y `cuotaDe(usuarioId)` (M3, M4, M5; lanza `SuscripcionNoEncontrada`).
+
+**Rutas:** `GET /suscripciones/health`, `GET /suscripciones/planes` (pública).
+
+Hecho: DB-01 y M2-01 (change `feat-m2-schema-nucleo`).

@@ -1,0 +1,3 @@
+schema: spec-driven
+created: 2026-09-29
+goal: M1-03 iniciar y cerrar sesión con SesionGuard y @UsuarioActual, y persistencia compartida (DB-01) para que la demo del Avance 1 corra en compose

@@ -11,7 +11,7 @@ Ciclo de despliegue: **Recepción → Construcción → Ejecución → Enrutamie
 Necesitas [Docker](https://docs.docker.com/get-docker/) con Compose v2, y para trabajar fuera de Docker Node 22 y pnpm 9 (`corepack enable`).
 
 1. Clona el repo y entra en la carpeta.
-2. Copia el entorno de ejemplo: `cp .env.example .env`
+2. Copia el entorno de ejemplo: `cp .env.example .env` y define `ADMIN_CLAVE` (la del admin y del cliente de demostración del seed)
 3. Levanta todo: `docker compose up --build`
 4. Comprueba: API [http://localhost:3001/health](http://localhost:3001/health) y web [http://localhost:3000](http://localhost:3000) (catálogo del design system en `/sistema`).
 5. Lee **tu kit** (tabla de abajo), [METODOLOGIA.md](METODOLOGIA.md) y [docs/ingenieria.md](docs/ingenieria.md) antes del primer PR.

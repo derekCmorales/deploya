@@ -7,14 +7,16 @@ import {
   Post,
   Query,
   UseFilters,
+  UseGuards,
   type ArgumentsHost,
   type ExceptionFilter,
 } from "@nestjs/common";
 import type { Response } from "express";
+import { SesionGuard } from "../identidad/sesion.guard";
+import { UsuarioActual } from "../identidad/usuario-actual.decorator";
 import { ConstruccionService } from "./construccion.service";
 import { DespliegueNoEncontrado, ProyectoNoEncontrado, TransicionInvalida } from "./dominio/errores";
 import type { DespliegueCreado } from "./dominio/despliegue";
-import { UsuarioSolicitante } from "./usuario-solicitante.decorator";
 import type { PaginaBitacora, VistaDespliegue } from "./vista-despliegue";
 
 /** Traduce los errores de dominio del motor a HTTP en el borde. */
@@ -27,18 +29,20 @@ export class ErroresMotorFilter implements ExceptionFilter {
   }
 }
 
+/** Rutas del contrato de despliegues: todas exigen sesión (M1-03). */
 @Controller()
 @UseFilters(ErroresMotorFilter)
+@UseGuards(SesionGuard)
 export class DesplieguesController {
   constructor(private readonly construccion: ConstruccionService) {}
 
   @Post("proyectos/:id/despliegues")
-  desplegar(@Param("id") proyectoId: string, @UsuarioSolicitante() usuarioId: string): Promise<DespliegueCreado> {
+  desplegar(@Param("id") proyectoId: string, @UsuarioActual("id") usuarioId: string): Promise<DespliegueCreado> {
     return this.construccion.desplegarComoDueno(proyectoId, usuarioId);
   }
 
   @Get("despliegues/:id")
-  consultar(@Param("id") despliegueId: string, @UsuarioSolicitante() usuarioId: string): Promise<VistaDespliegue> {
+  consultar(@Param("id") despliegueId: string, @UsuarioActual("id") usuarioId: string): Promise<VistaDespliegue> {
     return this.construccion.consultar(despliegueId, usuarioId);
   }
 
@@ -46,7 +50,7 @@ export class DesplieguesController {
   bitacora(
     @Param("id") despliegueId: string,
     @Query("desde") desde: string | undefined,
-    @UsuarioSolicitante() usuarioId: string,
+    @UsuarioActual("id") usuarioId: string,
   ): Promise<PaginaBitacora> {
     return this.construccion.bitacoraDesde(despliegueId, usuarioId, posicionDesde(desde));
   }

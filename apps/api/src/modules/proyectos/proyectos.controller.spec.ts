@@ -1,6 +1,14 @@
 import type { ArgumentsHost } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { AdaptersModule } from "../../adapters/adapters.module";
+import { RepositorioArtefactosMemoria } from "../../adapters/memoria/repositorio-artefactos.memoria";
+import { RepositorioDesplieguesMemoria } from "../../adapters/memoria/repositorio-despliegues.memoria";
+import { RepositorioProyectosMemoria } from "../../adapters/memoria/repositorio-proyectos.memoria";
+import { PrismaModule } from "../../compartido/prisma/prisma.module";
+import { PrismaService } from "../../compartido/prisma/prisma.service";
+import { RelojFijo } from "../../compartido/reloj";
+import { RepositorioArtefactos } from "../construccion/puertos/repositorio-artefactos.puerto";
+import { RepositorioDespliegues } from "../construccion/puertos/repositorio-despliegues.puerto";
 import { ConstruccionService } from "../construccion/construccion.service";
 import { ProyectosLecturaPuerto } from "../construccion/puertos/proyectos-lectura.puerto";
 import {
@@ -15,9 +23,11 @@ import {
   UrlRepositorioInvalida,
 } from "./dominio/errores";
 import type { ConsultaRepositorio, ValidacionRepositorio } from "./dominio/proyecto";
+import { CuotaProyectosStub } from "./adaptadores/cuota-proyectos.stub";
 import { ErroresProyectosFilter } from "./errores-proyectos.filter";
 import { ProyectosController } from "./proyectos.controller";
 import { ProyectosModule } from "./proyectos.module";
+import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
 
@@ -36,11 +46,24 @@ class FuenteDoble extends ProveedorFuente {
   }
 }
 
-/** Nest real (DI, AdaptersModule en modo stub, motor y M3) con GitHub como doble. */
+/**
+ * Nest real (DI, AdaptersModule en modo stub, motor, M1 y M3) con GitHub como doble y la
+ * persistencia en memoria: sin base de datos, la cuota queda en Sandbox.
+ */
 async function montarApi() {
-  const modulo = await Test.createTestingModule({ imports: [AdaptersModule.paraApi(), ProyectosModule] })
+  const modulo = await Test.createTestingModule({ imports: [AdaptersModule.paraApi(), PrismaModule, ProyectosModule] })
+    .overrideProvider(PrismaService)
+    .useValue({})
     .overrideProvider(ProveedorFuente)
     .useValue(new FuenteDoble())
+    .overrideProvider(RepositorioProyectos)
+    .useValue(new RepositorioProyectosMemoria(new RelojFijo()))
+    .overrideProvider(RepositorioDespliegues)
+    .useValue(new RepositorioDesplieguesMemoria())
+    .overrideProvider(RepositorioArtefactos)
+    .useValue(new RepositorioArtefactosMemoria())
+    .overrideProvider(CuotaProyectosPuerto)
+    .useValue(new CuotaProyectosStub())
     .compile();
   return {
     controlador: modulo.get(ProyectosController),
@@ -101,7 +124,7 @@ describe("ProyectosController", () => {
   it("el cuerpo se valida antes de llegar al servicio", async () => {
     const { controlador, repositorio } = await montarApi();
     expect(() => controlador.crear("usuario-1", { url: "https://gitlab.com/a/b", nombre: "x" })).toThrow(UrlRepositorioInvalida);
-    expect(() => controlador.validarRepositorio("usuario-1", null)).toThrow(DatosAltaInvalidos);
+    expect(() => controlador.validarRepositorio(null)).toThrow(DatosAltaInvalidos);
     expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
   });
 

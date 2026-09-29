@@ -44,7 +44,7 @@ describe("SuscripcionesService", () => {
       ["starter", 3, 0.5, 512, 150],
       ["pro", 10, 1, 1024, 500],
       ["business", 25, 2, 2048, 2000],
-    ])("devuelve los límites de %s", async (codigo, maxProyectos, cpus, memoriaMb, construccionesMes) => {
+    ])("Cuota por plan · %s", async (codigo, maxProyectos, cpus, memoriaMb, construccionesMes) => {
       const planes = planesDePrueba();
       const suscripciones = new RepositorioSuscripcionesMemoria(planes);
       await suscripciones.crearSiNoExiste({

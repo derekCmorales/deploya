@@ -1699,8 +1699,26 @@ classDiagram
         -reloj Reloj
         +registrar(correo, clave) CuentaRegistrada
         +verificar(token) CuentaVerificada
-        +iniciarSesion(correo, clave) Sesion
-        +cerrarSesion(sesionId) void
+    }
+    class SesionService {
+        -usuarios RepositorioUsuarios
+        -sesiones RepositorioSesiones
+        -hash HashContrasena
+        -generador GeneradorToken
+        -reloj Reloj
+        +iniciar(credenciales) SesionIniciada
+        +cerrar(token) void
+        +usuarioDe(token) UsuarioSesion
+    }
+    class RepositorioSesiones {
+        <<abstract>>
+        +crear(sesion) Sesion
+        +porHuella(hashToken) Sesion
+        +registrarActividad(id, marca) void
+        +revocar(id, marca) void
+    }
+    class UsuarioActual {
+        <<decorator>>
     }
     class RepositorioUsuarios {
         <<abstract>>
@@ -1733,8 +1751,13 @@ classDiagram
         +coincide(clave, hash) Boolean
     }
     class SesionGuard {
+        -sesiones SesionService
         +canActivate(contexto) Boolean
     }
+    class RepositorioUsuariosPrisma
+    class RepositorioTokensCuentaPrisma
+    class RepositorioSesionesPrisma
+    class AsignacionSandboxSuscripciones
     class CorreoPuerto {
         <<abstract>>
         +enviar(destinatario, plantilla, datos) void
@@ -1821,12 +1844,12 @@ classDiagram
         +deUsuario(usuarioId) List~Proyecto~
         +existeSubdominio(subdominio) Boolean
     }
-    class RepositorioProyectosMemoria
+    class RepositorioProyectosPrisma
     class CuotaProyectosPuerto {
         <<abstract>>
         +cuotaDe(usuarioId) CuotaProyectos
     }
-    class CuotaProyectosStub
+    class CuotaProyectosSuscripciones
     class ParserExpose {
         +puertoDesdeExpose(dockerfile) Integer
     }
@@ -2075,7 +2098,17 @@ classDiagram
     IdentidadService --> RepositorioTokensCuenta
     IdentidadService --> GeneradorToken
     IdentidadService --> AsignacionSandboxPuerto
-    AsignacionSandboxPuerto ..> SuscripcionesService : asignarSandbox
+    AsignacionSandboxPuerto <|-- AsignacionSandboxSuscripciones
+    AsignacionSandboxSuscripciones ..> SuscripcionesService : asignarSandbox
+    SesionService --> RepositorioUsuarios
+    SesionService --> RepositorioSesiones
+    SesionService --> HashContrasena
+    SesionService --> GeneradorToken
+    SesionGuard --> SesionService
+    SesionGuard ..> UsuarioActual : request.usuario
+    RepositorioUsuarios <|-- RepositorioUsuariosPrisma
+    RepositorioTokensCuenta <|-- RepositorioTokensCuentaPrisma
+    RepositorioSesiones <|-- RepositorioSesionesPrisma
     CorreoPuerto <|-- CorreoSmtpAdaptador
     CorreoPuerto <|-- CorreoConsolaAdaptador
     CorreoPuerto ..> PlantillaCorreo
@@ -2097,8 +2130,11 @@ classDiagram
     ProyectosService --> ConstruccionService : crearDespliegue
     ProveedorFuente <|-- FuenteGitHubPublica
     FuenteGitHubPublica --> ParserExpose
-    RepositorioProyectos <|-- RepositorioProyectosMemoria
-    CuotaProyectosPuerto <|-- CuotaProyectosStub
+    RepositorioProyectos <|-- RepositorioProyectosPrisma
+    CuotaProyectosPuerto <|-- CuotaProyectosSuscripciones
+    CuotaProyectosSuscripciones ..> SuscripcionesService : cuotaDe
+    ProyectosController ..> SesionGuard : protege
+    DesplieguesController ..> SesionGuard : protege
 
     ConstruccionService --> ColaConstruccionPuerto
     ConstruccionService --> RepositorioDespliegues
@@ -2132,7 +2168,8 @@ classDiagram
     OrquestacionService --> VerificacionEntornoPuerto
     OrquestacionService --> LimitesContenedor
     OrquestacionService --> CuotaPlanPuerto
-    CuotaPlanPuerto ..> SuscripcionesService : adaptador sobre cuotaDe
+    CuotaPlanPuerto <|-- CuotaPlanSuscripciones
+    CuotaPlanSuscripciones ..> SuscripcionesService : cuotaDe
     ReversionService --> RepositorioArtefactos
     ReversionService --> ColaConstruccionPuerto
     RetencionArtefactos --> PoliticaRetencion
@@ -2145,6 +2182,7 @@ classDiagram
     ConstructorImagenPuerto <|-- ConstructorDocker
     LectorFuente <|-- LectorFuenteLocal
     RepositorioDespliegues <|-- RepositorioDesplieguesPrisma
+    RepositorioArtefactos <|-- RepositorioArtefactosPrisma
     ContenedorPuerto <|-- ContenedorDocker
     VerificacionEntornoPuerto <|-- VerificacionHttp
     EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo

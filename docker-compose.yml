@@ -25,6 +25,23 @@ services:
       timeout: 3s
       retries: 10
 
+  # DB-01: aplica las migraciones y el seed idempotente (planes, admin y cliente de demo)
+  # antes de que arranquen la API y el trabajador. ADMIN_CLAVE sale de .env (sin valor por defecto).
+  migracion:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    command: ["sh", "-c", "export PATH=\"$$PWD/node_modules/.bin:$$PATH\" && prisma migrate deploy && prisma db seed"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deploya}:${POSTGRES_PASSWORD:-deploya}@postgres:5432/${POSTGRES_DB:-deploya}
+      ADMIN_CORREO: ${ADMIN_CORREO:-admin@deploya.app}
+      ADMIN_CLAVE: ${ADMIN_CLAVE:?Define ADMIN_CLAVE en .env (cp .env.example .env)}
+      CLIENTE_CLAVE: ${CLIENTE_CLAVE:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   api:
     build:
       context: .
@@ -43,8 +60,8 @@ services:
     ports:
       - "${API_PORT:-3001}:3000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migracion:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
 
@@ -69,8 +86,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - traefik_dinamico:/traefik/dinamico
     depends_on:
-      postgres:
-        condition: service_healthy
+      migracion:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
 

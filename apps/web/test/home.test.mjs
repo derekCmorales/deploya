@@ -15,11 +15,10 @@ function archivos(dir) {
   });
 }
 
-test("el home nombra Deploya y apunta al design system", () => {
+test("el home nombra Deploya, lleva a registro, ingreso y planes, y enlaza el design system", () => {
   const page = leer("src/app/page.tsx");
   assert.match(page, /Deploya/);
-  assert.match(page, /docs\/diseno/);
-  assert.match(page, /\/sistema/);
+  for (const ruta of ["/registro", "/ingresar", "/planes", "/sistema"]) assert.match(page, new RegExp(`href="${ruta}"`));
 });
 
 test("el layout declara Geist, lang es y claro por defecto", () => {

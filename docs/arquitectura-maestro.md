@@ -1699,8 +1699,11 @@ classDiagram
     %% ───────── M2 Suscripciones · M9 Administración (Javier) ─────────
     class SuscripcionesService {
         <<Facade>>
+        -planes RepositorioPlanes
+        -suscripciones RepositorioSuscripciones
         -pasarela PasarelaPago
         -reloj Reloj
+        +catalogo() PlanCatalogo[]
         +asignarSandbox(usuarioId) void
         +cuotaDe(usuarioId) Cuota
         +contratar(usuarioId, planCodigo, vigenciaDias, tarjeta) Pago
@@ -1717,6 +1720,18 @@ classDiagram
         +memoriaMb Integer
         +construccionesMes Integer
     }
+    class RepositorioPlanes {
+        <<abstract>>
+        +todos() Plan[]
+        +porCodigo(codigo) Plan
+    }
+    class RepositorioSuscripciones {
+        <<abstract>>
+        +deUsuario(usuarioId) Suscripcion
+        +crearSiNoExiste(nueva) void
+    }
+    class RepositorioPlanesPrisma
+    class RepositorioSuscripcionesPrisma
     class PoliticaCicloSuscripcion {
         +avanzar(suscripcion, ahora) EstadoSuscripcion
     }
@@ -2008,6 +2023,10 @@ classDiagram
     SuscripcionesService --> PoliticaCicloSuscripcion
     SuscripcionesService --> PasarelaPago
     SuscripcionesService ..> Cuota
+    SuscripcionesService --> RepositorioPlanes
+    SuscripcionesService --> RepositorioSuscripciones
+    RepositorioPlanes <|-- RepositorioPlanesPrisma
+    RepositorioSuscripciones <|-- RepositorioSuscripcionesPrisma
     PasarelaPago <|-- PasarelaSimulada
     AdministracionService --> OrquestacionService : detenerTodosDe
     ProyectosService --> ProveedorFuente

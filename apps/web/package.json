@@ -6,7 +6,7 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start --port 3000",
-    "test": "node --experimental-strip-types --test test/home.test.mjs test/proyectos.test.mjs"
+    "test": "node --experimental-strip-types --test \"test/*.test.mjs\""
   },
   "dependencies": {
     "@radix-ui/react-scroll-area": "^1.2.18",

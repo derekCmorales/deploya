@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { HealthController } from "./health.controller";
 import { AdaptersModule } from "./adapters/adapters.module";
+import { PrismaModule } from "./compartido/prisma/prisma.module";
 import { IdentidadModule } from "./modules/identidad/identidad.module";
 import { NotificacionesModule } from "./modules/notificaciones/notificaciones.module";
 import { SuscripcionesModule } from "./modules/suscripciones/suscripciones.module";
@@ -15,6 +16,7 @@ import { HerramientasModule } from "./modules/herramientas/herramientas.module";
 @Module({
   imports: [
     AdaptersModule.paraApi(),
+    PrismaModule,
     IdentidadModule,
     NotificacionesModule,
     SuscripcionesModule,

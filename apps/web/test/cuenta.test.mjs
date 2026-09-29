@@ -31,8 +31,25 @@ test("01 · un fallo de red o 500 muestra un mensaje genérico", () => {
   assert.equal(resultadoRegistro(500, { mensaje: "Internal server error" }).mensaje.startsWith("No pudimos"), true);
 });
 
-test("02 · 200 es cuenta activada; TokenNoValido es enlace no válido; lo demás, error", () => {
+test("02 · un 200 con la cuenta suspendida no se muestra como activada", () => {
+  assert.equal(resultadoVerificacion(200, { estadoCuenta: "suspendida" }), "no-activada");
+});
+
+test("02 · 200 activa es cuenta activada; TokenNoValido es enlace no válido; lo demás, error", () => {
   assert.equal(resultadoVerificacion(200, { estadoCuenta: "activa" }), "activada");
   assert.equal(resultadoVerificacion(410, { codigo: "TokenNoValido" }), "no-valido");
   assert.equal(resultadoVerificacion(503, {}), "error");
+});
+
+test("01–02 · las pantallas de acceso usan el header público (Planes · tema · Iniciar sesión) sin la navegación del panel", async () => {
+  const { readFileSync } = await import("node:fs");
+  const leer = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
+  const marco = leer("src/components/shell/marco-app.tsx");
+  const [publico, panel] = marco.split("return <AppShell nav=");
+  assert.match(leer("src/app/layout.tsx"), /<MarcoApp>/);
+  assert.match(marco, /GRUPO_ACCESO = "\(auth\)"/);
+  assert.match(publico, />Planes</);
+  assert.match(publico, />Iniciar sesión</);
+  assert.doesNotMatch(publico, /NavPanel \/>/);
+  assert.match(panel, /NavPanel/);
 });

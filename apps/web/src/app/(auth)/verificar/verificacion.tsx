@@ -3,7 +3,7 @@
 import { ArrowRight, CircleCheck, Link2Off, Mail, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,16 +17,14 @@ export function Verificacion() {
   const token = parametros.get("token");
   const correo = parametros.get("correo");
   const [resultado, setResultado] = useState<ResultadoVerificacion | null>(null);
+  // El token es de un solo uso: Strict Mode monta el efecto dos veces en desarrollo y un
+  // segundo POST daría 410. El ref sobrevive a ese remontaje y evita repetir el envío.
+  const tokenEnviado = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!token) return;
-    let vigente = true;
-    void verificarCorreo(token).then((r) => {
-      if (vigente) setResultado(r);
-    });
-    return () => {
-      vigente = false;
-    };
+    if (!token || tokenEnviado.current === token) return;
+    tokenEnviado.current = token;
+    void verificarCorreo(token).then(setResultado);
   }, [token]);
 
   if (!token) return <RevisaTuBandeja correo={correo} />;
@@ -39,6 +37,7 @@ export function Verificacion() {
   }
   if (resultado === "activada") return <CuentaActivada />;
   if (resultado === "no-valido") return <EnlaceNoValido />;
+  if (resultado === "no-activada") return <CuentaNoActivada />;
   return <ErrorVerificacion />;
 }
 
@@ -94,6 +93,17 @@ function EnlaceNoValido() {
       <Button asChild variant="outline" size="lg" className="w-full">
         <Link href="/ingresar">Volver a iniciar sesión</Link>
       </Button>
+    </TarjetaEstado>
+  );
+}
+
+/** El enlace era válido, pero la cuenta no quedó activa (p. ej. suspendida por administración). */
+function CuentaNoActivada() {
+  return (
+    <TarjetaEstado icono={<TriangleAlert className="text-warn" aria-hidden />} titulo="Tu cuenta no está activa">
+      <p className="text-muted-foreground">
+        Confirmamos tu correo, pero la cuenta no puede usarse ahora. Escríbenos a soporte@deploya.app.
+      </p>
     </TarjetaEstado>
   );
 }

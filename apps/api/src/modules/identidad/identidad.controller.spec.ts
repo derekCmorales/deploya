@@ -1,4 +1,5 @@
 import { BadRequestException, type ArgumentsHost } from "@nestjs/common";
+import { HTTP_CODE_METADATA } from "@nestjs/common/constants";
 import { Test } from "@nestjs/testing";
 import { ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, TokenNoValido } from "./dominio/errores";
 import { ErroresIdentidadFilter, IdentidadController, textoDe } from "./identidad.controller";
@@ -50,6 +51,14 @@ describe("IdentidadController", () => {
 
     await expect(controller.verificar({ token: "abc" })).resolves.toEqual({ estadoCuenta: "activa" });
     expect(servicio.verificar).toHaveBeenCalledWith("abc");
+  });
+
+  it("fija el contrato HTTP: 201 al registrar y 200 al verificar", () => {
+    const codigoDe = (metodo: keyof IdentidadController) =>
+      Reflect.getMetadata(HTTP_CODE_METADATA, IdentidadController.prototype[metodo]);
+
+    expect(codigoDe("registrar")).toBe(201);
+    expect(codigoDe("verificar")).toBe(200);
   });
 
   it("un campo ausente o vacío responde 400", () => {

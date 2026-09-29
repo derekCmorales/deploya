@@ -162,7 +162,9 @@ function CuentaCreada({ correoEnmascarado, correoEnviado }: { correoEnmascarado:
         activa al abrirlo.
       </p>
       {correoEnviado ? null : (
-        <Banner variant="warn" title="No pudimos enviar el correo ahora. Podrás reenviarlo desde la verificación." />
+        <Banner variant="warn" title="No pudimos enviar el correo ahora.">
+          Escríbenos a soporte@deploya.app para activar tu cuenta.
+        </Banner>
       )}
       <Sunken className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm">
         Estado de la cuenta

@@ -20,6 +20,8 @@ import {
 } from "./dominio/errores";
 import { IdentidadService, type CuentaRegistrada, type CuentaVerificada } from "./identidad.service";
 
+const HTTP_CREADO = 201;
+const HTTP_OK = 200;
 const HTTP_SOLICITUD_INVALIDA = 400;
 const HTTP_CONFLICTO = 409;
 const HTTP_YA_NO_EXISTE = 410;
@@ -59,8 +61,9 @@ export class IdentidadController {
     return { status: "ok", module: "identidad" };
   }
 
-  /** Pantallas 01 y 01b. */
+  /** Pantallas 01 y 01b. La web trata solo el 201 como «Cuenta creada». */
   @Post("registro")
+  @HttpCode(HTTP_CREADO)
   registrar(@Body() cuerpo: unknown): Promise<CuentaRegistrada> {
     const contrasena = textoDe(cuerpo, "contrasena");
     if (textoDe(cuerpo, "confirmacion") !== contrasena) throw new ContrasenasNoCoinciden();
@@ -69,7 +72,7 @@ export class IdentidadController {
 
   /** Pantalla 02: POST y no GET, porque consume el token (abrir el enlace no debe tener efectos). */
   @Post("verificacion")
-  @HttpCode(200)
+  @HttpCode(HTTP_OK)
   verificar(@Body() cuerpo: unknown): Promise<CuentaVerificada> {
     return this.identidad.verificar(textoDe(cuerpo, "token"));
   }

@@ -38,11 +38,14 @@ export function resultadoRegistro(estado: number, cuerpo: Record<string, unknown
   return { tipo: "error", mensaje: MENSAJE_GENERICO };
 }
 
-/** Pantalla 02: (b) cuenta activada o (c) enlace no válido; otro fallo es un error de red o de API. */
-export type ResultadoVerificacion = "activada" | "no-valido" | "error";
+/**
+ * Pantalla 02: (b) cuenta activada o (c) enlace no válido. Un 200 con otro estado (una cuenta
+ * suspendida) no se muestra como activada. Cualquier otro fallo es un error de red o de API.
+ */
+export type ResultadoVerificacion = "activada" | "no-activada" | "no-valido" | "error";
 
 export function resultadoVerificacion(estado: number, cuerpo: Record<string, unknown>): ResultadoVerificacion {
-  if (estado === 200) return "activada";
+  if (estado === 200) return cuerpo.estadoCuenta === "activa" ? "activada" : "no-activada";
   if (cuerpo.codigo === "TokenNoValido" || estado === 400) return "no-valido";
   return "error";
 }

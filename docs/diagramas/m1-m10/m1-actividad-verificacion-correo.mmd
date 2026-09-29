@@ -7,22 +7,23 @@ flowchart TD
     START((Inicio))
 
     A["Usuario recibe<br/>correo de verificación"]
-    B["Seleccionar enlace<br/>de verificación"]
-    C["Enviar token<br/>a la plataforma"]
+    B["Abrir el enlace<br/>/verificar?token="]
+    C["La web envía el token<br/>POST /identidad/verificacion"]
 
-    D["Buscar token"]
-    E{"¿Token válido<br/>y vigente?"}
+    D["Buscar token<br/>por su huella"]
+    E{"¿Existe, es de verificación,<br/>vigente (24 h) y sin usar?"}
 
-    F["Rechazar verificación"]
-    G["Solicitar un nuevo<br/>enlace de verificación"]
+    F["Rechazar (410):<br/>«El enlace ya no es válido»"]
 
-    H["Activar cuenta"]
-    I["Marcar token<br/>como utilizado"]
-    J["Registrar evento<br/>de auditoría"]
-    K["Confirmar cuenta<br/>verificada"]
+    H["Marcar token<br/>como utilizado"]
+    I{"¿Cuenta pendiente?"}
+    J["Activar cuenta"]
+    K["Confirmar:<br/>«Cuenta activada»"]
+    L["Devolver el estado actual<br/>sin reactivar (p. ej. suspendida)"]
 
     END1((Fin))
     END2((Fin))
+    END3((Fin))
 
     START --> A
     A --> B
@@ -31,14 +32,16 @@ flowchart TD
     D --> E
 
     E -->|"No"| F
-    F --> G
-    G --> END1
+    F --> END1
 
     E -->|"Sí"| H
     H --> I
-    I --> J
+    I -->|"Sí"| J
     J --> K
     K --> END2
+
+    I -->|"No"| L
+    L --> END3
 
     classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81;
     classDef input fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b;
@@ -47,12 +50,12 @@ flowchart TD
     classDef error fill:#fff1f2,stroke:#fb7185,stroke-width:2px,color:#881337;
     classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534;
 
-    class START,END1,END2 startEnd;
+    class START,END1,END2,END3 startEnd;
     class A,B,C input;
-    class D,H,I,J process;
-    class E decision;
-    class F,G error;
+    class D,H,J process;
+    class E,I decision;
+    class F,L error;
     class K success;
 
-    linkStyle 5,6,7 stroke:#fb7185,stroke-width:2px;
-    linkStyle 8,9,10,11,12 stroke:#4ade80,stroke-width:2px;
+    linkStyle 5,6,12,13 stroke:#fb7185,stroke-width:2px;
+    linkStyle 7,8,9,10,11 stroke:#4ade80,stroke-width:2px;

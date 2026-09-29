@@ -12,7 +12,7 @@ Cada tarea de código tiene su prueba. Sin base, red ni reloj reales: repositori
 - [x] 2.1 `RepositorioUsuarios`, `RepositorioTokensCuenta`, `HashContrasena`, `GeneradorToken`, `AsignacionSandboxPuerto`
 - [x] 2.2 Adaptadores en memoria, `HashContrasenaScrypt`, `GeneradorTokenCripto`, `AsignacionSandboxStub`; binding en `identidad.module.ts`
 - [x] 2.3 Pruebas: el hash no contiene la clave y solo coincide con ella; tokens distintos con huella sha256 estable
-- [ ] 2.4 Adaptadores Prisma de `Usuario` y `TokenCuenta` cuando DB-01 esté en `main` (`marcarUsado` condicional)
+- [ ] 2.4 Adaptadores Prisma de `Usuario` y `TokenCuenta` cuando DB-01 esté en `main`, con operaciones atómicas: `marcarUsado` condicional (`usadoEn IS NULL`) y alta protegida por el índice único de `correo`
 - [ ] 2.5 Cambiar `AsignacionSandboxStub` por el adaptador a `SuscripcionesService.asignarSandbox` cuando M2 lo exporte
 
 ## 3. M1-01 · Registro
@@ -35,5 +35,17 @@ Cada tarea de código tiene su prueba. Sin base, red ni reloj reales: repositori
 ## 6. Cierre
 
 - [x] 6.1 `clases-unificado.mmd` actualizado y `pnpm diagramas:sync`
-- [ ] 6.2 En compose: registro → correo en Mailpit → enlace → cuenta activa
+- [x] 6.2 En compose: registro (201) → correo en Mailpit → enlace → cuenta activa (200) → el mismo enlace da 410; el correo repetido da 409 y la contraseña débil 400
 - [ ] 6.3 `/opsx-archive` tras el merge
+
+## 7. Correcciones de la revisión (#10)
+
+- [x] 7.1 Spec delta: los requisitos conservan el texto vivo, incluido el reenvío con cuenta atrás (se implementa en M1-04)
+- [x] 7.2 El banner de «correo no enviado» ya no promete un reenvío que no existe: remite a soporte@deploya.app
+- [x] 7.3 `/verificar` no repite el `POST` con el doble efecto de Strict Mode (`useRef` con el token enviado)
+- [x] 7.4 `@HttpCode(201)` explícito en el registro; la web muestra «Cuenta activada» solo con `estadoCuenta === "activa"`. Pruebas: metadata HTTP del controlador y «un 200 con la cuenta suspendida no se muestra como activada»
+- [x] 7.5 Header público en las pantallas de `(auth)` (`MarcoApp` elige el marco por grupo de rutas); prueba en `test/cuenta.test.mjs`
+- [x] 7.6 Diagramas de actividad de registro y verificación con el flujo real (Sandbox, `correoEnviado: false`, 410 y cuenta no pendiente; sin auditoría ni reenvío) y `pnpm diagramas:sync`
+- [x] 7.7 README de `(auth)`: enlaces que dan 404 hasta M1-03 y M1-05
+- [ ] 7.8 Ilustración de acceso de la pantalla 01 (SVG propio): falta el artboard `01-Registro` del canvas como referencia
+- [ ] 7.9 Revisión contra el canvas v4.1 en claro y oscuro

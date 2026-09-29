@@ -72,7 +72,7 @@ test("/planes existe, no trae planes en constantes y el stub /billing se borró"
   const tabla = leer("src/app/(billing)/planes/_componentes/tabla-planes.tsx");
   assert.doesNotMatch(tabla, /USD 5\.00|Starter|Business/);
   assert.match(leer("src/hooks/use-planes.ts"), /obtenerPlanes/);
-  assert.match(leer("src/components/shell/nav-panel.tsx"), /href: "\/planes"/);
+  assert.match(leer("src/components/shell/nav-panel.tsx"), /RUTA_PLANES = "\/planes"/);
 });
 
 test("los textos fijos de la ficha 06 están en la pantalla", () => {

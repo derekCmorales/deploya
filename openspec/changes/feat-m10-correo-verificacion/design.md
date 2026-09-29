@@ -27,6 +27,14 @@ ADR 0001 fija un único adaptador SMTP para Mailpit y para el proveedor real, m�
 
 - Sin `nodemailer` instalado, `nest build` falla. Las pruebas no lo importan: usan un `TransporteSmtp` falso.
 
+## Spec delta
+
+Los requisitos `MODIFIED` copian completo el texto del spec vivo y solo agregan lo nuevo, porque al archivar un `MODIFIED` reemplaza el requisito entero. Así la plantilla de recuperación (M10-02) y las reglas OCP/LSP siguen vigentes.
+
+## ADR
+
+ADR 0001 pasa a *Aceptado* con este change y su ejemplo de código queda igual al binding real (`correoSegun`).
+
 ## Diagramas
 
 `docs/diagramas/compartido/clases-unificado.mmd`: se agregan `PlantillaCorreo`, `PlantillaVerificacion` y `CorreoNoEnviado`.

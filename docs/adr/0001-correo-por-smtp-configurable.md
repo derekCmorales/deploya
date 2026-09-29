@@ -1,6 +1,6 @@
 # 0001 — Correo por un adaptador SMTP configurable; Mailpit solo en desarrollo
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado (2026-09-28, con M10-01)
 - **Fecha:** 2026-09-26
 - **Autor:** @derekCmorales · **Módulos:** M10 (consumidor: M1)
 - **Change de OpenSpec:** [`feat-m10-correo-verificacion`](../../openspec/changes/feat-m10-correo-verificacion/proposal.md) (M10-01)
@@ -13,21 +13,24 @@ Mailpit **no entrega correo**, así que no sirve en el VPS. El plan decía «ada
 
 ## Decisión
 
-Usamos un único `CorreoSmtpAdaptador` (nodemailer) detrás de `CorreoPuerto`. Apunta a Mailpit en desarrollo y al proveedor externo en el VPS. Además usamos un `CorreoConsolaAdaptador` para pruebas. `notificaciones.module.ts` elige el adaptador con `CORREO_ADAPTADOR`, y el adaptador SMTP lee `SMTP_HOST`, `SMTP_PORT`, `SMTP_USUARIO`, `SMTP_CLAVE` y `CORREO_REMITENTE`.
+Usamos un único `CorreoSmtpAdaptador` (nodemailer) detrás de `CorreoPuerto`. Apunta a Mailpit en desarrollo y al proveedor externo en el VPS. Además usamos un `CorreoConsolaAdaptador` para pruebas. `notificaciones.module.ts` elige el adaptador con `CORREO_ADAPTADOR`, y el adaptador SMTP lee `SMTP_HOST`, `SMTP_PORT`, `SMTP_USUARIO`, `SMTP_CLAVE` y `CORREO_REMITENTE`. Sin variables apunta a Mailpit (`localhost:1025`).
 
 ```ts
+// puertos/correo.puerto.ts: la plantilla compone el mensaje; el adaptador solo lo transporta
 export abstract class CorreoPuerto {
-  abstract enviar(destinatario: string, plantilla: PlantillaCorreo, datos: DatosPlantilla): Promise<void>;
+  abstract enviar<D extends { enlace: string }>(destinatario: string, plantilla: PlantillaCorreo<D>, datos: D): Promise<void>;
 }
 
-// notificaciones.module.ts: único lugar que conoce los adaptadores
+// configuracion-correo.ts: único lugar que decide el adaptador
+export function correoSegun(configuracion: ConfiguracionCorreo, crearTransporte: (c: ConfiguracionCorreo) => TransporteSmtp): CorreoPuerto {
+  if (configuracion.adaptador === "consola") return new CorreoConsolaAdaptador();
+  return new CorreoSmtpAdaptador(crearTransporte(configuracion), configuracion.remitente);
+}
+
+// notificaciones.module.ts: el binding lee el entorno una vez; nodemailer solo vive en transporte-nodemailer.ts
 {
   provide: CorreoPuerto,
-  useFactory: (config: ConfigService) =>
-    config.get('CORREO_ADAPTADOR') === 'consola'
-      ? new CorreoConsolaAdaptador()
-      : new CorreoSmtpAdaptador(config),
-  inject: [ConfigService],
+  useFactory: () => correoSegun(configuracionCorreoDesde(process.env), transporteNodemailer),
 }
 ```
 
@@ -44,8 +47,8 @@ Para producción proponemos **Resend o Brevo por SMTP**. Los dos tienen un plan 
 
 ## Consecuencias
 
-- **DIP:** M1 y `ServicioNotificaciones` dependen solo de `CorreoPuerto`. Nadie hace `nodemailer.createTransport()` fuera del adaptador.
-- **OCP:** si algún día hace falta la API HTTP de un proveedor, se añade un `CorreoResendAdaptador extends CorreoPuerto` y una rama en el binding. Servicios y plantillas no se tocan.
+- **DIP:** M1 (`IdentidadService`) depende solo de `CorreoPuerto`, que importa de `notificaciones/index.ts`. Nadie hace `nodemailer.createTransport()` fuera de `transporte-nodemailer.ts`.
+- **OCP:** si algún día hace falta la API HTTP de un proveedor, se añade un `CorreoResendAdaptador extends CorreoPuerto` y una rama en `correoSegun`. Servicios y plantillas no se tocan.
 - **LSP:** los dos adaptadores (y el doble de prueba) cumplen el mismo contrato y lanzan el mismo error de dominio `CorreoNoEnviado`.
 - **SRP:** las plantillas (Template Method) arman el HTML; el adaptador solo transporta.
 - Mailpit se queda en el compose de desarrollo (ENG-01) y no forma parte del despliegue del VPS.

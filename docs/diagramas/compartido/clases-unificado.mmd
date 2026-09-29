@@ -12,13 +12,39 @@ classDiagram
 
     %% ───────── M1 Identidad · M10 Notificaciones (Eddy) ─────────
     class IdentidadService {
+        -usuarios RepositorioUsuarios
+        -tokens RepositorioTokensCuenta
         -hash HashContrasena
+        -generador GeneradorToken
         -correo CorreoPuerto
+        -sandbox AsignacionSandboxPuerto
         -reloj Reloj
-        +registrar(correo, nombre, clave) Usuario
-        +verificar(token) void
+        +registrar(correo, clave) CuentaRegistrada
+        +verificar(token) CuentaVerificada
         +iniciarSesion(correo, clave) Sesion
         +cerrarSesion(sesionId) void
+    }
+    class RepositorioUsuarios {
+        <<abstract>>
+        +porCorreo(correo) Usuario
+        +porId(id) Usuario
+        +crear(usuario) Usuario
+        +cambiarEstado(id, estado) void
+    }
+    class RepositorioTokensCuenta {
+        <<abstract>>
+        +crear(token) TokenCuenta
+        +porHuella(hashToken) TokenCuenta
+        +marcarUsado(id, usadoEn) void
+    }
+    class GeneradorToken {
+        <<abstract>>
+        +generar() String
+        +huella(token) String
+    }
+    class AsignacionSandboxPuerto {
+        <<abstract>>
+        +asignarSandbox(usuarioId) void
     }
     class PoliticaContrasena {
         +validar(clave) ResultadoPolitica
@@ -37,6 +63,14 @@ classDiagram
     }
     class CorreoSmtpAdaptador
     class CorreoConsolaAdaptador
+    class PlantillaCorreo {
+        <<abstract>>
+        +componer(datos) MensajeCorreo
+    }
+    class PlantillaVerificacion
+    class CorreoNoEnviado {
+        <<error>>
+    }
 
     %% ───────── M2 Suscripciones · M9 Administración (Javier) ─────────
     class SuscripcionesService {
@@ -327,9 +361,16 @@ classDiagram
     IdentidadService --> PoliticaContrasena
     IdentidadService --> HashContrasena
     IdentidadService --> CorreoPuerto
-    IdentidadService --> SuscripcionesService : asignarSandbox
+    IdentidadService --> RepositorioUsuarios
+    IdentidadService --> RepositorioTokensCuenta
+    IdentidadService --> GeneradorToken
+    IdentidadService --> AsignacionSandboxPuerto
+    AsignacionSandboxPuerto ..> SuscripcionesService : asignarSandbox
     CorreoPuerto <|-- CorreoSmtpAdaptador
     CorreoPuerto <|-- CorreoConsolaAdaptador
+    CorreoPuerto ..> PlantillaCorreo
+    CorreoPuerto ..> CorreoNoEnviado : lanza
+    PlantillaCorreo <|-- PlantillaVerificacion
     SuscripcionesService --> PoliticaCicloSuscripcion
     SuscripcionesService --> PasarelaPago
     SuscripcionesService ..> Cuota

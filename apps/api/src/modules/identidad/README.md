@@ -8,4 +8,4 @@ Dueño: Eddy. Spec: [`openspec/specs/identidad/spec.md`](../../../../../openspec
 
 **Fuera de alcance (solo si da el tiempo):** Auditoría completa, roles Operador y Soporte, cambio de correo, segundo factor.
 
-Hoy: stub con `GET /identidad/health`. Cada historia entra con su change de OpenSpec.
+Hecho (M1-01 y M1-02, change `feat-m1-registro-verificacion`): `POST /identidad/registro` y `POST /identidad/verificacion`. Usuarios y tokens en memoria hasta DB-01; Sandbox en stub hasta M2. Pendiente: login, `SesionGuard` y `@UsuarioActual()` (M1-03, martes).

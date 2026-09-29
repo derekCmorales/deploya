@@ -643,21 +643,25 @@ config:
   layout: fixed
 ---
 flowchart TB
-    START(("Inicio")) --> A["Usuario selecciona<br>Registrarse"]
-    A --> B["Ingresar correo<br>y contraseña"]
+    START(("Inicio")) --> A["Usuario abre<br>Crear cuenta"]
+    A --> B["Ingresar correo, contraseña<br>y confirmación"]
     B --> C["Enviar solicitud<br>de registro"]
-    C --> D{"¿Datos válidos?"}
-    D -- No --> E["Mostrar errores<br>de validación"]
+    C --> D{"¿Correo válido y contraseña<br>cumple la política?"}
+    D -- No --> E["Mostrar errores<br>de validación (400)"]
     E --> B
     D -- Sí --> F["Verificar si el<br>correo ya existe"]
     F --> G{"¿Correo registrado?"}
-    G -- Sí --> H["Informar que la cuenta<br>ya existe"]
+    G -- Sí --> H["Informar que la cuenta ya existe (409):<br>iniciar sesión o recuperar contraseña"]
     H --> END1(("Fin"))
-    G -- No --> I["Crear cuenta<br>en estado pendiente"]
-    I --> J["Generar token temporal<br>de verificación"]
-    J --> K["Enviar correo<br>de verificación"]
-    K --> L["Mostrar confirmación:<br>revisar correo"]
+    G -- No --> I["Crear cuenta pendiente<br>con hash de la contraseña"]
+    I --> S["Pedir Sandbox a M2<br>(asignarSandbox)"]
+    S --> J["Generar token de verificación<br>(se guarda su huella; vence en 24 h)"]
+    J --> K["Enviar correo<br>de verificación (M10)"]
+    K --> M{"¿Correo enviado?"}
+    M -- Sí --> L["Mostrar confirmación:<br>revisar correo"]
     L --> END2(("Fin"))
+    M -- No --> N["Cuenta creada con aviso<br>(correoEnviado: false)"]
+    N --> END3(("Fin"))
 
      START:::startEnd
      A:::input
@@ -670,10 +674,14 @@ flowchart TB
      H:::error
      END1:::startEnd
      I:::process
+     S:::process
      J:::process
      K:::process
+     M:::decision
      L:::success
+     N:::error
      END2:::startEnd
+     END3:::startEnd
     classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef input fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
     classDef process fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px,color:#134e4a
@@ -682,10 +690,19 @@ flowchart TB
     classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
     linkStyle 4 stroke:#fb7185,stroke-width:2px,fill:none
     linkStyle 5 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 8 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 9 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 17 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 18 stroke:#fb7185,stroke-width:2px,fill:none
     linkStyle 6 stroke:#4ade80,stroke-width:2px,fill:none
     linkStyle 7 stroke:#4ade80,stroke-width:2px,fill:none
-    linkStyle 8 stroke:#4ade80,stroke-width:2px,fill:none
-    linkStyle 9 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 10 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 11 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 12 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 13 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 14 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 15 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 16 stroke:#4ade80,stroke-width:2px,fill:none
 ```
 
 #### Actividad: verificación de correo
@@ -702,22 +719,23 @@ flowchart TD
     START((Inicio))
 
     A["Usuario recibe<br/>correo de verificación"]
-    B["Seleccionar enlace<br/>de verificación"]
-    C["Enviar token<br/>a la plataforma"]
+    B["Abrir el enlace<br/>/verificar?token="]
+    C["La web envía el token<br/>POST /identidad/verificacion"]
 
-    D["Buscar token"]
-    E{"¿Token válido<br/>y vigente?"}
+    D["Buscar token<br/>por su huella"]
+    E{"¿Existe, es de verificación,<br/>vigente (24 h) y sin usar?"}
 
-    F["Rechazar verificación"]
-    G["Solicitar un nuevo<br/>enlace de verificación"]
+    F["Rechazar (410):<br/>«El enlace ya no es válido»"]
 
-    H["Activar cuenta"]
-    I["Marcar token<br/>como utilizado"]
-    J["Registrar evento<br/>de auditoría"]
-    K["Confirmar cuenta<br/>verificada"]
+    H["Marcar token<br/>como utilizado"]
+    I{"¿Cuenta pendiente?"}
+    J["Activar cuenta"]
+    K["Confirmar:<br/>«Cuenta activada»"]
+    L["Devolver el estado actual<br/>sin reactivar (p. ej. suspendida)"]
 
     END1((Fin))
     END2((Fin))
+    END3((Fin))
 
     START --> A
     A --> B
@@ -726,14 +744,16 @@ flowchart TD
     D --> E
 
     E -->|"No"| F
-    F --> G
-    G --> END1
+    F --> END1
 
     E -->|"Sí"| H
     H --> I
-    I --> J
+    I -->|"Sí"| J
     J --> K
     K --> END2
+
+    I -->|"No"| L
+    L --> END3
 
     classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81;
     classDef input fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b;
@@ -742,15 +762,15 @@ flowchart TD
     classDef error fill:#fff1f2,stroke:#fb7185,stroke-width:2px,color:#881337;
     classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534;
 
-    class START,END1,END2 startEnd;
+    class START,END1,END2,END3 startEnd;
     class A,B,C input;
-    class D,H,I,J process;
-    class E decision;
-    class F,G error;
+    class D,H,J process;
+    class E,I decision;
+    class F,L error;
     class K success;
 
-    linkStyle 5,6,7 stroke:#fb7185,stroke-width:2px;
-    linkStyle 8,9,10,11,12 stroke:#4ade80,stroke-width:2px;
+    linkStyle 5,6,12,13 stroke:#fb7185,stroke-width:2px;
+    linkStyle 7,8,9,10,11 stroke:#4ade80,stroke-width:2px;
 ```
 
 #### Actividad: recuperación de contraseña
@@ -1670,13 +1690,39 @@ classDiagram
 
     %% ───────── M1 Identidad · M10 Notificaciones (Eddy) ─────────
     class IdentidadService {
+        -usuarios RepositorioUsuarios
+        -tokens RepositorioTokensCuenta
         -hash HashContrasena
+        -generador GeneradorToken
         -correo CorreoPuerto
+        -sandbox AsignacionSandboxPuerto
         -reloj Reloj
-        +registrar(correo, nombre, clave) Usuario
-        +verificar(token) void
+        +registrar(correo, clave) CuentaRegistrada
+        +verificar(token) CuentaVerificada
         +iniciarSesion(correo, clave) Sesion
         +cerrarSesion(sesionId) void
+    }
+    class RepositorioUsuarios {
+        <<abstract>>
+        +porCorreo(correo) Usuario
+        +porId(id) Usuario
+        +crear(usuario) Usuario
+        +cambiarEstado(id, estado) void
+    }
+    class RepositorioTokensCuenta {
+        <<abstract>>
+        +crear(token) TokenCuenta
+        +porHuella(hashToken) TokenCuenta
+        +marcarUsado(id, usadoEn) void
+    }
+    class GeneradorToken {
+        <<abstract>>
+        +generar() String
+        +huella(token) String
+    }
+    class AsignacionSandboxPuerto {
+        <<abstract>>
+        +asignarSandbox(usuarioId) void
     }
     class PoliticaContrasena {
         +validar(clave) ResultadoPolitica
@@ -1695,6 +1741,14 @@ classDiagram
     }
     class CorreoSmtpAdaptador
     class CorreoConsolaAdaptador
+    class PlantillaCorreo {
+        <<abstract>>
+        +componer(datos) MensajeCorreo
+    }
+    class PlantillaVerificacion
+    class CorreoNoEnviado {
+        <<error>>
+    }
 
     %% ───────── M2 Suscripciones · M9 Administración (Javier) ─────────
     class SuscripcionesService {
@@ -1985,9 +2039,16 @@ classDiagram
     IdentidadService --> PoliticaContrasena
     IdentidadService --> HashContrasena
     IdentidadService --> CorreoPuerto
-    IdentidadService --> SuscripcionesService : asignarSandbox
+    IdentidadService --> RepositorioUsuarios
+    IdentidadService --> RepositorioTokensCuenta
+    IdentidadService --> GeneradorToken
+    IdentidadService --> AsignacionSandboxPuerto
+    AsignacionSandboxPuerto ..> SuscripcionesService : asignarSandbox
     CorreoPuerto <|-- CorreoSmtpAdaptador
     CorreoPuerto <|-- CorreoConsolaAdaptador
+    CorreoPuerto ..> PlantillaCorreo
+    CorreoPuerto ..> CorreoNoEnviado : lanza
+    PlantillaCorreo <|-- PlantillaVerificacion
     SuscripcionesService --> PoliticaCicloSuscripcion
     SuscripcionesService --> PasarelaPago
     SuscripcionesService ..> Cuota

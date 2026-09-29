@@ -69,10 +69,10 @@ export function TablaPlanes({ planes, vigencia, codigoActual }: TablaPlanesProps
                     </Badge>
                   ) : null}
                 </div>
-                <p className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-semibold tracking-[-0.03em]">{textoPrecio(plan, vigencia)}</span>
+                <p className="flex flex-wrap items-baseline gap-x-1.5">
+                  <span className="text-2xl font-semibold tracking-[-0.03em] whitespace-nowrap">{textoPrecio(plan, vigencia)}</span>
                   {textoPeriodo(plan, vigencia) ? (
-                    <span className="text-[13px] text-muted-foreground">{textoPeriodo(plan, vigencia)}</span>
+                    <span className="text-[13px] whitespace-nowrap text-muted-foreground">{textoPeriodo(plan, vigencia)}</span>
                   ) : null}
                 </p>
                 <p className="min-h-8 text-[13px] text-muted-foreground">{plan.descripcion}</p>

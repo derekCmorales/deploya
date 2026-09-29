@@ -11,10 +11,11 @@ import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
 import { CuotaPlanPuerto } from "../modules/orquestacion/puertos/cuota-plan.puerto";
 import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verificacion-entorno.puerto";
+import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { CONFIGURACION_MOTOR, configuracionDesde, type ConfiguracionMotor } from "./configuracion-motor";
-import { ProyectosLecturaMemoria } from "./memoria/proyectos-lectura.memoria";
 import { RepositorioArtefactosMemoria } from "./memoria/repositorio-artefactos.memoria";
 import { RepositorioDesplieguesMemoria } from "./memoria/repositorio-despliegues.memoria";
+import { RepositorioProyectosMemoria } from "./memoria/repositorio-proyectos.memoria";
 import { ClonadorGit } from "./reales/clonador-git";
 import { ColaBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
@@ -46,11 +47,13 @@ const socketDocker = (): Docker => new Docker({ socketPath: "/var/run/docker.soc
 /**
  * Hasta que DB-01 esté en `main`, despliegues, artefactos y proyectos viven en memoria
  * en ambos modos; el adaptador Prisma los reemplaza aquí sin tocar servicios.
+ * El motor lee los proyectos del mismo almacén en el que M3 los guarda.
  */
 const PERSISTENCIA: Provider[] = [
   { provide: RepositorioDespliegues, useClass: RepositorioDesplieguesMemoria },
   { provide: RepositorioArtefactos, useClass: RepositorioArtefactosMemoria },
-  { provide: ProyectosLecturaPuerto, useClass: ProyectosLecturaMemoria },
+  { provide: RepositorioProyectos, useClass: RepositorioProyectosMemoria },
+  { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
 ];
 
 const COMUNES: Provider[] = [

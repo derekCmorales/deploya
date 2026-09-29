@@ -12,13 +12,39 @@ classDiagram
 
     %% ───────── M1 Identidad · M10 Notificaciones (Eddy) ─────────
     class IdentidadService {
+        -usuarios RepositorioUsuarios
+        -tokens RepositorioTokensCuenta
         -hash HashContrasena
+        -generador GeneradorToken
         -correo CorreoPuerto
+        -sandbox AsignacionSandboxPuerto
         -reloj Reloj
-        +registrar(correo, nombre, clave) Usuario
-        +verificar(token) void
+        +registrar(correo, clave) CuentaRegistrada
+        +verificar(token) CuentaVerificada
         +iniciarSesion(correo, clave) Sesion
         +cerrarSesion(sesionId) void
+    }
+    class RepositorioUsuarios {
+        <<abstract>>
+        +porCorreo(correo) Usuario
+        +porId(id) Usuario
+        +crear(usuario) Usuario
+        +cambiarEstado(id, estado) void
+    }
+    class RepositorioTokensCuenta {
+        <<abstract>>
+        +crear(token) TokenCuenta
+        +porHuella(hashToken) TokenCuenta
+        +marcarUsado(id, usadoEn) void
+    }
+    class GeneradorToken {
+        <<abstract>>
+        +generar() String
+        +huella(token) String
+    }
+    class AsignacionSandboxPuerto {
+        <<abstract>>
+        +asignarSandbox(usuarioId) void
     }
     class PoliticaContrasena {
         +validar(clave) ResultadoPolitica
@@ -37,6 +63,14 @@ classDiagram
     }
     class CorreoSmtpAdaptador
     class CorreoConsolaAdaptador
+    class PlantillaCorreo {
+        <<abstract>>
+        +componer(datos) MensajeCorreo
+    }
+    class PlantillaVerificacion
+    class CorreoNoEnviado {
+        <<error>>
+    }
 
     %% ───────── M2 Suscripciones · M9 Administración (Javier) ─────────
     class SuscripcionesService {
@@ -89,17 +123,34 @@ classDiagram
     %% ───────── M3 Proyectos · M7 Observabilidad (Eduardo) ─────────
     class ProyectosService {
         -fuente ProveedorFuente
-        +validarRepositorio(url, rama) RepositorioValidado
-        +crear(usuarioId, alta) Proyecto
+        -repositorio RepositorioProyectos
+        -cuota CuotaProyectosPuerto
+        -construccion ConstruccionService
+        +validarRepositorio(consulta) ValidacionRepositorio
+        +listar(usuarioId) ListaProyectos
+        +crear(usuarioId, alta) ProyectoCreado
     }
     class ProveedorFuente {
         <<abstract>>
-        +inspeccionar(url, rama) RepositorioInspeccionado
+        +validar(consulta) ValidacionRepositorio
         +lector(url, rama) LectorFuente
     }
     class FuenteGitHubPublica
+    class RepositorioProyectos {
+        <<abstract>>
+        +guardar(proyecto) Proyecto
+        +porId(id) Proyecto
+        +deUsuario(usuarioId) List~Proyecto~
+        +existeSubdominio(subdominio) Boolean
+    }
+    class RepositorioProyectosMemoria
+    class CuotaProyectosPuerto {
+        <<abstract>>
+        +cuotaDe(usuarioId) CuotaProyectos
+    }
+    class CuotaProyectosStub
     class ParserExpose {
-        +puertos(dockerfile) List~Integer~
+        +puertoDesdeExpose(dockerfile) Integer
     }
 
     %% ───────── M4 Construcción (Derek) ─────────
@@ -342,9 +393,16 @@ classDiagram
     IdentidadService --> PoliticaContrasena
     IdentidadService --> HashContrasena
     IdentidadService --> CorreoPuerto
-    IdentidadService --> SuscripcionesService : asignarSandbox
+    IdentidadService --> RepositorioUsuarios
+    IdentidadService --> RepositorioTokensCuenta
+    IdentidadService --> GeneradorToken
+    IdentidadService --> AsignacionSandboxPuerto
+    AsignacionSandboxPuerto ..> SuscripcionesService : asignarSandbox
     CorreoPuerto <|-- CorreoSmtpAdaptador
     CorreoPuerto <|-- CorreoConsolaAdaptador
+    CorreoPuerto ..> PlantillaCorreo
+    CorreoPuerto ..> CorreoNoEnviado : lanza
+    PlantillaCorreo <|-- PlantillaVerificacion
     SuscripcionesService --> PoliticaCicloSuscripcion
     SuscripcionesService --> PasarelaPago
     SuscripcionesService ..> Cuota
@@ -355,17 +413,21 @@ classDiagram
     PasarelaPago <|-- PasarelaSimulada
     AdministracionService --> OrquestacionService : detenerTodosDe
     ProyectosService --> ProveedorFuente
-    ProyectosService --> ParserExpose
+    ProyectosService --> RepositorioProyectos
+    ProyectosService --> CuotaProyectosPuerto
     ProyectosService --> DeteccionStackService : detectar
     ProyectosService --> ConstruccionService : crearDespliegue
     ProveedorFuente <|-- FuenteGitHubPublica
+    FuenteGitHubPublica --> ParserExpose
+    RepositorioProyectos <|-- RepositorioProyectosMemoria
+    CuotaProyectosPuerto <|-- CuotaProyectosStub
 
     ConstruccionService --> ColaConstruccionPuerto
     ConstruccionService --> RepositorioDespliegues
     ConstruccionService --> PoliticaDespliegue
     ConstruccionService --> TransicionesDespliegue
     ConstruccionService --> ProyectosLecturaPuerto
-    ProyectosLecturaPuerto ..> ProyectosService : adaptador sobre M3
+    ProyectosLecturaPuerto ..> RepositorioProyectos : mismo almacén
     DeteccionStackService --> RecetaStack
     DeteccionStackService --> LectorFuente
     RecetaStack <|-- RecetaDockerfile

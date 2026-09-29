@@ -3,21 +3,25 @@ config:
   layout: fixed
 ---
 flowchart TB
-    START(("Inicio")) --> A["Usuario selecciona<br>Registrarse"]
-    A --> B["Ingresar correo<br>y contraseña"]
+    START(("Inicio")) --> A["Usuario abre<br>Crear cuenta"]
+    A --> B["Ingresar correo, contraseña<br>y confirmación"]
     B --> C["Enviar solicitud<br>de registro"]
-    C --> D{"¿Datos válidos?"}
-    D -- No --> E["Mostrar errores<br>de validación"]
+    C --> D{"¿Correo válido y contraseña<br>cumple la política?"}
+    D -- No --> E["Mostrar errores<br>de validación (400)"]
     E --> B
     D -- Sí --> F["Verificar si el<br>correo ya existe"]
     F --> G{"¿Correo registrado?"}
-    G -- Sí --> H["Informar que la cuenta<br>ya existe"]
+    G -- Sí --> H["Informar que la cuenta ya existe (409):<br>iniciar sesión o recuperar contraseña"]
     H --> END1(("Fin"))
-    G -- No --> I["Crear cuenta<br>en estado pendiente"]
-    I --> J["Generar token temporal<br>de verificación"]
-    J --> K["Enviar correo<br>de verificación"]
-    K --> L["Mostrar confirmación:<br>revisar correo"]
+    G -- No --> I["Crear cuenta pendiente<br>con hash de la contraseña"]
+    I --> S["Pedir Sandbox a M2<br>(asignarSandbox)"]
+    S --> J["Generar token de verificación<br>(se guarda su huella; vence en 24 h)"]
+    J --> K["Enviar correo<br>de verificación (M10)"]
+    K --> M{"¿Correo enviado?"}
+    M -- Sí --> L["Mostrar confirmación:<br>revisar correo"]
     L --> END2(("Fin"))
+    M -- No --> N["Cuenta creada con aviso<br>(correoEnviado: false)"]
+    N --> END3(("Fin"))
 
      START:::startEnd
      A:::input
@@ -30,10 +34,14 @@ flowchart TB
      H:::error
      END1:::startEnd
      I:::process
+     S:::process
      J:::process
      K:::process
+     M:::decision
      L:::success
+     N:::error
      END2:::startEnd
+     END3:::startEnd
     classDef startEnd fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef input fill:#eef2ff,stroke:#818cf8,stroke-width:2px,color:#1e1b4b
     classDef process fill:#f0fdfa,stroke:#2dd4bf,stroke-width:2px,color:#134e4a
@@ -42,7 +50,16 @@ flowchart TB
     classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
     linkStyle 4 stroke:#fb7185,stroke-width:2px,fill:none
     linkStyle 5 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 8 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 9 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 17 stroke:#fb7185,stroke-width:2px,fill:none
+    linkStyle 18 stroke:#fb7185,stroke-width:2px,fill:none
     linkStyle 6 stroke:#4ade80,stroke-width:2px,fill:none
     linkStyle 7 stroke:#4ade80,stroke-width:2px,fill:none
-    linkStyle 8 stroke:#4ade80,stroke-width:2px,fill:none
-    linkStyle 9 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 10 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 11 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 12 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 13 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 14 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 15 stroke:#4ade80,stroke-width:2px,fill:none
+    linkStyle 16 stroke:#4ade80,stroke-width:2px,fill:none

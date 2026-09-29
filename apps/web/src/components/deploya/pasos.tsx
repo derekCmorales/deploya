@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Pasos de un asistente (Nuevo proyecto: Repositorio · Variables · Revisar).
- * `actual` es 0-based. Los pasos previos se marcan completos.
+ * `actual` es 0-based. Los pasos previos se marcan completos, salvo los deshabilitados.
  */
 function Pasos({
   pasos,
@@ -18,7 +18,7 @@ function Pasos({
   return (
     <ol className={cn("flex flex-col gap-1", className)} aria-label="Pasos">
       {pasos.map((p, i) => {
-        const hecho = i < actual;
+        const hecho = i < actual && !p.deshabilitado;
         const activo = i === actual;
         return (
           <li

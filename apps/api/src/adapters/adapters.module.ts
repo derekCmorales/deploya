@@ -9,13 +9,12 @@ import { RepositorioArtefactos } from "../modules/construccion/puertos/repositor
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
-import { CuotaPlanPuerto } from "../modules/orquestacion/puertos/cuota-plan.puerto";
 import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verificacion-entorno.puerto";
 import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { CONFIGURACION_MOTOR, configuracionDesde, type ConfiguracionMotor } from "./configuracion-motor";
-import { RepositorioArtefactosMemoria } from "./memoria/repositorio-artefactos.memoria";
-import { RepositorioDesplieguesMemoria } from "./memoria/repositorio-despliegues.memoria";
-import { RepositorioProyectosMemoria } from "./memoria/repositorio-proyectos.memoria";
+import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
+import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
+import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
 import { ColaBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
@@ -26,7 +25,6 @@ import { ClonadorStub } from "./stubs/clonador.stub";
 import { ColaMemoria } from "./stubs/cola.memoria";
 import { ConstructorImagenStub } from "./stubs/constructor-imagen.stub";
 import { ContenedorStub } from "./stubs/contenedor.stub";
-import { CuotaPlanStub } from "./stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "./stubs/enrutamiento.stub";
 import { VerificacionEntornoStub } from "./stubs/verificacion-entorno.stub";
 
@@ -45,14 +43,14 @@ export function puerto<T>(token: abstract new (...args: never[]) => T, fabrica: 
 const socketDocker = (): Docker => new Docker({ socketPath: "/var/run/docker.sock" });
 
 /**
- * Hasta que DB-01 esté en `main`, despliegues, artefactos y proyectos viven en memoria
- * en ambos modos; el adaptador Prisma los reemplaza aquí sin tocar servicios.
- * El motor lee los proyectos del mismo almacén en el que M3 los guarda.
+ * Despliegues, artefactos y proyectos en PostgreSQL (DB-01) en ambos modos: la API y el
+ * trabajador son procesos distintos y solo comparten la base. Los repositorios en memoria
+ * quedan para las pruebas. El motor lee los proyectos del mismo almacén en el que M3 los guarda.
  */
 const PERSISTENCIA: Provider[] = [
-  { provide: RepositorioDespliegues, useClass: RepositorioDesplieguesMemoria },
-  { provide: RepositorioArtefactos, useClass: RepositorioArtefactosMemoria },
-  { provide: RepositorioProyectos, useClass: RepositorioProyectosMemoria },
+  { provide: RepositorioDespliegues, useClass: RepositorioDesplieguesPrisma },
+  { provide: RepositorioArtefactos, useClass: RepositorioArtefactosPrisma },
+  { provide: RepositorioProyectos, useClass: RepositorioProyectosPrisma },
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
 ];
 
@@ -76,7 +74,6 @@ const SOLO_TRABAJADOR: Provider[] = [
       new EnrutamientoTraefikArchivo({ directorio: c.traefikDinamico, dominio: c.dominioApps, esquema: c.esquemaApps }),
     stub: () => new EnrutamientoStub(),
   }),
-  { provide: CuotaPlanPuerto, useClass: CuotaPlanStub },
 ];
 
 const tokens = (proveedores: Provider[]) => proveedores.map((p) => (typeof p === "function" ? p : p.provide));

@@ -74,17 +74,34 @@ classDiagram
     %% ───────── M3 Proyectos · M7 Observabilidad (Eduardo) ─────────
     class ProyectosService {
         -fuente ProveedorFuente
-        +validarRepositorio(url, rama) RepositorioValidado
-        +crear(usuarioId, alta) Proyecto
+        -repositorio RepositorioProyectos
+        -cuota CuotaProyectosPuerto
+        -construccion ConstruccionService
+        +validarRepositorio(consulta) ValidacionRepositorio
+        +listar(usuarioId) ListaProyectos
+        +crear(usuarioId, alta) ProyectoCreado
     }
     class ProveedorFuente {
         <<abstract>>
-        +inspeccionar(url, rama) RepositorioInspeccionado
+        +validar(consulta) ValidacionRepositorio
         +lector(url, rama) LectorFuente
     }
     class FuenteGitHubPublica
+    class RepositorioProyectos {
+        <<abstract>>
+        +guardar(proyecto) Proyecto
+        +porId(id) Proyecto
+        +deUsuario(usuarioId) List~Proyecto~
+        +existeSubdominio(subdominio) Boolean
+    }
+    class RepositorioProyectosMemoria
+    class CuotaProyectosPuerto {
+        <<abstract>>
+        +cuotaDe(usuarioId) CuotaProyectos
+    }
+    class CuotaProyectosStub
     class ParserExpose {
-        +puertos(dockerfile) List~Integer~
+        +puertoDesdeExpose(dockerfile) Integer
     }
 
     %% ───────── M4 Construcción (Derek) ─────────
@@ -336,17 +353,21 @@ classDiagram
     PasarelaPago <|-- PasarelaSimulada
     AdministracionService --> OrquestacionService : detenerTodosDe
     ProyectosService --> ProveedorFuente
-    ProyectosService --> ParserExpose
+    ProyectosService --> RepositorioProyectos
+    ProyectosService --> CuotaProyectosPuerto
     ProyectosService --> DeteccionStackService : detectar
     ProyectosService --> ConstruccionService : crearDespliegue
     ProveedorFuente <|-- FuenteGitHubPublica
+    FuenteGitHubPublica --> ParserExpose
+    RepositorioProyectos <|-- RepositorioProyectosMemoria
+    CuotaProyectosPuerto <|-- CuotaProyectosStub
 
     ConstruccionService --> ColaConstruccionPuerto
     ConstruccionService --> RepositorioDespliegues
     ConstruccionService --> PoliticaDespliegue
     ConstruccionService --> TransicionesDespliegue
     ConstruccionService --> ProyectosLecturaPuerto
-    ProyectosLecturaPuerto ..> ProyectosService : adaptador sobre M3
+    ProyectosLecturaPuerto ..> RepositorioProyectos : mismo almacén
     DeteccionStackService --> RecetaStack
     DeteccionStackService --> LectorFuente
     RecetaStack <|-- RecetaDockerfile

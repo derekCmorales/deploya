@@ -1,8 +1,7 @@
-/// <reference types="jest" />
 import { puertoDesdeExpose } from "./puerto-expose";
 
 describe("puertoDesdeExpose", () => {
-  it("un EXPOSE", () => {
+  it("Puerto desde EXPOSE: un EXPOSE", () => {
     expect(puertoDesdeExpose("EXPOSE 3000")).toBe(3000);
   });
 
@@ -10,11 +9,11 @@ describe("puertoDesdeExpose", () => {
     expect(puertoDesdeExpose("EXPOSE 3000/tcp")).toBe(3000);
   });
 
-  it("varios EXPOSE", () => {
+  it("Puerto desde EXPOSE: con varios gana el primero", () => {
     expect(puertoDesdeExpose("EXPOSE 3000 8080")).toBe(3000);
   });
 
-  it("sin EXPOSE", () => {
+  it("Puerto desde EXPOSE: sin EXPOSE devuelve null", () => {
     expect(puertoDesdeExpose("FROM node:18")).toBeNull();
   });
 

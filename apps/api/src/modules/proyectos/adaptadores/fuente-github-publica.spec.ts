@@ -104,12 +104,12 @@ describe("FuenteGitHubPublica", () => {
     await expect(new FuenteGitHubPublica(http).validar(consulta())).resolves.toMatchObject({ puerto: 4000 });
   });
 
-  it("límite de peticiones agotado lanza FuenteNoDisponible, no «no accesible»", async () => {
+  it("GitHub no disponible: límite de peticiones agotado lanza FuenteNoDisponible, no «no accesible»", async () => {
     const { http } = github({ [BASE]: { estado: 403, cabeceras: { "x-ratelimit-remaining": "0" } } });
     await expect(new FuenteGitHubPublica(http).validar(consulta())).rejects.toThrow(FuenteNoDisponible);
   });
 
-  it("GitHub caído o sin red lanza FuenteNoDisponible", async () => {
+  it("GitHub no disponible: caído o sin red lanza FuenteNoDisponible", async () => {
     await expect(new FuenteGitHubPublica(github({ [BASE]: { estado: 502 } }).http).validar(consulta())).rejects.toThrow(
       FuenteNoDisponible,
     );

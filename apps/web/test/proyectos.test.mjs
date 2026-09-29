@@ -32,7 +32,7 @@ test("10 · ¿sigue en curso? según el estado del despliegue", () => {
   for (const e of ["saludable", "fallido", "cancelado", "detenido"]) assert.equal(despliegueEnCurso(e), false, e);
 });
 
-test("10 · la lista sigue sondeando mientras algún último despliegue esté en curso", () => {
+test("10 · Sondeo mientras hay algo en curso: la lista sigue mientras algún último despliegue no termine", () => {
   assert.equal(algunoEnCurso({ proyectos: [conUltimo("saludable"), conUltimo("construyendo")] }), true);
   assert.equal(algunoEnCurso({ proyectos: [conUltimo("saludable"), conUltimo(null)] }), false);
   assert.equal(algunoEnCurso({ proyectos: [] }), false);

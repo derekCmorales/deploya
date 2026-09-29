@@ -5,7 +5,7 @@ Cada tarea de código tiene su tarea de pruebas. Pruebas sin base, red ni reloj 
 ## 1. DB-01 · Schema y Prisma
 
 - [x] 1.1 `schema.prisma` = contrato v1 (`prisma validate` y `prisma format` sin cambios)
-- [ ] 1.2 Migración `nucleo` con `prisma migrate dev` contra el Postgres de compose; subir `prisma/migrations/`
+- [x] 1.2 Migración `nucleo` con `prisma migrate dev` contra el Postgres de compose; subir `prisma/migrations/`
 - [x] 1.3 `PrismaService` y `PrismaModule` global en `compartido/prisma`, registrado en `app.module.ts`
 - [x] 1.4 Pruebas: `PrismaService` conecta y desconecta con el ciclo de Nest
 
@@ -20,7 +20,7 @@ Cada tarea de código tiene su tarea de pruebas. Pruebas sin base, red ni reloj 
 - [x] 3.1 `planesSemilla()`, `usuariosSemilla(entorno)`, `sembrar()` detrás de `DestinoSemilla`; `seed.ts` con Prisma y `hashSemilla` (scrypt, formato de M1); prueba de formato y de que solo coincide con su clave
 - [x] 3.2 `.env.example`: `ADMIN_CORREO`, `ADMIN_CLAVE`, `CLIENTE_CLAVE`
 - [x] 3.3 Pruebas: `planesSemilla()` con los valores de la tabla, «Dos corridas», «Falta la clave del administrador», administrador y cliente con Sandbox
-- [ ] 3.4 Verificar en compose: seed dos veces, mismos registros
+- [x] 3.4 Verificar en compose: seed dos veces, mismos registros
 
 ## 4. M2-01 · Catálogo
 

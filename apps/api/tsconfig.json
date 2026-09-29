@@ -16,9 +16,7 @@
     "strictNullChecks": true,
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "rootDir": "./src",
-    "ignoreDeprecations": "6.0",
+    "esModuleInterop": true
   },
   "include": ["src/**/*"]
 }

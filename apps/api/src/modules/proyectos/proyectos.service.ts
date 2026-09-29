@@ -1,80 +1,82 @@
 import { Injectable } from "@nestjs/common";
+import { ConstruccionService } from "../construccion/construccion.service";
+import { LimiteProyectosAlcanzado, SubdominioEnUso } from "./dominio/errores";
+import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
+import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
+import { subdominioDesdeNombre } from "./dominio/subdominio";
+import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
-import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
-import { ConstruccionService } from "../construccion/construccion.service";
-import { AltaProyecto, ValidacionRepositorio } from "./dominio/proyecto";
-import { subdominioDesdeNombre } from "./dominio/subdominio";
-import { validarAltaProyecto } from "./dominio/alta-proyecto";
-import { SubdominioEnUso, LimiteProyectosAlcanzado } from "./dominio/errores";
-import { RUTA_DOCKERFILE, RAMA_POR_DEFECTO } from "./dominio/proyectos.constantes";
 
+type Ultimos = Awaited<ReturnType<ConstruccionService["ultimosDespliegues"]>>;
+type DespliegueCreado = Awaited<ReturnType<ConstruccionService["crearDespliegue"]>>;
+
+export interface ProyectoEnLista extends Proyecto {
+  ultimoDespliegue: Ultimos[string] | null;
+}
+
+/** `GET /proyectos` (10 / 10b): la lista, el contador y los recursos del plan. */
+export interface ListaProyectos {
+  proyectos: ProyectoEnLista[];
+  usados: number;
+  maximo: number;
+  plan: { nombre: string; cpus: number; memoriaMb: number };
+}
+
+export interface ProyectoCreado {
+  proyecto: Proyecto;
+  despliegue: DespliegueCreado;
+}
+
+/** Caso de uso de M3: valida la fuente, guarda el proyecto y pide a M4 el despliegue #1. */
 @Injectable()
 export class ProyectosService {
   constructor(
-    private readonly proveedorFuente: ProveedorFuente,
-    private readonly repositorioProyectos: RepositorioProyectos,
-    private readonly cuotaProyectos: CuotaProyectosPuerto,
-    private readonly construccionService: ConstruccionService
+    private readonly fuente: ProveedorFuente,
+    private readonly repositorio: RepositorioProyectos,
+    private readonly cuota: CuotaProyectosPuerto,
+    private readonly construccion: ConstruccionService,
   ) {}
 
-  async validarRepositorio(url: string, rama?: string): Promise<ValidacionRepositorio> {
-    const ramaElegida = rama && rama.trim() !== "" ? rama : RAMA_POR_DEFECTO;
-    return this.proveedorFuente.validar(url, ramaElegida);
+  validarRepositorio(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
+    return this.fuente.validar(consulta);
   }
 
-  async listar(usuarioId: string) {
-    const proyectos = await this.repositorioProyectos.deUsuario(usuarioId);
-    const maximo = await this.cuotaProyectos.maxProyectosDe(usuarioId);
-    const usados = proyectos.length;
-
-    const ids = proyectos.map((p) => p.id);
-    const ultimos = ids.length > 0 ? await this.construccionService.ultimosDespliegues(ids) : {};
-
-    const proyectosConDespliegue = proyectos.map((p) => ({
-      ...p,
-      ultimoDespliegue: ultimos[p.id] ?? null,
-    }));
-
+  async listar(usuarioId: string): Promise<ListaProyectos> {
+    const [proyectos, cuota] = await Promise.all([this.repositorio.deUsuario(usuarioId), this.cuota.cuotaDe(usuarioId)]);
+    const ultimos = await this.construccion.ultimosDespliegues(proyectos.map((p) => p.id));
     return {
-      proyectos: proyectosConDespliegue,
-      usados,
-      maximo,
+      proyectos: masRecientesPrimero(proyectos).map((p) => ({ ...p, ultimoDespliegue: ultimos[p.id] ?? null })),
+      usados: proyectos.length,
+      maximo: cuota.maxProyectos,
+      plan: { nombre: cuota.plan, cpus: cuota.cpus, memoriaMb: cuota.memoriaMb },
     };
   }
 
-  async crear(usuarioId: string, altaCuerpo: unknown) {
-    const alta = validarAltaProyecto(altaCuerpo);
-    const maximo = await this.cuotaProyectos.maxProyectosDe(usuarioId);
-    const existentes = await this.repositorioProyectos.deUsuario(usuarioId);
-
-    if (existentes.length >= maximo) {
-      throw new LimiteProyectosAlcanzado();
-    }
-
-    const validacion = await this.proveedorFuente.validar(alta.url, alta.rama);
+  async crear(usuarioId: string, alta: AltaProyecto): Promise<ProyectoCreado> {
+    await this.exigirCupo(usuarioId);
+    const validacion = await this.fuente.validar({ url: alta.url, rama: alta.rama });
     const subdominio = subdominioDesdeNombre(alta.nombre);
-
-    const subdominioOcupado = await this.repositorioProyectos.existeSubdominio(subdominio);
-    if (subdominioOcupado) {
-      throw new SubdominioEnUso();
-    }
-
-    const proyecto = await this.repositorioProyectos.guardar({
+    if (await this.repositorio.existeSubdominio(subdominio)) throw new SubdominioEnUso(subdominio);
+    const proyecto = await this.repositorio.guardar({
       usuarioId,
       nombre: alta.nombre,
       subdominio,
       urlRepositorio: validacion.urlNormalizada,
       rama: alta.rama,
       rutaDockerfile: RUTA_DOCKERFILE,
-      puertoInterno: alta.puerto,
+      puertoInterno: alta.puerto ?? validacion.puerto,
     });
-
-    const despliegue = await this.construccionService.crearDespliegue(proyecto.id, "alta");
-
-    return {
-      proyecto,
-      despliegue,
-    };
+    const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");
+    return { proyecto, despliegue };
   }
+
+  private async exigirCupo(usuarioId: string): Promise<void> {
+    const [existentes, cuota] = await Promise.all([this.repositorio.deUsuario(usuarioId), this.cuota.cuotaDe(usuarioId)]);
+    if (existentes.length >= cuota.maxProyectos) throw new LimiteProyectosAlcanzado(cuota.maxProyectos);
+  }
+}
+
+function masRecientesPrimero(proyectos: Proyecto[]): Proyecto[] {
+  return [...proyectos].sort((a, b) => b.creado.getTime() - a.creado.getTime());
 }

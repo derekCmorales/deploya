@@ -1,6 +1,13 @@
-import { ValidacionRepositorio } from "../dominio/proyecto";
+import type { ConsultaRepositorio, ValidacionRepositorio } from "../dominio/proyecto";
 
+/**
+ * Fuente del código (Adapter). Hoy solo GitHub público; otra fuente es otra
+ * implementación, no un `if` en el servicio.
+ */
 export abstract class ProveedorFuente {
-  /** Lanza RepositorioNoAccesible, RamaNoEncontrada o RepositorioSinDockerfile. */
-  abstract validar(url: string, rama: string): Promise<ValidacionRepositorio>;
+  /**
+   * Lanza `RepositorioNoAccesible`, `RamaNoEncontrada`, `RepositorioSinDockerfile`
+   * o `FuenteNoDisponible`.
+   */
+  abstract validar(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio>;
 }

@@ -2,4 +2,4 @@
 
 Planes y cobro. Dueño: @Javier-r04. Kit: [docs/diseno/README.md](../../../../../docs/diseno/README.md). Pago simulado.
 
-Pantallas del canvas v4.1 que viven aquí: 06 Planes (pública), 07 Contratar, 08 Mi suscripción, 09 Historial de pagos. Alcance: [docs/alcance.md](../../../../../docs/alcance.md). Hoy `/billing` es un stub.
+Pantallas del canvas v4.1 que viven aquí: 06 Planes (pública), 07 Contratar, 08 Mi suscripción, 09 Historial de pagos. Alcance: [docs/alcance.md](../../../../../docs/alcance.md). `/planes` (06) lee el catálogo de `GET /suscripciones/planes` con `usePlanes`; «Contratar» se activa con M2-02.

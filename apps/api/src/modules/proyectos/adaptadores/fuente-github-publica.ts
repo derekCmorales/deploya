@@ -7,7 +7,7 @@ import { ProveedorFuente } from "../puertos/proveedor-fuente.puerto";
 
 export type ClienteHttp = (url: string, opciones: RequestInit) => Promise<Response>;
 
-const API_GITHUB = "https://api.github.com";
+export const API_GITHUB = "https://api.github.com";
 const TIEMPO_ESPERA_GITHUB_MS = 10_000;
 const RAMAS_POR_PAGINA = 100;
 const HTTP_NO_ENCONTRADO = 404;
@@ -30,13 +30,14 @@ export class FuenteGitHubPublica extends ProveedorFuente {
   constructor(
     private readonly http: ClienteHttp,
     private readonly token?: string,
+    private readonly api: string = API_GITHUB,
   ) {
     super();
   }
 
   async validar({ url, rama }: ConsultaRepositorio): Promise<ValidacionRepositorio> {
     const repositorio = repositorioDesdeUrl(url);
-    const base = `${API_GITHUB}/repos/${repositorio.dueno}/${repositorio.nombre}`;
+    const base = `${this.api}/repos/${repositorio.dueno}/${repositorio.nombre}`;
     await this.exigir(await this.pedir(base));
     const ramas = await this.ramas(base);
     const commit = await this.ultimoCommit(base, rama);

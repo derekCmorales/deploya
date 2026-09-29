@@ -126,6 +126,14 @@ describe("FuenteGitHubPublica", () => {
     expect(pedidas).toHaveLength(0);
   });
 
+  it("usa otra URL base de la API si se configura (GitHub Enterprise o un doble local)", async () => {
+    const otra = "http://localhost:4010";
+    const rutas = Object.fromEntries(Object.entries(VALIDO).map(([ruta, r]) => [ruta.replace("https://api.github.com", otra), r]));
+    const { http, pedidas } = github(rutas);
+    await expect(new FuenteGitHubPublica(http, undefined, otra).validar(consulta())).resolves.toMatchObject({ puerto: 3000 });
+    expect(pedidas[0].url).toBe(`${otra}/repos/derekCmorales/hola-deploya`);
+  });
+
   it("manda el token solo si está configurado", async () => {
     const conToken = github(VALIDO);
     await new FuenteGitHubPublica(conToken.http, "t0k3n").validar(consulta());

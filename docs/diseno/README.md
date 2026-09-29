@@ -147,7 +147,7 @@ Importa desde `@/components/...`. Catálogo vivo: `/sistema`.
 | `Segmented` | Opciones cortas excluyentes (30 / 365 días, filtros). |
 | `Tabs` / `TabsNav` | Vistas del mismo recurso. `TabsNav` para rutas con `aria-current="page"`. |
 | `Banner` | Avisos `muted`, `warn`, `bad`, `signal` con acciones. |
-| `Meter` | Consumo frente al límite; cambia a `warn` al 80 % y `bad` al 100 %. |
+| `Meter` | Consumo frente al límite; cambia a `warn` al 80 % y `bad` al 100 %. `tonoAlLimite="warn"` cuando llegar al límite no es un error (proyectos del plan). |
 | `Table` y partes | Tablas en panel; fila activa con `data-activa="true"`. |
 | `CopyField` | Valor copiable en mono. |
 | `Dialog` | Modal nativo. Confirmación destructiva: escribir el nombre. |
@@ -161,7 +161,7 @@ Importa desde `@/components/...`. Catálogo vivo: `/sistema`.
 | `RielEtapas` | Cinco etapas. `size="sm"` en listas (55px), `size="lg"` en cabeceras con duración. |
 | `EstadoDespliegue`, `EstadoSuscripcion` | Badges canónicos. |
 | `Bitacora` | Líneas numeradas en mono; `nivel="error"` resalta; `enCurso` muestra cursor. Contenido no confiable: solo texto. |
-| `Pasos` | Asistente de alta (Repositorio · Variables · Revisar). |
+| `Pasos` | Asistente de alta (Repositorio · Variables · Revisar). Un paso `deshabilitado` nunca se marca como hecho. |
 | `RequisitosContrasena` + `REGLAS_CONTRASENA`, `contrasenaValida` | Reglas de contraseña compartidas por 01, 04 y 05b. |
 | `LineaTiempo` | Secuencia de eventos con hora. |
 | `MapaActividad` | 12 semanas de despliegues. |

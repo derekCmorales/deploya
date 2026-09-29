@@ -1,9 +1,14 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Post, Body } from '@nestjs/common';
+import { ProyectosService } from './proyectos.service';
 
-@Controller("proyectos")
+@Controller('proyectos')
 export class ProyectosController {
-  @Get("health")
-  health() {
-    return { status: "ok", module: "proyectos" };
+  constructor(private readonly proyectosService: ProyectosService) {}
+
+  @Post()
+  async crearProyecto(
+    @Body() body: { url: string; rama: string; nombre: string; usuarioId: string },
+  ) {
+    return this.proyectosService.crearProyecto(body);
   }
 }

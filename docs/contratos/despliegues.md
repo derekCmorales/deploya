@@ -38,7 +38,7 @@ export interface ResultadoDeteccion {
 
 ## HTTP (requiere sesión; solo el dueño del proyecto; si no, 404)
 
-Sesión: las rutas leen `request.usuario.id`, que pone el `SesionGuard` de M1. Hasta que llegue (martes), en desarrollo (`pnpm dev:api`, `NODE_ENV` distinto de `production`) se puede definir `USUARIO_DESARROLLO=<id del usuario del seed>`; en compose y en el VPS no aplica y sin sesión responde 401.
+Sesión: las rutas llevan `SesionGuard` de M1 y leen el usuario con `@UsuarioActual("id")`. Sin la cookie `deploya_sesion` de una sesión vigente responden 401 (`codigo: "SinSesion"`). La web manda la cookie con `credentials: "include"`.
 
 ### v1 · Avance 1
 
@@ -115,4 +115,5 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 |---|---|---|
 | 1 | 2026-09-20 | Contrato del Avance 1 |
 | 1.1 | 2026-09-27 | Agrega `ultimosDespliegues` (ya estaba prometido en «Lista de proyectos») y `USUARIO_DESARROLLO` |
+| 1.2 | 2026-09-29 | M1-03 en `main`: `SesionGuard` y `@UsuarioActual()` reemplazan a `USUARIO_DESARROLLO`, que se borra |
 | 2 | 2026-09-27 | Solo agrega: detección de stack, acciones, artefactos, reversión y `revirtiendo`; campos `disparador`, `recursos`, `motivoFallo`, `imagen.numero`, `imagen.receta` |

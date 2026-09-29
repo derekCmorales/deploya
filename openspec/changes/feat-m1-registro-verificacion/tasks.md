@@ -12,8 +12,8 @@ Cada tarea de código tiene su prueba. Sin base, red ni reloj reales: repositori
 - [x] 2.1 `RepositorioUsuarios`, `RepositorioTokensCuenta`, `HashContrasena`, `GeneradorToken`, `AsignacionSandboxPuerto`
 - [x] 2.2 Adaptadores en memoria, `HashContrasenaScrypt`, `GeneradorTokenCripto`, `AsignacionSandboxStub`; binding en `identidad.module.ts`
 - [x] 2.3 Pruebas: el hash no contiene la clave y solo coincide con ella; tokens distintos con huella sha256 estable
-- [ ] 2.4 Adaptadores Prisma de `Usuario` y `TokenCuenta` cuando DB-01 esté en `main`, con operaciones atómicas: `marcarUsado` condicional (`usadoEn IS NULL`) y alta protegida por el índice único de `correo`
-- [ ] 2.5 Cambiar `AsignacionSandboxStub` por el adaptador a `SuscripcionesService.asignarSandbox` cuando M2 lo exporte
+- [x] 2.4 Adaptadores Prisma de `Usuario` y `TokenCuenta` cuando DB-01 esté en `main`, con operaciones atómicas: `marcarUsado` condicional (`usadoEn IS NULL`) y alta protegida por el índice único de `correo`
+- [x] 2.5 Cambiar `AsignacionSandboxStub` por el adaptador a `SuscripcionesService.asignarSandbox` cuando M2 lo exporte
 
 ## 3. M1-01 · Registro
 

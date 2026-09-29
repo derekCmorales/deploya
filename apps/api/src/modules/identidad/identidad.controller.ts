@@ -16,6 +16,9 @@ import {
   ContrasenasNoCoinciden,
   CorreoInvalido,
   CorreoYaRegistrado,
+  CredencialesInvalidas,
+  CuentaNoVerificada,
+  CuentaSuspendida,
   TokenNoValido,
 } from "./dominio/errores";
 import { IdentidadService, type CuentaRegistrada, type CuentaVerificada } from "./identidad.service";
@@ -23,15 +26,38 @@ import { IdentidadService, type CuentaRegistrada, type CuentaVerificada } from "
 const HTTP_CREADO = 201;
 const HTTP_OK = 200;
 const HTTP_SOLICITUD_INVALIDA = 400;
+const HTTP_NO_AUTENTICADO = 401;
+const HTTP_PROHIBIDO = 403;
 const HTTP_CONFLICTO = 409;
 const HTTP_YA_NO_EXISTE = 410;
 
 /** Traduce los errores de dominio de M1 a HTTP en el borde; `codigo` es lo que lee la web. */
-@Catch(CorreoInvalido, ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, TokenNoValido)
+@Catch(
+  CorreoInvalido,
+  ContrasenaDebil,
+  ContrasenasNoCoinciden,
+  CorreoYaRegistrado,
+  TokenNoValido,
+  CredencialesInvalidas,
+  CuentaNoVerificada,
+  CuentaSuspendida,
+)
 export class ErroresIdentidadFilter implements ExceptionFilter {
   catch(error: Error, host: ArgumentsHost): void {
     const respuesta = host.switchToHttp().getResponse<Response>();
     const cuerpo = { codigo: error.name, mensaje: error.message };
+    if (error instanceof CredencialesInvalidas) {
+      respuesta.status(HTTP_NO_AUTENTICADO).json(cuerpo);
+      return;
+    }
+    if (error instanceof CuentaNoVerificada) {
+      respuesta.status(HTTP_PROHIBIDO).json({ ...cuerpo, correoEnmascarado: error.correoEnmascarado });
+      return;
+    }
+    if (error instanceof CuentaSuspendida) {
+      respuesta.status(HTTP_PROHIBIDO).json(cuerpo);
+      return;
+    }
     if (error instanceof CorreoYaRegistrado) {
       respuesta.status(HTTP_CONFLICTO).json(cuerpo);
       return;

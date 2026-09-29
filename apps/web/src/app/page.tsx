@@ -13,20 +13,29 @@ export default function HomePage() {
           Deploya: del repositorio a un servicio en línea.
         </h1>
         <p className="max-w-xl text-muted-foreground">
-          Las rutas del panel se construyen historia por historia con el design system v4.1. Guía para el equipo y
-          para agentes: <span className="font-mono text-[13px] text-foreground">docs/diseno/</span>.
+          Conecta un repositorio público de GitHub con su <span className="font-mono text-[13px] text-foreground">Dockerfile</span>{" "}
+          y Deploya lo construye, lo corre con los límites de tu plan y lo publica en su propio subdominio.
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button asChild>
-            <Link href="/sistema">
-              Ver el sistema de diseño
+            <Link href="/registro">
+              Empezar en Sandbox
               <ArrowRight />
             </Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href="/projects">Proyectos</Link>
+            <Link href="/ingresar">Iniciar sesión</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href="/planes">Ver planes</Link>
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Hecho con el design system v4.1 ·{" "}
+          <Link href="/sistema" className="underline underline-offset-[3px]">
+            ver el sistema
+          </Link>
+        </p>
       </div>
     </main>
   );

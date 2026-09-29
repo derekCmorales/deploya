@@ -5,12 +5,12 @@ import { useSelectedLayoutSegment } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/shell/app-shell";
+import { MenuUsuario, RUTA_INGRESAR } from "@/components/shell/menu-usuario";
 import { NavPanel, RUTA_PLANES } from "@/components/shell/nav-panel";
 import { Button } from "@/components/ui/button";
 
 /** Grupo de rutas de las pantallas de acceso (01–05): llevan el header público, sin navegación del panel. */
 const GRUPO_ACCESO = "(auth)";
-const RUTA_INGRESAR = "/ingresar";
 
 /**
  * Elige el marco según el grupo de rutas activo, no según la URL: toda pantalla nueva
@@ -39,5 +39,9 @@ export function MarcoApp({ children }: { children: ReactNode }) {
     );
   }
 
-  return <AppShell nav={<NavPanel />}>{children}</AppShell>;
+  return (
+    <AppShell nav={<NavPanel />} usuario={<MenuUsuario />}>
+      {children}
+    </AppShell>
+  );
 }

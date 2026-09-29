@@ -38,3 +38,27 @@ export class TokenNoValido extends Error {
     this.name = "TokenNoValido";
   }
 }
+
+/** Pantalla 03b: banner genérico; nunca se dice si falló el correo o la contraseña. */
+export class CredencialesInvalidas extends Error {
+  constructor() {
+    super("Correo o contraseña incorrectos");
+    this.name = "CredencialesInvalidas";
+  }
+}
+
+/** Pantalla 03b: la cuenta existe y la clave es correcta, pero falta abrir el enlace. */
+export class CuentaNoVerificada extends Error {
+  constructor(readonly correoEnmascarado: string) {
+    super("Tu cuenta aún no está verificada");
+    this.name = "CuentaNoVerificada";
+  }
+}
+
+/** Pantalla 03b: suspendida por administración (M9); el motivo lo completa M1-04. */
+export class CuentaSuspendida extends Error {
+  constructor() {
+    super("Cuenta suspendida por administración");
+    this.name = "CuentaSuspendida";
+  }
+}

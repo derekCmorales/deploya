@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { SesionProvider } from "@/hooks/use-sesion";
 import { MarcoApp } from "@/components/shell/marco-app";
 import { ThemeProvider } from "@/components/shell/theme-provider";
 
@@ -33,7 +34,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-full font-sans`}
       >
         <ThemeProvider>
-          <MarcoApp>{children}</MarcoApp>
+          <SesionProvider>
+            <MarcoApp>{children}</MarcoApp>
+          </SesionProvider>
         </ThemeProvider>
       </body>
     </html>

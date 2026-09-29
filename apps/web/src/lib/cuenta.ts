@@ -49,3 +49,33 @@ export function resultadoVerificacion(estado: number, cuerpo: Record<string, unk
   if (cuerpo.codigo === "TokenNoValido" || estado === 400) return "no-valido";
   return "error";
 }
+
+/** Pantallas 03 y 03b: qué muestra el formulario según la respuesta de `POST /identidad/sesion`. */
+export type ResultadoIngreso =
+  | { tipo: "dentro" }
+  | { tipo: "credenciales" }
+  | { tipo: "sin-verificar"; correoEnmascarado: string }
+  | { tipo: "suspendida" }
+  | { tipo: "error"; mensaje: string };
+
+const MENSAJE_INGRESO = "No pudimos iniciar sesión. Intenta de nuevo en unos segundos.";
+
+export function resultadoIngreso(estado: number, cuerpo: Record<string, unknown>): ResultadoIngreso {
+  if (estado === 200) return { tipo: "dentro" };
+  if (cuerpo.codigo === "CredencialesInvalidas") return { tipo: "credenciales" };
+  if (cuerpo.codigo === "CuentaNoVerificada") {
+    return { tipo: "sin-verificar", correoEnmascarado: typeof cuerpo.correoEnmascarado === "string" ? cuerpo.correoEnmascarado : "tu correo" };
+  }
+  if (cuerpo.codigo === "CuentaSuspendida") return { tipo: "suspendida" };
+  return { tipo: "error", mensaje: MENSAJE_INGRESO };
+}
+
+export const DESTINO_POR_DEFECTO = "/projects";
+
+/** A dónde volver tras iniciar sesión: solo rutas propias («/x»), nunca otro sitio («//x», «https://…»). */
+export function destinoTrasIngreso(siguiente: string | null | undefined): string {
+  if (!siguiente || !siguiente.startsWith("/") || siguiente.startsWith("//") || siguiente.startsWith("/\\")) {
+    return DESTINO_POR_DEFECTO;
+  }
+  return siguiente;
+}

@@ -1,121 +1,114 @@
-'use client';
+"use client";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 
-import { useState } from 'react';
+interface Proyecto {
+  id: string;
+  nombre: string;
+  subdominio: string;
+  urlRepositorio: string;
+  rama: string;
+  puertoInterno: number;
+  ultimoDespliegue?: {
+    estado: string;
+    actualizado: string;
+  } | null;
+}
 
-export default function ProjectsPage() {
-  const [nombre, setNombre] = useState('');
-  const [url, setUrl] = useState('');
-  const [rama, setRama] = useState('main');
-  const [cargando, setCargando] = useState(false);
-  const [respuestaExito, setRespuestaExito] = useState<any>(null);
-  const [error, setError] = useState('');
+export default function ProyectosPage() {
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [usados, setUsados] = useState(0);
+  const [maximo, setMaximo] = useState(5);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCargando(true);
-    setError('');
-    setRespuestaExito(null);
-
-    try {
-      // Petición hacia tu backend de NestJS (ajusta el puerto si tu API corre en otro diferente, ej. 3000 o 4000)
-      const res = await fetch('http://localhost:3000/proyectos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre,
-          url,
-          rama,
-          usuarioId: 'eduardo-dev-id', // ID simulado para pruebas de desarrollo
-        }),
+  useEffect(() => {
+    fetch("http://localhost:3001/proyectos", {
+      headers: {
+        // Simulación de cabecera de identidad / usuario solicitante si aplica
+        "x-usuario-id": "u1",
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("No se pudo cargar la lista de proyectos");
+        return res.json();
+      })
+      .then((data) => {
+        setProyectos(data.proyectos || []);
+        setUsados(data.usados || 0);
+        setMaximo(data.maximo || 5);
+        setCargando(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setCargando(false);
       });
-
-      if (!res.ok) {
-        throw new Error('No se pudo crear el proyecto. Revisa la URL o el Dockerfile.');
-      }
-
-      const data = await res.json();
-      setRespuestaExito(data);
-      setNombre('');
-      setUrl('');
-      setRama('main');
-    } catch (err: any) {
-      setError(err.message || 'Ocurrió un error inesperado');
-    } finally {
-      setCargando(false);
-    }
-  };
+  }, []);
 
   return (
-    <main className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold tracking-tight mb-2">Gestión de Proyectos (M3)</h1>
-      <p className="text-sm text-muted-foreground mb-6">
-        Registra un repositorio público de GitHub para iniciar su alta y despliegue automático.
-      </p>
-
-      {/* Formulario de Alta */}
-      <form onSubmit={handleSubmit} className="space-y-4 bg-card p-6 rounded-lg border shadow-sm">
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="flex justify-between items-center border-b pb-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Nombre del Proyecto</label>
-          <input
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="ej. Mi App Web"
-            required
-            className="w-full px-3 py-2 border rounded-md text-sm bg-background"
-          />
+          <h1 className="text-2xl font-bold tracking-tight">Proyectos</h1>
+          <p className="text-sm text-muted-foreground">
+            Gestiona tus despliegues y contenedores en tiempo real.
+          </p>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">URL del Repositorio de GitHub</label>
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://github.com/usuario/repositorio"
-            required
-            className="w-full px-3 py-2 border rounded-md text-sm bg-background"
-          />
+        <div className="flex items-center gap-4">
+          <div className="text-sm font-medium bg-secondary px-3 py-1.5 rounded-md">
+            Cuota: <span className="font-bold">{usados}</span> / {maximo} usados
+          </div>
+          <Link
+            href="/proyectos/nuevo"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium text-sm hover:opacity-90 transition"
+          >
+            + Nuevo Proyecto
+          </Link>
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Rama (Branch)</label>
-          <input
-            type="text"
-            value={rama}
-            onChange={(e) => setRama(e.target.value)}
-            placeholder="main"
-            required
-            className="w-full px-3 py-2 border rounded-md text-sm bg-background"
-          />
-        </div>
+      {cargando && <p className="text-sm text-muted-foreground">Cargando proyectos...</p>}
+      {error && <div className="p-4 bg-destructive/10 text-destructive rounded-md text-sm">{error}</div>}
 
-        <button
-          type="submit"
-          disabled={cargando}
-          className="w-full py-2 px-4 bg-primary text-primary-foreground font-medium rounded-md hover:opacity-90 transition disabled:opacity-50 text-sm"
-        >
-          {cargando ? 'Validando y creando proyecto...' : 'Crear y Desplegar Proyecto'}
-        </button>
-      </form>
-
-      {/* Mensajes de Éxito o Error */}
-      {error && (
-        <div className="mt-4 p-4 bg-destructive/10 text-destructive text-sm rounded-md border border-destructive/20">
-          {error}
+      {!cargando && !error && proyectos.length === 0 && (
+        <div className="text-center py-12 border border-dashed rounded-lg space-y-3">
+          <p className="text-muted-foreground text-sm">No tienes ningún proyecto registrado todavía.</p>
+          <Link
+            href="/proyectos/nuevo"
+            className="inline-block text-primary font-medium text-sm hover:underline"
+          >
+            Crea tu primer proyecto &rarr;
+          </Link>
         </div>
       )}
 
-      {respuestaExito && (
-        <div className="mt-4 p-4 bg-emerald-500/10 text-emerald-600 text-sm rounded-md border border-emerald-500/20">
-          <p className="font-semibold">¡Proyecto creado y encolado con éxito!</p>
-          <pre className="mt-2 text-xs bg-background p-2 rounded overflow-x-auto text-foreground">
-            {JSON.stringify(respuestaExito, null, 2)}
-          </pre>
-        </div>
-      )}
-    </main>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {proyectos.map((p) => (
+          <div key={p.id} className="border rounded-lg p-5 space-y-3 bg-card shadow-sm">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-lg">{p.nombre}</h3>
+                <a
+                  href={`http://${p.subdominio}.deploya.local`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-primary hover:underline"
+                >
+                  {p.subdominio}.deploya.local
+                </a>
+              </div>
+              <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-secondary text-secondary-foreground">
+                {p.ultimoDespliegue?.estado || "pendiente"}
+              </span>
+            </div>
+
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>Repo: <span className="font-mono">{p.urlRepositorio}</span> (rama: {p.rama})</p>
+              <p>Puerto interno: {p.puertoInterno}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

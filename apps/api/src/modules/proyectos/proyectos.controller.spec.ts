@@ -1,12 +1,31 @@
-import { Test } from "@nestjs/testing";
+/// <reference types="jest" />
+import { Test, TestingModule } from "@nestjs/testing";
 import { ProyectosController } from "./proyectos.controller";
+import { ProyectosService } from "./proyectos.service";
+import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
+import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
+import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
+import { ConstruccionService } from "../construccion/construccion.service";
 
 describe("ProyectosController", () => {
-  it("health del módulo", async () => {
-    const moduleRef = await Test.createTestingModule({
+  let controller: ProyectosController;
+
+  beforeEach(async () => {
+    const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [ProyectosController],
+      providers: [
+        ProyectosService,
+        { provide: ProveedorFuente, useValue: {} },
+        { provide: RepositorioProyectos, useValue: {} },
+        { provide: CuotaProyectosPuerto, useValue: {} },
+        { provide: ConstruccionService, useValue: {} },
+      ],
     }).compile();
-    const controller = moduleRef.get(ProyectosController);
+
+    controller = moduleRef.get<ProyectosController>(ProyectosController);
+  });
+
+  it("health del módulo", () => {
     expect(controller.health()).toEqual({ status: "ok", module: "proyectos" });
   });
 });

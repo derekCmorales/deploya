@@ -1,5 +1,5 @@
 /// <reference types="jest" />
-import { puertoDesdeExpose } from "./dominio/puerto-expose";
+import { puertoDesdeExpose } from "./puerto-expose";
 
 describe("puertoDesdeExpose", () => {
   it("un EXPOSE", () => {

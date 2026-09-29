@@ -27,6 +27,12 @@ async function main() {
     const body = await (await get(`${api}/${mod}/health`)).json();
     if (body.module !== mod) throw new Error(`health ${mod}`);
   }
+  // DB-01: el servicio `migracion` aplicó el schema y sembró los cuatro planes.
+  const planes = await (await get(`${api}/suscripciones/planes`)).json();
+  if (planes.map((p) => p.codigo).join() !== "sandbox,starter,pro,business") throw new Error("catálogo sin los 4 planes del seed");
+  // M1-03: las rutas del panel exigen sesión.
+  const sinSesion = await fetch(`${api}/proyectos`);
+  if (sinSesion.status !== 401) throw new Error(`/proyectos sin sesión → ${sinSesion.status}, se esperaba 401`);
   const home = await get(web);
   const html = await home.text();
   if (!html.includes("Deploya")) throw new Error("web home sin Deploya");

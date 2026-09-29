@@ -1,12 +1,12 @@
-export default function ProjectsPage() {
+import { Suspense } from "react";
+
+import { PanelProyectos } from "./_componentes/panel-proyectos";
+
+/** Pantallas 10 (lista + detalle) y 10b (primer proyecto). M3-01. */
+export default function ProyectosPage() {
   return (
-    <main className="p-6">
-      <h1 className="text-xl font-semibold tracking-tight">Proyectos</h1>
-      <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-        Stub de proyectos (Eduardo). Reutiliza el kit de{" "}
-        <span className="font-medium text-foreground">docs/diseno/</span>.
-        Sin lista, detalle ni flujo de producto.
-      </p>
-    </main>
+    <Suspense>
+      <PanelProyectos />
+    </Suspense>
   );
 }

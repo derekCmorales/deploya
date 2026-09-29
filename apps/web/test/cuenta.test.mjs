@@ -53,13 +53,3 @@ test("01–02 · las pantallas de acceso usan el header público (Planes · tema
   assert.doesNotMatch(publico, /NavPanel \/>/);
   assert.match(panel, /NavPanel/);
 });
-
-test("01 · la columna derecha lleva la ilustración de acceso hecha solo con tokens (sin hex)", async () => {
-  const { readFileSync } = await import("node:fs");
-  const leer = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
-  const ilustracion = leer("src/app/(auth)/registro/ilustracion-registro.tsx");
-  assert.match(leer("src/app/(auth)/registro/page.tsx"), /<IlustracionRegistro/);
-  assert.match(ilustracion, /aria-hidden/);
-  assert.match(ilustracion, /fill-signal/);
-  assert.doesNotMatch(ilustracion, /#[0-9a-fA-F]{3,8}\b/);
-});

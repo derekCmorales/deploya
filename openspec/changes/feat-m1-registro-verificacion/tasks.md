@@ -47,5 +47,5 @@ Cada tarea de código tiene su prueba. Sin base, red ni reloj reales: repositori
 - [x] 7.5 Header público en las pantallas de `(auth)` (`MarcoApp` elige el marco por grupo de rutas); prueba en `test/cuenta.test.mjs`
 - [x] 7.6 Diagramas de actividad de registro y verificación con el flujo real (Sandbox, `correoEnviado: false`, 410 y cuenta no pendiente; sin auditoría ni reenvío) y `pnpm diagramas:sync`
 - [x] 7.7 README de `(auth)`: enlaces que dan 404 hasta M1-03 y M1-05
-- [x] 7.8 Ilustración de acceso de la pantalla 01 (`ilustracion-registro.tsx`): SVG con tokens (órbita punteada, círculo, bloque de tinta, punto y barra de Señal) según el artboard `01-Registro`; se invierte sola en oscuro
+- [ ] 7.8 Ilustración de acceso de la pantalla 01 (SVG propio): falta el artboard `01-Registro` del canvas como referencia
 - [ ] 7.9 Revisión contra el canvas v4.1 en claro y oscuro

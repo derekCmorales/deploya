@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConstruccionService } from "../construccion/construccion.service";
-import { LimiteProyectosAlcanzado, SubdominioEnUso } from "./dominio/errores";
+import { ConfirmacionNoCoincide, LimiteProyectosAlcanzado, ProyectoNoEncontrado, SubdominioEnUso } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
 import { subdominioDesdeNombre } from "./dominio/subdominio";
@@ -69,6 +69,17 @@ export class ProyectosService {
     });
     const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");
     return { proyecto, despliegue };
+  }
+
+  /**
+   * Elimina el proyecto (19b). Un proyecto ajeno se trata como inexistente; el cliente
+   * debe escribir el nombre exacto. Libera el cupo del plan sin importar el estado del despliegue.
+   */
+  async eliminar(usuarioId: string, proyectoId: string, confirmacion: string): Promise<void> {
+    const proyecto = await this.repositorio.porId(proyectoId);
+    if (!proyecto || proyecto.usuarioId !== usuarioId) throw new ProyectoNoEncontrado(proyectoId);
+    if (confirmacion !== proyecto.nombre) throw new ConfirmacionNoCoincide();
+    await this.repositorio.eliminar(proyecto.id);
   }
 
   private async exigirCupo(usuarioId: string): Promise<void> {

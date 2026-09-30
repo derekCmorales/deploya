@@ -33,4 +33,8 @@ export class RepositorioProyectosMemoria extends RepositorioProyectos {
   async existeSubdominio(subdominio: string): Promise<boolean> {
     return [...this.proyectos.values()].some((p) => p.subdominio === subdominio);
   }
+
+  async eliminar(id: string): Promise<void> {
+    this.proyectos.delete(id);
+  }
 }

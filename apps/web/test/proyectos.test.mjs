@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   algunoEnCurso,
+  confirmacionCoincide,
   contadorProyectos,
   despliegueEnCurso,
   duracionEtapa,
@@ -130,4 +131,11 @@ test("las pantallas de proyectos no hacen fetch, no usan colores de Tailwind ni 
     assert.doesNotMatch(codigo, /\b(?:bg|text|border)-(?:red|green|emerald|blue|yellow|amber|slate|gray)-\d/, `color de Tailwind en ${f}`);
     assert.doesNotMatch(codigo, /:\s*any\b|<any>/, `any en ${f}`);
   }
+});
+
+test("19b · eliminar solo se habilita con el nombre exacto del proyecto", () => {
+  assert.equal(confirmacionCoincide("api-tienda", "api-tienda"), true);
+  assert.equal(confirmacionCoincide("api-tienda", "  api-tienda "), true);
+  assert.equal(confirmacionCoincide("api-tienda", "API-tienda"), false);
+  assert.equal(confirmacionCoincide("api-tienda", ""), false);
 });

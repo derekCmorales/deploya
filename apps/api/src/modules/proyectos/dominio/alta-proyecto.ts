@@ -21,6 +21,11 @@ export function validarAltaProyecto(cuerpo: unknown): AltaProyecto {
   return puerto === undefined ? { url, rama, nombre } : { url, rama, nombre, puerto };
 }
 
+/** `DELETE /proyectos/:id`: el nombre que el cliente escribió en la confirmación (19b). */
+export function validarConfirmacionEliminar(cuerpo: unknown): string {
+  return texto(comoObjeto(cuerpo).confirmacion);
+}
+
 function comoObjeto(cuerpo: unknown): Cuerpo {
   if (!cuerpo || typeof cuerpo !== "object") throw new DatosAltaInvalidos("La solicitud no trae datos.");
   return cuerpo as Cuerpo;

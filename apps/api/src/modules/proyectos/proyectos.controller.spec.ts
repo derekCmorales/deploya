@@ -14,8 +14,10 @@ import { ProyectosLecturaPuerto } from "../construccion/puertos/proyectos-lectur
 import {
   DatosAltaInvalidos,
   ErrorProyectos,
+  ConfirmacionNoCoincide,
   FuenteNoDisponible,
   LimiteProyectosAlcanzado,
+  ProyectoNoEncontrado,
   RamaNoEncontrada,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
@@ -121,6 +123,26 @@ describe("ProyectosController", () => {
     expect(ajena.proyectos).toHaveLength(0);
   });
 
+  it("DELETE /proyectos/:id borra el proyecto del usuario de la sesión y libera su cupo", async () => {
+    const { controlador, repositorio } = await montarApi();
+    const { proyecto } = await controlador.crear("usuario-1", { url: "https://github.com/derekCmorales/hola-deploya", nombre: "hola" });
+
+    await controlador.eliminar("usuario-1", proyecto.id, { confirmacion: " hola " });
+
+    expect(await repositorio.porId(proyecto.id)).toBeNull();
+    expect((await controlador.listar("usuario-1")).usados).toBe(0);
+  });
+
+  it("DELETE sin confirmación en el cuerpo no toca el proyecto", async () => {
+    const { controlador, repositorio } = await montarApi();
+    const { proyecto } = await controlador.crear("usuario-1", { url: "https://github.com/derekCmorales/hola-deploya", nombre: "hola" });
+
+    await expect(controlador.eliminar("usuario-1", proyecto.id, {})).rejects.toThrow(ConfirmacionNoCoincide);
+    expect(() => controlador.eliminar("usuario-1", proyecto.id, undefined)).toThrow(DatosAltaInvalidos);
+
+    expect(await repositorio.porId(proyecto.id)).not.toBeNull();
+  });
+
   it("el cuerpo se valida antes de llegar al servicio", async () => {
     const { controlador, repositorio } = await montarApi();
     expect(() => controlador.crear("usuario-1", { url: "https://gitlab.com/a/b", nombre: "x" })).toThrow(UrlRepositorioInvalida);
@@ -137,6 +159,8 @@ describe("ProyectosController", () => {
     [new FuenteNoDisponible(), 503, { codigo: "fuente-no-disponible" }],
     [new SubdominioEnUso("hola"), 409, { codigo: "subdominio-en-uso", subdominio: "hola" }],
     [new LimiteProyectosAlcanzado(1), 409, { codigo: "limite-proyectos", maximo: 1 }],
+    [new ProyectoNoEncontrado("p-1"), 404, { codigo: "proyecto-no-encontrado" }],
+    [new ConfirmacionNoCoincide(), 400, { codigo: "confirmacion-no-coincide" }],
   ])("el filtro traduce %p a HTTP %i con su código", (error, estado, cuerpo) => {
     const { respuesta, host } = respuestaFalsa();
     new ErroresProyectosFilter().catch(error, host);

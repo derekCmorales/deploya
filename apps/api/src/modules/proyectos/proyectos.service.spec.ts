@@ -3,7 +3,9 @@ import { RelojFijo } from "../../compartido/reloj";
 import type { ConstruccionService } from "../construccion/construccion.service";
 import { CUOTA_SANDBOX } from "./adaptadores/cuota-proyectos.stub";
 import {
+  ConfirmacionNoCoincide,
   LimiteProyectosAlcanzado,
+  ProyectoNoEncontrado,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
   SubdominioEnUso,
@@ -152,6 +154,39 @@ describe("ProyectosService", () => {
       const { servicio } = montar();
       await servicio.crear("usuario-2", alta());
       await expect(servicio.listar("usuario-1")).resolves.toMatchObject({ proyectos: [], usados: 0 });
+    });
+  });
+
+  describe("eliminar", () => {
+    it("Eliminar proyecto: con el nombre exacto borra el proyecto y libera el cupo del plan", async () => {
+      const { servicio, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+      expect((await servicio.listar("usuario-1")).usados).toBe(1);
+
+      await servicio.eliminar("usuario-1", proyecto.id, "Hola Deploya");
+
+      expect(await repositorio.porId(proyecto.id)).toBeNull();
+      expect((await servicio.listar("usuario-1")).usados).toBe(0);
+      await expect(servicio.crear("usuario-1", alta())).resolves.toMatchObject({ proyecto: { nombre: "Hola Deploya" } });
+    });
+
+    it("Confirmación distinta: rechaza y conserva el proyecto", async () => {
+      const { servicio, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+
+      await expect(servicio.eliminar("usuario-1", proyecto.id, "hola")).rejects.toThrow(ConfirmacionNoCoincide);
+
+      expect(await repositorio.porId(proyecto.id)).not.toBeNull();
+    });
+
+    it("Proyecto ajeno o inexistente: se trata como no encontrado y no borra nada", async () => {
+      const { servicio, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+
+      await expect(servicio.eliminar("usuario-2", proyecto.id, "Hola Deploya")).rejects.toThrow(ProyectoNoEncontrado);
+      await expect(servicio.eliminar("usuario-1", "no-existe", "Hola Deploya")).rejects.toThrow(ProyectoNoEncontrado);
+
+      expect(await repositorio.porId(proyecto.id)).not.toBeNull();
     });
   });
 

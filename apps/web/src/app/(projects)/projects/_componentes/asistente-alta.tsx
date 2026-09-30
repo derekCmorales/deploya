@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useAltaProyecto } from "@/hooks/use-alta-proyecto";
 import { useProyectos } from "@/hooks/use-proyectos";
 import { contadorProyectos, puedeCrearProyecto } from "@/lib/proyectos";
+import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
 
 import { LateralAlta } from "./lateral-alta";
 import { PasoRepositorio } from "./paso-repositorio";
@@ -44,7 +45,7 @@ export function AsistenteAlta() {
               title="Llegaste al límite de tu plan"
               actions={
                 <Button asChild variant="outline" size="sm">
-                  <Link href="/billing">Cambiar plan</Link>
+                  <Link href={RUTA_SUSCRIPCION}>Cambiar plan</Link>
                 </Button>
               }
             >

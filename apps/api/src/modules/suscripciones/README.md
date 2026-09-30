@@ -10,6 +10,10 @@ Dueño: Javier. Spec: [`openspec/specs/suscripciones/spec.md`](../../../../../op
 
 **Exporta** `SuscripcionesService`: `asignarSandbox(usuarioId)` (idempotente, lo llama M1 al registrar) y `cuotaDe(usuarioId)` (M3, M4, M5; lanza `SuscripcionNoEncontrada`).
 
-**Rutas:** `GET /suscripciones/health`, `GET /suscripciones/planes` (pública).
+**Exporta** también `ContratacionService`, solo para `CobroModule` (rutas con sesión; va aparte porque M1 importa este módulo y M2 necesita el `SesionGuard` de M1).
 
-Hecho: DB-01 y M2-01 (change `feat-m2-schema-nucleo`).
+**Rutas:** `GET /suscripciones/health`, `GET /suscripciones/planes` (pública). Con sesión: `GET /suscripciones/mia`, `GET /suscripciones/cotizacion?plan=&vigenciaDias=`, `POST /suscripciones/contratar` (`{ plan, vigenciaDias, tarjeta }`; un rechazo responde 200 con `resultado: "rechazado"`), `POST /suscripciones/descenso` (`{ plan }`).
+
+**Pasarela simulada:** `4242 4242 4242 4242` aprueba, `4000 0000 0000 0002` rechaza, `4000 0000 0000 3220` tarda 5 s.
+
+Hecho: DB-01 y M2-01 (change `feat-m2-schema-nucleo`); M2-02, M2-03 y M2-04 (change `feat-m2-contratacion-suscripcion`).

@@ -28,6 +28,7 @@ describe("cuotaDeSuscripcion", () => {
       vigenciaDias: 30,
       inicio: new Date("2026-09-30T00:00:00.000Z"),
       vence,
+      planSiguiente: null,
     });
     expect(cuota).toEqual({
       plan: { codigo: "pro", nombre: "Pro" },

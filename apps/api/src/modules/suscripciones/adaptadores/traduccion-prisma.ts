@@ -1,4 +1,12 @@
-import type { EstadoSuscripcion, Plan as PlanFila, Prisma, Suscripcion as SuscripcionFila } from "@prisma/client";
+import type {
+  ConceptoPago as ConceptoPagoFila,
+  EstadoSuscripcion,
+  Pago as PagoFila,
+  Plan as PlanFila,
+  Prisma,
+  Suscripcion as SuscripcionFila,
+} from "@prisma/client";
+import type { ConceptoPago, Pago } from "../dominio/pago";
 import type { Plan } from "../dominio/plan";
 import type { EstadoSuscripcionValor, Suscripcion } from "../dominio/suscripcion";
 
@@ -32,7 +40,12 @@ export function planDesdePrisma(fila: PlanFila): Plan {
   };
 }
 
-export function suscripcionDesdePrisma(fila: SuscripcionFila & { plan: PlanFila }): Suscripcion {
+/** La fila con sus planes; `planSiguiente` falta si la consulta no lo incluyó. */
+export type SuscripcionConPlanes = SuscripcionFila & { plan: PlanFila; planSiguiente?: PlanFila | null };
+
+export const INCLUIR_PLANES = { plan: true, planSiguiente: true } as const;
+
+export function suscripcionDesdePrisma(fila: SuscripcionConPlanes): Suscripcion {
   return {
     id: fila.id,
     usuarioId: fila.usuarioId,
@@ -41,5 +54,28 @@ export function suscripcionDesdePrisma(fila: SuscripcionFila & { plan: PlanFila 
     vigenciaDias: fila.vigenciaDias,
     inicio: fila.inicio,
     vence: fila.vence,
+    planSiguiente: fila.planSiguiente ? planDesdePrisma(fila.planSiguiente) : null,
+  };
+}
+
+export function conceptoAPrisma(concepto: ConceptoPago): ConceptoPagoFila {
+  return concepto.replaceAll("-", "_") as ConceptoPagoFila;
+}
+
+export function pagoDesdePrisma(fila: PagoFila): Pago {
+  return {
+    id: fila.id,
+    usuarioId: fila.usuarioId,
+    suscripcionId: fila.suscripcionId,
+    planId: fila.planId,
+    concepto: fila.concepto.replaceAll("_", "-") as ConceptoPago,
+    vigenciaDias: fila.vigenciaDias,
+    monto: numeroDe(fila.monto),
+    moneda: fila.moneda,
+    estado: fila.estado,
+    motivoRechazo: fila.motivoRechazo,
+    tarjetaUltimos4: fila.tarjetaUltimos4,
+    numeroComprobante: fila.numeroComprobante,
+    creado: fila.creado,
   };
 }

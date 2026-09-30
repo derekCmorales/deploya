@@ -1,4 +1,5 @@
 import { Check, Cpu, FolderGit2, Hammer, Info, MemoryStick, type LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
   type PlanCatalogo,
   type Vigencia,
 } from "@/lib/planes";
+import { RUTA_SUSCRIPCION, rutaContratar } from "@/lib/suscripcion";
 import { cn } from "@/lib/utils";
 
 const ICONOS: Record<ClaveRecurso, LucideIcon> = {
@@ -20,8 +22,6 @@ const ICONOS: Record<ClaveRecurso, LucideIcon> = {
   memoriaMb: MemoryStick,
   construccionesMes: Hammer,
 };
-
-const CONTRATACION_PENDIENTE = "La contratación llega en la próxima entrega";
 
 interface TablaPlanesProps {
   planes: PlanCatalogo[];
@@ -76,7 +76,7 @@ export function TablaPlanes({ planes, vigencia, codigoActual }: TablaPlanesProps
                   ) : null}
                 </p>
                 <p className="min-h-8 text-[13px] text-muted-foreground">{plan.descripcion}</p>
-                <AccionPlan plan={plan} actual={esActual(plan)} />
+                <AccionPlan plan={plan} actual={esActual(plan)} vigencia={vigencia} conPlan={codigoActual !== null} />
               </div>
             ))}
           </div>
@@ -113,7 +113,11 @@ export function TablaPlanes({ planes, vigencia, codigoActual }: TablaPlanesProps
   );
 }
 
-function AccionPlan({ plan, actual }: { plan: PlanCatalogo; actual: boolean }) {
+/**
+ * «Contratar» lleva a 07 con la vigencia elegida (sin sesión, 07 manda a iniciar sesión).
+ * Bajar a Sandbox es un descenso: se programa en Mi suscripción (08).
+ */
+function AccionPlan({ plan, actual, vigencia, conPlan }: { plan: PlanCatalogo; actual: boolean; vigencia: Vigencia; conPlan: boolean }) {
   if (actual) {
     return (
       <Button variant="outline" className="w-full" disabled>
@@ -121,10 +125,17 @@ function AccionPlan({ plan, actual }: { plan: PlanCatalogo; actual: boolean }) {
       </Button>
     );
   }
-  if (esGratuito(plan)) return <span aria-hidden className="h-9" />;
+  if (esGratuito(plan)) {
+    if (!conPlan) return <span aria-hidden className="h-9" />;
+    return (
+      <Button asChild variant="outline" className="w-full">
+        <Link href={RUTA_SUSCRIPCION}>Cambiar a {plan.nombre}</Link>
+      </Button>
+    );
+  }
   return (
-    <Button className="w-full" disabled title={CONTRATACION_PENDIENTE}>
-      Contratar
+    <Button asChild className="w-full">
+      <Link href={rutaContratar(plan.codigo, vigencia)}>Contratar</Link>
     </Button>
   );
 }

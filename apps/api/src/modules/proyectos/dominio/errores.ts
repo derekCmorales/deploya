@@ -95,3 +95,19 @@ export class LimiteProyectosAlcanzado extends ErrorProyectos {
     return { maximo: this.maximo };
   }
 }
+
+export class ProyectoNoEncontrado extends ErrorProyectos {
+  readonly codigo = "proyecto-no-encontrado";
+
+  constructor(readonly proyectoId: string) {
+    super(`No encontramos el proyecto ${proyectoId}.`);
+  }
+}
+
+export class ConfirmacionNoCoincide extends ErrorProyectos {
+  readonly codigo = "confirmacion-no-coincide";
+
+  constructor() {
+    super("Escribe el nombre exacto del proyecto para eliminarlo.");
+  }
+}

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConstruccionService } from "../construccion/construccion.service";
-import { LimiteProyectosAlcanzado, SubdominioEnUso } from "./dominio/errores";
+import { ConfirmacionNoCoincide, LimiteProyectosAlcanzado, ProyectoNoEncontrado, SubdominioEnUso } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
 import { subdominioDesdeNombre } from "./dominio/subdominio";
@@ -47,7 +47,7 @@ export class ProyectosService {
     const ultimos = await this.construccion.ultimosDespliegues(proyectos.map((p) => p.id));
     return {
       proyectos: masRecientesPrimero(proyectos).map((p) => ({ ...p, ultimoDespliegue: ultimos[p.id] ?? null })),
-      usados: proyectos.length,
+      usados: proyectos.filter((proyecto) => cuentaParaElPlan(ultimos[proyecto.id])).length,
       maximo: cuota.maxProyectos,
       plan: { nombre: cuota.plan, cpus: cuota.cpus, memoriaMb: cuota.memoriaMb },
     };
@@ -71,10 +71,28 @@ export class ProyectosService {
     return { proyecto, despliegue };
   }
 
+  /**
+   * Elimina el proyecto (19b). Un proyecto ajeno se trata como inexistente; el cliente
+   * debe escribir el nombre exacto. Libera el cupo del plan sin importar el estado del despliegue.
+   */
+  async eliminar(usuarioId: string, proyectoId: string, confirmacion: string): Promise<void> {
+    const proyecto = await this.repositorio.porId(proyectoId);
+    if (!proyecto || proyecto.usuarioId !== usuarioId) throw new ProyectoNoEncontrado(proyectoId);
+    if (confirmacion !== proyecto.nombre) throw new ConfirmacionNoCoincide();
+    await this.repositorio.eliminar(proyecto.id);
+  }
+
   private async exigirCupo(usuarioId: string): Promise<void> {
     const [existentes, cuota] = await Promise.all([this.repositorio.deUsuario(usuarioId), this.cuota.cuotaDe(usuarioId)]);
-    if (existentes.length >= cuota.maxProyectos) throw new LimiteProyectosAlcanzado(cuota.maxProyectos);
+    const ultimos = await this.construccion.ultimosDespliegues(existentes.map((p) => p.id));
+    const usados = existentes.filter((proyecto) => cuentaParaElPlan(ultimos[proyecto.id])).length;
+    if (usados >= cuota.maxProyectos) throw new LimiteProyectosAlcanzado(cuota.maxProyectos);
   }
+}
+
+/** Un proyecto cuyo último despliegue falló no ocupa cupo del plan (por ahora, hasta definir la política de M2). */
+function cuentaParaElPlan(ultimo: Ultimos[string] | undefined): boolean {
+  return ultimo?.estado !== "fallido";
 }
 
 function masRecientesPrimero(proyectos: Proyecto[]): Proyecto[] {

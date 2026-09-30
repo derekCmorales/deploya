@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseFilters, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseFilters, UseGuards } from "@nestjs/common";
 import { SesionGuard } from "../identidad/sesion.guard";
 import { UsuarioActual } from "../identidad/usuario-actual.decorator";
-import { validarAltaProyecto, validarConsultaRepositorio } from "./dominio/alta-proyecto";
+import { validarAltaProyecto, validarConfirmacionEliminar, validarConsultaRepositorio } from "./dominio/alta-proyecto";
 import type { ValidacionRepositorio } from "./dominio/proyecto";
 import { ErroresProyectosFilter } from "./errores-proyectos.filter";
 import { ProyectosService, type ListaProyectos, type ProyectoCreado } from "./proyectos.service";
@@ -34,5 +34,12 @@ export class ProyectosController {
   @UseGuards(SesionGuard)
   crear(@UsuarioActual("id") usuarioId: string, @Body() cuerpo: unknown): Promise<ProyectoCreado> {
     return this.proyectos.crear(usuarioId, validarAltaProyecto(cuerpo));
+  }
+
+  @Delete(":id")
+  @UseGuards(SesionGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  eliminar(@UsuarioActual("id") usuarioId: string, @Param("id") id: string, @Body() cuerpo: unknown): Promise<void> {
+    return this.proyectos.eliminar(usuarioId, id, validarConfirmacionEliminar(cuerpo));
   }
 }

@@ -95,6 +95,11 @@ export function puedeCrearProyecto(lista: Pick<ListaProyectos, "usados" | "maxim
   return lista.usados < lista.maximo;
 }
 
+/** 19b: el botón «Eliminar» solo se habilita con el nombre exacto del proyecto (sin espacios de más). */
+export function confirmacionCoincide(nombre: string, escrito: string): boolean {
+  return escrito.trim() === nombre;
+}
+
 /** «0 de 1 proyecto en Sandbox» · «2 de 3 proyectos en Starter». */
 export function contadorProyectos(lista: Pick<ListaProyectos, "usados" | "maximo" | "plan">): string {
   return `${cuenta(lista)} en ${lista.plan.nombre}`;

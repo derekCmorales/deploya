@@ -12,6 +12,8 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   "fuente-no-disponible": HttpStatus.SERVICE_UNAVAILABLE,
   "subdominio-en-uso": HttpStatus.CONFLICT,
   "limite-proyectos": HttpStatus.CONFLICT,
+  "proyecto-no-encontrado": HttpStatus.NOT_FOUND,
+  "confirmacion-no-coincide": HttpStatus.BAD_REQUEST,
 };
 
 /** Traduce los errores de dominio de M3 a `{ codigo, mensaje, ...detalle }` en el borde. */

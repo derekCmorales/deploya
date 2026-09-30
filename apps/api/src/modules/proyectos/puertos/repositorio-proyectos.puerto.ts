@@ -10,4 +10,6 @@ export abstract class RepositorioProyectos {
   abstract porId(id: string): Promise<Proyecto | null>;
   abstract deUsuario(usuarioId: string): Promise<Proyecto[]>;
   abstract existeSubdominio(subdominio: string): Promise<boolean>;
+  /** Borra el proyecto; sus despliegues, artefactos y variables caen en cascada. */
+  abstract eliminar(id: string): Promise<void>;
 }

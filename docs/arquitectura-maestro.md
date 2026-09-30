@@ -1861,6 +1861,7 @@ classDiagram
         +validarRepositorio(consulta) ValidacionRepositorio
         +listar(usuarioId) ListaProyectos
         +crear(usuarioId, alta) ProyectoCreado
+        +eliminar(usuarioId, proyectoId, confirmacion) void
     }
     class ProveedorFuente {
         <<abstract>>
@@ -1874,6 +1875,7 @@ classDiagram
         +porId(id) Proyecto
         +deUsuario(usuarioId) List~Proyecto~
         +existeSubdominio(subdominio) Boolean
+        +eliminar(id) void
     }
     class RepositorioProyectosPrisma
     class CuotaProyectosPuerto {

@@ -3,7 +3,9 @@ import { RelojFijo } from "../../compartido/reloj";
 import type { ConstruccionService } from "../construccion/construccion.service";
 import { CUOTA_SANDBOX } from "./adaptadores/cuota-proyectos.stub";
 import {
+  ConfirmacionNoCoincide,
   LimiteProyectosAlcanzado,
+  ProyectoNoEncontrado,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
   SubdominioEnUso,
@@ -111,6 +113,17 @@ describe("ProyectosService", () => {
       expect(await repositorio.deUsuario("usuario-1")).toHaveLength(1);
     });
 
+    it("Proyecto fallido no cuenta: con el último despliegue fallido el usuario puede crear otro aunque esté en el límite", async () => {
+      const { servicio, construccion, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+      construccion.ultimosDespliegues.mockResolvedValue({ [proyecto.id]: { estado: "fallido" } });
+
+      await expect(servicio.crear("usuario-1", alta({ nombre: "Otro proyecto" }))).resolves.toMatchObject({
+        proyecto: { subdominio: "otro-proyecto" },
+      });
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(2);
+    });
+
     it("Subdominio duplicado: otro usuario con el mismo nombre recibe SubdominioEnUso", async () => {
       const { servicio } = montar();
       await servicio.crear("usuario-1", alta());
@@ -148,10 +161,54 @@ describe("ProyectosService", () => {
       expect(lista).toMatchObject({ usados: 2, maximo: 3, plan: { nombre: "Starter" } });
     });
 
+    it("Proyecto fallido no cuenta: sigue en la lista pero no suma en «usados»", async () => {
+      const { servicio, construccion } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+      construccion.ultimosDespliegues.mockResolvedValue({ [proyecto.id]: { estado: "fallido" } });
+
+      const lista = await servicio.listar("usuario-1");
+
+      expect(lista.proyectos).toHaveLength(1);
+      expect(lista.usados).toBe(0);
+    });
+
     it("Solo sus proyectos: no lista los de otro usuario", async () => {
       const { servicio } = montar();
       await servicio.crear("usuario-2", alta());
       await expect(servicio.listar("usuario-1")).resolves.toMatchObject({ proyectos: [], usados: 0 });
+    });
+  });
+
+  describe("eliminar", () => {
+    it("Eliminar proyecto: con el nombre exacto borra el proyecto y libera el cupo del plan", async () => {
+      const { servicio, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+      expect((await servicio.listar("usuario-1")).usados).toBe(1);
+
+      await servicio.eliminar("usuario-1", proyecto.id, "Hola Deploya");
+
+      expect(await repositorio.porId(proyecto.id)).toBeNull();
+      expect((await servicio.listar("usuario-1")).usados).toBe(0);
+      await expect(servicio.crear("usuario-1", alta())).resolves.toMatchObject({ proyecto: { nombre: "Hola Deploya" } });
+    });
+
+    it("Confirmación distinta: rechaza y conserva el proyecto", async () => {
+      const { servicio, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+
+      await expect(servicio.eliminar("usuario-1", proyecto.id, "hola")).rejects.toThrow(ConfirmacionNoCoincide);
+
+      expect(await repositorio.porId(proyecto.id)).not.toBeNull();
+    });
+
+    it("Proyecto ajeno o inexistente: se trata como no encontrado y no borra nada", async () => {
+      const { servicio, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+
+      await expect(servicio.eliminar("usuario-2", proyecto.id, "Hola Deploya")).rejects.toThrow(ProyectoNoEncontrado);
+      await expect(servicio.eliminar("usuario-1", "no-existe", "Hola Deploya")).rejects.toThrow(ProyectoNoEncontrado);
+
+      expect(await repositorio.porId(proyecto.id)).not.toBeNull();
     });
   });
 

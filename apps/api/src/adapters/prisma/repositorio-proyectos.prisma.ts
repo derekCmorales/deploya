@@ -31,4 +31,8 @@ export class RepositorioProyectosPrisma extends RepositorioProyectos {
   async existeSubdominio(subdominio: string): Promise<boolean> {
     return (await this.prisma.proyecto.count({ where: { subdominio } })) > 0;
   }
+
+  async eliminar(id: string): Promise<void> {
+    await this.prisma.proyecto.deleteMany({ where: { id } });
+  }
 }

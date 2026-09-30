@@ -1,5 +1,6 @@
 import { Prisma, type Plan as PlanFila } from "@prisma/client";
 import type { PrismaService } from "../../../compartido/prisma/prisma.service";
+import { RepositorioPagosPrisma } from "./repositorio-pagos.prisma";
 import { RepositorioPlanesPrisma } from "./repositorio-planes.prisma";
 import { RepositorioSuscripcionesPrisma } from "./repositorio-suscripciones.prisma";
 import { estadoAPrisma, estadoDesdePrisma } from "./traduccion-prisma";
@@ -93,5 +94,82 @@ describe("RepositorioSuscripcionesPrisma", () => {
     const repositorio = new RepositorioSuscripcionesPrisma(prismaDoble({ suscripcion: { findUnique } }));
     await expect(repositorio.deUsuario("u1")).resolves.toMatchObject({ estado: "por-vencer", plan: { codigo: "starter", cpus: 0.5 } });
     await expect(repositorio.deUsuario("u2")).resolves.toBeNull();
+  });
+});
+
+describe("RepositorioSuscripcionesPrisma · cambios", () => {
+  const ahora = new Date("2026-09-24T12:00:00.000Z");
+  const fila = {
+    id: "s1",
+    usuarioId: "u1",
+    planId: STARTER.id,
+    plan: STARTER,
+    planSiguiente: { ...STARTER, id: "plan-sandbox", codigo: "sandbox", nombre: "Sandbox" },
+    estado: "activa",
+    estadoDesde: ahora,
+    vigenciaDias: 30,
+    inicio: ahora,
+    vence: ahora,
+    planSiguienteId: "plan-sandbox",
+    creado: ahora,
+    actualizado: ahora,
+  };
+
+  it("actualizar traduce el estado y devuelve la suscripción con sus planes", async () => {
+    const update = jest.fn().mockResolvedValue(fila);
+    const cambio = { planId: "plan-starter", estado: "por-vencer" as const, estadoDesde: ahora, vigenciaDias: 30, inicio: ahora, vence: ahora, planSiguienteId: null };
+    const suscripcion = await new RepositorioSuscripcionesPrisma(prismaDoble({ suscripcion: { update } })).actualizar("s1", cambio);
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "s1" },
+      data: { ...cambio, estado: "por_vencer" },
+      include: { plan: true, planSiguiente: true },
+    });
+    expect(suscripcion.planSiguiente).toMatchObject({ codigo: "sandbox" });
+  });
+
+  it("programarDescenso solo toca planSiguienteId", async () => {
+    const update = jest.fn().mockResolvedValue(fila);
+    await new RepositorioSuscripcionesPrisma(prismaDoble({ suscripcion: { update } })).programarDescenso("s1", "plan-sandbox");
+    expect(update).toHaveBeenCalledWith({ where: { id: "s1" }, data: { planSiguienteId: "plan-sandbox" }, include: { plan: true, planSiguiente: true } });
+  });
+});
+
+describe("RepositorioPagosPrisma", () => {
+  const creado = new Date("2026-09-24T12:00:00.000Z");
+  const nuevo = {
+    usuarioId: "u1",
+    suscripcionId: "s1",
+    planId: "plan-pro",
+    concepto: "cambio-plan" as const,
+    vigenciaDias: 30,
+    monto: 15,
+    estado: "aprobado" as const,
+    motivoRechazo: null,
+    tarjetaUltimos4: "4242",
+    creado,
+  };
+
+  function transaccional(count: jest.Mock, create: jest.Mock): PrismaService {
+    const tx = { pago: { count, create } };
+    return { $transaction: (fn: (t: typeof tx) => unknown) => fn(tx) } as unknown as PrismaService;
+  }
+
+  it("un aprobado lleva el siguiente comprobante del año y el concepto en formato Prisma", async () => {
+    const count = jest.fn().mockResolvedValue(183);
+    const create = jest.fn().mockImplementation(({ data }) =>
+      Promise.resolve({ ...data, id: "p1", monto: new Prisma.Decimal("15.00") }),
+    );
+    const pago = await new RepositorioPagosPrisma(transaccional(count, create)).registrar(nuevo);
+    expect(count).toHaveBeenCalledWith({ where: { numeroComprobante: { startsWith: "DPY-2026-" } } });
+    expect(create.mock.calls[0][0].data).toMatchObject({ concepto: "cambio_plan", moneda: "USD", numeroComprobante: "DPY-2026-000184" });
+    expect(pago).toMatchObject({ id: "p1", concepto: "cambio-plan", monto: 15, numeroComprobante: "DPY-2026-000184" });
+  });
+
+  it("un rechazado no lleva comprobante (I2)", async () => {
+    const count = jest.fn();
+    const create = jest.fn().mockImplementation(({ data }) => Promise.resolve({ ...data, id: "p2", monto: new Prisma.Decimal("15.00") }));
+    const pago = await new RepositorioPagosPrisma(transaccional(count, create)).registrar({ ...nuevo, estado: "rechazado", motivoRechazo: "x" });
+    expect(count).not.toHaveBeenCalled();
+    expect(pago.numeroComprobante).toBeNull();
   });
 });

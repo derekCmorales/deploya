@@ -10,6 +10,8 @@ export interface ItemNav {
   href: string;
   texto: string;
   icono: LucideIcon;
+  /** Otras rutas que también marcan el item como activo (Suscripción en /planes). */
+  activoEn?: string[];
 }
 
 /** Navegación principal en píldora (v4.1 `.nav2`). La activa lleva su icono en Señal. */
@@ -20,8 +22,8 @@ export function NavPrincipal({ items, className }: { items: ItemNav[]; className
       aria-label="Principal"
       className={cn("ml-[18px] flex items-center gap-0.5 rounded-[11px] border border-border bg-sunken p-[3px]", className)}
     >
-      {items.map(({ href, texto, icono: Icono }) => {
-        const activo = ruta === href || ruta.startsWith(`${href}/`);
+      {items.map(({ href, texto, icono: Icono, activoEn = [] }) => {
+        const activo = [href, ...activoEn].some((r) => ruta === r || ruta.startsWith(`${r}/`));
         return (
           <Link
             key={href}

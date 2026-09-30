@@ -77,6 +77,7 @@ test("/planes existe, no trae planes en constantes y el stub /billing se borró"
 
 test("los textos fijos de la ficha 06 están en la pantalla", () => {
   const pantalla = [
+    "src/app/(billing)/_componentes/cabecera-cobro.tsx",
     "src/app/(billing)/planes/_componentes/cabecera-planes.tsx",
     "src/app/(billing)/planes/_componentes/tabla-planes.tsx",
   ]

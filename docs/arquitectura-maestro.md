@@ -1778,15 +1778,44 @@ classDiagram
         <<Facade>>
         -planes RepositorioPlanes
         -suscripciones RepositorioSuscripciones
-        -pasarela PasarelaPago
         -reloj Reloj
         +catalogo() PlanCatalogo[]
         +asignarSandbox(usuarioId) void
         +cuotaDe(usuarioId) Cuota
-        +contratar(usuarioId, planCodigo, vigenciaDias, tarjeta) Pago
-        +renovar(usuarioId, tarjeta) Pago
-        +cambiarPlan(usuarioId, planCodigo, tarjeta) Pago
     }
+    class ContratacionService {
+        -planes RepositorioPlanes
+        -suscripciones RepositorioSuscripciones
+        -pagos RepositorioPagos
+        -pasarela PasarelaPago
+        -reloj Reloj
+        +miSuscripcion(usuarioId) VistaSuscripcion
+        +cotizar(usuarioId, solicitud) Cotizacion
+        +contratar(usuarioId, solicitud) ResultadoContratacion
+        +programarDescenso(usuarioId, planCodigo) VistaSuscripcion
+    }
+    class PoliticaCambioPlan {
+        <<Strategy · funciones puras>>
+        +operacionDeCobro(actual, destino, vigenciaDias, ahora) OperacionCobro
+        +cambioTrasCobro(operacion, ahora) CambioSuscripcion
+        +validarDescenso(actual, destino, ahora) void
+    }
+    class CobroController {
+        +mia() VistaSuscripcion
+        +cotizacion(consulta) Cotizacion
+        +contratar(cuerpo) ResultadoContratacion
+        +descenso(cuerpo) VistaSuscripcion
+    }
+    class RepositorioPagos {
+        <<abstract>>
+        +registrar(nuevo) Pago
+    }
+    class RepositorioPagosPrisma
+    class Espera {
+        <<abstract>>
+        +esperar(milisegundos) void
+    }
+    class EsperaTemporizador
     class Cuota {
         <<valor>>
         +plan PlanResumen
@@ -1806,6 +1835,8 @@ classDiagram
         <<abstract>>
         +deUsuario(usuarioId) Suscripcion
         +crearSiNoExiste(nueva) void
+        +actualizar(suscripcionId, cambio) Suscripcion
+        +programarDescenso(suscripcionId, planSiguienteId) Suscripcion
     }
     class RepositorioPlanesPrisma
     class RepositorioSuscripcionesPrisma
@@ -1814,7 +1845,7 @@ classDiagram
     }
     class PasarelaPago {
         <<abstract>>
-        +cobrar(monto, tarjeta) ResultadoPago
+        +cobrar(cargo) ResultadoCobro
     }
     class PasarelaSimulada
     class AdministracionService {
@@ -2115,7 +2146,16 @@ classDiagram
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
     SuscripcionesService --> PoliticaCicloSuscripcion
-    SuscripcionesService --> PasarelaPago
+    ContratacionService --> PasarelaPago
+    ContratacionService --> RepositorioPagos
+    ContratacionService --> RepositorioPlanes
+    ContratacionService --> RepositorioSuscripciones
+    ContratacionService ..> PoliticaCambioPlan
+    CobroController --> ContratacionService
+    CobroController ..> SesionGuard : protege
+    RepositorioPagos <|-- RepositorioPagosPrisma
+    PasarelaSimulada --> Espera
+    Espera <|-- EsperaTemporizador
     SuscripcionesService ..> Cuota
     SuscripcionesService --> RepositorioPlanes
     SuscripcionesService --> RepositorioSuscripciones

@@ -18,6 +18,7 @@ import {
   type ListaProyectos as Lista,
   type ProyectoEnLista,
 } from "@/lib/proyectos";
+import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
 import { cn } from "@/lib/utils";
 
 import { DetalleProyecto } from "./detalle-proyecto";
@@ -66,7 +67,7 @@ export function ListaProyectos({
         ) : (
           <>
             <Button asChild variant="link" size="sm" className="text-xs">
-              <Link href="/billing">Cambiar plan</Link>
+              <Link href={RUTA_SUSCRIPCION}>Cambiar plan</Link>
             </Button>
             <Button size="sm" disabled aria-describedby="limite-proyectos">
               <Plus />

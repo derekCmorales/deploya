@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../compartido/prisma/prisma.service";
-import type { NuevaSuscripcion, Suscripcion } from "../dominio/suscripcion";
+import type { CambioSuscripcion, NuevaSuscripcion, Suscripcion } from "../dominio/suscripcion";
 import { RepositorioSuscripciones } from "../puertos/repositorio-suscripciones.puerto";
-import { estadoAPrisma, suscripcionDesdePrisma } from "./traduccion-prisma";
+import { estadoAPrisma, INCLUIR_PLANES, suscripcionDesdePrisma } from "./traduccion-prisma";
 
 @Injectable()
 export class RepositorioSuscripcionesPrisma extends RepositorioSuscripciones {
@@ -11,7 +11,7 @@ export class RepositorioSuscripcionesPrisma extends RepositorioSuscripciones {
   }
 
   async deUsuario(usuarioId: string): Promise<Suscripcion | null> {
-    const fila = await this.prisma.suscripcion.findUnique({ where: { usuarioId }, include: { plan: true } });
+    const fila = await this.prisma.suscripcion.findUnique({ where: { usuarioId }, include: INCLUIR_PLANES });
     return fila ? suscripcionDesdePrisma(fila) : null;
   }
 
@@ -29,5 +29,23 @@ export class RepositorioSuscripcionesPrisma extends RepositorioSuscripciones {
         vence: nueva.vence,
       },
     });
+  }
+
+  async actualizar(suscripcionId: string, cambio: CambioSuscripcion): Promise<Suscripcion> {
+    const fila = await this.prisma.suscripcion.update({
+      where: { id: suscripcionId },
+      data: { ...cambio, estado: estadoAPrisma(cambio.estado) },
+      include: INCLUIR_PLANES,
+    });
+    return suscripcionDesdePrisma(fila);
+  }
+
+  async programarDescenso(suscripcionId: string, planSiguienteId: string): Promise<Suscripcion> {
+    const fila = await this.prisma.suscripcion.update({
+      where: { id: suscripcionId },
+      data: { planSiguienteId },
+      include: INCLUIR_PLANES,
+    });
+    return suscripcionDesdePrisma(fila);
   }
 }

@@ -11,6 +11,7 @@ Un proyecto cuyo despliegue falló sigue contando contra el límite del plan (`u
 - **API:** `DELETE /proyectos/:id` con `{ confirmacion }`. Exige sesión, trata un proyecto ajeno como inexistente (404) y rechaza (400) si `confirmacion` no es el nombre exacto. Borra el proyecto; despliegues, artefactos y variables caen por `onDelete: Cascade`. Libera el cupo sin importar el estado del despliegue.
 - **Puerto:** `RepositorioProyectos.eliminar(id)` (Prisma y memoria).
 - **Errores de dominio:** `ProyectoNoEncontrado` (404) y `ConfirmacionNoCoincide` (400).
+- **Cupo:** un proyecto cuyo último despliegue está `fallido` no cuenta contra el límite del plan (ni en `usados` ni al crear), por ahora.
 - **Web:** «Eliminar proyecto» en el detalle de `/projects` con el diálogo 19b (escribir el nombre); al terminar recarga la lista y el contador.
 
 ## Non-goals

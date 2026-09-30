@@ -18,3 +18,17 @@ El cliente SHALL poder cambiar nombre (no cambia el subdominio), repositorio, ra
 
 - **WHEN** el cliente intenta eliminar un proyecto que no es suyo o que no existe
 - **THEN** se responde como no encontrado y no se borra nada
+
+### Requirement: Límite y estado de la suscripción
+
+El alta SHALL bloquearse si el cliente alcanzó el límite de proyectos de su plan o si su suscripción está Vencida o Suspendida. Un proyecto cuyo último despliegue está Fallido SHALL NOT contar contra el límite.
+
+#### Scenario: Suscripción vencida
+
+- **WHEN** la suscripción del cliente está Vencida
+- **THEN** «Nuevo proyecto» y «Desplegar» quedan bloqueados y se ofrece renovar
+
+#### Scenario: Proyecto fallido no cuenta
+
+- **WHEN** el último despliegue de un proyecto está Fallido
+- **THEN** el proyecto sigue en la lista, no suma al contador y el cliente puede crear otro aunque esté en el límite

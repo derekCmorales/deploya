@@ -113,6 +113,17 @@ describe("ProyectosService", () => {
       expect(await repositorio.deUsuario("usuario-1")).toHaveLength(1);
     });
 
+    it("Proyecto fallido no cuenta: con el último despliegue fallido el usuario puede crear otro aunque esté en el límite", async () => {
+      const { servicio, construccion, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+      construccion.ultimosDespliegues.mockResolvedValue({ [proyecto.id]: { estado: "fallido" } });
+
+      await expect(servicio.crear("usuario-1", alta({ nombre: "Otro proyecto" }))).resolves.toMatchObject({
+        proyecto: { subdominio: "otro-proyecto" },
+      });
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(2);
+    });
+
     it("Subdominio duplicado: otro usuario con el mismo nombre recibe SubdominioEnUso", async () => {
       const { servicio } = montar();
       await servicio.crear("usuario-1", alta());
@@ -148,6 +159,17 @@ describe("ProyectosService", () => {
         ["api", resumen],
       ]);
       expect(lista).toMatchObject({ usados: 2, maximo: 3, plan: { nombre: "Starter" } });
+    });
+
+    it("Proyecto fallido no cuenta: sigue en la lista pero no suma en «usados»", async () => {
+      const { servicio, construccion } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+      construccion.ultimosDespliegues.mockResolvedValue({ [proyecto.id]: { estado: "fallido" } });
+
+      const lista = await servicio.listar("usuario-1");
+
+      expect(lista.proyectos).toHaveLength(1);
+      expect(lista.usados).toBe(0);
     });
 
     it("Solo sus proyectos: no lista los de otro usuario", async () => {

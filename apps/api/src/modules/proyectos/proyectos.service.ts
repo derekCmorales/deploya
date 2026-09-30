@@ -47,7 +47,7 @@ export class ProyectosService {
     const ultimos = await this.construccion.ultimosDespliegues(proyectos.map((p) => p.id));
     return {
       proyectos: masRecientesPrimero(proyectos).map((p) => ({ ...p, ultimoDespliegue: ultimos[p.id] ?? null })),
-      usados: proyectos.length,
+      usados: proyectos.filter((proyecto) => cuentaParaElPlan(ultimos[proyecto.id])).length,
       maximo: cuota.maxProyectos,
       plan: { nombre: cuota.plan, cpus: cuota.cpus, memoriaMb: cuota.memoriaMb },
     };
@@ -84,8 +84,15 @@ export class ProyectosService {
 
   private async exigirCupo(usuarioId: string): Promise<void> {
     const [existentes, cuota] = await Promise.all([this.repositorio.deUsuario(usuarioId), this.cuota.cuotaDe(usuarioId)]);
-    if (existentes.length >= cuota.maxProyectos) throw new LimiteProyectosAlcanzado(cuota.maxProyectos);
+    const ultimos = await this.construccion.ultimosDespliegues(existentes.map((p) => p.id));
+    const usados = existentes.filter((proyecto) => cuentaParaElPlan(ultimos[proyecto.id])).length;
+    if (usados >= cuota.maxProyectos) throw new LimiteProyectosAlcanzado(cuota.maxProyectos);
   }
+}
+
+/** Un proyecto cuyo último despliegue falló no ocupa cupo del plan (por ahora, hasta definir la política de M2). */
+function cuentaParaElPlan(ultimo: Ultimos[string] | undefined): boolean {
+  return ultimo?.estado !== "fallido";
 }
 
 function masRecientesPrimero(proyectos: Proyecto[]): Proyecto[] {

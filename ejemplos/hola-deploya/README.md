@@ -1,6 +1,6 @@
 # hola-deploya
 
-App HTTP mínima para la demo de Deploya. Escucha en `PORT` (8080 por defecto) y responde en `/` y `/health`.
+App HTTP mínima para la demo de Deploya. Escucha en `PORT` (8080 por defecto) y responde en `/` y `/health`. El título de la página sale de la variable `SALUDO` (por defecto «Hola desde Deploya»): en el Avance 2 se cambia desde la pantalla 17 para mostrar «Guardar y desplegar» sin corte (M3-03 + M5-02).
 
 Se publica como repositorio **público** `derekCmorales/hola-deploya` con tres ramas, una por caso de la demo:
 

@@ -27,7 +27,7 @@ Cada tarea de código tiene su tarea de pruebas. Pruebas sin Docker, red, base n
 
 - [x] 4.1 `ConstruccionService.crearDespliegue`, `consultar`, `bitacoraDesde` + `DesplieguesController` con las tres rutas del contrato v1 y el mapeo de errores
 - [x] 4.2 Pruebas: «Encolar», «Números consecutivos», «Proyecto ajeno», «Etapas en curso», «Leer desde una posición», «Despliegue terminado»
-- [ ] 4.3 `RepositorioDesplieguesMemoria` (hecho) y `RepositorioDesplieguesPrisma` (**pendiente: espera DB-01 en `main`**); traducción `en_curso` ↔ `en-curso`
+- [x] 4.3 `RepositorioDesplieguesMemoria` y `RepositorioDesplieguesPrisma` (en `main` con `feat/m1-sesion`); traducción `en_curso` ↔ `en-curso`
 - [x] 4.4 Prueba del repositorio en memoria: `lineasDesde` respeta `desde` y `limite`
 
 ## 5. M4-01 · Trabajador y construcción (martes)

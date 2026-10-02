@@ -38,6 +38,8 @@ Reglas que fijan las pantallas: contraseña ≥ 12 con mayúsculas, minúsculas,
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eddy](../../plan-avances.md#eddy--cuentas-10-pts).
 
+**Avance 2 (50 %):** [plan-avances.md § Eddy (A2)](../../plan-avances.md#eddy--cuentas-6-pts) · changes `feat-m1-estados-roles` (M1-04) y `feat-m1-recuperacion` (M1-05, M10-02) · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#eddy). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+
 **Dependencia crítica:** el resto de módulos necesita `SesionGuard` y `@UsuarioActual()`. Publícalos pronto, aunque el login todavía no tenga todos los estados.
 
 ## SOLID, patrones y pruebas

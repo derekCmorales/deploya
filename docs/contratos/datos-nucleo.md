@@ -386,6 +386,7 @@ model LineaBitacora {
 - Precio de 365 días: propuesta 10 × el mensual (dos meses gratis). Lo decide Javier; si cambia, solo cambia esta tabla.
 - Administrador: `ADMIN_CORREO` (por defecto `admin@deploya.app`) y `ADMIN_CLAVE` (obligatoria, sin valor por defecto), `rol = administrador`, `estadoCuenta = activa`, con Sandbox.
 - Cliente de demostración para Eduardo hasta que llegue el guard: `cliente@deploya.app`, `activa`, con Sandbox.
+- Avance 2 (M5-03): `vencida@deploya.app` con la suscripción **Vencida** y `suspendida@deploya.app` con la suscripción **Suspendida**, para demostrar los bloqueos antes del ciclo §4.4 (M2-05). Misma contraseña de demo que `cliente@deploya.app`.
 - El hash de contraseña del seed usa la **misma** función que M1 (acordar con Eddy; propuesta: argon2id con `@node-rs/argon2`).
 
 ## Servicios que se exportan sobre estos datos
@@ -425,3 +426,4 @@ SuscripcionesService.cuotaDe(usuarioId: string): Promise<Cuota>; // lanza Suscri
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1 | 2026-09-27 | Firma inicial para DB-01 (incluye detección de stack y reversión, que volvieron al núcleo) |
+| 1.1 | 2026-10-02 | Seed: cuentas de demo Vencida y Suspendida para M5-03. Sin cambios de tablas en el Avance 2 |

@@ -1,0 +1,31 @@
+# Tasks
+
+Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
+
+## 1. Reenviar verificación
+
+- [ ] 1.1 `PoliticaReenvio` y `ESPERA_REENVIO_MS`; `RepositorioTokensCuenta.ultimoDe` e `invalidarVigentes` (si `feat/m1-recuperacion` no lo trajo ya); `POST /identidad/verificacion/reenvio`
+- [ ] 1.2 Pruebas: «Reenviar verificación», «Reenvío antes de la cuenta atrás», «Reenvío a una cuenta ya activa» (neutro, sin correo)
+
+## 2. Estados del login
+
+- [ ] 2.1 `CuentaSuspendida(motivo, desde)` y su cuerpo en el filtro; `GET /identidad/sesion` con `rol`
+- [ ] 2.2 Pruebas: «Cuenta suspendida» devuelve motivo y fecha; «Cuenta sin verificar» devuelve el correo enmascarado
+
+## 3. Roles
+
+- [ ] 3.1 `RolGuard`, `@Roles()`, exportados por `IdentidadModule`; `AdministracionController` con `@UseGuards(SesionGuard, RolGuard)` y `@Roles("administrador")`
+- [ ] 3.2 Pruebas: «Cliente en ruta de administración» (403 `SoloAdministracion`), «Administrador en ruta de administración» (200), ruta sin `@Roles` deja pasar; el `health` de administración sigue público
+
+## 4. Web (02, 03b, 28)
+
+- [ ] 4.1 02: «Reenviar correo» con cuenta atrás desde el 429; 03b: reenviar y suspendida con motivo; 28: 403 y sesión expirada; `/admin` muestra 403 a un Cliente
+- [ ] 4.2 Pruebas `node --test`: formato de la cuenta atrás, decisión «expirada» frente a «sin sesión», textos de las fichas
+- [ ] 4.3 Revisión contra los artboards 02, 03b y 28 en claro y oscuro
+
+## 5. Cierre
+
+- [ ] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync`
+- [ ] 5.2 `pnpm check` en verde; cobertura ≥ 80 % en `identidad/`
+- [ ] 5.3 Avisar a Javier (M9 usa `RolGuard`) y a Eduardo (28 comparte componentes)
+- [ ] 5.4 `/opsx-archive` después del merge

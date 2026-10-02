@@ -164,9 +164,9 @@ Plan B: el video grabado el martes en el ensayo, por si falla la red o Docker du
 
 ---
 
-## Avance 2 — 50 % (cierre de F3: viernes 9 de octubre)
+## Avance 2 — 50 % (entrega: miércoles 7 de octubre en la noche)
 
-La versión visual de esta sección (resumen, una hoja por persona, integración y calidad, con las pantallas de cada quien y el estado de cada historia) está en la página **Avance 2 · 50 % · guía** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Fecha: la propuesta cierra F3 el viernes 9 de octubre; si el curso fija otro día de presentación, se mueve el calendario completo y nada más.
+La versión visual de esta sección (resumen, una hoja por persona, integración y calidad, con las pantallas de cada quien y el estado de cada historia) está en la página **Avance 2 · 50 % · guía** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Entrega: **miércoles 7 de octubre en la noche**, sin ensayo por ahora. Todo tiene que estar en `main` ese día a las 20:00.
 
 ### Dónde estamos (2 de octubre)
 
@@ -210,9 +210,9 @@ Los changes están en `openspec/changes/` y validan con `openspec validate --all
 | M1-05 | Recuperar contraseña (04): solicitud neutra, token de 30 min y un uso, nueva contraseña con la política, cierra todas las sesiones | Un enlace usado o de más de 30 min muestra «Este enlace ya no sirve»; otra sesión abierta queda cerrada |
 | M10-02 | `PlantillaRecuperacion` (24) sobre el mismo esqueleto que verificación | El correo llega a Mailpit con botón y enlace en texto plano |
 
-**Presenta:** «Olvidé mi contraseña» → Mailpit → nueva contraseña → el otro navegador pierde la sesión; un Cliente en `/admin` (403).
+**Demuestra en la entrega:** «Olvidé mi contraseña» → Mailpit → nueva contraseña → el otro navegador pierde la sesión; un Cliente en `/admin` (403).
 
-**Entrega a otros:** `RolGuard` y `@Roles()` el **lunes 5 a las 12:00** (Javier los usa en M9, Avance 3). CI verde en cada PR (dueño de workflows).
+**Entrega a otros:** `RolGuard` y `@Roles()` el **domingo 4** (Javier los usa en M9, Avance 3). CI verde en cada PR (dueño de workflows).
 
 ### Javier — monetización (11 pts, ya en `main`)
 
@@ -222,9 +222,9 @@ Los changes están en `openspec/changes/` y validan con `openspec validate --all
 | M2-03 | Mi suscripción: vigencia, consumo, renovar (08) | **Hecho** |
 | M2-04 | Cambiar plan: ascenso cobrado, descenso programado (08) | **Hecho** (aplicar el descenso al vencer es M2-05) |
 
-**Esta semana:** archivar `feat-m2-schema-nucleo` y `feat-m2-contratacion-suscripcion`; seed de demo con `vencida@deploya.app` y `suspendida@deploya.app` para M5-03 (**lunes 5**); revisar los PRs que tocan `prisma/`. Si sobra tiempo, adelantar M2-05 (ciclo §4.4) **sin prometerlo**: es lo que más pesa del Avance 3.
+**Esta semana:** archivar `feat-m2-schema-nucleo` y `feat-m2-contratacion-suscripcion`; seed de demo con `vencida@deploya.app` y `suspendida@deploya.app` para M5-03 (**domingo 4**); revisar los PRs que tocan `prisma/`. Si sobra tiempo, adelantar M2-05 (ciclo §4.4) **sin prometerlo**: es lo que más pesa del Avance 3.
 
-**Presenta:** contratar Starter con la tarjeta de prueba (aprobada y rechazada), Mi suscripción con la vigencia, ascenso y descenso programado; la cuenta Vencida bloqueando «Desplegar».
+**Demuestra en la entrega:** contratar Starter con la tarjeta de prueba (aprobada y rechazada), Mi suscripción con la vigencia, ascenso y descenso programado; la cuenta Vencida bloqueando «Desplegar».
 
 ### Eduardo — proyectos y experiencia (8 pts)
 
@@ -235,9 +235,9 @@ Los changes están en `openspec/changes/` y validan con `openspec validate --all
 
 También: textos de 11a y 11e con la detección de stack (`LectorFuenteGitHub`, contrato v2) y el banner de bloqueo en 11d y 17 (M5-03). Revisa los PRs con UI de los demás.
 
-**Presenta:** alta con `SALUDO` → riel y bitácora en vivo → 12b con URL y digest; la rama `roto` en 12c; cambiar la variable en 17 y «Guardar y desplegar».
+**Demuestra en la entrega:** alta con `SALUDO` → riel y bitácora en vivo → 12b con URL y digest; la rama `roto` en 12c; cambiar la variable en 17 y «Guardar y desplegar».
 
-**Entrega a otros:** `VariablesProyectoService.descifradasDe` exportado el **miércoles 7 a las 12:00** (Derek lo conecta al contenedor).
+**Entrega a otros:** `VariablesProyectoService.descifradasDe` exportado el **martes 6 a las 12:00** (Derek lo conecta al contenedor).
 
 ### Derek — motor (12 pts)
 
@@ -248,11 +248,11 @@ También: textos de 11a y 11e con la detección de stack (`LectorFuenteGitHub`, 
 | M5-03 | `BloqueosService`: Vencida o Suspendida bloquean; construcciones del mes (I7) contra `construccionesMes` | `vencida@deploya.app` recibe 409 `suscripcion-no-permite`; la construcción 31 de Sandbox, `cuota-construcciones-agotada` |
 | M4-03 | Detección de stack: recetas Node, Python, Go y estático; el `Dockerfile` propio manda | La rama `sin-dockerfile` termina Saludable con receta `node` y la bitácora lo dice |
 
-**Presenta:** la rama `sin-dockerfile` detectada y en línea; «Guardar y desplegar» sin corte (dos pestañas: la app nunca da error); detener y reiniciar; el bloqueo por cuota; el diagrama de actividad de la detección contra lo que corre.
+**Demuestra en la entrega:** la rama `sin-dockerfile` detectada y en línea; «Guardar y desplegar» sin corte (dos pestañas: la app nunca da error); detener y reiniciar; el bloqueo por cuota; el diagrama de actividad de la detección contra lo que corre.
 
-**Entrega a otros:** contrato de despliegues **v2.1** (ya en `docs/contratos/despliegues.md`); `GET /proyectos/:id/despliegues/:numero` el **lunes 5 a las 12:00** (Eduardo); `BloqueosService` el **martes 6 a las 12:00** (Eduardo lo usa en el alta); `DeteccionStackService` el **martes 6** (Eduardo, 11a); rama `sin-dockerfile` y `server.js` con `SALUDO` publicados en el repo público `hola-deploya`.
+**Entrega a otros:** contrato de despliegues **v2.1** (ya en `docs/contratos/despliegues.md`); `GET /proyectos/:id/despliegues/:numero` el **domingo 4 a las 20:00** (Eduardo); `BloqueosService` y `DeteccionStackService` el **lunes 5 a las 12:00** (Eduardo los usa en el alta y en 11a); rama `sin-dockerfile` y `server.js` con `SALUDO` publicados en el repo público `hola-deploya`.
 
-### Deuda del Avance 1 (antes del lunes 5)
+### Deuda del Avance 1 (antes del domingo 4)
 
 | Qué | Quién |
 |---|---|
@@ -260,18 +260,17 @@ También: textos de 11a y 11e con la detección de stack (`LectorFuenteGitHub`, 
 | Tarea 8.2 de `feat-m4-motor-construccion`: recorrido desde la API en compose | Derek |
 | Tareas 7.8 y 7.9 de `feat-m1-registro-verificacion`: ilustración de 01 y revisión en claro y oscuro | Eddy |
 
-### Calendario hasta el viernes 9
+### Calendario hasta el miércoles 7
 
 | Día | Qué |
 |---|---|
-| Vie 2 – dom 4 | Cada quien lee su guía y **revisa** su change (ya propuesto); archivar lo del A1. Contrato v2.1 publicado |
-| Lun 5 | **12:00** `RolGuard` (Eddy), consulta por número (Derek) y seed de demo (Javier) en `main`. Recetas de stack (Derek). Vista 12 contra la API (Eduardo). Recuperación (Eddy) |
-| Mar 6 | **12:00** `BloqueosService` y `DeteccionStackService` en `main` (Derek). Variables: dominio, cifrado y API (Eduardo). Reiniciar y detener (Derek). Reenvío y 403 (Eddy) |
-| Mié 7 | **12:00** `VariablesProyectoService` en `main` (Eduardo). Variables al contenedor (Derek). 11c, 17, 11a y banners (Eduardo) |
-| Jue 8 | **20:00** todo en `main`. **21:00** ensayo completo y video de respaldo |
-| Vie 9 | Ensayo corto sobre `main` limpio. **Entrega y presentación** |
+| Vie 2 – sáb 3 | Cada quien lee su guía y **revisa** su change (ya propuesto); archivar lo del A1. Contrato v2.1 publicado |
+| Dom 4 | **20:00** en `main`: consulta por número (Derek), `RolGuard` (Eddy) y seed de demo (Javier) |
+| Lun 5 | **12:00** `BloqueosService` y `DeteccionStackService` en `main` (Derek). Recuperación (Eddy). Vista 12 contra la API y variables: dominio, cifrado y API (Eduardo). Reiniciar y detener (Derek) |
+| Mar 6 | **12:00** `VariablesProyectoService` en `main` (Eduardo). Variables al contenedor (Derek). Reenvío y 403 (Eddy). 11c, 17, 11a y banners (Eduardo) |
+| Mié 7 | **20:00** todo en `main` y cada quien comprueba su parte en `docker compose up` limpio. **Entrega en la noche** |
 
-### Guion de la presentación (≈ 12 min)
+### Guion de la demo, si se presenta (≈ 12 min)
 
 1. **Qué cambió (Derek, 1 min):** retroalimentación de la entrega 1 (detección de stack y reversión al núcleo) y el porcentaje con la tabla de arriba.
 2. **Cuentas (Eddy, 2 min):** recuperar contraseña con Mailpit; reenvío con cuenta atrás; 403.
@@ -280,7 +279,7 @@ También: textos de 11a y 11e con la detección de stack (`LectorFuenteGitHub`, 
 5. **Motor (Derek, 3 min):** `sin-dockerfile` → stack detectado; Guardar y desplegar sin corte; detener y reiniciar; cuenta Vencida bloqueada.
 6. **Proceso y calidad (Javier, 1 min):** changes de OpenSpec, pruebas por escenario en CI, SOLID y patrones por historia.
 
-Plan B: el video grabado el jueves en el ensayo.
+Sin ensayo por ahora; si se agenda una presentación, se graba un video de respaldo antes.
 
 ## Avance 3 — 80 %
 

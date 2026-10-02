@@ -52,6 +52,8 @@ Activa → Por vencer (≤ 7 días) → Vencida (gracia 5 días; entornos en lí
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Javier](../../plan-avances.md#javier--monetización-5-pts).
 
+**Avance 2 (50 %):** [plan-avances.md § Javier (A2)](../../plan-avances.md#javier--monetización-11-pts-ya-en-main) · changes `feat-m2-contratacion-suscripcion` (hecho: falta archivar) y el seed de demo de `feat-m5-bloqueos-cuota` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#javier). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+
 **Dependencia crítica:** tu schema bloquea a todos. PR el lunes; pide antes los campos a cada módulo. Si te sobra tiempo en el Avance 1, adelanta M2-02.
 
 ## SOLID, patrones y pruebas

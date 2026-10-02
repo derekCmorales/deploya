@@ -21,6 +21,11 @@ El sistema SHALL crear un proyecto desde la URL de un repositorio **público de 
 - **WHEN** el repositorio no existe o es privado
 - **THEN** se rechaza con el código recibido y la lista de qué revisar (11e)
 
+#### Scenario: Falta el Dockerfile
+
+- **WHEN** la rama no tiene `Dockerfile` en la ruta indicada
+- **THEN** antes de rechazar se pide a M4 que reconozca el stack; solo si no lo reconoce se muestra el error de 11e
+
 #### Scenario: Falta el Dockerfile y no se reconoce el stack
 
 - **WHEN** la rama no tiene `Dockerfile` y M4 lanza `StackNoReconocido`

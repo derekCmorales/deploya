@@ -41,6 +41,8 @@ Estados de despliegue: Encolado, Construyendo, Aprovisionando, Publicando, Salud
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Derek](../../plan-avances.md#derek--motor-10-pts).
 
+**Avance 2 (50 %):** [plan-avances.md § Derek (A2)](../../plan-avances.md#derek--motor-12-pts) · changes `feat-m4-deteccion-stack`, `feat-m5-acciones-contenedor` (M5-02 y cierre de M6-01), `feat-m5-bloqueos-cuota` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#derek). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+
 **Dependencia crítica:** el contrato ya está en [docs/contratos/despliegues.md](../../contratos/despliegues.md); tu implementación debe cumplirlo para que Eduardo conecte **Desplegar** el martes. También migraste el design system v4.1 (WEB-01, hecho).
 
 ## Fuera de alcance · solo si da el tiempo
@@ -81,7 +83,7 @@ Regla general: [ingenieria.md](../../ingenieria.md). Hallazgos pendientes del mo
 
 ## Changes de OpenSpec
 
-`openspec/changes/feat-m4-motor-construccion` (A1) · `feat-m4-deteccion-stack` (A2) · `feat-m5-reversion-instantanea` (A3). Contratos: [despliegues v2](../../contratos/despliegues.md), [datos del núcleo](../../contratos/datos-nucleo.md).
+`openspec/changes/feat-m4-motor-construccion` (A1) · `feat-m4-deteccion-stack`, `feat-m5-acciones-contenedor`, `feat-m5-bloqueos-cuota` (A2) · `feat-m5-reversion-instantanea` (A3). Contratos: [despliegues v2.1](../../contratos/despliegues.md), [datos del núcleo](../../contratos/datos-nucleo.md).
 
 ## Specs OpenSpec
 

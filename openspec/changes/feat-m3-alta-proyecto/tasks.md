@@ -13,7 +13,7 @@ Cada tarea de código tiene su tarea de pruebas. Sin Docker, red, base ni reloj 
 - [x] 2.2 Pruebas con GitHub falso: «Repositorio válido», «Repositorio no accesible», «Rama inexistente», «Falta el Dockerfile», «GitHub no disponible», directorio `Dockerfile`, archivo de más de 1 MB, token
 - [x] 2.3 `RepositorioProyectos` + `RepositorioProyectosMemoria` en `AdaptersModule`; `ProyectosLecturaPuerto` con `useExisting`
 - [x] 2.4 `CuotaProyectosPuerto` + `CuotaProyectosStub` (Sandbox)
-- [ ] 2.5 `RepositorioProyectosPrisma` y adaptador de `cuotaDe` real (**esperan DB-01 y M2 en `main`**)
+- [x] 2.5 `RepositorioProyectosPrisma` y adaptador de `cuotaDe` real (en `main` con `feat/m1-sesion` y PR #13)
 
 ## 3. Servicio y controlador
 

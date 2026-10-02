@@ -47,6 +47,8 @@ Accesibilidad: semántica, foco visible, contraste en ambos temas, botones reale
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eduardo](../../plan-avances.md#eduardo--proyectos-8-pts).
 
+**Avance 2 (50 %):** [plan-avances.md § Eduardo (A2)](../../plan-avances.md#eduardo--proyectos-y-experiencia-8-pts) · changes `feat-m7-vista-despliegue` (M7-01) y `feat-m3-variables-cifradas` (M3-03); con Derek, 11a y 11e de `feat-m4-deteccion-stack` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#eduardo). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+
 **Dependencias:** schema de Javier (lunes), contrato de despliegues ([docs/contratos/despliegues.md](../../contratos/despliegues.md), ya publicado), guard de sesión de Eddy (martes 12:00; antes usa el usuario del seed).
 
 ## SOLID, patrones y pruebas

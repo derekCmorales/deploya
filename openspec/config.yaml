@@ -33,7 +33,7 @@ rules:
     - Do not introduce I-prefixed ports
     - UI in apps/web must reuse docs/diseno/README.md; do not invent palettes or a second shell
   design:
-    - Include a section "Diseño: SOLID y patrones" naming the classes, ports (abstract class, no I prefix) and design patterns used, and which SOLID principle each decision serves (docs/ingenieria.md §2 and §4)
+    - 'Include a section "Diseño: SOLID y patrones" naming the classes, ports (abstract class, no I prefix) and design patterns used, and which SOLID principle each decision serves (docs/ingenieria.md §2 and §4)'
     - List any change to a port, class or state and update docs/diagramas/compartido/clases-unificado.mmd in the same change
   tasks:
     - Break tasks into chunks a teammate can finish in one PR
@@ -42,9 +42,9 @@ rules:
 operations:
   apply:
     guidance:
-      - UI: seguir docs/diseno/guia-construccion.md y la ficha de la pantalla; solo componentes de apps/web/src/components; no inventar paleta
+      - "UI: seguir docs/diseno/guia-construccion.md y la ficha de la pantalla; solo componentes de apps/web/src/components; no inventar paleta"
       - Keep module health endpoints working
-      - Follow docs/ingenieria.md: SOLID, clean code, named patterns; services depend on ports injected by constructor
+      - "Follow docs/ingenieria.md: SOLID, clean code, named patterns; services depend on ports injected by constructor"
       - Write the unit test for each Scenario alongside the code (Jest *.spec.ts); no real Docker, network, DB or clock; pnpm test must be green before marking a task done
   archive:
     guidance:

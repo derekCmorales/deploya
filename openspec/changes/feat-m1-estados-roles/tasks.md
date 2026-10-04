@@ -14,8 +14,8 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 
 ## 3. Roles
 
-- [ ] 3.1 `RolGuard`, `@Roles()`, exportados por `IdentidadModule`; `AdministracionController` con `@UseGuards(SesionGuard, RolGuard)` y `@Roles("administrador")`
-- [ ] 3.2 Pruebas: «Cliente en ruta de administración» (403 `SoloAdministracion`), «Administrador en ruta de administración» (200), ruta sin `@Roles` deja pasar; el `health` de administración sigue público
+- [x] 3.1 `RolGuard`, `@Roles()`, exportados por `IdentidadModule`; `AdministracionController` con `@UseGuards(SesionGuard, RolGuard)` y `@Roles("administrador")` en `GET /administracion/acceso` (la ruta que la web consulta antes de mostrar `/admin`)
+- [x] 3.2 Pruebas: «Cliente en ruta de administración» (403 `SoloAdministracion`), «Administrador en ruta de administración» (200), ruta sin `@Roles` deja pasar, `@Roles` en el controlador, sin usuario de sesión → 401; el `health` de administración sigue público (`rol.guard.spec.ts`, `administracion.controller.spec.ts`)
 
 ## 4. Web (02, 03b, 28)
 
@@ -25,7 +25,7 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 
 ## 5. Cierre
 
-- [ ] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync`
+- [ ] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync` (hecho para `RolGuard` y `Roles`; faltan `PoliticaReenvio` y `ultimoDe`)
 - [ ] 5.2 `pnpm check` en verde; cobertura ≥ 80 % en `identidad/`
 - [ ] 5.3 Avisar a Javier (M9 usa `RolGuard`) y a Eduardo (28 comparte componentes)
 - [ ] 5.4 `/opsx-archive` después del merge

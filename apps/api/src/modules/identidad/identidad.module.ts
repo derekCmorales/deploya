@@ -17,13 +17,15 @@ import { HashContrasena } from "./puertos/hash-contrasena.puerto";
 import { RepositorioSesiones } from "./puertos/repositorio-sesiones.puerto";
 import { RepositorioTokensCuenta } from "./puertos/repositorio-tokens-cuenta.puerto";
 import { RepositorioUsuarios } from "./puertos/repositorio-usuarios.puerto";
+import { RolGuard } from "./rol.guard";
 import { CONFIGURACION_COOKIE, SesionController } from "./sesion.controller";
 import { SesionGuard } from "./sesion.guard";
 import { SesionService } from "./sesion.service";
 
 /**
  * Binding de M1: repositorios en PostgreSQL (DB-01) y Sandbox vía la Facade de M2.
- * Exporta `SesionGuard` y `SesionService` para que M3 y M4 protejan sus rutas.
+ * Exporta `SesionGuard` y `SesionService` para que M3 y M4 protejan sus rutas, y `RolGuard`
+ * para las rutas de administración (M9).
  */
 @Module({
   imports: [NotificacionesModule, SuscripcionesModule],
@@ -32,6 +34,7 @@ import { SesionService } from "./sesion.service";
     IdentidadService,
     SesionService,
     SesionGuard,
+    RolGuard,
     { provide: CONFIGURACION_IDENTIDAD, useFactory: () => configuracionIdentidadDesde(process.env) },
     { provide: CONFIGURACION_COOKIE, useFactory: () => configuracionCookieDesde(process.env) },
     { provide: RepositorioUsuarios, useClass: RepositorioUsuariosPrisma },
@@ -41,6 +44,6 @@ import { SesionService } from "./sesion.service";
     { provide: GeneradorToken, useClass: GeneradorTokenCripto },
     { provide: AsignacionSandboxPuerto, useClass: AsignacionSandboxSuscripciones },
   ],
-  exports: [IdentidadService, SesionService, SesionGuard],
+  exports: [IdentidadService, SesionService, SesionGuard, RolGuard],
 })
 export class IdentidadModule {}

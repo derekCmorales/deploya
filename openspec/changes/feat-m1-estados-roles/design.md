@@ -17,6 +17,7 @@
 1. **Cuenta atrás en el servidor.** `PoliticaReenvio.segundosRestantes(ultimoToken.creado, ahora)` (función pura, `ESPERA_REENVIO_MS = 60_000`). La web muestra la cuenta atrás con el número que devuelve el 429; no la inventa.
 2. **Reenvío neutro:** correo inexistente o cuenta ya activa → 202 sin enviar nada, igual que la recuperación.
 3. **`RolGuard` se compone con `SesionGuard`:** `@UseGuards(SesionGuard, RolGuard)` y `@Roles("administrador")`. `RolGuard` lee `request.usuario` (lo deja `SesionGuard`) y los metadatos con `Reflector`. Sin `@Roles` deja pasar.
+3b. **Ruta de acceso de administración:** mientras M9 no tenga rutas (Avance 3), `AdministracionController` expone `GET /administracion/acceso`, protegida con los dos guards, que devuelve el usuario. La web la consulta antes de mostrar `/admin`: 200 muestra la sección y 403 `SoloAdministracion` muestra la pantalla 28. El `health` sigue público.
 4. **Sesión expirada en la web:** `RequiereSesion` distingue «nunca hubo sesión» (va a `/ingresar`) de «la sesión venció» (respuesta 401 tras haber tenido usuario: va a `/ingresar?expirada=1` y muestra el banner de 28).
 
 ## Diseño: SOLID y patrones

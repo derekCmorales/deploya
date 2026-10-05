@@ -47,5 +47,5 @@ Cada tarea de código tiene su prueba. Sin base, red ni reloj reales: repositori
 - [x] 7.5 Header público en las pantallas de `(auth)` (`MarcoApp` elige el marco por grupo de rutas); prueba en `test/cuenta.test.mjs`
 - [x] 7.6 Diagramas de actividad de registro y verificación con el flujo real (Sandbox, `correoEnviado: false`, 410 y cuenta no pendiente; sin auditoría ni reenvío) y `pnpm diagramas:sync`
 - [x] 7.7 README de `(auth)`: enlaces que dan 404 hasta M1-03 y M1-05
-- [ ] 7.8 Ilustración de acceso de la pantalla 01 (SVG propio): falta el artboard `01-Registro` del canvas como referencia
-- [ ] 7.9 Revisión contra el canvas v4.1 en claro y oscuro
+- [x] 7.8 Ilustración de acceso de la pantalla 01 (`registro/ilustracion-registro.tsx`): SVG según el artboard `01-Registro`, con los colores del sistema por variables CSS (`--foreground`, `--signal`, `--faint`, `--border-stronger`) para que cambie con el tema. Movimiento del artboard: la órbita punteada gira y la barra de Señal se llena como una carga; se detiene con `prefers-reduced-motion`. Verificada en la app en claro y oscuro
+- [x] 7.9 Revisión contra el canvas v4.1 en claro y oscuro (01, 01b y 02): coinciden con el diseño de A1; el reenvío con cuenta atrás de 02 llega con M1-04

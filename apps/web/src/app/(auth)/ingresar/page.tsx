@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { FormularioIngreso } from "./formulario-ingreso";
+import { IlustracionIngreso } from "./ilustracion-ingreso";
 
 export const metadata: Metadata = { title: "Iniciar sesión · Deploya" };
 
@@ -14,7 +15,9 @@ export default function IngresarPage() {
           <FormularioIngreso />
         </Suspense>
       </section>
-      <aside aria-hidden className="puntos hidden border-l border-border bg-sunken lg:block" />
+      <aside aria-hidden className="puntos hidden place-items-center border-l border-border bg-sunken p-12 lg:grid">
+        <IlustracionIngreso className="w-[420px] max-w-full" />
+      </aside>
     </div>
   );
 }

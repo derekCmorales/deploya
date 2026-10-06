@@ -41,6 +41,15 @@ export class DesplieguesController {
     return this.construccion.desplegarComoDueno(proyectoId, usuarioId);
   }
 
+  @Get("proyectos/:id/despliegues/:numero")
+  consultarPorNumero(
+    @Param("id") proyectoId: string,
+    @Param("numero") numero: string,
+    @UsuarioActual("id") usuarioId: string,
+  ): Promise<VistaDespliegue> {
+    return this.construccion.consultarPorNumero(proyectoId, numeroDespliegue(numero), usuarioId);
+  }
+
   @Get("despliegues/:id")
   consultar(@Param("id") despliegueId: string, @UsuarioActual("id") usuarioId: string): Promise<VistaDespliegue> {
     return this.construccion.consultar(despliegueId, usuarioId);
@@ -54,6 +63,13 @@ export class DesplieguesController {
   ): Promise<PaginaBitacora> {
     return this.construccion.bitacoraDesde(despliegueId, usuarioId, posicionDesde(desde));
   }
+}
+
+/** Un número que no es entero positivo no puede existir: se responde como inexistente. */
+export function numeroDespliegue(valor: string): number {
+  const n = Number(valor);
+  if (!Number.isInteger(n) || n < 1) throw new DespliegueNoEncontrado(`#${valor}`);
+  return n;
 }
 
 export function posicionDesde(valor: string | undefined): number {

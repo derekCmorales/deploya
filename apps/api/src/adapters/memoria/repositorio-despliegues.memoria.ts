@@ -49,6 +49,11 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return despliegue ? structuredClone(despliegue) : null;
   }
 
+  async porNumero(proyectoId: string, numero: number): Promise<Despliegue | null> {
+    const despliegue = [...this.despliegues.values()].find((d) => d.proyectoId === proyectoId && d.numero === numero);
+    return despliegue ? structuredClone(despliegue) : null;
+  }
+
   async cambiarEstado(id: string, estado: EstadoDespliegue, cambios: CambiosDespliegue = {}): Promise<void> {
     const despliegue = this.obtener(id);
     Object.assign(despliegue, cambios, { estado });

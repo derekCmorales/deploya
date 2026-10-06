@@ -138,4 +138,25 @@ describe("ConstruccionService", () => {
 
     expect(await motor.servicio.ultimosDespliegues([])).toEqual({});
   });
+
+  describe("Consulta por número de despliegue", () => {
+    it("Consultar por número", async () => {
+      const motor = motorDePrueba();
+      await motor.desplegar();
+      await motor.desplegar();
+      const tercero = await motor.desplegar();
+
+      const porNumero = await motor.servicio.consultarPorNumero("proyecto-1", 3, "usuario-1");
+
+      expect(porNumero).toEqual(await motor.servicio.consultar(tercero.id, "usuario-1"));
+    });
+
+    it("Número inexistente o proyecto ajeno", async () => {
+      const motor = motorDePrueba();
+      await motor.desplegar();
+
+      await expect(motor.servicio.consultarPorNumero("proyecto-1", 9, "usuario-1")).rejects.toThrow(DespliegueNoEncontrado);
+      await expect(motor.servicio.consultarPorNumero("proyecto-1", 1, "otro-usuario")).rejects.toThrow(ProyectoNoEncontrado);
+    });
+  });
 });

@@ -45,12 +45,15 @@ export class ConstruccionService {
   }
 
   async consultar(despliegueId: string, usuarioId: string): Promise<VistaDespliegue> {
-    const despliegue = await this.despliegueDe(despliegueId, usuarioId);
-    const artefacto = despliegue.artefactoId ? await this.artefactos.porId(despliegue.artefactoId) : null;
-    const imagen = artefacto
-      ? { numero: artefacto.numero, digest: artefacto.digest, tamanoBytes: artefacto.tamanoBytes, receta: artefacto.receta }
-      : null;
-    return vistaDespliegue(despliegue, imagen);
+    return this.vistaDe(await this.despliegueDe(despliegueId, usuarioId));
+  }
+
+  /** `GET /proyectos/:id/despliegues/:numero`: número inexistente o proyecto ajeno → 404. */
+  async consultarPorNumero(proyectoId: string, numero: number, usuarioId: string): Promise<VistaDespliegue> {
+    await this.proyectoDe(proyectoId, usuarioId);
+    const despliegue = await this.despliegues.porNumero(proyectoId, numero);
+    if (!despliegue) throw new DespliegueNoEncontrado(`${proyectoId}#${numero}`);
+    return this.vistaDe(despliegue);
   }
 
   async bitacoraDesde(despliegueId: string, usuarioId: string, desde: number): Promise<PaginaBitacora> {
@@ -79,6 +82,14 @@ export class ConstruccionService {
     });
     await this.cola.encolar({ despliegueId: despliegue.id, plan: "construccion" });
     return { id: despliegue.id, numero: despliegue.numero, estado: despliegue.estado };
+  }
+
+  private async vistaDe(despliegue: Despliegue): Promise<VistaDespliegue> {
+    const artefacto = despliegue.artefactoId ? await this.artefactos.porId(despliegue.artefactoId) : null;
+    const imagen = artefacto
+      ? { numero: artefacto.numero, digest: artefacto.digest, tamanoBytes: artefacto.tamanoBytes, receta: artefacto.receta }
+      : null;
+    return vistaDespliegue(despliegue, imagen);
   }
 
   private async proyectoDe(proyectoId: string, usuarioId: string): Promise<ProyectoDesplegable> {

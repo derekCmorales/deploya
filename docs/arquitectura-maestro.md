@@ -1896,6 +1896,7 @@ classDiagram
         -reloj Reloj
         +crearDespliegue(proyectoId, disparador) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
+        +consultarPorNumero(proyectoId, numero, usuarioId) VistaDespliegue
         +bitacoraDesde(despliegueId, usuarioId, desde) PaginaBitacora
         +ultimosDespliegues(proyectoIds) Map~ResumenDespliegue~
     }
@@ -2028,6 +2029,7 @@ classDiagram
         <<abstract>>
         +crear(nuevo NuevoDespliegue) Despliegue
         +porId(id) Despliegue
+        +porNumero(proyectoId, numero) Despliegue
         +cambiarEstado(id, estado, cambios) void
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void

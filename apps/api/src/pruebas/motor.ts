@@ -10,6 +10,7 @@ import { ConstructorImagenStub } from "../adapters/stubs/constructor-imagen.stub
 import { ContenedorStub } from "../adapters/stubs/contenedor.stub";
 import { CuotaPlanStub } from "../adapters/stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "../adapters/stubs/enrutamiento.stub";
+import { VariablesEntornoStub } from "../adapters/stubs/variables-entorno.stub";
 import { VerificacionEntornoStub } from "../adapters/stubs/verificacion-entorno.stub";
 import { ConstruccionService } from "../modules/construccion/construccion.service";
 import { AccionesContenedorService } from "../modules/orquestacion/acciones/acciones-contenedor.service";
@@ -58,6 +59,7 @@ export function motorDePrueba() {
   const enrutamiento = new EnrutamientoStub();
   const cuota = new CuotaPlanStub();
   const recetas = new RecetaProyectoMemoria();
+  const variables = new VariablesEntornoStub();
   const orquestacion = new OrquestacionService(contenedores, salud, cuota);
   const enrutamientoServicio = new EnrutamientoService(enrutamiento);
   const colaOperacion = new ColaOperacionMemoria();
@@ -70,7 +72,7 @@ export function motorDePrueba() {
   const pasos = [
     new PasoRecepcion(clonador, despliegues, new DeteccionStackService(recetasEnOrden()), recetas),
     new PasoConstruccion(constructorImagen, artefactos, despliegues, reloj),
-    new PasoEjecucion(orquestacion, despliegues),
+    new PasoEjecucion(orquestacion, despliegues, variables),
     new PasoEnrutamiento(enrutamientoServicio, despliegues),
     new PasoOperacion(orquestacion, despliegues),
   ];
@@ -82,7 +84,7 @@ export function motorDePrueba() {
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
     contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
-    colaOperacion, accionesProyecto, accionesContenedor,
+    colaOperacion, accionesProyecto, accionesContenedor, variables,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);

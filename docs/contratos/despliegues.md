@@ -56,6 +56,8 @@ BloqueosService.verificar(usuarioId: string): Promise<void>
 VariablesProyectoService.descifradasDe(proyectoId: string): Promise<Record<string, string>>
 // lanza VariableIlegible si un valor fue alterado → el despliegue queda Fallido con motivo «variable ilegible»
 // la bitácora registra solo «N variables aplicadas»; PORT la pone el motor con puertoInterno
+// M5: VariablesEntornoPuerto.deProyecto(proyectoId). El adaptador sobre descifradasDe traduce
+// VariableIlegible (M3) a VariablesIlegibles (FalloDespliegue en Ejecución, motivo «Variable ilegible»)
 ```
 
 ### Variables de entorno (M3, HTTP · v2.1 · A2)

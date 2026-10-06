@@ -68,6 +68,14 @@ export class SaludNoAlcanzada extends FalloDespliegue {
   }
 }
 
+/** Un valor cifrado de M3 fue alterado: el contenedor no se crea y la versión activa no cambia. */
+export class VariablesIlegibles extends FalloDespliegue {
+  constructor() {
+    super("ejecucion", "Variable ilegible");
+    this.name = "VariablesIlegibles";
+  }
+}
+
 export class EnrutamientoFallido extends FalloDespliegue {
   constructor(detalle: string) {
     super("enrutamiento", `No se pudo publicar la ruta: ${detalle}`);

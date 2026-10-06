@@ -10,7 +10,9 @@ import { CuotaPlanSuscripciones } from "./adaptadores/cuota-plan.suscripciones";
 import { OrquestacionService } from "./orquestacion.service";
 import { PasoEjecucion } from "./paso-ejecucion";
 import { PasoOperacion } from "./paso-operacion";
+import { VariablesEntornoPendientes } from "./adaptadores/variables-entorno.pendientes";
 import { CuotaPlanPuerto } from "./puertos/cuota-plan.puerto";
+import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
 
 /**
  * Lo que M5 aporta al proceso trabajador: los pasos del pipeline (límites del plan de M2) y
@@ -23,6 +25,7 @@ import { CuotaPlanPuerto } from "./puertos/cuota-plan.puerto";
     PasoEjecucion,
     PasoOperacion,
     { provide: CuotaPlanPuerto, useClass: CuotaPlanSuscripciones },
+    { provide: VariablesEntornoPuerto, useClass: VariablesEntornoPendientes },
     ReiniciarManejador,
     DetenerManejador,
     EliminarManejador,

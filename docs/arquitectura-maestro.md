@@ -2013,6 +2013,11 @@ classDiagram
     }
     class PasoEjecucion {
         -orquestacion OrquestacionService
+        -variablesEntorno VariablesEntornoPuerto
+    }
+    class VariablesEntornoPuerto {
+        <<abstract>>
+        +deProyecto(proyectoId) Map~String, String~
     }
     class PasoOperacion {
         -contenedores ContenedorPuerto
@@ -2129,6 +2134,7 @@ classDiagram
     class RepositorioDesplieguesPrisma
     class ContenedorDocker
     class ColaOperacionBullMq
+    class VariablesEntornoPendientes
     class VerificacionHttp
     class EnrutamientoTraefikArchivo
 
@@ -2294,6 +2300,8 @@ classDiagram
     RepositorioArtefactos <|-- RepositorioArtefactosPrisma
     ContenedorPuerto <|-- ContenedorDocker
     ColaOperacionPuerto <|-- ColaOperacionBullMq
+    PasoEjecucion --> VariablesEntornoPuerto
+    VariablesEntornoPuerto <|-- VariablesEntornoPendientes
     ProyectosService --> AccionesProyectoService : pedirEliminacion
     AccionesProyectoService --> ColaOperacionPuerto
     AccionesProyectoService ..> AccionContenedor : encola

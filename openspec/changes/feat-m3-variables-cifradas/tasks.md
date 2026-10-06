@@ -16,8 +16,8 @@ Requiere el layout del proyecto de `feat/m7-vista-despliegue` para la pantalla 1
 
 ## 3. Al contenedor (Derek)
 
-- [ ] 3.1 `VariablesEntornoPuerto` en M5, adaptador sobre `VariablesProyectoService`, `PasoEjecucion` las pasa a `aprovisionar`; la bitácora registra solo la cantidad
-- [ ] 3.2 Pruebas: «Variables llegan al contenedor», «La bitácora no muestra valores», «Variable ilegible»
+- [ ] 3.1 `VariablesEntornoPuerto` en M5, adaptador sobre `VariablesProyectoService`, `PasoEjecucion` las pasa a `aprovisionar`; la bitácora registra solo la cantidad (**hecho salvo el adaptador**: hoy el binding es `VariablesEntornoPendientes`; falta cambiarlo por el adaptador sobre `descifradasDe` cuando M3-03 esté en `main`, que traduce `VariableIlegible` a `VariablesIlegibles`)
+- [x] 3.2 Pruebas: «Variables llegan al contenedor», «La bitácora no muestra valores», «Variable ilegible»
 
 ## 4. Web (Eduardo)
 

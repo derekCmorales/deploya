@@ -1,7 +1,7 @@
 import { motorDePrueba } from "../../pruebas/motor";
 import { VariablesIlegibles } from "../construccion/dominio/errores";
 import { VariablesEntornoPendientes } from "./adaptadores/variables-entorno.pendientes";
-import { textoVariables } from "./paso-ejecucion";
+import { PISTA_PUERTO_RECETA, textoVariables } from "./paso-ejecucion";
 
 describe("Variables de entorno en el contenedor (M3-03 → M5)", () => {
   it("Variables llegan al contenedor", async () => {
@@ -42,5 +42,21 @@ describe("Variables de entorno en el contenedor (M3-03 → M5)", () => {
   it("sin variables no escribe la línea y una sola va en singular", async () => {
     expect(textoVariables(1)).toBe("1 variable aplicada");
     expect(await new VariablesEntornoPendientes().deProyecto()).toEqual({});
+  });
+
+  it("con receta, si no pasa la salud la bitácora sugiere escuchar en PORT; con Dockerfile propio no", async () => {
+    const lineasDe = async (archivos: Map<string, string>) => {
+      const motor = motorDePrueba();
+      motor.clonador.archivos = archivos;
+      motor.salud.resultado = { ok: false, estadoHttp: null, milisegundos: 60_000, detalle: "connect ECONNREFUSED" };
+      const despliegue = await motor.desplegar();
+      return (await motor.despliegues.lineasDesde(despliegue.id, 0, 500)).map((l) => [l.nivel, l.texto]);
+    };
+
+    const conReceta = await lineasDe(new Map([["package.json", JSON.stringify({ scripts: { start: "node ." } })]]));
+    const conDockerfile = await lineasDe(new Map([["Dockerfile", "FROM node:22"]]));
+
+    expect(conReceta).toContainEqual(["aviso", PISTA_PUERTO_RECETA]);
+    expect(conDockerfile.map(([, texto]) => texto)).not.toContain(PISTA_PUERTO_RECETA);
   });
 });

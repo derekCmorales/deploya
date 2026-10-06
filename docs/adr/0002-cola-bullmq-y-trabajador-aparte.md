@@ -11,7 +11,7 @@ Construir una imagen tarda de segundos a minutos (el tope es de 10 min) y necesi
 
 ## Decisión
 
-Usamos **BullMQ** sobre Redis con una cola `despliegues`. La API solo produce: crea el `Despliegue` y encola un `TrabajoDespliegue { despliegueId, plan: "construccion" | "reversion" }` (patrón Command, `jobId = despliegueId` para que sea idempotente, sin reintentos automáticos: reintentar es una acción del cliente). Un proceso **worker** con la misma imagen que la API (`node dist/trabajador.js`, `TrabajadorModule`) consume con concurrencia 1, monta `/var/run/docker.sock` y es el único que habla con Docker, git y Traefik. La cola queda detrás de `ColaConstruccionPuerto` (cierra C1 de la auditoría).
+Usamos **BullMQ** sobre Redis con una cola `despliegues`. La API solo produce: crea el `Despliegue` y encola un `TrabajoDespliegue { despliegueId, plan: "construccion" | "reversion" }` (patrón Command, `jobId = despliegueId` para que sea idempotente, sin reintentos automáticos: reintentar es una acción del cliente). Un proceso **worker** con la misma imagen que la API (`node dist/trabajador.js`, `TrabajadorModule`) consume con concurrencia 1, monta `/var/run/docker.sock` y es el único que habla con Docker, git y Traefik. La cola queda detrás de `ColaConstruccionPuerto` (cierra C1 de la auditoría). Desde el Avance 2 hay una segunda cola, `operacion` (M5-02), para reiniciar, detener y eliminar: acciones de segundos que no esperan detrás de un build; esas sí reintentan 3 veces con espera exponencial porque no cuestan construcciones.
 
 ## Alternativas consideradas
 

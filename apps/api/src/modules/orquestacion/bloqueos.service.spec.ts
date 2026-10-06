@@ -63,6 +63,18 @@ describe("Bloqueos por suscripción y cuota (M5-03)", () => {
     expect(creado.estado).toBe("encolado");
   });
 
+  it("Límite de construcciones", async () => {
+    const motor = motorDePrueba();
+    await crearConstrucciones(motor, SANDBOX);
+
+    motor.reloj.avanzar(11 * 60 * 60 * 1000);
+    await expect(motor.servicio.crearDespliegue("proyecto-1")).rejects.toThrow(CuotaConstruccionesAgotada);
+    motor.reloj.avanzar(60 * 60 * 1000);
+
+    expect(motor.reloj.ahora().toISOString()).toBe("2026-10-01T00:00:00.000Z");
+    expect((await motor.servicio.crearDespliegue("proyecto-1")).estado).toBe("encolado");
+  });
+
   it("La reversión no cuenta", async () => {
     const motor = motorDePrueba();
     const desde = new Date("2026-09-01T00:00:00Z");

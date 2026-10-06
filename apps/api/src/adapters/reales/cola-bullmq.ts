@@ -53,8 +53,16 @@ export function consumirDespliegues(
 }
 
 /**
- * Productor de la cola `operacion` (M5-02). `jobId = proyectoId:tipo` evita pedir dos veces lo
- * mismo mientras está pendiente; al terminar se borra para que se pueda volver a pedir.
+ * `jobId` de una acción: uno por proyecto y tipo. BullMQ rechaza ids con `:` (separador de
+ * claves en Redis) y los que son enteros.
+ */
+export function idTrabajoOperacion(accion: AccionContenedor): string {
+  return `${accion.tipo}-${accion.proyectoId}`;
+}
+
+/**
+ * Productor de la cola `operacion` (M5-02). El `jobId` evita pedir dos veces lo mismo
+ * mientras está pendiente; al terminar se borra para que se pueda volver a pedir.
  * Reintenta 3 veces con espera exponencial: una acción no es una construcción.
  */
 export class ColaOperacionBullMq extends ColaOperacionPuerto {
@@ -67,7 +75,7 @@ export class ColaOperacionBullMq extends ColaOperacionPuerto {
 
   async encolar(accion: AccionContenedor): Promise<void> {
     await this.cola.add(accion.tipo, accion, {
-      jobId: `${accion.proyectoId}:${accion.tipo}`,
+      jobId: idTrabajoOperacion(accion),
       attempts: INTENTOS_OPERACION,
       backoff: { type: "exponential", delay: ESPERA_INICIAL_OPERACION_MS },
       removeOnComplete: true,

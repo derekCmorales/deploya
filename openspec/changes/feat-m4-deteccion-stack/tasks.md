@@ -25,6 +25,6 @@ Requiere `feat/m4-motor-construccion` en `main`. Pruebas con mapas de archivos e
 
 ## 5. Cierre
 
-- [ ] 5.1 `pnpm check` en verde; cobertura ≥ 80 % en `construccion/deteccion`
+- [x] 5.1 `pnpm check` en verde; cobertura ≥ 80 % en `construccion/deteccion`
 - [ ] 5.2 En compose: rama `sin-dockerfile` de `hola-deploya` termina Saludable con receta `node`
 - [ ] 5.3 Quitar «detección de stack» de *Fuera de alcance* en `openspec/specs/proyectos/spec.md` y `motor-construccion/spec.md` al archivar; ADR 0003 a Aceptado

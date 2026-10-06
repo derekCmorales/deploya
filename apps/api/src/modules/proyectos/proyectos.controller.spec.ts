@@ -4,6 +4,7 @@ import { AdaptersModule } from "../../adapters/adapters.module";
 import { RepositorioArtefactosMemoria } from "../../adapters/memoria/repositorio-artefactos.memoria";
 import { RepositorioDesplieguesMemoria } from "../../adapters/memoria/repositorio-despliegues.memoria";
 import { RepositorioProyectosMemoria } from "../../adapters/memoria/repositorio-proyectos.memoria";
+import { CuotaPlanStub } from "../../adapters/stubs/cuota-plan.stub";
 import { PrismaModule } from "../../compartido/prisma/prisma.module";
 import { PrismaService } from "../../compartido/prisma/prisma.service";
 import { RelojFijo } from "../../compartido/reloj";
@@ -11,6 +12,7 @@ import { RepositorioArtefactos } from "../construccion/puertos/repositorio-artef
 import { RepositorioDespliegues } from "../construccion/puertos/repositorio-despliegues.puerto";
 import { ConstruccionService } from "../construccion/construccion.service";
 import { ProyectosLecturaPuerto } from "../construccion/puertos/proyectos-lectura.puerto";
+import { CuotaPlanPuerto } from "../orquestacion/puertos/cuota-plan.puerto";
 import {
   DatosAltaInvalidos,
   ErrorProyectos,
@@ -66,6 +68,8 @@ async function montarApi() {
     .useValue(new RepositorioArtefactosMemoria())
     .overrideProvider(CuotaProyectosPuerto)
     .useValue(new CuotaProyectosStub())
+    .overrideProvider(CuotaPlanPuerto)
+    .useValue(new CuotaPlanStub())
     .compile();
   return {
     controlador: modulo.get(ProyectosController),

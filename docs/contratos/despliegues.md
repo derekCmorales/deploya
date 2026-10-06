@@ -47,6 +47,8 @@ export interface ResultadoDeteccion {
 BloqueosService.verificar(usuarioId: string): Promise<void>
 // lanza SuscripcionNoPermite (Vencida o Suspendida) o CuotaConstruccionesAgotada
 // construcciones del mes = invariante I7 de datos-nucleo.md (mes calendario UTC, disparador ≠ reversion)
+// Exportado por OrquestacionModule. Sus errores salen como 409 { codigo, mensaje } en CUALQUIER ruta
+// (filtro global BloqueosDespliegueFilter): M3 no necesita traducirlos. Bloquean también "cancelada".
 
 // v2.1 · A2 · M3 → M5 (M3-03). M5 lo envuelve con su puerto VariablesEntornoPuerto en PasoEjecucion.
 VariablesProyectoService.descifradasDe(proyectoId: string): Promise<Record<string, string>>

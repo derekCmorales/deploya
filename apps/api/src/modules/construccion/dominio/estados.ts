@@ -25,6 +25,9 @@ export type NivelBitacora = "info" | "aviso" | "error";
 
 export type DisparadorDespliegue = "alta" | "manual" | "reintento" | "redespliegue" | "reversion" | "variables";
 
+/** La reversión reusa un artefacto: no construye ni cuenta contra el plan (I7). */
+export const DISPARADOR_SIN_CONSTRUCCION: DisparadorDespliegue = "reversion";
+
 export type PlanPipeline = "construccion" | "reversion";
 
 export type RecetaConstruccion = "dockerfile" | "node" | "python" | "go" | "estatica";

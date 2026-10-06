@@ -11,6 +11,7 @@ import { CuotaPlanStub } from "../adapters/stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "../adapters/stubs/enrutamiento.stub";
 import { VerificacionEntornoStub } from "../adapters/stubs/verificacion-entorno.stub";
 import { ConstruccionService } from "../modules/construccion/construccion.service";
+import { BloqueosService } from "../modules/orquestacion/bloqueos.service";
 import { DeteccionStackService } from "../modules/construccion/deteccion/deteccion-stack.service";
 import { recetasEnOrden } from "../modules/construccion/deteccion/recetas-stack";
 import type { ProyectoDesplegable } from "../modules/construccion/dominio/despliegue";
@@ -59,12 +60,14 @@ export function motorDePrueba() {
     new PasoEnrutamiento(new EnrutamientoService(enrutamiento), despliegues),
     new PasoOperacion(orquestacion, despliegues),
   ];
-  const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, reloj);
+  const bloqueos = new BloqueosService(cuota, despliegues, reloj);
+  const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, bloqueos, reloj);
   const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, pasos);
   proyectos.agregar(proyectoDemo());
+  despliegues.registrarDueno("proyecto-1", "usuario-1");
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
-    contenedores, salud, enrutamiento, cuota, recetas, orquestacion, servicio, pipeline,
+    contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);

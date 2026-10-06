@@ -38,4 +38,9 @@ export abstract class RepositorioDespliegues {
   abstract ultimosDe(proyectoIds: string[]): Promise<Despliegue[]>;
   abstract activoDe(proyectoId: string): Promise<Despliegue | null>;
   abstract marcarActivo(proyectoId: string, despliegueId: string): Promise<void>;
+  /**
+   * Construcciones del usuario desde `desde` (invariante I7): todos sus despliegues creados
+   * desde esa fecha salvo los de `reversion`, que no construyen. Terminen como terminen.
+   */
+  abstract contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number>;
 }

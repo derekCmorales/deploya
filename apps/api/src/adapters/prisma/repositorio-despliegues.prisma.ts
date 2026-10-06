@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../compartido/prisma/prisma.service";
 import type { Despliegue, LineaBitacora } from "../../modules/construccion/dominio/despliegue";
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
-import { ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
+import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
@@ -118,6 +118,12 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
 
   async marcarActivo(proyectoId: string, despliegueId: string): Promise<void> {
     await this.prisma.proyecto.update({ where: { id: proyectoId }, data: { despliegueActivoId: despliegueId } });
+  }
+
+  async contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number> {
+    return this.prisma.despliegue.count({
+      where: { proyecto: { usuarioId }, creado: { gte: desde }, disparador: { not: DISPARADOR_SIN_CONSTRUCCION } },
+    });
   }
 
   private async crearConSiguienteNumero(nuevo: NuevoDespliegue): Promise<Despliegue> {

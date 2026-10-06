@@ -1893,6 +1893,7 @@ classDiagram
         -cola ColaConstruccionPuerto
         -despliegues RepositorioDespliegues
         -proyectos ProyectosLecturaPuerto
+        -bloqueos BloqueosService
         -reloj Reloj
         +crearDespliegue(proyectoId, disparador) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
@@ -1954,7 +1955,16 @@ classDiagram
         +etapaDe(estado) Etapa
     }
     class PoliticaDespliegue {
-        +puedeConstruir(cuota, construccionesDelMes) Decision
+        <<Specification>>
+        +verificarDespliegue(situacion SituacionDespliegue) void
+        +inicioDelMes(ahora) Date
+    }
+    class BloqueosService {
+        <<Facade>>
+        -cuota CuotaPlanPuerto
+        -despliegues RepositorioDespliegues
+        -reloj Reloj
+        +verificar(usuarioId) void
     }
 
     %% ───────── M5 Orquestación (Derek) ─────────
@@ -2027,6 +2037,7 @@ classDiagram
     class CuotaPlanPuerto {
         <<abstract>>
         +recursosDe(usuarioId) RecursosPlan
+        +permisoDe(usuarioId) PermisoPlan
     }
     class ConstructorImagenPuerto {
         <<abstract>>
@@ -2049,7 +2060,7 @@ classDiagram
         +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
         +marcarActivo(proyectoId, despliegueId) void
-        +construccionesDesde(usuarioId, desde) Integer
+        +contarConstruccionesDesde(usuarioId, desde) Integer
     }
     class RepositorioArtefactos {
         <<abstract>>
@@ -2195,7 +2206,10 @@ classDiagram
 
     ConstruccionService --> ColaConstruccionPuerto
     ConstruccionService --> RepositorioDespliegues
-    ConstruccionService --> PoliticaDespliegue
+    ConstruccionService --> BloqueosService : verificar
+    BloqueosService --> PoliticaDespliegue
+    BloqueosService --> CuotaPlanPuerto
+    BloqueosService --> RepositorioDespliegues
     ConstruccionService --> TransicionesDespliegue
     ConstruccionService --> ProyectosLecturaPuerto
     ProyectosLecturaPuerto ..> RepositorioProyectos : mismo almacén

@@ -1,15 +1,26 @@
 import { RelojFijo } from "../compartido/reloj";
 import { ProyectosLecturaMemoria } from "../adapters/memoria/proyectos-lectura.memoria";
+import { RecetaProyectoMemoria } from "../adapters/memoria/receta-proyecto.memoria";
 import { RepositorioArtefactosMemoria } from "../adapters/memoria/repositorio-artefactos.memoria";
 import { RepositorioDesplieguesMemoria } from "../adapters/memoria/repositorio-despliegues.memoria";
 import { ClonadorStub } from "../adapters/stubs/clonador.stub";
 import { ColaMemoria } from "../adapters/stubs/cola.memoria";
+import { ColaOperacionMemoria } from "../adapters/stubs/cola-operacion.memoria";
 import { ConstructorImagenStub } from "../adapters/stubs/constructor-imagen.stub";
 import { ContenedorStub } from "../adapters/stubs/contenedor.stub";
 import { CuotaPlanStub } from "../adapters/stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "../adapters/stubs/enrutamiento.stub";
+import { VariablesEntornoStub } from "../adapters/stubs/variables-entorno.stub";
 import { VerificacionEntornoStub } from "../adapters/stubs/verificacion-entorno.stub";
 import { ConstruccionService } from "../modules/construccion/construccion.service";
+import { AccionesContenedorService } from "../modules/orquestacion/acciones/acciones-contenedor.service";
+import { AccionesProyectoService } from "../modules/orquestacion/acciones/acciones-proyecto.service";
+import { DetenerManejador } from "../modules/orquestacion/acciones/detener.manejador";
+import { EliminarManejador } from "../modules/orquestacion/acciones/eliminar.manejador";
+import { ReiniciarManejador } from "../modules/orquestacion/acciones/reiniciar.manejador";
+import { BloqueosService } from "../modules/orquestacion/bloqueos.service";
+import { DeteccionStackService } from "../modules/construccion/deteccion/deteccion-stack.service";
+import { recetasEnOrden } from "../modules/construccion/deteccion/recetas-stack";
 import type { ProyectoDesplegable } from "../modules/construccion/dominio/despliegue";
 import { PasoConstruccion } from "../modules/construccion/pipeline/paso-construccion";
 import { PasoRecepcion } from "../modules/construccion/pipeline/paso-recepcion";
@@ -47,25 +58,44 @@ export function motorDePrueba() {
   const salud = new VerificacionEntornoStub();
   const enrutamiento = new EnrutamientoStub();
   const cuota = new CuotaPlanStub();
+  const recetas = new RecetaProyectoMemoria();
+  const variables = new VariablesEntornoStub();
   const orquestacion = new OrquestacionService(contenedores, salud, cuota);
+  const enrutamientoServicio = new EnrutamientoService(enrutamiento);
+  const colaOperacion = new ColaOperacionMemoria();
+  const accionesProyecto = new AccionesProyectoService(proyectos, despliegues, colaOperacion);
+  const accionesContenedor = new AccionesContenedorService([
+    new ReiniciarManejador(despliegues, proyectos, orquestacion, enrutamientoServicio, reloj),
+    new DetenerManejador(despliegues, orquestacion, enrutamientoServicio, reloj),
+    new EliminarManejador(orquestacion, enrutamientoServicio),
+  ]);
   const pasos = [
-    new PasoRecepcion(clonador, despliegues),
-    new PasoConstruccion(clonador, constructorImagen, artefactos, despliegues, reloj),
-    new PasoEjecucion(orquestacion, despliegues),
-    new PasoEnrutamiento(new EnrutamientoService(enrutamiento), despliegues),
+    new PasoRecepcion(clonador, despliegues, new DeteccionStackService(recetasEnOrden()), recetas),
+    new PasoConstruccion(constructorImagen, artefactos, despliegues, reloj),
+    new PasoEjecucion(orquestacion, despliegues, variables),
+    new PasoEnrutamiento(enrutamientoServicio, despliegues),
     new PasoOperacion(orquestacion, despliegues),
   ];
-  const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, reloj);
+  const bloqueos = new BloqueosService(cuota, despliegues, reloj);
+  const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, bloqueos, reloj);
   const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, pasos);
   proyectos.agregar(proyectoDemo());
+  despliegues.registrarDueno("proyecto-1", "usuario-1");
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
-    contenedores, salud, enrutamiento, cuota, orquestacion, servicio, pipeline,
+    contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
+    colaOperacion, accionesProyecto, accionesContenedor, variables,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);
       await pipeline.ejecutar({ despliegueId: creado.id, plan: "construccion" }, 0);
       return (await despliegues.porId(creado.id))!;
+    },
+    /** Pide la acción como la API y la ejecuta como el trabajador (cola `operacion`). */
+    async accion(tipo: "reiniciar" | "detener", proyectoId = "proyecto-1") {
+      await accionesProyecto[tipo](proyectoId, "usuario-1");
+      await accionesContenedor.ejecutar(colaOperacion.acciones.at(-1)!);
+      return (await despliegues.activoDe(proyectoId))!;
     },
   };
 }

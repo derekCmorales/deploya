@@ -28,6 +28,8 @@ export interface CambiosDespliegue {
 export abstract class RepositorioDespliegues {
   abstract crear(nuevo: NuevoDespliegue): Promise<Despliegue>;
   abstract porId(id: string): Promise<Despliegue | null>;
+  /** El despliegue #`numero` del proyecto (pantalla 12 abre por número). */
+  abstract porNumero(proyectoId: string, numero: number): Promise<Despliegue | null>;
   abstract cambiarEstado(id: string, estado: EstadoDespliegue, cambios?: CambiosDespliegue): Promise<void>;
   abstract marcarEtapa(id: string, etapa: Etapa, estado: EstadoEtapa, marca: Date): Promise<void>;
   abstract agregarLineas(id: string, lineas: LineaBitacora[]): Promise<void>;
@@ -36,4 +38,9 @@ export abstract class RepositorioDespliegues {
   abstract ultimosDe(proyectoIds: string[]): Promise<Despliegue[]>;
   abstract activoDe(proyectoId: string): Promise<Despliegue | null>;
   abstract marcarActivo(proyectoId: string, despliegueId: string): Promise<void>;
+  /**
+   * Construcciones del usuario desde `desde` (invariante I7): todos sus despliegues creados
+   * desde esa fecha salvo los de `reversion`, que no construyen. Terminen como terminen.
+   */
+  abstract contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number>;
 }

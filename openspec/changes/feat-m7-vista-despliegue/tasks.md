@@ -4,8 +4,8 @@ Requiere `feat/m4-motor-construccion` en `main` (ya está). Pruebas web con `nod
 
 ## 1. Motor (Derek)
 
-- [ ] 1.1 `RepositorioDespliegues.porNumero` (Prisma y memoria) y `GET /proyectos/:id/despliegues/:numero`
-- [ ] 1.2 Pruebas: «Consultar por número», «Número inexistente o proyecto ajeno»
+- [x] 1.1 `RepositorioDespliegues.porNumero` (Prisma y memoria) y `GET /proyectos/:id/despliegues/:numero`
+- [x] 1.2 Pruebas: «Consultar por número», «Número inexistente o proyecto ajeno»
 
 ## 2. Lógica web pura
 

@@ -1,6 +1,6 @@
 import { BadRequestException, type ArgumentsHost } from "@nestjs/common";
 import { motorDePrueba } from "../../pruebas/motor";
-import { DesplieguesController, ErroresMotorFilter, posicionDesde } from "./despliegues.controller";
+import { DesplieguesController, ErroresMotorFilter, numeroDespliegue, posicionDesde } from "./despliegues.controller";
 import { DespliegueNoEncontrado, TransicionInvalida } from "./dominio/errores";
 
 function respuestaFalsa() {
@@ -55,5 +55,21 @@ describe("DesplieguesController", () => {
 
     expect(noEncontrado.respuesta.estado).toBe(404);
     expect(conflicto.respuesta.estado).toBe(409);
+  });
+
+  it("GET /proyectos/:id/despliegues/:numero devuelve el mismo cuerpo que por id", async () => {
+    const motor = motorDePrueba();
+    const controlador = new DesplieguesController(motor.servicio);
+    const despliegue = await motor.desplegar();
+
+    const vista = await controlador.consultarPorNumero("proyecto-1", "1", "usuario-1");
+
+    expect(vista).toEqual(await controlador.consultar(despliegue.id, "usuario-1"));
+  });
+
+  it("un número que no es entero positivo responde como inexistente (404)", () => {
+    expect(() => numeroDespliegue("0")).toThrow(DespliegueNoEncontrado);
+    expect(() => numeroDespliegue("abc")).toThrow(DespliegueNoEncontrado);
+    expect(numeroDespliegue("3")).toBe(3);
   });
 });

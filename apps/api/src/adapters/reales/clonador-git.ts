@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
-import { access, mkdir, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { join, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import { ClonFallido } from "../../modules/construccion/dominio/errores";
 import {
@@ -8,6 +8,8 @@ import {
   type ClonListo,
   type SolicitudClon,
 } from "../../modules/construccion/puertos/clonador-repositorio.puerto";
+import type { LectorFuente } from "../../modules/construccion/puertos/lector-fuente.puerto";
+import { LectorFuenteLocal } from "./lector-fuente-local";
 
 const ejecutar = promisify(execFile);
 const URL_PUBLICA = /^https:\/\/[\w.-]+\/[\w.-]+\/[\w.-]+(\.git)?\/?$/;
@@ -34,13 +36,14 @@ export class ClonadorGit extends ClonadorRepositorioPuerto {
     return { directorio, commit: { sha, mensaje, autor } };
   }
 
-  async existeArchivo(directorio: string, ruta: string): Promise<boolean> {
-    try {
-      await access(join(directorio, ruta));
-      return true;
-    } catch {
-      return false;
-    }
+  lector(directorio: string): LectorFuente {
+    return new LectorFuenteLocal(directorio);
+  }
+
+  async escribir(directorio: string, ruta: string, contenido: string): Promise<void> {
+    const destino = resolve(directorio, ruta);
+    if (relative(directorio, destino).startsWith("..")) throw new ClonFallido(`ruta fuera del clon: ${ruta}`);
+    await writeFile(destino, contenido, "utf8");
   }
 
   async limpiar(directorio: string): Promise<void> {

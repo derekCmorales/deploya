@@ -5,24 +5,28 @@ import { ClonadorRepositorioPuerto } from "../modules/construccion/puertos/clona
 import { ColaConstruccionPuerto } from "../modules/construccion/puertos/cola-construccion.puerto";
 import { ConstructorImagenPuerto } from "../modules/construccion/puertos/constructor-imagen.puerto";
 import { ProyectosLecturaPuerto } from "../modules/construccion/puertos/proyectos-lectura.puerto";
+import { RecetaProyectoPuerto } from "../modules/construccion/puertos/receta-proyecto.puerto";
 import { RepositorioArtefactos } from "../modules/construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
+import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
 import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verificacion-entorno.puerto";
 import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { CONFIGURACION_MOTOR, configuracionDesde, type ConfiguracionMotor } from "./configuracion-motor";
+import { RecetaProyectoPrisma } from "./prisma/receta-proyecto.prisma";
 import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
-import { ColaBullMq } from "./reales/cola-bullmq";
+import { ColaBullMq, ColaOperacionBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
 import { ContenedorDocker } from "./reales/contenedor-docker";
 import { EnrutamientoTraefikArchivo } from "./reales/enrutamiento-traefik-archivo";
 import { VerificacionHttp } from "./reales/verificacion-http";
 import { ClonadorStub } from "./stubs/clonador.stub";
 import { ColaMemoria } from "./stubs/cola.memoria";
+import { ColaOperacionMemoria } from "./stubs/cola-operacion.memoria";
 import { ConstructorImagenStub } from "./stubs/constructor-imagen.stub";
 import { ContenedorStub } from "./stubs/contenedor.stub";
 import { EnrutamientoStub } from "./stubs/enrutamiento.stub";
@@ -52,6 +56,7 @@ const PERSISTENCIA: Provider[] = [
   { provide: RepositorioArtefactos, useClass: RepositorioArtefactosPrisma },
   { provide: RepositorioProyectos, useClass: RepositorioProyectosPrisma },
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
+  { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
 ];
 
 const COMUNES: Provider[] = [
@@ -59,6 +64,7 @@ const COMUNES: Provider[] = [
   { provide: Reloj, useClass: RelojSistema },
   ...PERSISTENCIA,
   puerto(ColaConstruccionPuerto, { docker: (c) => new ColaBullMq(c.redisUrl), stub: () => new ColaMemoria() }),
+  puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
 ];
 
 const SOLO_TRABAJADOR: Provider[] = [

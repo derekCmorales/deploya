@@ -9,18 +9,18 @@ Sin base ni reloj reales: `Reloj` falso y repositorios en memoria.
 
 ## 2. Política y servicio (Derek)
 
-- [ ] 2.1 `PoliticaDespliegue`, `inicioDelMes`, errores, `BloqueosService`, `CuotaPlanPuerto.permisoDe`, `RepositorioDespliegues.contarConstruccionesDesde` (Prisma y memoria)
-- [ ] 2.2 Pruebas: «Suscripción vencida bloquea el despliegue», «Suscripción suspendida bloquea el despliegue», «Cuota de construcciones agotada», «Dentro de la cuota», «La reversión no cuenta», «Mes nuevo, cuota nueva»
+- [x] 2.1 `PoliticaDespliegue`, `inicioDelMes`, errores, `BloqueosService`, `CuotaPlanPuerto.permisoDe`, `RepositorioDespliegues.contarConstruccionesDesde` (Prisma y memoria)
+- [x] 2.2 Pruebas: «Suscripción vencida bloquea el despliegue», «Suscripción suspendida bloquea el despliegue», «Cuota de construcciones agotada», «Dentro de la cuota», «La reversión no cuenta», «Mes nuevo, cuota nueva»
 
 ## 3. Puntos de entrada
 
-- [ ] 3.1 Derek: `ConstruccionService.crearDespliegue` verifica; filtro 409 con `codigo`
+- [x] 3.1 Derek: `ConstruccionService.crearDespliegue` verifica; filtro 409 con `codigo`
 - [ ] 3.2 Eduardo: `POST /proyectos` verifica antes de persistir; banner en 11d y 17 con enlace a `/suscripcion`
-- [ ] 3.3 Pruebas: controlador de despliegues 409 con cada `codigo`; «Alta con la suscripción vencida» no persiste el proyecto
+- [ ] 3.3 Pruebas: controlador de despliegues 409 con cada `codigo` (**hecho**, filtro global `RechazosOrquestacionFilter`); «Alta con la suscripción vencida» no persiste el proyecto (Eduardo, con 3.2)
 
 ## 4. Cierre
 
-- [ ] 4.1 `clases-unificado.mmd` y `pnpm diagramas:sync`
-- [ ] 4.2 `pnpm check` en verde; cobertura ≥ 80 % en `orquestacion/`
+- [x] 4.1 `clases-unificado.mmd` y `pnpm diagramas:sync`
+- [x] 4.2 `pnpm check` en verde; cobertura ≥ 80 % en `orquestacion/`
 - [ ] 4.3 Demo en compose: con `vencida@deploya.app`, «Desplegar» muestra el banner; con Sandbox y 30 construcciones en el mes, la 31 se rechaza
 - [ ] 4.4 Marcar la tarea 5.3 de `feat/m3-alta-proyecto`; `/opsx-archive` después del merge

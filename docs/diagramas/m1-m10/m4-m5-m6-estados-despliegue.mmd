@@ -20,8 +20,8 @@ stateDiagram-v2
     Publicando --> Saludable : Traefik apunta al contenedor nuevo y se detiene el anterior
     Publicando --> Fallido : falla el enrutamiento
 
-    Saludable --> Detenido : el cliente detiene, suscripción Suspendida o cuenta suspendida
-    Detenido --> Aprovisionando : el cliente reinicia
+    Saludable --> Detenido : el cliente detiene o reinicia (cola operación), suscripción Suspendida o cuenta suspendida
+    Detenido --> Aprovisionando : el cliente reinicia (mismo contenedor, sin reconstruir ni consumir construcciones)
 
     Fallido --> [*]
     Cancelado --> [*]

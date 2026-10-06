@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConstruccionService } from "../construccion/construccion.service";
+import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
 import { ConfirmacionNoCoincide, LimiteProyectosAlcanzado, ProyectoNoEncontrado, SubdominioEnUso } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
@@ -36,6 +37,7 @@ export class ProyectosService {
     private readonly repositorio: RepositorioProyectos,
     private readonly cuota: CuotaProyectosPuerto,
     private readonly construccion: ConstruccionService,
+    private readonly acciones: AccionesProyectoService,
   ) {}
 
   validarRepositorio(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
@@ -74,11 +76,13 @@ export class ProyectosService {
   /**
    * Elimina el proyecto (19b). Un proyecto ajeno se trata como inexistente; el cliente
    * debe escribir el nombre exacto. Libera el cupo del plan sin importar el estado del despliegue.
+   * M5 borra después contenedores, imágenes y ruta por la cola de operación (M5-02).
    */
   async eliminar(usuarioId: string, proyectoId: string, confirmacion: string): Promise<void> {
     const proyecto = await this.repositorio.porId(proyectoId);
     if (!proyecto || proyecto.usuarioId !== usuarioId) throw new ProyectoNoEncontrado(proyectoId);
     if (confirmacion !== proyecto.nombre) throw new ConfirmacionNoCoincide();
+    await this.acciones.pedirEliminacion(proyecto);
     await this.repositorio.eliminar(proyecto.id);
   }
 

@@ -37,4 +37,9 @@ describe("Adaptadores de M1, M3 y M5 sobre la Facade de M2", () => {
     const recursos = await new CuotaPlanSuscripciones(facadeFalsa() as unknown as SuscripcionesService).recursosDe("u-1");
     expect(recursos).toEqual({ plan: "pro", cpus: 1, memoriaMb: 1024 });
   });
+
+  it("M5: los bloqueos leen el estado y las construcciones del mes", async () => {
+    const permiso = await new CuotaPlanSuscripciones(facadeFalsa() as unknown as SuscripcionesService).permisoDe("u-1");
+    expect(permiso).toEqual({ estado: "activa", construccionesMes: 500 });
+  });
 });

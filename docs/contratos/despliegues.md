@@ -20,7 +20,7 @@ ConstruccionService.ultimosDespliegues(proyectoIds: string[]):
   Promise<Record<string, { id; numero; estado; etapas: [{ nombre, estado, duracionMs }]; creado }>>
 
 // v2 · A2 — M3 lo usa en el paso 11a para mostrar «Dockerfile detectado» o «Stack detectado»
-DeteccionStackService.detectar(fuente: LectorFuente): Promise<ResultadoDeteccion>
+DeteccionStackService.detectar(fuente: LectorFuente, rutaDockerfile = "Dockerfile"): Promise<ResultadoDeteccion>
 
 export abstract class LectorFuente {          // M3 lo implementa sobre la API pública de GitHub
   abstract existe(ruta: string): Promise<boolean>;
@@ -32,9 +32,15 @@ export interface ResultadoDeteccion {
   descripcion: string;        // «Dockerfile en la raíz» · «Node.js 22 · package.json con script start»
   puertoSugerido: number;     // EXPOSE del Dockerfile o el de la receta (8080)
   evidencia: string[];        // archivos que decidieron: ["package.json", "package-lock.json"]
+  nombre: string;             // v2.1 · «Node.js 22» (bitácora: «Stack detectado: Node.js 22 · receta Deploya»)
+  dockerfile: string | null;  // v2.1 · el Dockerfile.deploya de la receta; null si manda el del repo (M3 lo ignora)
 }
 // Sin Dockerfile ni stack reconocido: lanza StackNoReconocido → 11e «falta Dockerfile y no se reconoce el stack»
+// StackNoReconocido.pista: «agrega un script start o un Dockerfile» (Node sin start), etc. M3 la muestra en 11e.
+// Exportados por ConstruccionModule: DeteccionStackService; LectorFuente vive en construccion/puertos/lector-fuente.puerto.ts
 ```
+
+`DELETE /proyectos/:id` de M3 llama a `AccionesProyectoService.pedirEliminacion({ id, subdominio })` (exportado por M5, A2) antes de borrar las filas: el trabajador quita la ruta, los contenedores y las imágenes `deploya/<subdominio>:*`.
 
 `POST /proyectos` de M3 llama a `crearDespliegue(id, "alta")` después de persistir el proyecto. Rechaza con **409** si la suscripción está Vencida o Suspendida o se agotaron las construcciones del mes (A2, M5-03), con cuerpo `{ codigo: "suscripcion-no-permite" | "cuota-construcciones-agotada", mensaje }`.
 
@@ -43,11 +49,15 @@ export interface ResultadoDeteccion {
 BloqueosService.verificar(usuarioId: string): Promise<void>
 // lanza SuscripcionNoPermite (Vencida o Suspendida) o CuotaConstruccionesAgotada
 // construcciones del mes = invariante I7 de datos-nucleo.md (mes calendario UTC, disparador ≠ reversion)
+// Exportado por OrquestacionModule. Sus errores salen como 409 { codigo, mensaje } en CUALQUIER ruta
+// (filtro global RechazosOrquestacionFilter): M3 no necesita traducirlos. Bloquean también "cancelada".
 
 // v2.1 · A2 · M3 → M5 (M3-03). M5 lo envuelve con su puerto VariablesEntornoPuerto en PasoEjecucion.
 VariablesProyectoService.descifradasDe(proyectoId: string): Promise<Record<string, string>>
 // lanza VariableIlegible si un valor fue alterado → el despliegue queda Fallido con motivo «variable ilegible»
 // la bitácora registra solo «N variables aplicadas»; PORT la pone el motor con puertoInterno
+// M5: VariablesEntornoPuerto.deProyecto(proyectoId). El adaptador sobre descifradasDe traduce
+// VariableIlegible (M3) a VariablesIlegibles (FalloDespliegue en Ejecución, motivo «Variable ilegible»)
 ```
 
 ### Variables de entorno (M3, HTTP · v2.1 · A2)
@@ -112,6 +122,8 @@ POST /proyectos/:id/redespliegues       (A3, M4-02) body { commitSha } → 201 {
 POST /proyectos/:id/reiniciar           (A2, M5-02) → 202 {}                             · reinicia el contenedor activo (también si está Detenido)
 POST /proyectos/:id/detener             (A2, M5-02) → 202 {}                             · v2.1: antes 200; el estado llega por GET /despliegues/:id
                                         · ambas: 409 { codigo: "sin-despliegue-activo" | "accion-no-permitida" }
+                                        · reiniciar: desde Saludable o Detenido; detener: solo desde Saludable
+                                        · el estado pasa por detenido → aprovisionando → publicando → saludable (o fallido)
 
 GET  /proyectos/:id/despliegues/:numero (A2, M7-01) → 200 mismo cuerpo que GET /despliegues/:id · 404 si no existe o el proyecto es ajeno
 POST /proyectos/:id/despliegues         (A2, M5-03) → además 409 { codigo: "suscripcion-no-permite" | "cuota-construcciones-agotada", mensaje }
@@ -153,3 +165,4 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 1.2 | 2026-09-29 | M1-03 en `main`: `SesionGuard` y `@UsuarioActual()` reemplazan a `USUARIO_DESARROLLO`, que se borra |
 | 2 | 2026-09-27 | Solo agrega: detección de stack, acciones, artefactos, reversión y `revirtiendo`; campos `disparador`, `recursos`, `motivoFallo`, `imagen.numero`, `imagen.receta` |
 | 2.1 | 2026-10-02 | Avance 2: consulta por número, variables (HTTP y M3 → M5), `BloqueosService`; `detener` responde 202 |
+| 2.1 | 2026-10-06 | Solo agrega: `detectar` acepta `rutaDockerfile`; `ResultadoDeteccion.nombre` y `.dockerfile`; `StackNoReconocido.pista` |

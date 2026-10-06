@@ -65,15 +65,46 @@ describe("PipelineDespliegue (plan construcción, puertos en stub)", () => {
     expect(despliegue.motivoFallo).toContain("Remote branch nope not found");
   });
 
-  it("Rama sin Dockerfile: Fallido en Construcción con motivo «falta Dockerfile»", async () => {
+  it("Stack no reconocido: sin Dockerfile ni receta, Fallido en Recepción con el motivo y la pista", async () => {
     const motor = motorDePrueba();
-    motor.clonador.archivos = new Set();
+    motor.clonador.archivos = new Map([["LEEME.md", "hola"]]);
 
     const despliegue = await motor.desplegar();
 
     expect(despliegue.estado).toBe("fallido");
-    expect(despliegue.etapas.find((e) => e.etapa === "construccion")?.estado).toBe("fallida");
-    expect(despliegue.motivoFallo).toBe("Falta Dockerfile (Dockerfile)");
+    expect(despliegue.etapas.find((e) => e.etapa === "recepcion")?.estado).toBe("fallida");
+    expect(despliegue.motivoFallo).toBe("Falta Dockerfile y no se reconoce el stack: agrega un Dockerfile en la raíz del repositorio");
+    expect(motor.constructorImagen.solicitudes).toHaveLength(0);
+  });
+
+  it("Construcción con receta: escribe Dockerfile.deploya, la bitácora dice el stack y el artefacto guarda receta = node", async () => {
+    const motor = motorDePrueba();
+    motor.clonador.archivos = new Map([["package.json", JSON.stringify({ scripts: { start: "node server.js" } })]]);
+
+    const despliegue = await motor.desplegar();
+
+    expect(despliegue.estado).toBe("saludable");
+    expect(motor.clonador.escritos).toEqual([
+      expect.objectContaining({ directorio: `/tmp/deploya/${despliegue.id}`, ruta: "Dockerfile.deploya" }),
+    ]);
+    expect(motor.constructorImagen.solicitudes[0].rutaDockerfile).toBe("Dockerfile.deploya");
+    expect(motor.artefactos.artefactos[0].receta).toBe("node");
+    expect(motor.recetas.recetas.get("proyecto-1")).toBe("node");
+    const textos = (await motor.despliegues.lineasDesde(despliegue.id, 0, 500)).map((l) => l.texto);
+    expect(textos).toContain("Stack detectado: Node.js 22 · receta Deploya");
+  });
+
+  it("El Dockerfile manda: no escribe Dockerfile.deploya y construye con el del repositorio", async () => {
+    const motor = motorDePrueba();
+    motor.clonador.archivos.set("package.json", JSON.stringify({ scripts: { start: "node server.js" } }));
+
+    const despliegue = await motor.desplegar();
+
+    expect(motor.clonador.escritos).toHaveLength(0);
+    expect(motor.constructorImagen.solicitudes[0].rutaDockerfile).toBe("Dockerfile");
+    expect(motor.artefactos.artefactos[0].receta).toBe("dockerfile");
+    const textos = (await motor.despliegues.lineasDesde(despliegue.id, 0, 500)).map((l) => l.texto);
+    expect(textos).toContain("Dockerfile detectado (Dockerfile)");
   });
 
   it("Contenedor saludable: publica, detiene el anterior y el nuevo pasa a ser el activo", async () => {
@@ -153,7 +184,7 @@ describe("PipelineDespliegue (plan construcción, puertos en stub)", () => {
     const lineas = await motor.despliegues.lineasDesde(despliegue.id, 0, 500);
     expect(lineas.map((l) => l.n)).toEqual(lineas.map((_, i) => i + 1));
     expect(lineas.map((l) => l.etapa)).toEqual([
-      "recepcion", "recepcion", "construccion", "construccion", "construccion", "construccion",
+      "recepcion", "recepcion", "recepcion", "construccion", "construccion", "construccion", "construccion",
       "ejecucion", "ejecucion", "enrutamiento", "operacion",
     ]);
   });

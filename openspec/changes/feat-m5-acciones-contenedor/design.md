@@ -12,7 +12,7 @@ Existen: `TransicionesDespliegue` (ya permite `saludable → detenido` y `deteni
 
 ## Decisions
 
-1. **Una cola aparte (`operacion`).** Una acción de segundos no espera detrás de una construcción de minutos. Concurrencia 1 por proyecto (`jobId = proyectoId:tipo`) para no reiniciar y detener a la vez.
+1. **Una cola aparte (`operacion`).** Una acción de segundos no espera detrás de una construcción de minutos. Concurrencia 1 en el consumidor para no reiniciar y detener a la vez, y `jobId = <tipo>-<proyectoId>` para no encolar dos veces lo mismo (BullMQ no acepta `:` en un `jobId`). El trabajador vuelve a validar el estado: si cambió mientras esperaba en la cola, no hace nada.
 2. **Reiniciar reutiliza el contenedor del despliegue activo** (`iniciar` tras `detener`); no crea despliegue nuevo ni consume construcciones. Las transiciones son las que ya existen; no se agregan estados.
 3. **Detener retira la ruta.** Así el subdominio responde 404 de Traefik en vez de un 502; reiniciar la vuelve a publicar.
 4. **Eliminar es idempotente:** si el contenedor o la imagen ya no existen, se registra y sigue. `eliminarImagenesDe(subdominio)` borra las etiquetas `deploya/<subdominio>:*`.
@@ -26,7 +26,8 @@ Existen: `TransicionesDespliegue` (ya permite `saludable → detenido` y `deteni
 | `ColaOperacionPuerto` → `ColaOperacionBullmq`, `ColaOperacionMemoria` | Adapter | D, L | Igual que la cola de construcción; las pruebas usan la de memoria |
 | `AccionesContenedorService` con un manejador por tipo (`ReiniciarHandler`, `DetenerHandler`, `EliminarHandler`) | Strategy | O | Una acción nueva (p. ej. suspender en A3) es un manejador nuevo, sin `switch` |
 | `TransicionesDespliegue` | State | S | Sin cambios: valida cada paso |
-| `ContenedorPuerto.iniciar`, `eliminarImagenesDe` | Port | I | Dos métodos estrechos; el adaptador dockerode los implementa |
+| `ContenedorPuerto.iniciar`, `eliminarContenedoresDe`, `eliminarImagenesDe` | Port | I | Métodos estrechos; el adaptador dockerode los implementa. `eliminarContenedoresDe` borra también los contenedores detenidos de versiones anteriores (filtro por la etiqueta del proyecto) |
+| `AccionesProyectoService` (API) | Facade | S, D | Valida dueño, activo y estado, y encola; M3 lo usa para eliminar |
 
 Cambios para `clases-unificado.mmd`: las piezas anteriores. Estados: anotar en `m4-m5-m6-estados-despliegue.mmd` que Detenido → Aprovisionando es «reiniciar».
 

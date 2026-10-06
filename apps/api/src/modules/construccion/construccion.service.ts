@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Reloj } from "../../compartido/reloj";
+import { BloqueosService } from "../orquestacion/bloqueos.service";
 import type { Despliegue, DespliegueCreado, ProyectoDesplegable } from "./dominio/despliegue";
 import { DespliegueNoEncontrado, ProyectoNoEncontrado } from "./dominio/errores";
-import type { DisparadorDespliegue } from "./dominio/estados";
+import { DISPARADOR_SIN_CONSTRUCCION, type DisparadorDespliegue } from "./dominio/estados";
 import { LINEAS_POR_PAGINA } from "./dominio/motor.constantes";
 import { ColaConstruccionPuerto } from "./puertos/cola-construccion.puerto";
 import { ProyectosLecturaPuerto } from "./puertos/proyectos-lectura.puerto";
@@ -28,6 +29,7 @@ export class ConstruccionService {
     private readonly artefactos: RepositorioArtefactos,
     private readonly proyectos: ProyectosLecturaPuerto,
     private readonly cola: ColaConstruccionPuerto,
+    private readonly bloqueos: BloqueosService,
     private readonly reloj: Reloj,
   ) {}
 
@@ -45,12 +47,15 @@ export class ConstruccionService {
   }
 
   async consultar(despliegueId: string, usuarioId: string): Promise<VistaDespliegue> {
-    const despliegue = await this.despliegueDe(despliegueId, usuarioId);
-    const artefacto = despliegue.artefactoId ? await this.artefactos.porId(despliegue.artefactoId) : null;
-    const imagen = artefacto
-      ? { numero: artefacto.numero, digest: artefacto.digest, tamanoBytes: artefacto.tamanoBytes, receta: artefacto.receta }
-      : null;
-    return vistaDespliegue(despliegue, imagen);
+    return this.vistaDe(await this.despliegueDe(despliegueId, usuarioId));
+  }
+
+  /** `GET /proyectos/:id/despliegues/:numero`: número inexistente o proyecto ajeno → 404. */
+  async consultarPorNumero(proyectoId: string, numero: number, usuarioId: string): Promise<VistaDespliegue> {
+    await this.proyectoDe(proyectoId, usuarioId);
+    const despliegue = await this.despliegues.porNumero(proyectoId, numero);
+    if (!despliegue) throw new DespliegueNoEncontrado(`${proyectoId}#${numero}`);
+    return this.vistaDe(despliegue);
   }
 
   async bitacoraDesde(despliegueId: string, usuarioId: string, desde: number): Promise<PaginaBitacora> {
@@ -69,7 +74,9 @@ export class ConstruccionService {
     return Object.fromEntries(ultimos.map((d) => [d.proyectoId, resumenDespliegue(d)]));
   }
 
+  /** M5-03: se verifica antes de crear nada, así el cliente recibe el 409 al instante. */
   private async registrarYEncolar(proyecto: ProyectoDesplegable, disparador: DisparadorDespliegue): Promise<DespliegueCreado> {
+    if (disparador !== DISPARADOR_SIN_CONSTRUCCION) await this.bloqueos.verificar(proyecto.usuarioId);
     const despliegue = await this.despliegues.crear({
       proyectoId: proyecto.id,
       disparador,
@@ -79,6 +86,14 @@ export class ConstruccionService {
     });
     await this.cola.encolar({ despliegueId: despliegue.id, plan: "construccion" });
     return { id: despliegue.id, numero: despliegue.numero, estado: despliegue.estado };
+  }
+
+  private async vistaDe(despliegue: Despliegue): Promise<VistaDespliegue> {
+    const artefacto = despliegue.artefactoId ? await this.artefactos.porId(despliegue.artefactoId) : null;
+    const imagen = artefacto
+      ? { numero: artefacto.numero, digest: artefacto.digest, tamanoBytes: artefacto.tamanoBytes, receta: artefacto.receta }
+      : null;
+    return vistaDespliegue(despliegue, imagen);
   }
 
   private async proyectoDe(proyectoId: string, usuarioId: string): Promise<ProyectoDesplegable> {

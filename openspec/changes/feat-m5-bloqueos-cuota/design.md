@@ -17,7 +17,8 @@
 1. **Mes calendario en UTC** (invariante I7 de `datos-nucleo.md`, firmada en el Avance 1). `inicioDelMes(ahora)` es pura y vive en el dominio de M5; el conteo lo hace M4, dueño de `Despliegue`. Mi suscripción (M7-03) mostrará «se reinicia el 1 de <mes>».
 2. **Qué cuenta como construcción:** todo despliegue creado en el mes con disparador `alta`, `manual`, `variables`, `reintento` o `redespliegue`, termine como termine (una construcción fallida también gastó CPU). `reversion` no cuenta.
 3. **Se verifica al crear, no en el trabajador.** El cliente recibe el 409 al instante y no queda un despliegue Fallido «por cuota».
-4. **Orden de las reglas:** primero el estado de la suscripción, luego la cuota. Por Activa y Por vencer se permite; Vencida y Suspendida, no.
+4. **Orden de las reglas:** primero el estado de la suscripción, luego la cuota. Por Activa y Por vencer se permite; Vencida y Suspendida, no. **Cancelada** (sin suscripción vigente) también bloquea: la lista es de estados que permiten, no de los que bloquean, así un estado nuevo de M2 no abre la puerta por omisión.
+6. **Un filtro global** (`RechazosOrquestacionFilter`, `APP_FILTER`) traduce los rechazos de M5 a 409 en cualquier ruta: `POST /proyectos/:id/despliegues`, el alta de M3 y `PUT …/variables` con `desplegar` responden igual sin que cada módulo los traduzca.
 5. **`POST /proyectos` verifica antes de guardar** para no dejar un proyecto sin despliegue que además ocupa cupo.
 
 ## Diseño: SOLID y patrones

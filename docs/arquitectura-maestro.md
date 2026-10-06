@@ -1893,23 +1893,31 @@ classDiagram
         -cola ColaConstruccionPuerto
         -despliegues RepositorioDespliegues
         -proyectos ProyectosLecturaPuerto
+        -bloqueos BloqueosService
         -reloj Reloj
         +crearDespliegue(proyectoId, disparador) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
+        +consultarPorNumero(proyectoId, numero, usuarioId) VistaDespliegue
         +bitacoraDesde(despliegueId, usuarioId, desde) PaginaBitacora
         +ultimosDespliegues(proyectoIds) Map~ResumenDespliegue~
     }
     class DeteccionStackService {
         -recetas List~RecetaStack~
-        +detectar(fuente LectorFuente) ResultadoDeteccion
+        +detectar(fuente LectorFuente, rutaDockerfile) ResultadoDeteccion
     }
     class RecetaStack {
         <<abstract>>
         +receta RecetaConstruccion
+        +nombre String
         +archivosQueLee List~String~
         +reconoce(archivos MapaArchivos) Boolean
+        +describir(archivos MapaArchivos) DescripcionReceta
         +dockerfile(archivos MapaArchivos) String
         +puertoSugerido(archivos MapaArchivos) Integer
+        +pista(archivos MapaArchivos) String
+    }
+    class LectorDockerfileEn {
+        <<Decorator>>
     }
     class RecetaDockerfile
     class RecetaNode
@@ -1930,6 +1938,7 @@ classDiagram
     class PasoRecepcion {
         -clonador ClonadorRepositorioPuerto
         -deteccion DeteccionStackService
+        -recetas RecetaProyectoPuerto
     }
     class PasoConstruccion {
         -constructor ConstructorImagenPuerto
@@ -1946,7 +1955,16 @@ classDiagram
         +etapaDe(estado) Etapa
     }
     class PoliticaDespliegue {
-        +puedeConstruir(cuota, construccionesDelMes) Decision
+        <<Specification>>
+        +verificarDespliegue(situacion SituacionDespliegue) void
+        +inicioDelMes(ahora) Date
+    }
+    class BloqueosService {
+        <<Facade>>
+        -cuota CuotaPlanPuerto
+        -despliegues RepositorioDespliegues
+        -reloj Reloj
+        +verificar(usuarioId) void
     }
 
     %% ───────── M5 Orquestación (Derek) ─────────
@@ -1954,11 +1972,39 @@ classDiagram
         -contenedores ContenedorPuerto
         -salud VerificacionEntornoPuerto
         -cuota CuotaPlanPuerto
-        +aprovisionar(contexto) ContenedorCreado
-        +detener(proyectoId) void
-        +reiniciar(proyectoId) void
-        +detenerTodosDe(usuarioId) void
+        +aprovisionar(solicitud) Aprovisionado
+        +reanudar(contenedorId, host, puerto) ResultadoSalud
+        +detenerContenedor(contenedorId) void
+        +eliminarContenedor(contenedorId) void
+        +eliminarRecursosDe(subdominio) void
     }
+    class AccionesProyectoService {
+        <<Facade>>
+        -proyectos ProyectosLecturaPuerto
+        -despliegues RepositorioDespliegues
+        -cola ColaOperacionPuerto
+        +reiniciar(proyectoId, usuarioId) void
+        +detener(proyectoId, usuarioId) void
+        +pedirEliminacion(proyecto) void
+    }
+    class AccionContenedor {
+        <<Command>>
+        +tipo TipoAccion
+        +proyectoId String
+        +subdominio String
+    }
+    class AccionesContenedorService {
+        -manejadores Map~TipoAccion, ManejadorAccion~
+        +ejecutar(accion AccionContenedor) void
+    }
+    class ManejadorAccion {
+        <<abstract>>
+        +tipo TipoAccion
+        +ejecutar(accion AccionContenedor) void
+    }
+    class ReiniciarManejador
+    class DetenerManejador
+    class EliminarManejador
     class ReversionService {
         -artefactos RepositorioArtefactos
         -despliegues RepositorioDespliegues
@@ -1967,6 +2013,11 @@ classDiagram
     }
     class PasoEjecucion {
         -orquestacion OrquestacionService
+        -variablesEntorno VariablesEntornoPuerto
+    }
+    class VariablesEntornoPuerto {
+        <<abstract>>
+        +deProyecto(proyectoId) Map~String, String~
     }
     class PasoOperacion {
         -contenedores ContenedorPuerto
@@ -2004,8 +2055,13 @@ classDiagram
     class ClonadorRepositorioPuerto {
         <<abstract>>
         +clonar(solicitud SolicitudClon) ClonListo
-        +existeArchivo(directorio, ruta) Boolean
+        +lector(directorio) LectorFuente
+        +escribir(directorio, ruta, contenido) void
         +limpiar(directorio) void
+    }
+    class RecetaProyectoPuerto {
+        <<abstract>>
+        +registrar(proyectoId, receta) void
     }
     class ProyectosLecturaPuerto {
         <<abstract>>
@@ -2014,6 +2070,7 @@ classDiagram
     class CuotaPlanPuerto {
         <<abstract>>
         +recursosDe(usuarioId) RecursosPlan
+        +permisoDe(usuarioId) PermisoPlan
     }
     class ConstructorImagenPuerto {
         <<abstract>>
@@ -2028,6 +2085,7 @@ classDiagram
         <<abstract>>
         +crear(nuevo NuevoDespliegue) Despliegue
         +porId(id) Despliegue
+        +porNumero(proyectoId, numero) Despliegue
         +cambiarEstado(id, estado, cambios) void
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
@@ -2035,7 +2093,7 @@ classDiagram
         +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
         +marcarActivo(proyectoId, despliegueId) void
-        +construccionesDesde(usuarioId, desde) Integer
+        +contarConstruccionesDesde(usuarioId, desde) Integer
     }
     class RepositorioArtefactos {
         <<abstract>>
@@ -2047,10 +2105,15 @@ classDiagram
     class ContenedorPuerto {
         <<abstract>>
         +crear(espec EspecContenedor) ContenedorCreado
+        +iniciar(contenedorId) void
         +detener(contenedorId) void
-        +reiniciar(contenedorId) void
         +eliminar(contenedorId) void
-        +eliminarImagen(imagen) void
+        +eliminarContenedoresDe(subdominio) void
+        +eliminarImagenesDe(subdominio) void
+    }
+    class ColaOperacionPuerto {
+        <<abstract>>
+        +encolar(accion AccionContenedor) void
     }
     class VerificacionEntornoPuerto {
         <<abstract>>
@@ -2067,8 +2130,11 @@ classDiagram
     class ClonadorGit
     class ConstructorDocker
     class LectorFuenteLocal
+    class RecetaProyectoPrisma
     class RepositorioDesplieguesPrisma
     class ContenedorDocker
+    class ColaOperacionBullMq
+    class VariablesEntornoPendientes
     class VerificacionHttp
     class EnrutamientoTraefikArchivo
 
@@ -2180,7 +2246,10 @@ classDiagram
 
     ConstruccionService --> ColaConstruccionPuerto
     ConstruccionService --> RepositorioDespliegues
-    ConstruccionService --> PoliticaDespliegue
+    ConstruccionService --> BloqueosService : verificar
+    BloqueosService --> PoliticaDespliegue
+    BloqueosService --> CuotaPlanPuerto
+    BloqueosService --> RepositorioDespliegues
     ConstruccionService --> TransicionesDespliegue
     ConstruccionService --> ProyectosLecturaPuerto
     ProyectosLecturaPuerto ..> RepositorioProyectos : mismo almacén
@@ -2223,9 +2292,29 @@ classDiagram
     ClonadorRepositorioPuerto <|-- ClonadorGit
     ConstructorImagenPuerto <|-- ConstructorDocker
     LectorFuente <|-- LectorFuenteLocal
+    LectorFuente <|-- LectorDockerfileEn
+    DeteccionStackService --> LectorDockerfileEn
+    PasoRecepcion --> RecetaProyectoPuerto
+    RecetaProyectoPuerto <|-- RecetaProyectoPrisma
     RepositorioDespliegues <|-- RepositorioDesplieguesPrisma
     RepositorioArtefactos <|-- RepositorioArtefactosPrisma
     ContenedorPuerto <|-- ContenedorDocker
+    ColaOperacionPuerto <|-- ColaOperacionBullMq
+    PasoEjecucion --> VariablesEntornoPuerto
+    VariablesEntornoPuerto <|-- VariablesEntornoPendientes
+    ProyectosService --> AccionesProyectoService : pedirEliminacion
+    AccionesProyectoService --> ColaOperacionPuerto
+    AccionesProyectoService ..> AccionContenedor : encola
+    AccionesContenedorService --> ManejadorAccion
+    ManejadorAccion <|-- ReiniciarManejador
+    ManejadorAccion <|-- DetenerManejador
+    ManejadorAccion <|-- EliminarManejador
+    ReiniciarManejador --> OrquestacionService
+    ReiniciarManejador --> EnrutamientoService
+    DetenerManejador --> OrquestacionService
+    DetenerManejador --> EnrutamientoService
+    EliminarManejador --> OrquestacionService
+    EliminarManejador --> EnrutamientoService
     VerificacionEntornoPuerto <|-- VerificacionHttp
     EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo
 
@@ -2312,8 +2401,8 @@ stateDiagram-v2
     Publicando --> Saludable : Traefik apunta al contenedor nuevo y se detiene el anterior
     Publicando --> Fallido : falla el enrutamiento
 
-    Saludable --> Detenido : el cliente detiene, suscripción Suspendida o cuenta suspendida
-    Detenido --> Aprovisionando : el cliente reinicia
+    Saludable --> Detenido : el cliente detiene o reinicia (cola operación), suscripción Suspendida o cuenta suspendida
+    Detenido --> Aprovisionando : el cliente reinicia (mismo contenedor, sin reconstruir ni consumir construcciones)
 
     Fallido --> [*]
     Cancelado --> [*]

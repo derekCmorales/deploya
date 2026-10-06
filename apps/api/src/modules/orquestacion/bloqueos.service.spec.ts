@@ -1,6 +1,6 @@
 import type { ArgumentsHost } from "@nestjs/common";
 import { motorDePrueba } from "../../pruebas/motor";
-import { BloqueosDespliegueFilter } from "./bloqueos-despliegue.filter";
+import { RechazosOrquestacionFilter } from "./rechazos-orquestacion.filter";
 import { CuotaConstruccionesAgotada, SuscripcionNoPermite } from "./dominio/errores";
 
 const SANDBOX = 30;
@@ -85,7 +85,7 @@ describe("Bloqueos por suscripción y cuota (M5-03)", () => {
   ])("el filtro responde 409 con el código del contrato (%#)", (error, codigo) => {
     const { respuesta, host } = respuestaFalsa();
 
-    new BloqueosDespliegueFilter().catch(error, host);
+    new RechazosOrquestacionFilter().catch(error, host);
 
     expect(respuesta.estado).toBe(409);
     expect(respuesta.cuerpo).toEqual({ codigo, mensaje: error.message });

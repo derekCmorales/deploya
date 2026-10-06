@@ -8,12 +8,19 @@ import {
 @Injectable()
 export class ContenedorStub extends ContenedorPuerto {
   readonly creados: EspecContenedor[] = [];
+  readonly iniciados: string[] = [];
   readonly detenidos: string[] = [];
   readonly eliminados: string[] = [];
+  readonly proyectosLimpiados: string[] = [];
+  readonly imagenesBorradas: string[] = [];
 
   async crear(espec: EspecContenedor): Promise<ContenedorCreado> {
     this.creados.push(espec);
     return { id: `contenedor-${espec.nombre}`, host: espec.nombre };
+  }
+
+  async iniciar(contenedorId: string): Promise<void> {
+    this.iniciados.push(contenedorId);
   }
 
   async detener(contenedorId: string): Promise<void> {
@@ -22,5 +29,13 @@ export class ContenedorStub extends ContenedorPuerto {
 
   async eliminar(contenedorId: string): Promise<void> {
     this.eliminados.push(contenedorId);
+  }
+
+  async eliminarContenedoresDe(subdominio: string): Promise<void> {
+    this.proyectosLimpiados.push(subdominio);
+  }
+
+  async eliminarImagenesDe(subdominio: string): Promise<void> {
+    this.imagenesBorradas.push(subdominio);
   }
 }

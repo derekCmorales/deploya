@@ -11,6 +11,8 @@ export const RUTA_SALUD = "/";
 export const PREFIJO_IMAGEN = "deploya";
 export const PREFIJO_RED_PROYECTO = "deploya-p-";
 export const COLA_DESPLIEGUES = "despliegues";
+/** Cola de acciones sobre el contenedor (M5-02): una acción de segundos no espera detrás de un build. */
+export const COLA_OPERACION = "operacion";
 
 export function etiquetaImagen(subdominio: string, numero: number): string {
   return `${PREFIJO_IMAGEN}/${subdominio}:${numero}`;

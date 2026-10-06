@@ -4,6 +4,7 @@ import {
   type ContenedorCreado,
   type EspecContenedor,
 } from "../../modules/orquestacion/puertos/contenedor.puerto";
+import { PREFIJO_IMAGEN, redDeProyecto } from "../../modules/construccion/dominio/motor.constantes";
 import { limitesDesde } from "../../modules/orquestacion/dominio/limites-contenedor";
 
 const SEGUNDOS_PARA_DETENER = 10;
@@ -49,6 +50,10 @@ export class ContenedorDocker extends ContenedorPuerto {
     return { id: contenedor.id, host: espec.nombre };
   }
 
+  async iniciar(contenedorId: string): Promise<void> {
+    await this.ignorar([ESTADO_YA_HECHO], () => this.docker.getContainer(contenedorId).start());
+  }
+
   async detener(contenedorId: string): Promise<void> {
     await this.ignorar([ESTADO_YA_HECHO, ESTADO_NO_EXISTE], () =>
       this.docker.getContainer(contenedorId).stop({ t: SEGUNDOS_PARA_DETENER }),
@@ -57,6 +62,22 @@ export class ContenedorDocker extends ContenedorPuerto {
 
   async eliminar(contenedorId: string): Promise<void> {
     await this.ignorar([ESTADO_NO_EXISTE], () => this.docker.getContainer(contenedorId).remove({ force: true }));
+  }
+
+  /** Los contenedores del proyecto llevan la etiqueta con su red (`crear`). */
+  async eliminarContenedoresDe(subdominio: string): Promise<void> {
+    const contenedores = await this.docker.listContainers({
+      all: true,
+      filters: { label: [`${ETIQUETA_DEPLOYA}=${redDeProyecto(subdominio)}`] },
+    });
+    for (const { Id } of contenedores) await this.eliminar(Id);
+  }
+
+  async eliminarImagenesDe(subdominio: string): Promise<void> {
+    const imagenes = await this.docker.listImages({ filters: { reference: [`${PREFIJO_IMAGEN}/${subdominio}`] } });
+    for (const { Id } of imagenes) {
+      await this.ignorar([ESTADO_NO_EXISTE, ESTADO_CONFLICTO], () => this.docker.getImage(Id).remove({ force: true }));
+    }
   }
 
   private async asegurarRed(nombre: string): Promise<void> {

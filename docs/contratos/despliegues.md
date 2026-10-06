@@ -40,6 +40,8 @@ export interface ResultadoDeteccion {
 // Exportados por ConstruccionModule: DeteccionStackService; LectorFuente vive en construccion/puertos/lector-fuente.puerto.ts
 ```
 
+`DELETE /proyectos/:id` de M3 llama a `AccionesProyectoService.pedirEliminacion({ id, subdominio })` (exportado por M5, A2) antes de borrar las filas: el trabajador quita la ruta, los contenedores y las imágenes `deploya/<subdominio>:*`.
+
 `POST /proyectos` de M3 llama a `crearDespliegue(id, "alta")` después de persistir el proyecto. Rechaza con **409** si la suscripción está Vencida o Suspendida o se agotaron las construcciones del mes (A2, M5-03), con cuerpo `{ codigo: "suscripcion-no-permite" | "cuota-construcciones-agotada", mensaje }`.
 
 ```ts
@@ -48,7 +50,7 @@ BloqueosService.verificar(usuarioId: string): Promise<void>
 // lanza SuscripcionNoPermite (Vencida o Suspendida) o CuotaConstruccionesAgotada
 // construcciones del mes = invariante I7 de datos-nucleo.md (mes calendario UTC, disparador ≠ reversion)
 // Exportado por OrquestacionModule. Sus errores salen como 409 { codigo, mensaje } en CUALQUIER ruta
-// (filtro global BloqueosDespliegueFilter): M3 no necesita traducirlos. Bloquean también "cancelada".
+// (filtro global RechazosOrquestacionFilter): M3 no necesita traducirlos. Bloquean también "cancelada".
 
 // v2.1 · A2 · M3 → M5 (M3-03). M5 lo envuelve con su puerto VariablesEntornoPuerto en PasoEjecucion.
 VariablesProyectoService.descifradasDe(proyectoId: string): Promise<Record<string, string>>
@@ -118,6 +120,8 @@ POST /proyectos/:id/redespliegues       (A3, M4-02) body { commitSha } → 201 {
 POST /proyectos/:id/reiniciar           (A2, M5-02) → 202 {}                             · reinicia el contenedor activo (también si está Detenido)
 POST /proyectos/:id/detener             (A2, M5-02) → 202 {}                             · v2.1: antes 200; el estado llega por GET /despliegues/:id
                                         · ambas: 409 { codigo: "sin-despliegue-activo" | "accion-no-permitida" }
+                                        · reiniciar: desde Saludable o Detenido; detener: solo desde Saludable
+                                        · el estado pasa por detenido → aprovisionando → publicando → saludable (o fallido)
 
 GET  /proyectos/:id/despliegues/:numero (A2, M7-01) → 200 mismo cuerpo que GET /despliegues/:id · 404 si no existe o el proyecto es ajeno
 POST /proyectos/:id/despliegues         (A2, M5-03) → además 409 { codigo: "suscripcion-no-permite" | "cuota-construcciones-agotada", mensaje }

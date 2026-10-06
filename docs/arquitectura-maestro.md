@@ -1972,11 +1972,39 @@ classDiagram
         -contenedores ContenedorPuerto
         -salud VerificacionEntornoPuerto
         -cuota CuotaPlanPuerto
-        +aprovisionar(contexto) ContenedorCreado
-        +detener(proyectoId) void
-        +reiniciar(proyectoId) void
-        +detenerTodosDe(usuarioId) void
+        +aprovisionar(solicitud) Aprovisionado
+        +reanudar(contenedorId, host, puerto) ResultadoSalud
+        +detenerContenedor(contenedorId) void
+        +eliminarContenedor(contenedorId) void
+        +eliminarRecursosDe(subdominio) void
     }
+    class AccionesProyectoService {
+        <<Facade>>
+        -proyectos ProyectosLecturaPuerto
+        -despliegues RepositorioDespliegues
+        -cola ColaOperacionPuerto
+        +reiniciar(proyectoId, usuarioId) void
+        +detener(proyectoId, usuarioId) void
+        +pedirEliminacion(proyecto) void
+    }
+    class AccionContenedor {
+        <<Command>>
+        +tipo TipoAccion
+        +proyectoId String
+        +subdominio String
+    }
+    class AccionesContenedorService {
+        -manejadores Map~TipoAccion, ManejadorAccion~
+        +ejecutar(accion AccionContenedor) void
+    }
+    class ManejadorAccion {
+        <<abstract>>
+        +tipo TipoAccion
+        +ejecutar(accion AccionContenedor) void
+    }
+    class ReiniciarManejador
+    class DetenerManejador
+    class EliminarManejador
     class ReversionService {
         -artefactos RepositorioArtefactos
         -despliegues RepositorioDespliegues
@@ -2072,10 +2100,15 @@ classDiagram
     class ContenedorPuerto {
         <<abstract>>
         +crear(espec EspecContenedor) ContenedorCreado
+        +iniciar(contenedorId) void
         +detener(contenedorId) void
-        +reiniciar(contenedorId) void
         +eliminar(contenedorId) void
-        +eliminarImagen(imagen) void
+        +eliminarContenedoresDe(subdominio) void
+        +eliminarImagenesDe(subdominio) void
+    }
+    class ColaOperacionPuerto {
+        <<abstract>>
+        +encolar(accion AccionContenedor) void
     }
     class VerificacionEntornoPuerto {
         <<abstract>>
@@ -2095,6 +2128,7 @@ classDiagram
     class RecetaProyectoPrisma
     class RepositorioDesplieguesPrisma
     class ContenedorDocker
+    class ColaOperacionBullMq
     class VerificacionHttp
     class EnrutamientoTraefikArchivo
 
@@ -2259,6 +2293,20 @@ classDiagram
     RepositorioDespliegues <|-- RepositorioDesplieguesPrisma
     RepositorioArtefactos <|-- RepositorioArtefactosPrisma
     ContenedorPuerto <|-- ContenedorDocker
+    ColaOperacionPuerto <|-- ColaOperacionBullMq
+    ProyectosService --> AccionesProyectoService : pedirEliminacion
+    AccionesProyectoService --> ColaOperacionPuerto
+    AccionesProyectoService ..> AccionContenedor : encola
+    AccionesContenedorService --> ManejadorAccion
+    ManejadorAccion <|-- ReiniciarManejador
+    ManejadorAccion <|-- DetenerManejador
+    ManejadorAccion <|-- EliminarManejador
+    ReiniciarManejador --> OrquestacionService
+    ReiniciarManejador --> EnrutamientoService
+    DetenerManejador --> OrquestacionService
+    DetenerManejador --> EnrutamientoService
+    EliminarManejador --> OrquestacionService
+    EliminarManejador --> EnrutamientoService
     VerificacionEntornoPuerto <|-- VerificacionHttp
     EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo
 
@@ -2345,8 +2393,8 @@ stateDiagram-v2
     Publicando --> Saludable : Traefik apunta al contenedor nuevo y se detiene el anterior
     Publicando --> Fallido : falla el enrutamiento
 
-    Saludable --> Detenido : el cliente detiene, suscripción Suspendida o cuenta suspendida
-    Detenido --> Aprovisionando : el cliente reinicia
+    Saludable --> Detenido : el cliente detiene o reinicia (cola operación), suscripción Suspendida o cuenta suspendida
+    Detenido --> Aprovisionando : el cliente reinicia (mismo contenedor, sin reconstruir ni consumir construcciones)
 
     Fallido --> [*]
     Cancelado --> [*]

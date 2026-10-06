@@ -26,7 +26,8 @@ Existen: `TransicionesDespliegue` (ya permite `saludable → detenido` y `deteni
 | `ColaOperacionPuerto` → `ColaOperacionBullmq`, `ColaOperacionMemoria` | Adapter | D, L | Igual que la cola de construcción; las pruebas usan la de memoria |
 | `AccionesContenedorService` con un manejador por tipo (`ReiniciarHandler`, `DetenerHandler`, `EliminarHandler`) | Strategy | O | Una acción nueva (p. ej. suspender en A3) es un manejador nuevo, sin `switch` |
 | `TransicionesDespliegue` | State | S | Sin cambios: valida cada paso |
-| `ContenedorPuerto.iniciar`, `eliminarImagenesDe` | Port | I | Dos métodos estrechos; el adaptador dockerode los implementa |
+| `ContenedorPuerto.iniciar`, `eliminarContenedoresDe`, `eliminarImagenesDe` | Port | I | Métodos estrechos; el adaptador dockerode los implementa. `eliminarContenedoresDe` borra también los contenedores detenidos de versiones anteriores (filtro por la etiqueta del proyecto) |
+| `AccionesProyectoService` (API) | Facade | S, D | Valida dueño, activo y estado, y encola; M3 lo usa para eliminar |
 
 Cambios para `clases-unificado.mmd`: las piezas anteriores. Estados: anotar en `m4-m5-m6-estados-despliegue.mmd` que Detenido → Aprovisionando es «reiniciar».
 

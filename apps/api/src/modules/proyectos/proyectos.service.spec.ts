@@ -11,6 +11,7 @@ import {
   SubdominioEnUso,
 } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, ValidacionRepositorio } from "./dominio/proyecto";
+import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
 import { ProyectosService } from "./proyectos.service";
 import { CuotaProyectosPuerto, type CuotaProyectos } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
@@ -54,8 +55,15 @@ function montar() {
     crearDespliegue: jest.fn(async () => ({ id: "despliegue-1", numero: 1, estado: "encolado" as const })),
     ultimosDespliegues: jest.fn(async (): Promise<Record<string, unknown>> => ({})),
   };
-  const servicio = new ProyectosService(fuente, repositorio, cuota, construccion as unknown as ConstruccionService);
-  return { servicio, fuente, reloj, repositorio, cuota, construccion };
+  const acciones = { pedirEliminacion: jest.fn(async () => undefined) };
+  const servicio = new ProyectosService(
+    fuente,
+    repositorio,
+    cuota,
+    construccion as unknown as ConstruccionService,
+    acciones as unknown as AccionesProyectoService,
+  );
+  return { servicio, fuente, reloj, repositorio, cuota, construccion, acciones };
 }
 
 const alta = (cambios: Partial<AltaProyecto> = {}): AltaProyecto => ({ url: URL, rama: "main", nombre: "Hola Deploya", ...cambios });
@@ -192,11 +200,21 @@ describe("ProyectosService", () => {
       await expect(servicio.crear("usuario-1", alta())).resolves.toMatchObject({ proyecto: { nombre: "Hola Deploya" } });
     });
 
+    it("Eliminar pide a M5 borrar contenedor, imágenes y ruta del subdominio", async () => {
+      const { servicio, acciones } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta());
+
+      await servicio.eliminar("usuario-1", proyecto.id, "Hola Deploya");
+
+      expect(acciones.pedirEliminacion).toHaveBeenCalledWith(expect.objectContaining({ id: proyecto.id, subdominio: "hola-deploya" }));
+    });
+
     it("Confirmación distinta: rechaza y conserva el proyecto", async () => {
-      const { servicio, repositorio } = montar();
+      const { servicio, repositorio, acciones } = montar();
       const { proyecto } = await servicio.crear("usuario-1", alta());
 
       await expect(servicio.eliminar("usuario-1", proyecto.id, "hola")).rejects.toThrow(ConfirmacionNoCoincide);
+      expect(acciones.pedirEliminacion).not.toHaveBeenCalled();
 
       expect(await repositorio.porId(proyecto.id)).not.toBeNull();
     });

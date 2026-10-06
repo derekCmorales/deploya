@@ -81,4 +81,62 @@ describe("ContenedorDocker", () => {
 
     await expect(new ContenedorDocker(docker, []).eliminar("c-9")).resolves.toBeUndefined();
   });
+
+  describe("acciones del cliente (M5-02)", () => {
+    function dockerConRecursos() {
+      const registro = { iniciados: [] as string[], borrados: [] as string[], imagenesBorradas: [] as string[], filtros: [] as unknown[] };
+      const conEstado = (statusCode: number) => Object.assign(new Error(`docker ${statusCode}`), { statusCode });
+      const docker = {
+        getContainer: (id: string) => ({
+          start: async () => {
+            registro.iniciados.push(id);
+            if (id === "ya-corriendo") throw conEstado(304);
+          },
+          remove: async () => {
+            registro.borrados.push(id);
+          },
+        }),
+        listContainers: async (opciones: unknown) => {
+          registro.filtros.push(opciones);
+          return [{ Id: "c-1" }, { Id: "c-2" }];
+        },
+        listImages: async (opciones: unknown) => {
+          registro.filtros.push(opciones);
+          return [{ Id: "sha256:a" }, { Id: "sha256:b" }];
+        },
+        getImage: (id: string) => ({
+          remove: async () => {
+            if (id === "sha256:b") throw conEstado(404);
+            registro.imagenesBorradas.push(id);
+          },
+        }),
+      };
+      return { docker: docker as unknown as Docker, registro };
+    }
+
+    it("iniciar arranca el mismo contenedor y no falla si ya corría", async () => {
+      const { docker, registro } = dockerConRecursos();
+      const adaptador = new ContenedorDocker(docker, []);
+
+      await adaptador.iniciar("c-1");
+      await expect(adaptador.iniciar("ya-corriendo")).resolves.toBeUndefined();
+
+      expect(registro.iniciados).toEqual(["c-1", "ya-corriendo"]);
+    });
+
+    it("Eliminar borra contenedor, imágenes y ruta: todos los contenedores e imágenes deploya/<subdominio>", async () => {
+      const { docker, registro } = dockerConRecursos();
+      const adaptador = new ContenedorDocker(docker, []);
+
+      await adaptador.eliminarContenedoresDe("hola-deploya");
+      await adaptador.eliminarImagenesDe("hola-deploya");
+
+      expect(registro.filtros).toEqual([
+        { all: true, filters: { label: ["app.deploya.proyecto=deploya-p-hola-deploya"] } },
+        { filters: { reference: ["deploya/hola-deploya"] } },
+      ]);
+      expect(registro.borrados).toEqual(["c-1", "c-2"]);
+      expect(registro.imagenesBorradas).toEqual(["sha256:a"]);
+    });
+  });
 });

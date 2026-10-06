@@ -1,5 +1,6 @@
 import { RelojFijo } from "../compartido/reloj";
 import { ProyectosLecturaMemoria } from "../adapters/memoria/proyectos-lectura.memoria";
+import { RecetaProyectoMemoria } from "../adapters/memoria/receta-proyecto.memoria";
 import { RepositorioArtefactosMemoria } from "../adapters/memoria/repositorio-artefactos.memoria";
 import { RepositorioDesplieguesMemoria } from "../adapters/memoria/repositorio-despliegues.memoria";
 import { ClonadorStub } from "../adapters/stubs/clonador.stub";
@@ -10,6 +11,8 @@ import { CuotaPlanStub } from "../adapters/stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "../adapters/stubs/enrutamiento.stub";
 import { VerificacionEntornoStub } from "../adapters/stubs/verificacion-entorno.stub";
 import { ConstruccionService } from "../modules/construccion/construccion.service";
+import { DeteccionStackService } from "../modules/construccion/deteccion/deteccion-stack.service";
+import { recetasEnOrden } from "../modules/construccion/deteccion/recetas-stack";
 import type { ProyectoDesplegable } from "../modules/construccion/dominio/despliegue";
 import { PasoConstruccion } from "../modules/construccion/pipeline/paso-construccion";
 import { PasoRecepcion } from "../modules/construccion/pipeline/paso-recepcion";
@@ -47,10 +50,11 @@ export function motorDePrueba() {
   const salud = new VerificacionEntornoStub();
   const enrutamiento = new EnrutamientoStub();
   const cuota = new CuotaPlanStub();
+  const recetas = new RecetaProyectoMemoria();
   const orquestacion = new OrquestacionService(contenedores, salud, cuota);
   const pasos = [
-    new PasoRecepcion(clonador, despliegues),
-    new PasoConstruccion(clonador, constructorImagen, artefactos, despliegues, reloj),
+    new PasoRecepcion(clonador, despliegues, new DeteccionStackService(recetasEnOrden()), recetas),
+    new PasoConstruccion(constructorImagen, artefactos, despliegues, reloj),
     new PasoEjecucion(orquestacion, despliegues),
     new PasoEnrutamiento(new EnrutamientoService(enrutamiento), despliegues),
     new PasoOperacion(orquestacion, despliegues),
@@ -60,7 +64,7 @@ export function motorDePrueba() {
   proyectos.agregar(proyectoDemo());
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
-    contenedores, salud, enrutamiento, cuota, orquestacion, servicio, pipeline,
+    contenedores, salud, enrutamiento, cuota, recetas, orquestacion, servicio, pipeline,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);

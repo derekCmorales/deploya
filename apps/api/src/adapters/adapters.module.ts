@@ -5,6 +5,7 @@ import { ClonadorRepositorioPuerto } from "../modules/construccion/puertos/clona
 import { ColaConstruccionPuerto } from "../modules/construccion/puertos/cola-construccion.puerto";
 import { ConstructorImagenPuerto } from "../modules/construccion/puertos/constructor-imagen.puerto";
 import { ProyectosLecturaPuerto } from "../modules/construccion/puertos/proyectos-lectura.puerto";
+import { RecetaProyectoPuerto } from "../modules/construccion/puertos/receta-proyecto.puerto";
 import { RepositorioArtefactos } from "../modules/construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
@@ -12,6 +13,7 @@ import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.pue
 import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verificacion-entorno.puerto";
 import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { CONFIGURACION_MOTOR, configuracionDesde, type ConfiguracionMotor } from "./configuracion-motor";
+import { RecetaProyectoPrisma } from "./prisma/receta-proyecto.prisma";
 import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
@@ -52,6 +54,7 @@ const PERSISTENCIA: Provider[] = [
   { provide: RepositorioArtefactos, useClass: RepositorioArtefactosPrisma },
   { provide: RepositorioProyectos, useClass: RepositorioProyectosPrisma },
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
+  { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
 ];
 
 const COMUNES: Provider[] = [

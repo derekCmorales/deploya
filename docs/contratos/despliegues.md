@@ -20,7 +20,7 @@ ConstruccionService.ultimosDespliegues(proyectoIds: string[]):
   Promise<Record<string, { id; numero; estado; etapas: [{ nombre, estado, duracionMs }]; creado }>>
 
 // v2 · A2 — M3 lo usa en el paso 11a para mostrar «Dockerfile detectado» o «Stack detectado»
-DeteccionStackService.detectar(fuente: LectorFuente): Promise<ResultadoDeteccion>
+DeteccionStackService.detectar(fuente: LectorFuente, rutaDockerfile = "Dockerfile"): Promise<ResultadoDeteccion>
 
 export abstract class LectorFuente {          // M3 lo implementa sobre la API pública de GitHub
   abstract existe(ruta: string): Promise<boolean>;
@@ -32,8 +32,12 @@ export interface ResultadoDeteccion {
   descripcion: string;        // «Dockerfile en la raíz» · «Node.js 22 · package.json con script start»
   puertoSugerido: number;     // EXPOSE del Dockerfile o el de la receta (8080)
   evidencia: string[];        // archivos que decidieron: ["package.json", "package-lock.json"]
+  nombre: string;             // v2.1 · «Node.js 22» (bitácora: «Stack detectado: Node.js 22 · receta Deploya»)
+  dockerfile: string | null;  // v2.1 · el Dockerfile.deploya de la receta; null si manda el del repo (M3 lo ignora)
 }
 // Sin Dockerfile ni stack reconocido: lanza StackNoReconocido → 11e «falta Dockerfile y no se reconoce el stack»
+// StackNoReconocido.pista: «agrega un script start o un Dockerfile» (Node sin start), etc. M3 la muestra en 11e.
+// Exportados por ConstruccionModule: DeteccionStackService; LectorFuente vive en construccion/puertos/lector-fuente.puerto.ts
 ```
 
 `POST /proyectos` de M3 llama a `crearDespliegue(id, "alta")` después de persistir el proyecto. Rechaza con **409** si la suscripción está Vencida o Suspendida o se agotaron las construcciones del mes (A2, M5-03), con cuerpo `{ codigo: "suscripcion-no-permite" | "cuota-construcciones-agotada", mensaje }`.
@@ -153,3 +157,4 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 1.2 | 2026-09-29 | M1-03 en `main`: `SesionGuard` y `@UsuarioActual()` reemplazan a `USUARIO_DESARROLLO`, que se borra |
 | 2 | 2026-09-27 | Solo agrega: detección de stack, acciones, artefactos, reversión y `revirtiendo`; campos `disparador`, `recursos`, `motivoFallo`, `imagen.numero`, `imagen.receta` |
 | 2.1 | 2026-10-02 | Avance 2: consulta por número, variables (HTTP y M3 → M5), `BloqueosService`; `detener` responde 202 |
+| 2.1 | 2026-10-06 | Solo agrega: `detectar` acepta `rutaDockerfile`; `ResultadoDeteccion.nombre` y `.dockerfile`; `StackNoReconocido.pista` |

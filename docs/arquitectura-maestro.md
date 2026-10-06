@@ -1902,15 +1902,21 @@ classDiagram
     }
     class DeteccionStackService {
         -recetas List~RecetaStack~
-        +detectar(fuente LectorFuente) ResultadoDeteccion
+        +detectar(fuente LectorFuente, rutaDockerfile) ResultadoDeteccion
     }
     class RecetaStack {
         <<abstract>>
         +receta RecetaConstruccion
+        +nombre String
         +archivosQueLee List~String~
         +reconoce(archivos MapaArchivos) Boolean
+        +describir(archivos MapaArchivos) DescripcionReceta
         +dockerfile(archivos MapaArchivos) String
         +puertoSugerido(archivos MapaArchivos) Integer
+        +pista(archivos MapaArchivos) String
+    }
+    class LectorDockerfileEn {
+        <<Decorator>>
     }
     class RecetaDockerfile
     class RecetaNode
@@ -1931,6 +1937,7 @@ classDiagram
     class PasoRecepcion {
         -clonador ClonadorRepositorioPuerto
         -deteccion DeteccionStackService
+        -recetas RecetaProyectoPuerto
     }
     class PasoConstruccion {
         -constructor ConstructorImagenPuerto
@@ -2005,8 +2012,13 @@ classDiagram
     class ClonadorRepositorioPuerto {
         <<abstract>>
         +clonar(solicitud SolicitudClon) ClonListo
-        +existeArchivo(directorio, ruta) Boolean
+        +lector(directorio) LectorFuente
+        +escribir(directorio, ruta, contenido) void
         +limpiar(directorio) void
+    }
+    class RecetaProyectoPuerto {
+        <<abstract>>
+        +registrar(proyectoId, receta) void
     }
     class ProyectosLecturaPuerto {
         <<abstract>>
@@ -2069,6 +2081,7 @@ classDiagram
     class ClonadorGit
     class ConstructorDocker
     class LectorFuenteLocal
+    class RecetaProyectoPrisma
     class RepositorioDesplieguesPrisma
     class ContenedorDocker
     class VerificacionHttp
@@ -2225,6 +2238,10 @@ classDiagram
     ClonadorRepositorioPuerto <|-- ClonadorGit
     ConstructorImagenPuerto <|-- ConstructorDocker
     LectorFuente <|-- LectorFuenteLocal
+    LectorFuente <|-- LectorDockerfileEn
+    DeteccionStackService --> LectorDockerfileEn
+    PasoRecepcion --> RecetaProyectoPuerto
+    RecetaProyectoPuerto <|-- RecetaProyectoPrisma
     RepositorioDespliegues <|-- RepositorioDesplieguesPrisma
     RepositorioArtefactos <|-- RepositorioArtefactosPrisma
     ContenedorPuerto <|-- ContenedorDocker

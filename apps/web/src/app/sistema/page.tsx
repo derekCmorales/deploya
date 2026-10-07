@@ -209,7 +209,7 @@ export default function SistemaPage() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <Meter label="Proyectos" value={3} max={3} />
+              <Meter label="Proyectos" value={3} max={3} tonoAlLimite="warn" />
               <Meter label="Construcciones" value={96} max={150} />
             </CardContent>
             <CardFooter>

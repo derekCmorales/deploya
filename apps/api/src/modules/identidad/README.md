@@ -8,4 +8,9 @@ Dueño: Eddy. Spec: [`openspec/specs/identidad/spec.md`](../../../../../openspec
 
 **Fuera de alcance (solo si da el tiempo):** Auditoría completa, roles Operador y Soporte, cambio de correo, segundo factor.
 
-Hoy: stub con `GET /identidad/health`. Cada historia entra con su change de OpenSpec.
+Hecho:
+
+- M1-01 y M1-02 (change `feat-m1-registro-verificacion`): `POST /identidad/registro` y `POST /identidad/verificacion`.
+- M1-03 (change `feat-m1-sesion`): `POST`, `GET` y `DELETE /identidad/sesion` con cookie HttpOnly `deploya_sesion` (7 días sin actividad). `SesionGuard` y `@UsuarioActual()` se exportan para M3, M4 y los que vengan: `@UseGuards(SesionGuard)` y `@UsuarioActual("id")`.
+- Usuarios, tokens y sesiones en PostgreSQL (DB-01); Sandbox vía `SuscripcionesService.asignarSandbox` (M2).
+- M1-04, parte de roles (change `feat-m1-estados-roles`): `RolGuard` y `@Roles()` exportados. Uso: `@UseGuards(SesionGuard, RolGuard)` y `@Roles("administrador")` en la ruta o en el controlador. Un Cliente recibe 403 `{ codigo: "SoloAdministracion" }`; sin `@Roles` la ruta solo exige sesión. `GET /administracion/acceso` ya los usa.

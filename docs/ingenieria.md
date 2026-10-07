@@ -131,6 +131,25 @@ Anti-patrones que el revisor rechaza: *God object* (servicio de 600 líneas), *S
 | M5-01 | Derek | Los límites de `cuotaDe` llegan a `ContenedorPuerto.crear` (`cpu`, `memoriaMb`); salud falsa → Fallido; salud verdadera → Saludable |
 | ENG-01 | Derek | Smoke de compose en CI (ya existe) sigue verde |
 
+### 5.4 Pruebas mínimas del Avance 2
+
+Cada fila sale de los escenarios del change; el nombre del `it(...)` es el del escenario.
+
+| Historia | Dueño | Change | Pruebas unitarias mínimas |
+|---|---|---|---|
+| M1-04 | Eddy | `feat-m1-estados-roles` | Reenvío con y sin cuenta atrás (`Reloj` falso, 60 s); reenvío neutro a cuenta activa o inexistente; `CuentaSuspendida` con motivo y fecha; `RolGuard`: Cliente → 403, administrador → 200, ruta sin `@Roles` pasa |
+| M1-05 | Eddy | `feat-m1-recuperacion` | Respuesta neutra igual con y sin cuenta; token vigente cambia el hash y revoca **todas** las sesiones; vencido (31 min), usado y reemplazado por uno nuevo se rechazan; contraseña débil no consume el token; un fallo de correo no cambia el 202 |
+| M10-02 | Eddy | `feat-m1-recuperacion` | `PlantillaRecuperacion`: botón, enlace en texto plano, 30 minutos, un uso y «si no la pediste, ignórala»; datos escapados |
+| M2-02 · M2-03 · M2-04 | Javier | `feat-m2-contratacion-suscripcion` | **Hechas** (en `main`): ascenso, renovar, descenso sin cobro, pasarela que aprueba, rechaza y tarda, comprobante consecutivo |
+| M7-01 | Eduardo | `feat-m7-vista-despliegue` | `fusionarLineas` sin duplicar ni reordenar; `lineaDeError`; `textoParaCopiar`; el polling para cuando `terminado = true` (con `pedirApi` doble); API: consulta por número y 404 ajeno |
+| M3-03 | Eduardo (+ Derek) | `feat-m3-variables-cifradas` | Clave inválida y `PORT` reservada; cifrado de ida y vuelta, IV distinto, valor alterado → `VariableIlegible`; en la base solo `v1:…`; «Guardar y desplegar» pide despliegue `variables`; en M5 las variables llegan a `ContenedorPuerto.crear` y la bitácora no muestra valores |
+| M6-01 | Derek | `feat-m4-motor-construccion` (+ `feat-m5-acciones-contenedor`) | Publicación tras la salud; renombrar no cambia el subdominio; la ruta solo se escribe por `EnrutamientoPuerto` |
+| M5-02 | Derek | `feat-m5-acciones-contenedor` | Conmutación: el anterior se detiene solo después de activar el nuevo; salud fallida no conmuta; detener, reiniciar (Saludable y Detenido), reinicio sin salud → Fallido, sin despliegue activo → 409; eliminar borra contenedor, imágenes y ruta y es idempotente |
+| M5-03 | Derek (+ Javier, Eduardo) | `feat-m5-bloqueos-cuota` | `PoliticaDespliegue`: Vencida y Suspendida bloquean, cuota agotada bloquea, dentro de la cuota pasa, mes nuevo reinicia, la reversión no cuenta; el alta con la suscripción vencida no persiste el proyecto |
+| M4-03 | Derek (+ Eduardo) | `feat-m4-deteccion-stack` | Una prueba por receta con mapas de archivos en memoria (Dockerfile manda, Node, Python, Go, estático, no reconocido, Node sin `start`); cada plantilla con `PORT=8080` y `USER` sin privilegios; `PasoRecepcion` escribe `Dockerfile.deploya` |
+
+Web: cada historia con UI agrega sus pruebas `node --test` de lógica pura (`apps/web/test`) y se revisa contra su artboard en claro y oscuro.
+
 ---
 
 ## 6. Cómo se aplica en el flujo

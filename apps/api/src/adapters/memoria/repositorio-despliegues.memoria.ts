@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import type { Despliegue, LineaBitacora } from "../../modules/construccion/dominio/despliegue";
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
-import { ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
+import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
@@ -18,6 +18,12 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
   private readonly despliegues = new Map<string, Despliegue>();
   private readonly lineas = new Map<string, LineaBitacora[]>();
   private readonly activos = new Map<string, string>();
+  private readonly duenos = new Map<string, string>();
+
+  /** En la base el dueño sale de `Proyecto.usuarioId`; aquí se registra a mano. */
+  registrarDueno(proyectoId: string, usuarioId: string): void {
+    this.duenos.set(proyectoId, usuarioId);
+  }
 
   async crear(nuevo: NuevoDespliegue): Promise<Despliegue> {
     const despliegue: Despliegue = {
@@ -46,6 +52,11 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
 
   async porId(id: string): Promise<Despliegue | null> {
     const despliegue = this.despliegues.get(id);
+    return despliegue ? structuredClone(despliegue) : null;
+  }
+
+  async porNumero(proyectoId: string, numero: number): Promise<Despliegue | null> {
+    const despliegue = [...this.despliegues.values()].find((d) => d.proyectoId === proyectoId && d.numero === numero);
     return despliegue ? structuredClone(despliegue) : null;
   }
 
@@ -88,6 +99,12 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
 
   async marcarActivo(proyectoId: string, despliegueId: string): Promise<void> {
     this.activos.set(proyectoId, despliegueId);
+  }
+
+  async contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number> {
+    return [...this.despliegues.values()].filter(
+      (d) => this.duenos.get(d.proyectoId) === usuarioId && d.disparador !== DISPARADOR_SIN_CONSTRUCCION && d.creado >= desde,
+    ).length;
   }
 
   private siguienteNumero(proyectoId: string): number {

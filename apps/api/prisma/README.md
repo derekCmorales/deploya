@@ -1,10 +1,12 @@
 # Prisma — Javier (@Javier-r04), review Derek
 
-Schema mínimo de bootstrap: `Usuario`, `Plan`, `Proyecto`, `Despliegue`. El schema del núcleo (con límites de los planes v4.1, admin por seed y Sandbox al registrarse) llega en **DB-01** ([plan-avances.md](../../../docs/plan-avances.md)). ERD completo: [erd-unificado.mmd](../../../docs/diagramas/compartido/erd-unificado.mmd); el núcleo es un subconjunto.
+Schema del núcleo v4.1, copia exacta del contrato [datos-nucleo.md](../../../docs/contratos/datos-nucleo.md) (DB-01). Cambiarlo exige avisar a los consumidores antes de mergear. ERD: [erd-unificado.mmd](../../../docs/diagramas/compartido/erd-unificado.mmd).
 
 ```bash
-pnpm --filter @deploya/api prisma:generate
-# con DATABASE_URL exportada (ver .env.example):
-pnpm --filter @deploya/api exec prisma db push
-pnpm --filter @deploya/api prisma:seed
+docker compose up -d postgres
+export DATABASE_URL=postgresql://deploya:deploya@localhost:5432/deploya
+pnpm --filter @deploya/api exec prisma migrate dev          # aplica prisma/migrations
+ADMIN_CLAVE=... pnpm --filter @deploya/api prisma:seed      # idempotente: se puede correr varias veces
 ```
+
+El seed crea los cuatro planes, el administrador (`ADMIN_CORREO`, `ADMIN_CLAVE`) y `cliente@deploya.app` (`CLIENTE_CLAVE`, o la del admin), ambos con Sandbox. La lógica está en `src/modules/suscripciones/semilla/` y tiene pruebas unitarias.

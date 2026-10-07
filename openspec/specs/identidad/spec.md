@@ -12,6 +12,8 @@ Permitir que un cliente cree una cuenta con correo verificado, entre con una ses
 
 El sistema SHALL crear una cuenta con correo único y contraseña de al menos 12 caracteres con mayúsculas, minúsculas, número y símbolo. La cuenta SHALL quedar *pendiente de verificación* y con suscripción Sandbox (M2).
 
+El correo SHALL compararse sin distinguir mayúsculas ni espacios, y la API SHALL aplicar las mismas reglas de contraseña que muestra la web. La contraseña SHALL guardarse solo como hash. La cuenta nueva SHALL tener rol Cliente. Si el correo de verificación no se puede enviar, la cuenta SHALL quedar creada y la respuesta SHALL indicarlo (`correoEnviado: false`). La respuesta SHALL traer el correo enmascarado para la pantalla 01b.
+
 #### Scenario: Registro válido
 
 - **WHEN** un visitante envía un correo nuevo y una contraseña válida
@@ -22,9 +24,21 @@ El sistema SHALL crear una cuenta con correo único y contraseña de al menos 12
 - **WHEN** el correo ya tiene una cuenta
 - **THEN** se rechaza el alta y se ofrece iniciar sesión o recuperar contraseña (pantalla 01b)
 
+#### Scenario: Contraseña débil
+
+- **WHEN** la contraseña no cumple alguna regla
+- **THEN** se rechaza con `ContrasenaDebil` (400) y la lista de reglas incumplidas, sin crear la cuenta
+
+#### Scenario: Falla del correo al registrarse
+
+- **WHEN** `CorreoPuerto` lanza `CorreoNoEnviado`
+- **THEN** la cuenta queda creada y la respuesta indica `correoEnviado: false`
+
 ### Requirement: Verificación de correo
 
 El sistema SHALL activar la cuenta solo con un token de verificación vigente (24 horas) y de un solo uso. El cliente SHALL poder pedir un reenvío tras una cuenta atrás.
+
+En la base SHALL guardarse solo la huella del token, nunca el token en claro. El token SHALL consumirse con `POST /identidad/verificacion`, no al abrir el enlace. Un token inexistente, vencido o usado SHALL responder el mismo error (`TokenNoValido`, 410), sin revelar cuál de los tres fue.
 
 #### Scenario: Token válido
 
@@ -40,6 +54,13 @@ El sistema SHALL activar la cuenta solo con un token de verificación vigente (2
 
 El sistema SHALL emitir una sesión al validar credenciales de una cuenta Activa. La sesión SHALL expirar tras 7 días sin actividad. El sistema SHALL exponer un guard de sesión y el usuario actual para el resto de módulos.
 
+El token de la sesión SHALL viajar solo en una cookie HttpOnly y en la base SHALL guardarse solo su huella. Cerrar sesión SHALL revocarla. Las rutas de proyectos y despliegues SHALL responder 401 sin una sesión vigente.
+
+#### Scenario: Credenciales válidas
+
+- **WHEN** una cuenta Activa envía su correo y contraseña
+- **THEN** recibe la cookie de sesión y la respuesta trae solo su usuario
+
 #### Scenario: Credenciales incorrectas
 
 - **WHEN** el correo o la contraseña no coinciden
@@ -54,6 +75,21 @@ El sistema SHALL emitir una sesión al validar credenciales de una cuenta Activa
 
 - **WHEN** una cuenta suspendida por administración intenta entrar
 - **THEN** se rechaza y se muestra el motivo registrado por M9
+
+#### Scenario: Sesión expirada
+
+- **WHEN** pasan 7 días sin actividad
+- **THEN** el token ya no resuelve a ningún usuario y la ruta protegida responde 401
+
+#### Scenario: Ruta protegida sin sesión
+
+- **WHEN** alguien sin cookie de sesión vigente pide `/proyectos` o un despliegue
+- **THEN** la API responde 401 y la web lleva a `/ingresar`
+
+#### Scenario: Cerrar sesión
+
+- **WHEN** el usuario cierra sesión
+- **THEN** la sesión queda revocada y la cookie vencida
 
 ### Requirement: Roles
 

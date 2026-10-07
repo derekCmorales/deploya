@@ -60,6 +60,23 @@ export class OrquestacionService {
     return { contenedor, recursos, salud };
   }
 
+  /** Arranca otra vez un contenedor existente y espera su salud (reiniciar, M5-02). Lanza `SaludNoAlcanzada`. */
+  async reanudar(contenedorId: string, host: string, puerto: number): Promise<ResultadoSalud> {
+    await this.contenedores.iniciar(contenedorId);
+    const salud = await this.salud.saludable({ host, puerto, ruta: RUTA_SALUD, tiempoMaximoMs: TIEMPO_MAXIMO_SALUD_MS });
+    if (!salud.ok) {
+      await this.contenedores.detener(contenedorId);
+      throw new SaludNoAlcanzada(TIEMPO_MAXIMO_SALUD_MS / MILISEGUNDOS_POR_SEGUNDO, salud.detalle);
+    }
+    return salud;
+  }
+
+  /** Lo que deja un proyecto eliminado: contenedores e imágenes. Idempotente. */
+  async eliminarRecursosDe(subdominio: string): Promise<void> {
+    await this.contenedores.eliminarContenedoresDe(subdominio);
+    await this.contenedores.eliminarImagenesDe(subdominio);
+  }
+
   async detenerContenedor(contenedorId: string): Promise<void> {
     await this.contenedores.detener(contenedorId);
   }

@@ -2,6 +2,10 @@ export interface Proyecto {
   id: string;
   usuarioId: string;
   nombre: string;
+<<<<<<< HEAD
+=======
+  /** Derivado del nombre al crear; único e inmutable. */
+>>>>>>> origin/main
   subdominio: string;
   urlRepositorio: string;
   rama: string;
@@ -10,17 +14,33 @@ export interface Proyecto {
   creado: Date;
 }
 
+<<<<<<< HEAD
+=======
+export type ProyectoNuevo = Omit<Proyecto, "id" | "creado">;
+
+/** Lo que pide la web en `POST /proyectos` (11d). Sin `puerto` se usa el de `EXPOSE`. */
+>>>>>>> origin/main
 export interface AltaProyecto {
   url: string;
   rama: string;
   nombre: string;
+<<<<<<< HEAD
   puerto: number;
+=======
+  puerto?: number;
+}
+
+export interface ConsultaRepositorio {
+  url: string;
+  rama: string;
+>>>>>>> origin/main
 }
 
 export interface CommitFuente {
   sha: string;
   mensaje: string;
   autor: string;
+<<<<<<< HEAD
 }
 
 export interface ValidacionRepositorio {
@@ -31,3 +51,20 @@ export interface ValidacionRepositorio {
   dockerfile: string;
   puerto: number;
 }
+=======
+  fecha: string;
+}
+
+/** Respuesta de `POST /proyectos/validar-repositorio` (11a). */
+export interface ValidacionRepositorio {
+  accesible: true;
+  urlNormalizada: string;
+  repositorio: string;
+  rama: string;
+  ramas: string[];
+  commit: CommitFuente;
+  dockerfile: string;
+  /** `EXPOSE` del Dockerfile o el puerto por defecto. */
+  puerto: number;
+}
+>>>>>>> origin/main

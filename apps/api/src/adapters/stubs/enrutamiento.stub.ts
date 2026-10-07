@@ -4,6 +4,7 @@ import { EnrutamientoPuerto, type RutaPublica } from "../../modules/enrutamiento
 @Injectable()
 export class EnrutamientoStub extends EnrutamientoPuerto {
   readonly publicadas: RutaPublica[] = [];
+  readonly retiradas: string[] = [];
   error: Error | null = null;
 
   async publicar(ruta: RutaPublica): Promise<{ url: string }> {
@@ -12,7 +13,7 @@ export class EnrutamientoStub extends EnrutamientoPuerto {
     return { url: `http://${ruta.subdominio}.localhost` };
   }
 
-  async retirar(): Promise<void> {
-    return;
+  async retirar(subdominio: string): Promise<void> {
+    this.retiradas.push(subdominio);
   }
 }

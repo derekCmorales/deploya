@@ -1,27 +1,29 @@
-import { PrismaClient } from "@prisma/client";
+import "reflect-metadata";
+import { RelojSistema } from "../src/compartido/reloj";
+import { PrismaService } from "../src/compartido/prisma/prisma.service";
+import { RepositorioPlanesPrisma } from "../src/modules/suscripciones/adaptadores/repositorio-planes.prisma";
+import { RepositorioSuscripcionesPrisma } from "../src/modules/suscripciones/adaptadores/repositorio-suscripciones.prisma";
+import { hashSemilla } from "../src/modules/suscripciones/semilla/hash-semilla";
+import { DestinoSemillaPrisma } from "../src/modules/suscripciones/semilla/destino-semilla.prisma";
+import { sembrar } from "../src/modules/suscripciones/semilla/sembrar";
+import { SuscripcionesService } from "../src/modules/suscripciones/suscripciones.service";
 
-const prisma = new PrismaClient();
-
-async function main() {
-  const planes = [
-    { nombre: "Sandbox", descripcion: "Entorno de evaluación", precio: 0, vigenciaDias: 30 },
-    { nombre: "Starter", descripcion: "Sitios personales", precio: 5, vigenciaDias: 30 },
-    { nombre: "Pro", descripcion: "Varios proyectos en producción", precio: 15, vigenciaDias: 30 },
-    { nombre: "Business", descripcion: "Equipos y retención extendida", precio: 40, vigenciaDias: 30 },
-  ];
-  for (const plan of planes) {
-    await prisma.plan.upsert({
-      where: { nombre: plan.nombre },
-      update: plan,
-      create: plan,
-    });
+async function main(): Promise<void> {
+  const prisma = new PrismaService();
+  const suscripciones = new SuscripcionesService(
+    new RepositorioPlanesPrisma(prisma),
+    new RepositorioSuscripcionesPrisma(prisma),
+    new RelojSistema(),
+  );
+  try {
+    await sembrar(new DestinoSemillaPrisma(prisma), suscripciones, hashSemilla, process.env);
+    console.log("Seed listo: 4 planes, administrador y cliente de demostración con Sandbox");
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+});

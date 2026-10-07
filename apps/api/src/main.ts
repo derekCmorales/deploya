@@ -4,7 +4,8 @@ import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  // La web manda la cookie de sesión (`credentials: "include"`): CORS con origen explícito.
+  app.enableCors({ origin: process.env.URL_WEB ?? "http://localhost:3000", credentials: true });
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
 }

@@ -18,4 +18,8 @@ export function puertoDesdeExpose(dockerfile: string): number | null {
     }
   }
   return null;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/main

@@ -16,7 +16,7 @@ Cuando la decisión es difícil de revertir o afecta a más de un módulo: elegi
 
 | # | Decisión | Estado |
 |---|---|---|
-| [0001](0001-correo-por-smtp-configurable.md) | Correo por un adaptador SMTP configurable; Mailpit solo en desarrollo | Propuesto |
+| [0001](0001-correo-por-smtp-configurable.md) | Correo por un adaptador SMTP configurable; Mailpit solo en desarrollo | Aceptado |
 | [0002](0002-cola-bullmq-y-trabajador-aparte.md) | Cola BullMQ y un trabajador aparte con la misma imagen | Propuesto |
 | [0003](0003-construccion-dockerfile-o-receta.md) | Construcción con el `Dockerfile` del repo o con una receta por stack detectado | Propuesto |
 | [0004](0004-versionado-y-reversion-sin-reconstruir.md) | Versionado inmutable y reversión sin reconstruir (retención de 5) | Propuesto |

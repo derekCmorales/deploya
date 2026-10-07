@@ -15,4 +15,9 @@ export class EnrutamientoService {
       throw new EnrutamientoFallido(error instanceof Error ? error.message : String(error));
     }
   }
+
+  /** Detener y eliminar quitan la ruta: el subdominio responde 404 de Traefik y no 502. */
+  async retirar(subdominio: string): Promise<void> {
+    await this.enrutamiento.retirar(subdominio);
+  }
 }

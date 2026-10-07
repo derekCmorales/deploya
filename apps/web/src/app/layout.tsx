@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
-import { AppShell } from "@/components/shell/app-shell";
-import { NavPanel } from "@/components/shell/nav-panel";
+import { SesionProvider } from "@/hooks/use-sesion";
+import { MarcoApp } from "@/components/shell/marco-app";
 import { ThemeProvider } from "@/components/shell/theme-provider";
 
 import "./globals.css";
@@ -34,7 +34,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} min-h-full font-sans`}
       >
         <ThemeProvider>
-          <AppShell nav={<NavPanel />}>{children}</AppShell>
+          <SesionProvider>
+            <MarcoApp>{children}</MarcoApp>
+          </SesionProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -47,13 +47,6 @@ export class ClonFallido extends FalloDespliegue {
   }
 }
 
-export class DockerfileAusente extends FalloDespliegue {
-  constructor(rutaDockerfile: string) {
-    super("construccion", `Falta Dockerfile (${rutaDockerfile})`);
-    this.name = "DockerfileAusente";
-  }
-}
-
 export class ConstruccionFallida extends FalloDespliegue {
   constructor(codigoSalida: number, detalle: string) {
     super("construccion", `La construcción terminó con código ${codigoSalida}: ${detalle}`, codigoSalida);
@@ -75,9 +68,41 @@ export class SaludNoAlcanzada extends FalloDespliegue {
   }
 }
 
+/** Un valor cifrado de M3 fue alterado: el contenedor no se crea y la versión activa no cambia. */
+export class VariablesIlegibles extends FalloDespliegue {
+  constructor() {
+    super("ejecucion", "Variable ilegible");
+    this.name = "VariablesIlegibles";
+  }
+}
+
 export class EnrutamientoFallido extends FalloDespliegue {
   constructor(detalle: string) {
     super("enrutamiento", `No se pudo publicar la ruta: ${detalle}`);
     this.name = "EnrutamientoFallido";
   }
+}
+
+/**
+ * Sin `Dockerfile` y sin receta que reconozca el stack (M4-03). No es un fallo de etapa:
+ * M3 lo muestra en 11e y el trabajador lo convierte en `DeteccionFallida`.
+ */
+export class StackNoReconocido extends Error {
+  static readonly MOTIVO = "falta Dockerfile y no se reconoce el stack";
+
+  constructor(readonly pista: string) {
+    super(StackNoReconocido.MOTIVO);
+    this.name = "StackNoReconocido";
+  }
+}
+
+export class DeteccionFallida extends FalloDespliegue {
+  constructor(error: StackNoReconocido) {
+    super("recepcion", `${capitalizar(error.message)}: ${error.pista}`);
+    this.name = "DeteccionFallida";
+  }
+}
+
+function capitalizar(texto: string): string {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }

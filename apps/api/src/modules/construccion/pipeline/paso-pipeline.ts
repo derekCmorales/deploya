@@ -1,6 +1,6 @@
 import type { ContenedorCreado } from "../../orquestacion/puertos/contenedor.puerto";
 import type { Commit, Despliegue, ProyectoDesplegable } from "../dominio/despliegue";
-import type { EstadoDespliegue, Etapa, NivelBitacora } from "../dominio/estados";
+import type { EstadoDespliegue, Etapa, NivelBitacora, RecetaConstruccion } from "../dominio/estados";
 
 export interface Bitacora {
   escribir(etapa: Etapa, texto: string, nivel?: NivelBitacora): void;
@@ -13,6 +13,9 @@ export interface ContextoDespliegue {
   bitacora: Bitacora;
   directorio?: string;
   commit?: Commit;
+  /** Lo decide la detección de stack en Recepción; Construcción lo usa. */
+  receta?: RecetaConstruccion;
+  rutaDockerfile?: string;
   imagen?: string;
   contenedor?: ContenedorCreado;
   url?: string;

@@ -184,6 +184,19 @@
     background-size: 220% 100%;
     animation: dy-brillo 1.5s linear infinite;
   }
+
+  /* Ilustraciones de acceso (01, 03): `.bob` y `.spin-slow` del canvas v4.1. */
+  .dy-flota {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dy-flota 4.2s ease-in-out infinite;
+  }
+
+  .dy-giro-lento {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dy-giro 18s linear infinite;
+  }
 }
 
 @keyframes dy-barrido {
@@ -230,12 +243,30 @@
   }
 }
 
+@keyframes dy-flota {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes dy-giro {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dy-barrido,
   .dy-vivo,
   .dy-cursor,
   .dy-entrada,
   .dy-esqueleto,
+  .dy-flota,
+  .dy-giro-lento,
   .animate-spin {
     animation: none;
   }

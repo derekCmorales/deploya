@@ -26,4 +26,4 @@ Sin base, red ni reloj reales: repositorios en memoria, `RelojFijo`, dobles de `
 - [x] 4.1 `/ingresar` con los estados de 03b; `resultadoIngreso` y `destinoTrasIngreso` con pruebas (`node --test`)
 - [x] 4.2 `SesionProvider`, `MenuUsuario` («Salir») y `RequiereSesion` en `(projects)`
 - [x] 4.3 Recorrido completo en compose con Playwright: registro → Mailpit → verificación → ingreso → planes → proyecto → Saludable → app en `hola-deploya.localhost` → salir
-- [x] 4.4 Ilustración de acceso de la pantalla 03 (`ingresar/ilustracion-ingreso.tsx`) según el artboard `03-Iniciar sesión`: cúpula, línea, arco punteado y cuadros con los colores del sistema; el punto de Señal flota sobre la cúpula y se detiene con `prefers-reduced-motion`. Verificada en la app en claro y oscuro
+- [x] 4.4 Ilustración de acceso de la pantalla 03 (`ingresar/ilustracion-ingreso.tsx`) según el artboard `03-Iniciar sesión`: cúpula y línea en tinta, arco de rayas quieto y dos cuadros, con los colores del sistema. El único movimiento es el punto de Señal, que flota detrás de la cúpula (`dy-flota` de `globals.css`) y se apaga con `prefers-reduced-motion`. Verificada en la app en claro y oscuro

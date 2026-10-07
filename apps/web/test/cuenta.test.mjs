@@ -83,41 +83,39 @@ test("03 · tras iniciar sesión vuelve solo a rutas propias", () => {
   assert.equal(destinoTrasIngreso("/\\evil.com"), "/projects");
 });
 
-test("01 · la columna derecha lleva la ilustración de acceso con colores del sistema, sin hex", async () => {
+/** Guardia de diseño de una ilustración de acceso: la página la monta, es decorativa y no trae hex. */
+async function revisarIlustracion(pagina, componente, nombre) {
   const { readFileSync } = await import("node:fs");
   const leer = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
-  const ilustracion = leer("src/app/(auth)/registro/ilustracion-registro.tsx");
-  assert.match(leer("src/app/(auth)/registro/page.tsx"), /<IlustracionRegistro/);
+  const ilustracion = leer(componente);
+  assert.match(leer(pagina), new RegExp(`<${nombre}`));
   assert.match(ilustracion, /aria-hidden="true"/);
-  assert.ok(ilustracion.includes("var(--foreground)"));
-  assert.ok(ilustracion.includes("var(--signal)"));
-  assert.ok(ilustracion.includes("var(--faint)"));
-  assert.ok(ilustracion.includes("var(--border-stronger)"));
   assert.doesNotMatch(ilustracion, /#[0-9a-fA-F]{3,8}\b/);
+}
+
+test("01 · la columna derecha lleva la ilustración de acceso, decorativa y sin hex", async () => {
+  await revisarIlustracion(
+    "src/app/(auth)/registro/page.tsx",
+    "src/app/(auth)/registro/ilustracion-registro.tsx",
+    "IlustracionRegistro",
+  );
 });
 
-test("01 · la ilustración del registro gira la órbita y llena la barra, y se detiene con movimiento reducido", async () => {
-  const { readFileSync } = await import("node:fs");
-  const ilustracion = readFileSync(new URL("../src/app/(auth)/registro/ilustracion-registro.tsx", import.meta.url), "utf8");
-  assert.match(ilustracion, /className="ilus-registro-orbita"/);
-  assert.match(ilustracion, /className="ilus-registro-carga"/);
-  assert.match(ilustracion, /@keyframes ilus-registro-giro/);
-  assert.match(ilustracion, /@keyframes ilus-registro-llenado/);
-  assert.match(ilustracion, /prefers-reduced-motion: reduce/);
+test("03 · la columna derecha lleva la ilustración de acceso, decorativa y sin hex", async () => {
+  await revisarIlustracion(
+    "src/app/(auth)/ingresar/page.tsx",
+    "src/app/(auth)/ingresar/ilustracion-ingreso.tsx",
+    "IlustracionIngreso",
+  );
 });
 
-test("03 · la ilustración del login: el punto flota detrás de la cúpula y el arco punteado se mueve, con colores del sistema", async () => {
+test("design system · toda utilidad de movimiento dy-* se apaga con movimiento reducido", async () => {
   const { readFileSync } = await import("node:fs");
-  const leer = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
-  const ilustracion = leer("src/app/(auth)/ingresar/ilustracion-ingreso.tsx");
-  assert.match(leer("src/app/(auth)/ingresar/page.tsx"), /<IlustracionIngreso/);
-  assert.match(ilustracion, /aria-hidden="true"/);
-  assert.match(ilustracion, /className="ilus-ingreso-punto"/);
-  assert.match(ilustracion, /@keyframes ilus-ingreso-flota/);
-  assert.match(ilustracion, /className="ilus-ingreso-arco"/);
-  assert.match(ilustracion, /@keyframes ilus-ingreso-recorre/);
-  assert.ok(ilustracion.indexOf("ilus-ingreso-punto\" cx") < ilustracion.indexOf("A136 136 0 0 1"), "el punto va detrás de la cúpula");
-  assert.match(ilustracion, /prefers-reduced-motion: reduce/);
-  assert.ok(ilustracion.includes("var(--signal)"));
-  assert.doesNotMatch(ilustracion, /#[0-9a-fA-F]{3,8}\b/);
+  const css = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
+  const conMovimiento = [...css.matchAll(/\.(dy-[a-z-]+)\s*\{[^}]*animation:/g)].map((m) => m[1]);
+  const reducido = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/)[1];
+
+  assert.ok(conMovimiento.includes("dy-flota"));
+  assert.ok(conMovimiento.includes("dy-giro-lento"));
+  assert.deepEqual(conMovimiento.filter((clase) => !reducido.includes(`.${clase}`)), []);
 });

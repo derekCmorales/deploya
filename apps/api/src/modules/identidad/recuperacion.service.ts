@@ -56,7 +56,10 @@ export class RecuperacionService {
     void this.correo.enviar(usuario.correo, PLANTILLA_RECUPERACION, { enlace }).catch((error: Error) => this.registro.warn(error.message));
   }
 
-  /** La política se valida antes de tocar el token: una contraseña débil no lo consume. */
+  /**
+   * La política se valida antes de tocar el token: una contraseña débil no lo consume. Solo
+   * una cuenta que sigue Activa puede cambiar su contraseña con el enlace.
+   */
   async restablecer(solicitud: SolicitudRestablecer): Promise<void> {
     const politica = this.politica.validar(solicitud.contrasena);
     if (!politica.valida) throw new ContrasenaDebil(politica.incumplidas);
@@ -65,6 +68,9 @@ export class RecuperacionService {
     const guardado = await this.tokens.porHuella(this.generador.huella(solicitud.token));
     const motivo = motivoInvalidez(guardado?.tipo === "recuperacion" ? guardado : null, ahora);
     if (motivo || !guardado) throw new TokenNoValido(motivo ?? "inexistente");
+    // Si la cuenta dejó de estar Activa después de pedir el enlace (p. ej. suspendida por M9), el enlace ya no sirve.
+    const usuario = await this.usuarios.porId(guardado.usuarioId);
+    if (usuario?.estadoCuenta !== "activa") throw new TokenNoValido("inexistente");
 
     await this.usuarios.cambiarHash(guardado.usuarioId, await this.hash.calcular(solicitud.contrasena));
     await this.tokens.marcarUsado(guardado.id, ahora);

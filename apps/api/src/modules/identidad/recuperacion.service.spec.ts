@@ -172,6 +172,17 @@ describe("M1-05 · Recuperación de contraseña", () => {
     await expect(servicio.restablecer({ token, contrasena: CLAVE_NUEVA })).resolves.toBeUndefined();
   });
 
+  it("si la cuenta se suspende después de pedir el enlace, el enlace ya no sirve y la contraseña no cambia", async () => {
+    const { servicio, correo, usuarios, usuario } = await armar();
+    await servicio.solicitar(usuario.correo);
+    await usuarios.cambiarEstado(usuario.id, "suspendida");
+
+    await expect(servicio.restablecer({ token: tokenDelEnlace(correo.enviados[0].enlace), contrasena: CLAVE_NUEVA })).rejects.toBeInstanceOf(
+      TokenNoValido,
+    );
+    expect((await usuarios.porId(usuario.id))?.hashContrasena).toBe(usuario.hashContrasena);
+  });
+
   it("un token desconocido o de verificación no sirve para restablecer", async () => {
     const { servicio, tokens, usuario, reloj } = await armar();
     await tokens.crear({

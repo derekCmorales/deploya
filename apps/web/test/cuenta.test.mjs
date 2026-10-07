@@ -182,6 +182,9 @@ test("04 · textos de la ficha, «Olvidé mi contraseña» lleva a /recuperar y 
     assert.ok(tarjeta.includes(texto), texto);
   }
   assert.match(paso2, /<RequisitosContrasena/);
+  for (const pagina of ["recuperar", "restablecer"]) {
+    assert.match(leer(`src/app/(auth)/${pagina}/page.tsx`), /lg:grid-cols-\[640px_1fr\]/, `${pagina} usa el patrón A`);
+  }
   assert.match(leer("src/app/(auth)/ingresar/formulario-ingreso.tsx"), /href="\/recuperar"/);
   for (const codigo of [paso1, paso2, tarjeta]) {
     assert.doesNotMatch(codigo, /fetch\(/);

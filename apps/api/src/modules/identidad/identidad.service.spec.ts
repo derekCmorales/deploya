@@ -4,7 +4,7 @@ import type { PlantillaCorreo } from "../notificaciones/dominio/plantilla-correo
 import { RepositorioTokensCuentaMemoria } from "./adaptadores/repositorio-tokens-cuenta.memoria";
 import { RepositorioUsuariosMemoria } from "./adaptadores/repositorio-usuarios.memoria";
 import { HORAS_VIGENCIA_VERIFICACION, MS_POR_HORA } from "./dominio/cuenta";
-import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, TokenNoValido } from "./dominio/errores";
+import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
 import { IdentidadService } from "./identidad.service";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
@@ -241,5 +241,69 @@ describe("M1-02 · Verificación de correo", () => {
     const resultado = await servicio.verificar("token-1");
 
     expect(resultado).toEqual({ estadoCuenta: "suspendida" });
+  });
+});
+
+describe("M1-04 · Reenviar verificación", () => {
+  const SEGUNDO = 1000;
+
+  it("Reenviar verificación: pasada la cuenta atrás llega un enlace nuevo de 24 h y el anterior deja de servir", async () => {
+    const { servicio, tokens, correo, reloj } = armar();
+    await registrarValido(servicio);
+    reloj.avanzar(61 * SEGUNDO);
+
+    await servicio.reenviarVerificacion({ correo: "derek@tiendademo.com" });
+
+    expect(correo.enviados).toHaveLength(2);
+    expect(correo.enviados[1].datos).toMatchObject({ enlace: "http://localhost:3000/verificar?token=token-2" });
+    expect((await tokens.porHuella("huella-token-1"))?.usadoEn).toEqual(reloj.ahora());
+    const nuevo = await tokens.porHuella("huella-token-2");
+    expect(nuevo?.expira.getTime()).toBe(reloj.ahora().getTime() + HORAS_VIGENCIA_VERIFICACION * MS_POR_HORA);
+    await expect(servicio.verificar("token-1")).rejects.toBeInstanceOf(TokenNoValido);
+    await expect(servicio.verificar("token-2")).resolves.toEqual({ estadoCuenta: "activa" });
+  });
+
+  it("Reenvío antes de la cuenta atrás: a los 20 s se rechaza con los 40 s que faltan y no se envía correo", async () => {
+    const { servicio, correo, reloj } = armar();
+    await registrarValido(servicio);
+    reloj.avanzar(20 * SEGUNDO);
+
+    const error = await servicio.reenviarVerificacion({ correo: "derek@tiendademo.com" }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(EsperaReenvio);
+    expect((error as EsperaReenvio).segundos).toBe(40);
+    expect(correo.enviados).toHaveLength(1);
+  });
+
+  it("Reenvío a una cuenta ya activa: misma respuesta neutra y no se envía correo (también con un correo que no existe)", async () => {
+    const { servicio, correo, reloj } = armar();
+    await registrarValido(servicio);
+    await servicio.verificar("token-1");
+    reloj.avanzar(61 * SEGUNDO);
+
+    await expect(servicio.reenviarVerificacion({ correo: "derek@tiendademo.com" })).resolves.toBeUndefined();
+    await expect(servicio.reenviarVerificacion({ correo: "nadie@tiendademo.com" })).resolves.toBeUndefined();
+    await expect(servicio.reenviarVerificacion({ correo: "mal@" })).resolves.toBeUndefined();
+    expect(correo.enviados).toHaveLength(1);
+  });
+
+  it("desde 02 (c) se reenvía con el token vencido del enlace", async () => {
+    const { servicio, correo, reloj } = armar();
+    await registrarValido(servicio);
+    reloj.avanzar((HORAS_VIGENCIA_VERIFICACION + 1) * MS_POR_HORA);
+
+    await servicio.reenviarVerificacion({ token: "token-1" });
+
+    expect(correo.enviados).toHaveLength(2);
+    await expect(servicio.reenviarVerificacion({ token: "inventado" })).resolves.toBeUndefined();
+  });
+
+  it("si el correo falla al reenviar, la respuesta no cambia", async () => {
+    const { servicio, correo, reloj } = armar();
+    await registrarValido(servicio);
+    reloj.avanzar(61 * SEGUNDO);
+    correo.falla = true;
+
+    await expect(servicio.reenviarVerificacion({ correo: "derek@tiendademo.com" })).resolves.toBeUndefined();
   });
 });

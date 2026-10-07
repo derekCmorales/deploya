@@ -19,9 +19,11 @@ import {
   CredencialesInvalidas,
   CuentaNoVerificada,
   CuentaSuspendida,
+  EsperaReenvio,
   TokenNoValido,
 } from "./dominio/errores";
-import { IdentidadService, type CuentaRegistrada, type CuentaVerificada } from "./identidad.service";
+import { ESPERA_REENVIO_MS } from "./dominio/politica-reenvio";
+import { IdentidadService, type CuentaRegistrada, type CuentaVerificada, type SolicitudReenvio } from "./identidad.service";
 
 const HTTP_CREADO = 201;
 const HTTP_OK = 200;
@@ -30,6 +32,18 @@ const HTTP_NO_AUTENTICADO = 401;
 const HTTP_PROHIBIDO = 403;
 const HTTP_CONFLICTO = 409;
 const HTTP_YA_NO_EXISTE = 410;
+const HTTP_ACEPTADO = 202;
+const HTTP_DEMASIADAS_SOLICITUDES = 429;
+const MS_POR_SEGUNDO = 1000;
+
+/**
+ * Pantallas 02 y 03b: el mismo cuerpo para toda solicitud aceptada, exista o no la cuenta.
+ * `segundos` es la cuenta atrás con la que arranca la web (no la inventa el cliente).
+ */
+export const REENVIO_ACEPTADO = {
+  mensaje: "Si la cuenta está pendiente, te enviamos un enlace nuevo.",
+  segundos: ESPERA_REENVIO_MS / MS_POR_SEGUNDO,
+} as const;
 
 /** Traduce los errores de dominio de M1 a HTTP en el borde; `codigo` es lo que lee la web. */
 @Catch(
@@ -41,6 +55,7 @@ const HTTP_YA_NO_EXISTE = 410;
   CredencialesInvalidas,
   CuentaNoVerificada,
   CuentaSuspendida,
+  EsperaReenvio,
 )
 export class ErroresIdentidadFilter implements ExceptionFilter {
   catch(error: Error, host: ArgumentsHost): void {
@@ -60,6 +75,10 @@ export class ErroresIdentidadFilter implements ExceptionFilter {
     }
     if (error instanceof CorreoYaRegistrado) {
       respuesta.status(HTTP_CONFLICTO).json(cuerpo);
+      return;
+    }
+    if (error instanceof EsperaReenvio) {
+      respuesta.status(HTTP_DEMASIADAS_SOLICITUDES).json({ ...cuerpo, segundos: error.segundos });
       return;
     }
     if (error instanceof TokenNoValido) {
@@ -102,4 +121,19 @@ export class IdentidadController {
   verificar(@Body() cuerpo: unknown): Promise<CuentaVerificada> {
     return this.identidad.verificar(textoDe(cuerpo, "token"));
   }
+
+  /** Pantallas 02 y 03b (M1-04): 202 neutro, o 429 `EsperaReenvio` con los segundos que faltan. */
+  @Post("verificacion/reenvio")
+  @HttpCode(HTTP_ACEPTADO)
+  async reenviar(@Body() cuerpo: unknown): Promise<typeof REENVIO_ACEPTADO> {
+    await this.identidad.reenviarVerificacion(solicitudDeReenvio(cuerpo));
+    return REENVIO_ACEPTADO;
+  }
+}
+
+/** El cuerpo trae `correo` (03b) o el `token` del enlace vencido (02 c); sin ninguno, 400. */
+function solicitudDeReenvio(cuerpo: unknown): SolicitudReenvio {
+  const campos = typeof cuerpo === "object" && cuerpo !== null ? (cuerpo as Record<string, unknown>) : {};
+  if (typeof campos.token === "string" && campos.token !== "") return { token: campos.token };
+  return { correo: textoDe(cuerpo, "correo") };
 }

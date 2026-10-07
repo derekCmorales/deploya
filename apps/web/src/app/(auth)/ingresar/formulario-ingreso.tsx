@@ -15,6 +15,7 @@ import { iniciarSesion } from "@/lib/api-identidad";
 import { destinoTrasIngreso, type ResultadoIngreso } from "@/lib/cuenta";
 import { fechaCorta } from "@/lib/fechas";
 
+import { BotonReenviar } from "../verificar/boton-reenviar";
 import { AvisoSesionExpirada } from "./aviso-sesion-expirada";
 
 type Aviso = Exclude<ResultadoIngreso, { tipo: "dentro" }> | null;
@@ -68,7 +69,11 @@ export function FormularioIngreso() {
         </Banner>
       ) : null}
       {aviso?.tipo === "sin-verificar" ? (
-        <Banner variant="warn" title="Tu cuenta aún no está verificada">
+        <Banner
+          variant="warn"
+          title="Tu cuenta aún no está verificada"
+          actions={<BotonReenviar destino={{ correo: correo.trim() }} compacto />}
+        >
           Abre el enlace que enviamos a <span className="font-medium text-foreground">{aviso.correoEnmascarado}</span> para
           activarla.
         </Banner>

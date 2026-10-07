@@ -65,3 +65,11 @@ export class CuentaSuspendida extends Error {
     this.name = "CuentaSuspendida";
   }
 }
+
+/** Pantallas 02 y 03b: el reenvío llegó antes de la cuenta atrás; `segundos` es lo que falta. */
+export class EsperaReenvio extends Error {
+  constructor(readonly segundos: number) {
+    super(`Podrás reenviar el correo en ${segundos} s`);
+    this.name = "EsperaReenvio";
+  }
+}

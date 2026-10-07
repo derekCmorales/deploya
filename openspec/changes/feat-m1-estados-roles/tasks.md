@@ -4,8 +4,8 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 
 ## 1. Reenviar verificación
 
-- [ ] 1.1 `PoliticaReenvio` y `ESPERA_REENVIO_MS`; `RepositorioTokensCuenta.ultimoDe` e `invalidarVigentes` (si `feat/m1-recuperacion` no lo trajo ya); `POST /identidad/verificacion/reenvio`
-- [ ] 1.2 Pruebas: «Reenviar verificación», «Reenvío antes de la cuenta atrás», «Reenvío a una cuenta ya activa» (neutro, sin correo)
+- [x] 1.1 `PoliticaReenvio` y `ESPERA_REENVIO_MS`; `RepositorioTokensCuenta.ultimoDe` (memoria y Prisma; `invalidarVigentes` llegó con `feat-m1-recuperacion`); `POST /identidad/verificacion/reenvio` con `{ correo }` o con el `{ token }` vencido de 02 (c); 202 trae `segundos` para que la web arranque la cuenta atrás
+- [x] 1.2 Pruebas: «Reenviar verificación», «Reenvío antes de la cuenta atrás» (40 s a los 20 s), «Reenvío a una cuenta ya activa» (neutro, sin correo, también correo inexistente); por token; fallo del correo; controlador 202 y 429; `PoliticaReenvio`; `ultimoDe`
 
 ## 2. Estados del login
 
@@ -19,13 +19,13 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 
 ## 4. Web (02, 03b, 28)
 
-- [ ] 4.1 02: «Reenviar correo» con cuenta atrás desde el 429; 03b: reenviar y suspendida con motivo; 28: 403 y sesión expirada; `/admin` muestra 403 a un Cliente. Hecho: `/admin` → 403 (`components/estados/sin-permisos.tsx`, guard en `app/(admin)/layout.tsx`), 03b suspendida con motivo y fecha, «Sesión expirada» (`pedirApi` avisa el 401 y `SesionProvider` distingue sesión vencida de «nunca hubo»). Falta: reenvío en 02 y 03b
-- [ ] 4.2 Pruebas `node --test`: formato de la cuenta atrás, decisión «expirada» frente a «sin sesión», textos de las fichas
-- [ ] 4.3 Revisión contra los artboards 02, 03b y 28 en claro y oscuro
+- [x] 4.1 02: «Reenviar correo» con cuenta atrás desde el número de la API (estado a con el correo que guarda 01b en la pestaña; estado c con el token vencido); 03b: reenviar y suspendida con motivo y fecha; 28: 403 (`components/estados/sin-permisos.tsx`, guard en `app/(admin)/layout.tsx`) y «Sesión expirada» (`pedirApi` avisa el 401 y `SesionProvider` distingue sesión vencida)
+- [x] 4.2 Pruebas `node --test`: formato de la cuenta atrás, decisión «expirada» frente a «sin sesión», acceso a administración, fecha de la suspensión, textos de las fichas
+- [x] 4.3 Revisión en la app (compose) en claro y oscuro contra las fichas 02, 03b y 28: 403 en `/admin`, 03b suspendida con motivo y fecha, aviso «Tu sesión expiró» y la cuenta atrás de «Reenviar correo» en 02 (a), 02 (c) y 03b
 
 ## 5. Cierre
 
-- [ ] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync` (hecho para `RolGuard` y `Roles`; faltan `PoliticaReenvio` y `ultimoDe`)
-- [ ] 5.2 `pnpm check` en verde; cobertura ≥ 80 % en `identidad/`
+- [x] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync` (`RolGuard`, `Roles`, `PoliticaReenvio`, `ultimoDe`, `reenviarVerificacion`)
+- [x] 5.2 Pruebas en verde (API 480; web 84); cobertura de `identidad/` 90 % (dominio 100 %). En Windows solo falla `lector-fuente-local.spec.ts` (M4, ruta `/clon` → `D:\clon`); en CI pasa
 - [ ] 5.3 Avisar a Javier (M9 usa `RolGuard`) y a Eduardo (28 comparte componentes)
 - [ ] 5.4 `/opsx-archive` después del merge

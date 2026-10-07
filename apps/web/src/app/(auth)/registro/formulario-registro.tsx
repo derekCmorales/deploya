@@ -12,6 +12,7 @@ import { Card, Sunken } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { registrarCuenta } from "@/lib/api-identidad";
+import { guardarCorreoPendiente } from "@/lib/correo-pendiente";
 import { erroresRegistro, type ErroresRegistro } from "@/lib/cuenta";
 
 type Estado =
@@ -46,6 +47,7 @@ export function FormularioRegistro() {
     setEstado({ fase: "enviando" });
     const resultado = await registrarCuenta(correo, contrasena, confirmacion);
     if (resultado.tipo === "creada") {
+      guardarCorreoPendiente(correo);
       setEstado({ fase: "creada", correoEnmascarado: resultado.correoEnmascarado, correoEnviado: resultado.correoEnviado });
       return;
     }

@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { verificarCorreo } from "@/lib/api-identidad";
+import { leerCorreoPendiente } from "@/lib/correo-pendiente";
 import type { ResultadoVerificacion } from "@/lib/cuenta";
+
+import { BotonReenviar } from "./boton-reenviar";
 
 /** (a) sin token: revisa tu bandeja · (b) token válido · (c) token expirado o inválido. */
 export function Verificacion() {
@@ -36,7 +39,7 @@ export function Verificacion() {
     );
   }
   if (resultado === "activada") return <CuentaActivada />;
-  if (resultado === "no-valido") return <EnlaceNoValido />;
+  if (resultado === "no-valido") return <EnlaceNoValido token={token} />;
   if (resultado === "no-activada") return <CuentaNoActivada />;
   return <ErrorVerificacion />;
 }
@@ -52,6 +55,9 @@ function TarjetaEstado({ icono, titulo, children }: { icono: ReactNode; titulo: 
 }
 
 function RevisaTuBandeja({ correo }: { correo: string | null }) {
+  const [correoReal, setCorreoReal] = useState<string | null>(null);
+  // Solo en el navegador: el correo real lo guardó 01b en esta pestaña (lib/correo-pendiente).
+  useEffect(() => setCorreoReal(leerCorreoPendiente()), []);
   return (
     <TarjetaEstado icono={<Mail aria-hidden />} titulo="Revisa tu bandeja">
       <p className="text-muted-foreground">
@@ -64,6 +70,7 @@ function RevisaTuBandeja({ correo }: { correo: string | null }) {
         . Caduca en 24 horas.
       </p>
       <p className="text-sm text-muted-foreground">¿No llegó? Revisa spam o promociones.</p>
+      {correoReal ? <BotonReenviar destino={{ correo: correoReal }} /> : null}
     </TarjetaEstado>
   );
 }
@@ -84,12 +91,14 @@ function CuentaActivada() {
   );
 }
 
-function EnlaceNoValido() {
+/** 02 (c): se reenvía con el token vencido del enlace; la API encuentra la cuenta (M1-04). */
+function EnlaceNoValido({ token }: { token: string }) {
   return (
     <TarjetaEstado icono={<Link2Off className="text-bad" aria-hidden />} titulo="El enlace ya no es válido">
       <p className="text-muted-foreground">
         Caducó o ya se usó. Los enlaces de verificación duran 24 horas y sirven una sola vez.
       </p>
+      <BotonReenviar destino={{ token }} />
       <Button asChild variant="outline" size="lg" className="w-full">
         <Link href="/ingresar">Volver a iniciar sesión</Link>
       </Button>

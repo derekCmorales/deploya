@@ -386,8 +386,8 @@ model LineaBitacora {
 - Precio de 365 días: propuesta 10 × el mensual (dos meses gratis). Lo decide Javier; si cambia, solo cambia esta tabla.
 - Administrador: `ADMIN_CORREO` (por defecto `admin@deploya.app`) y `ADMIN_CLAVE` (obligatoria, sin valor por defecto), `rol = administrador`, `estadoCuenta = activa`, con Sandbox.
 - Cliente de demostración para Eduardo hasta que llegue el guard: `cliente@deploya.app`, `activa`, con Sandbox.
-- Avance 2 (M5-03): `vencida@deploya.app` con la suscripción **Vencida** y `suspendida@deploya.app` con la suscripción **Suspendida**, para demostrar los bloqueos antes del ciclo §4.4 (M2-05). Misma contraseña de demo que `cliente@deploya.app`.
-- El hash de contraseña del seed usa la **misma** función que M1 (acordar con Eddy; propuesta: argon2id con `@node-rs/argon2`).
+- Avance 2 (M5-03): `vencida@deploya.app` y `suspendida@deploya.app` en **Starter** de 30 días con `vence` en el pasado, para demostrar los bloqueos antes del ciclo §4.4 (M2-05). `vencida@`: `vence` = hace 2 días, **Vencida** desde `vence`. `suspendida@`: `vence` = hace 10 días, **Suspendida** desde `vence` + 5 días (gracia). En ambas `inicio` = `vence` − 30 días y sin descenso pendiente. Solo se escriben si la cuenta sigue con la Sandbox recién asignada (`vence` nulo), así una segunda corrida no las toca. Misma contraseña de demo que `cliente@deploya.app`.
+- El hash de contraseña del seed usa la **misma** función que M1: scrypt de `node:crypto`, formato `scrypt:<sal>:<hash>` en hex (`HashContrasenaScrypt`).
 
 ## Servicios que se exportan sobre estos datos
 
@@ -427,3 +427,4 @@ SuscripcionesService.cuotaDe(usuarioId: string): Promise<Cuota>; // lanza Suscri
 |---|---|---|
 | 1 | 2026-09-27 | Firma inicial para DB-01 (incluye detección de stack y reversión, que volvieron al núcleo) |
 | 1.1 | 2026-10-02 | Seed: cuentas de demo Vencida y Suspendida para M5-03. Sin cambios de tablas en el Avance 2 |
+| 1.2 | 2026-10-06 | Seed: las cuentas Vencida y Suspendida quedan en Starter de 30 días con `vence` en el pasado (gracia de 5 días); el hash del seed es scrypt, igual que M1. Sin cambios de tablas |

@@ -36,7 +36,7 @@ Cada tarea de código tiene su prueba. Sin base, red ni reloj reales: repositori
 
 - [x] 6.1 `clases-unificado.mmd` actualizado y `pnpm diagramas:sync`
 - [x] 6.2 En compose: registro (201) → correo en Mailpit → enlace → cuenta activa (200) → el mismo enlace da 410; el correo repetido da 409 y la contraseña débil 400
-- [ ] 6.3 `/opsx-archive` tras el merge
+- [x] 6.3 `/opsx-archive` tras el merge
 
 ## 7. Correcciones de la revisión (#10)
 

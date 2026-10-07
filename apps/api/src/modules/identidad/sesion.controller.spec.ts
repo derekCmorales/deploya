@@ -44,7 +44,7 @@ describe("Cookie de sesión", () => {
 });
 
 describe("SesionGuard y @UsuarioActual()", () => {
-  it("Ruta protegida sin cookie responde 401", async () => {
+  it("Ruta protegida sin sesión: sin cookie responde 401", async () => {
     const guard = new SesionGuard(servicioFalso() as unknown as SesionService);
 
     await expect(guard.canActivate(contextoCon({ headers: {} }))).rejects.toBeInstanceOf(UnauthorizedException);

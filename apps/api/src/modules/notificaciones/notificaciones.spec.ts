@@ -39,7 +39,7 @@ describe("M10 · plantilla de verificación (pantalla 24)", () => {
     expect(mensaje.texto).toContain(DATOS.enlace);
   });
 
-  it("saluda por nombre, nombra el correo y avisa que caduca en 24 horas", () => {
+  it("Correo de verificación: saluda por nombre, nombra el correo y avisa que caduca en 24 horas", () => {
     const mensaje = PLANTILLA_VERIFICACION.componer(DATOS);
 
     expect(mensaje.asunto).toBe("Confirma tu correo en deploya");

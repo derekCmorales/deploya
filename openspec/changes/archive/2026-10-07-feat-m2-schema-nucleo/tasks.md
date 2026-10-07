@@ -32,5 +32,5 @@ Cada tarea de código tiene su tarea de pruebas. Pruebas sin base, red ni reloj 
 ## 5. Cierre
 
 - [x] 5.1 `clases-unificado.mmd` con los repositorios de M2; `pnpm diagramas:sync`
-- [ ] 5.2 `pnpm check` en verde y demo: `/planes` leyendo de la base y un usuario nuevo en Sandbox
-- [ ] 5.3 PR con la plantilla; revisor Derek (CODEOWNERS de `prisma/`)
+- [x] 5.2 `pnpm check` en verde y demo: `/planes` leyendo de la base y un usuario nuevo en Sandbox
+- [x] 5.3 PR con la plantilla; revisor Derek (CODEOWNERS de `prisma/`)

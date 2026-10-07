@@ -20,6 +20,7 @@
 4. **Orden de las reglas:** primero el estado de la suscripción, luego la cuota. Por Activa y Por vencer se permite; Vencida y Suspendida, no. **Cancelada** (sin suscripción vigente) también bloquea: la lista es de estados que permiten, no de los que bloquean, así un estado nuevo de M2 no abre la puerta por omisión.
 6. **Un filtro global** (`RechazosOrquestacionFilter`, `APP_FILTER`) traduce los rechazos de M5 a 409 en cualquier ruta: `POST /proyectos/:id/despliegues`, el alta de M3 y `PUT …/variables` con `desplegar` responden igual sin que cada módulo los traduzca.
 5. **`POST /proyectos` verifica antes de guardar** para no dejar un proyecto sin despliegue que además ocupa cupo.
+7. **Seed de demo (M2, Javier):** `vencida@deploya.app` y `suspendida@deploya.app` quedan en **Starter** de 30 días con `vence` en el pasado, no en Sandbox: una Sandbox no vence, así que una Sandbox «Vencida» no podría darse en el ciclo §4.4. Con `ahora` del `Reloj`: `vencida@` tiene `vence` = `ahora` − 2 d y está Vencida desde `vence`; `suspendida@` tiene `vence` = `ahora` − 10 d y está Suspendida desde `vence` + 5 d (fin de la gracia). En ambas `inicio` = `vence` − 30 d, `vigenciaDias` = 30 y sin descenso pendiente. El seed solo las escribe si la suscripción sigue siendo la Sandbox recién asignada (`vence` nulo): una segunda corrida no las toca, ni tampoco una cuenta que ya movió la tarea diaria de M2-05. Contrato: `datos-nucleo.md` v1.2.
 
 ## Diseño: SOLID y patrones
 

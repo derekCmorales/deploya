@@ -10,14 +10,19 @@ import { SuscripcionesService } from "../src/modules/suscripciones/suscripciones
 
 async function main(): Promise<void> {
   const prisma = new PrismaService();
-  const suscripciones = new SuscripcionesService(
-    new RepositorioPlanesPrisma(prisma),
-    new RepositorioSuscripcionesPrisma(prisma),
-    new RelojSistema(),
-  );
+  const planes = new RepositorioPlanesPrisma(prisma);
+  const repositorioSuscripciones = new RepositorioSuscripcionesPrisma(prisma);
+  const reloj = new RelojSistema();
+  const suscripciones = new SuscripcionesService(planes, repositorioSuscripciones, reloj);
   try {
-    await sembrar(new DestinoSemillaPrisma(prisma), suscripciones, hashSemilla, process.env);
-    console.log("Seed listo: 4 planes, administrador y cliente de demostración con Sandbox");
+    await sembrar(new DestinoSemillaPrisma(prisma), suscripciones, hashSemilla, process.env, {
+      suscripciones: repositorioSuscripciones,
+      planes,
+      reloj,
+    });
+    console.log(
+      "Seed listo: 4 planes, administrador y cliente@ con Sandbox; vencida@ y suspendida@ en Starter (Vencida y Suspendida)",
+    );
   } finally {
     await prisma.$disconnect();
   }

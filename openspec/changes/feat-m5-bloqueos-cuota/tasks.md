@@ -4,8 +4,8 @@ Sin base ni reloj reales: `Reloj` falso y repositorios en memoria.
 
 ## 1. Seed de demo (Javier)
 
-- [ ] 1.1 `vencida@deploya.app` (Vencida) y `suspendida@deploya.app` (Suspendida) en el seed, con la misma contraseña de demo que `cliente@deploya.app`
-- [ ] 1.2 Pruebas: el seed sigue idempotente y crea las dos cuentas con su estado
+- [x] 1.1 `vencida@deploya.app` (Vencida) y `suspendida@deploya.app` (Suspendida) en el seed, con la misma contraseña de demo que `cliente@deploya.app`
+- [x] 1.2 Pruebas: el seed sigue idempotente y crea las dos cuentas con su estado
 
 ## 2. Política y servicio (Derek)
 

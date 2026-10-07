@@ -8,6 +8,7 @@ import { Segmented } from "@/components/ui/segmented";
 import { usePlanes } from "@/hooks/use-planes";
 import { useSesion } from "@/hooks/use-sesion";
 import { useMiSuscripcion } from "@/hooks/use-suscripcion";
+import { sinVigencia } from "@/lib/suscripcion";
 import { VIGENCIAS, type Vigencia } from "@/lib/planes";
 
 import { CabeceraPlanes } from "./cabecera-planes";
@@ -39,7 +40,14 @@ export function PlanesContenedor() {
           Revisa tu conexión e inténtalo de nuevo.
         </Banner>
       ) : null}
-      {estado.tipo === "listo" ? <TablaPlanes planes={estado.planes} vigencia={vigencia} codigoActual={suscripcion?.plan.codigo ?? null} /> : null}
+      {estado.tipo === "listo" ? (
+        <TablaPlanes
+          planes={estado.planes}
+          vigencia={vigencia}
+          codigoActual={suscripcion?.plan.codigo ?? null}
+          vigenciaTerminada={suscripcion ? sinVigencia(suscripcion.estado) : false}
+        />
+      ) : null}
     </main>
   );
 }

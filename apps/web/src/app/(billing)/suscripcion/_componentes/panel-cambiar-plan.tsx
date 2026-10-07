@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, CalendarClock, LoaderCircle } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, CalendarClock, LoaderCircle, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +10,15 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDescenso } from "@/hooks/use-suscripcion";
 import type { PlanCatalogo } from "@/lib/planes";
-import { opcionesCambio, rutaContratar, type MiSuscripcion, type OpcionCambio } from "@/lib/suscripcion";
+import { opcionesCambio, rutaContratar, type MiSuscripcion, type OpcionCambio, type TipoCambio } from "@/lib/suscripcion";
 
-/** «Cambiar plan» de 08: ascenso va a pagar (07); descenso se programa aquí y aplica al vencer. */
+const ETIQUETAS: Record<TipoCambio, { texto: string; Icono: LucideIcon }> = {
+  ascenso: { texto: "Ascenso", Icono: ArrowUp },
+  descenso: { texto: "Descenso", Icono: ArrowDown },
+  contratacion: { texto: "Contratar", Icono: ArrowRight },
+};
+
+/** «Cambiar plan» de 08: ascenso y contratación van a pagar (07); descenso se programa aquí y aplica al vencer. */
 export function PanelCambiarPlan({
   suscripcion,
   catalogo,
@@ -24,7 +30,7 @@ export function PanelCambiarPlan({
 }) {
   const descenso = useDescenso(alCambiar);
   const opciones = catalogo ? opcionesCambio(catalogo, suscripcion) : null;
-  const primerAscenso = opciones?.find((o) => o.tipo === "ascenso")?.plan.codigo;
+  const primerPago = opciones?.find((o) => o.tipo !== "descenso")?.plan.codigo;
 
   return (
     <Card>
@@ -51,7 +57,7 @@ export function PanelCambiarPlan({
               </div>
               <AccionCambio
                 opcion={opcion}
-                principal={opcion.plan.codigo === primerAscenso}
+                principal={opcion.plan.codigo === primerPago}
                 enCurso={descenso.enCurso === opcion.plan.codigo}
                 programar={descenso.programar}
               />
@@ -77,11 +83,11 @@ function EtiquetaCambio({ opcion }: { opcion: OpcionCambio }) {
       </Badge>
     );
   }
-  const Icono = opcion.tipo === "ascenso" ? ArrowUp : ArrowDown;
+  const { texto, Icono } = ETIQUETAS[opcion.tipo];
   return (
     <Badge>
       <Icono aria-hidden />
-      {opcion.tipo === "ascenso" ? "Ascenso" : "Descenso"}
+      {texto}
     </Badge>
   );
 }
@@ -98,7 +104,7 @@ function AccionCambio({
   programar: (plan: string) => Promise<void>;
 }) {
   const texto = `Cambiar a ${opcion.plan.nombre}`;
-  if (opcion.tipo === "ascenso") {
+  if (opcion.tipo !== "descenso") {
     return (
       <Button asChild size="sm" variant={principal ? "default" : "outline"}>
         <Link href={rutaContratar(opcion.plan.codigo)}>{texto}</Link>

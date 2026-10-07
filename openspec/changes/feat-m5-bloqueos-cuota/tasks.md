@@ -6,6 +6,7 @@ Sin base ni reloj reales: `Reloj` falso y repositorios en memoria.
 
 - [x] 1.1 `vencida@deploya.app` (Vencida) y `suspendida@deploya.app` (Suspendida) en el seed, con la misma contraseña de demo que `cliente@deploya.app`
 - [x] 1.2 Pruebas: el seed sigue idempotente y crea las dos cuentas con su estado
+- [x] 1.3 Delta «Seed idempotente» en `specs/suscripciones` con las cuentas de demo y un escenario por prueba
 
 ## 2. Política y servicio (Derek)
 

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
+  avisoEstado,
   erroresTarjeta,
   fechaCorta,
   fechaLarga,
@@ -13,7 +14,9 @@ import {
   opcionesCambio,
   progresoVigencia,
   rangoVigencia,
+  reinicioConsumo,
   rutaContratar,
+  sinVigencia,
   subtituloOperacion,
   TARJETAS_PRUEBA,
   textoChipPlan,
@@ -72,7 +75,7 @@ test("08 · cuota, días y chip del plan", () => {
 });
 
 test("08 · Cambiar plan desde Starter: Pro y Business son ascenso, Sandbox es descenso", () => {
-  const opciones = opcionesCambio(CATALOGO, { plan: CATALOGO[1], planSiguiente: null });
+  const opciones = opcionesCambio(CATALOGO, { plan: CATALOGO[1], planSiguiente: null, estado: "activa" });
   assert.deepEqual(
     opciones.map((o) => [o.plan.nombre, o.tipo, o.precio]),
     [
@@ -86,9 +89,43 @@ test("08 · Cambiar plan desde Starter: Pro y Business son ascenso, Sandbox es d
 });
 
 test("08 · desde Sandbox todo es ascenso y un descenso programado se marca", () => {
-  assert.ok(opcionesCambio(CATALOGO, { plan: CATALOGO[0], planSiguiente: null }).every((o) => o.tipo === "ascenso"));
-  const desdePro = opcionesCambio(CATALOGO, { plan: CATALOGO[2], planSiguiente: { codigo: "sandbox", nombre: "Sandbox" } });
+  assert.ok(opcionesCambio(CATALOGO, { plan: CATALOGO[0], planSiguiente: null, estado: "activa" }).every((o) => o.tipo === "ascenso"));
+  const desdePro = opcionesCambio(CATALOGO, { plan: CATALOGO[2], planSiguiente: { codigo: "sandbox", nombre: "Sandbox" }, estado: "activa" });
   assert.deepEqual(desdePro.filter((o) => o.programado).map((o) => o.plan.codigo), ["sandbox"]);
+});
+
+test("08 · Cambiar plan con la vigencia terminada: sin descenso a Sandbox, el resto se contrata desde hoy", () => {
+  for (const estado of ["vencida", "suspendida", "cancelada"]) {
+    const opciones = opcionesCambio(CATALOGO, { plan: CATALOGO[2], planSiguiente: null, estado });
+    assert.deepEqual(
+      opciones.map((o) => [o.plan.nombre, o.tipo]),
+      [
+        ["Starter", "contratacion"],
+        ["Business", "ascenso"],
+      ],
+      estado,
+    );
+    assert.ok(opciones.every((o) => o.texto.startsWith("Pagas ")));
+  }
+});
+
+test("08 · estados sin vigencia y su aviso", () => {
+  assert.deepEqual(
+    ["activa", "por-vencer", "vencida", "suspendida", "cancelada"].map(sinVigencia),
+    [false, false, true, true, true],
+  );
+  assert.equal(avisoEstado("activa"), null);
+  assert.equal(avisoEstado("por-vencer"), null);
+  assert.equal(avisoEstado("vencida").titulo, "Tu vigencia terminó");
+  assert.match(avisoEstado("vencida").texto, /gracia/);
+  assert.equal(avisoEstado("suspendida").titulo, "Tu panel está en pausa");
+  assert.doesNotMatch(avisoEstado("suspendida").texto, /siguen en línea/);
+  assert.match(avisoEstado("cancelada").texto, /Contrata un plan/);
+});
+
+test("08 · el consumo se reinicia el día 1 del mes siguiente en UTC", () => {
+  assert.equal(fechaCorta(reinicioConsumo(new Date("2026-10-07T23:00:00.000Z"))), "01 nov");
+  assert.equal(fechaLarga(reinicioConsumo(new Date("2026-12-31T23:59:59.000Z"))), "01 ene 2027");
 });
 
 test("07 · ruta de contratar y vigencia del parámetro", () => {

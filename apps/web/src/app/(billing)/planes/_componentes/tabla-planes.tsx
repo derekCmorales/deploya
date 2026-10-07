@@ -28,9 +28,11 @@ interface TablaPlanesProps {
   vigencia: Vigencia;
   /** Código del plan de la sesión; `null` sin sesión (visitante). */
   codigoActual: string | null;
+  /** La suscripción está Vencida, Suspendida o Cancelada: el plan actual se renueva y no hay descenso. */
+  vigenciaTerminada?: boolean;
 }
 
-export function TablaPlanes({ planes, vigencia, codigoActual }: TablaPlanesProps) {
+export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada = false }: TablaPlanesProps) {
   const esActual = (plan: PlanCatalogo) => plan.codigo === codigoActual;
   const columna = (plan: PlanCatalogo, ultima = false) =>
     cn(esActual(plan) && "border-x border-border-strong bg-card", esActual(plan) && ultima && "rounded-b-[14px] border-b");
@@ -76,7 +78,13 @@ export function TablaPlanes({ planes, vigencia, codigoActual }: TablaPlanesProps
                   ) : null}
                 </p>
                 <p className="min-h-8 text-[13px] text-muted-foreground">{plan.descripcion}</p>
-                <AccionPlan plan={plan} actual={esActual(plan)} vigencia={vigencia} conPlan={codigoActual !== null} />
+                <AccionPlan
+                  plan={plan}
+                  actual={esActual(plan)}
+                  vigencia={vigencia}
+                  conPlan={codigoActual !== null}
+                  vigenciaTerminada={vigenciaTerminada}
+                />
               </div>
             ))}
           </div>
@@ -115,9 +123,29 @@ export function TablaPlanes({ planes, vigencia, codigoActual }: TablaPlanesProps
 
 /**
  * «Contratar» lleva a 07 con la vigencia elegida (sin sesión, 07 manda a iniciar sesión).
- * Bajar a Sandbox es un descenso: se programa en Mi suscripción (08).
+ * Bajar a Sandbox es un descenso: se programa en Mi suscripción (08). Sin vigencia en curso el plan
+ * actual se renueva y Sandbox no se ofrece (no hay descenso que esperar).
  */
-function AccionPlan({ plan, actual, vigencia, conPlan }: { plan: PlanCatalogo; actual: boolean; vigencia: Vigencia; conPlan: boolean }) {
+function AccionPlan({
+  plan,
+  actual,
+  vigencia,
+  conPlan,
+  vigenciaTerminada,
+}: {
+  plan: PlanCatalogo;
+  actual: boolean;
+  vigencia: Vigencia;
+  conPlan: boolean;
+  vigenciaTerminada: boolean;
+}) {
+  if (actual && vigenciaTerminada) {
+    return (
+      <Button asChild className="w-full">
+        <Link href={rutaContratar(plan.codigo, vigencia)}>Renovar</Link>
+      </Button>
+    );
+  }
   if (actual) {
     return (
       <Button variant="outline" className="w-full" disabled>
@@ -126,7 +154,7 @@ function AccionPlan({ plan, actual, vigencia, conPlan }: { plan: PlanCatalogo; a
     );
   }
   if (esGratuito(plan)) {
-    if (!conPlan) return <span aria-hidden className="h-9" />;
+    if (!conPlan || vigenciaTerminada) return <span aria-hidden className="h-9" />;
     return (
       <Button asChild variant="outline" className="w-full">
         <Link href={RUTA_SUSCRIPCION}>Cambiar a {plan.nombre}</Link>

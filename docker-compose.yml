@@ -25,7 +25,8 @@ services:
       timeout: 3s
       retries: 10
 
-  # DB-01: aplica las migraciones y el seed idempotente (planes, admin y cliente de demo)
+  # DB-01: aplica las migraciones y el seed idempotente (planes, admin, cliente de demo y las cuentas
+  # vencida@ y suspendida@ de los bloqueos de M5-03)
   # antes de que arranquen la API y el trabajador. ADMIN_CLAVE sale de .env (sin valor por defecto).
   migracion:
     build:

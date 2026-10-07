@@ -18,6 +18,8 @@ import { RepositorioSesiones } from "./puertos/repositorio-sesiones.puerto";
 import { RepositorioTokensCuenta } from "./puertos/repositorio-tokens-cuenta.puerto";
 import { RepositorioUsuarios } from "./puertos/repositorio-usuarios.puerto";
 import { RolGuard } from "./rol.guard";
+import { RecuperacionController } from "./recuperacion.controller";
+import { RecuperacionService } from "./recuperacion.service";
 import { CONFIGURACION_COOKIE, SesionController } from "./sesion.controller";
 import { SesionGuard } from "./sesion.guard";
 import { SesionService } from "./sesion.service";
@@ -29,10 +31,11 @@ import { SesionService } from "./sesion.service";
  */
 @Module({
   imports: [NotificacionesModule, SuscripcionesModule],
-  controllers: [IdentidadController, SesionController],
+  controllers: [IdentidadController, SesionController, RecuperacionController],
   providers: [
     IdentidadService,
     SesionService,
+    RecuperacionService,
     SesionGuard,
     RolGuard,
     { provide: CONFIGURACION_IDENTIDAD, useFactory: () => configuracionIdentidadDesde(process.env) },

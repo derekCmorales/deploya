@@ -3,6 +3,7 @@ import { CorreoSmtpAdaptador, type TransporteSmtp } from "./adaptadores/correo-s
 import { configuracionCorreoDesde, correoSegun } from "./configuracion-correo";
 import { CorreoNoEnviado } from "./dominio/errores";
 import { escaparHtml } from "./dominio/plantilla-correo";
+import { PLANTILLA_RECUPERACION } from "./dominio/plantilla-recuperacion";
 import { PLANTILLA_VERIFICACION, type DatosVerificacion } from "./dominio/plantilla-verificacion";
 
 const DATOS: DatosVerificacion = {
@@ -49,6 +50,36 @@ describe("M10 · plantilla de verificación (pantalla 24)", () => {
 
   it("escapa el HTML de los datos que vienen del usuario", () => {
     expect(escaparHtml(`<b>"x"&'y'</b>`)).toBe("&lt;b&gt;&quot;x&quot;&amp;&#39;y&#39;&lt;/b&gt;");
+  });
+});
+
+describe("M10-02 · plantilla de recuperación (pantalla 24)", () => {
+  const ENLACE = "http://localhost:3000/restablecer?token=abc123";
+
+  it("Correo de recuperación", () => {
+    const mensaje = PLANTILLA_RECUPERACION.componer({ enlace: ENLACE });
+
+    expect(mensaje.asunto).toBe("Restablece tu contraseña de deploya");
+    expect(mensaje.html).toContain(`href="${ENLACE}"`);
+    expect(mensaje.html).toContain("Crear contraseña nueva");
+    expect(mensaje.html).toContain("¿El botón no funciona? Copia este enlace:");
+    expect(mensaje.texto).toContain(`Crear contraseña nueva: ${ENLACE}`);
+    expect(mensaje.texto).toContain("Pediste crear una contraseña nueva. El enlace sirve una sola vez y caduca en 30 minutos.");
+    expect(mensaje.texto).toContain("deploya · soporte@deploya.app");
+  });
+
+  it("Recuperación no pedida", () => {
+    const mensaje = PLANTILLA_RECUPERACION.componer({ enlace: ENLACE });
+
+    expect(mensaje.html).toContain("Si no lo pediste, no hagas nada: tu contraseña sigue igual.");
+    expect(mensaje.texto).toContain("Si no lo pediste, no hagas nada: tu contraseña sigue igual.");
+  });
+
+  it("escapa el enlace dentro del HTML", () => {
+    const mensaje = PLANTILLA_RECUPERACION.componer({ enlace: `http://x/restablecer?token=a"><script>` });
+
+    expect(mensaje.html).not.toContain("<script>");
+    expect(mensaje.html).toContain("&quot;&gt;&lt;script&gt;");
   });
 });
 

@@ -24,4 +24,9 @@ export class RepositorioUsuariosMemoria extends RepositorioUsuarios {
     const usuario = this.usuarios.get(id);
     if (usuario) this.usuarios.set(id, { ...usuario, estadoCuenta: estado });
   }
+
+  async cambiarHash(id: string, hashContrasena: string): Promise<void> {
+    const usuario = this.usuarios.get(id);
+    if (usuario) this.usuarios.set(id, { ...usuario, hashContrasena });
+  }
 }

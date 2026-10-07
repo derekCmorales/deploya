@@ -1,9 +1,13 @@
 import {
   resultadoIngreso,
   resultadoRegistro,
+  resultadoRestablecer,
+  resultadoSolicitudRecuperacion,
   resultadoVerificacion,
   type ResultadoIngreso,
   type ResultadoRegistro,
+  type ResultadoRestablecer,
+  type ResultadoSolicitudRecuperacion,
   type ResultadoVerificacion,
 } from "@/lib/cuenta";
 
@@ -54,6 +58,26 @@ export async function iniciarSesion(correo: string, contrasena: string): Promise
     return resultadoIngreso(estado, json);
   } catch {
     return resultadoIngreso(0, {});
+  }
+}
+
+/** `POST /identidad/recuperacion` (pantalla 04, paso 1): respuesta neutra. */
+export async function solicitarRecuperacion(correo: string): Promise<ResultadoSolicitudRecuperacion> {
+  try {
+    const { estado } = await llamar("/identidad/recuperacion", "POST", { correo });
+    return resultadoSolicitudRecuperacion(estado);
+  } catch {
+    return "error";
+  }
+}
+
+/** `POST /identidad/recuperacion/restablecer` (pantalla 04, paso 2). */
+export async function restablecerContrasena(token: string, contrasena: string, confirmacion: string): Promise<ResultadoRestablecer> {
+  try {
+    const { estado, json } = await llamar("/identidad/recuperacion/restablecer", "POST", { token, contrasena, confirmacion });
+    return resultadoRestablecer(estado, json);
+  } catch {
+    return resultadoRestablecer(0, {});
   }
 }
 

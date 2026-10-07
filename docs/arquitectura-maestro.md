@@ -786,32 +786,34 @@ flowchart TD
 
     START((Inicio))
 
-    A["Usuario selecciona<br/>«Recuperar contraseña»"]
-    B["Ingresar correo"]
-    C["Enviar solicitud"]
-    D["Buscar cuenta"]
+    A["Usuario elige<br/>«Olvidé mi contraseña» (03)"]
+    B["Escribe su correo (04)"]
+    C["POST /identidad/recuperacion"]
+    D["Buscar cuenta por correo"]
 
-    E{"¿Cuenta encontrada?"}
+    E{"¿Cuenta Activa?"}
 
-    F["Generar token temporal"]
-    G["Almacenar token"]
-    H["Enviar enlace<br/>de recuperación"]
-    I["Mostrar respuesta<br/>genérica"]
+    F["Invalidar enlaces<br/>de recuperación anteriores"]
+    G["Crear token de 30 min<br/>(solo su huella sha256)"]
+    H["Enviar correo de recuperación (24)<br/>sin esperar; un fallo solo se registra"]
+    I["202 · «Revisa tu correo»<br/>misma respuesta siempre"]
 
-    J["Usuario abre<br/>el enlace"]
-    K["Validar token"]
+    J["Usuario abre<br/>/restablecer?token="]
+    P["Escribe y confirma<br/>la nueva contraseña"]
 
-    L{"¿Token válido<br/>y vigente?"}
+    V{"¿Cumple la política?"}
+    W["400 ContrasenaDebil<br/>el token sigue vigente"]
 
-    M["Rechazar solicitud"]
-    N["Solicitar nueva<br/>recuperación"]
+    K["Buscar token por huella"]
+    L{"¿De recuperación,<br/>sin usar y vigente?"}
 
-    O["Mostrar formulario<br/>de nueva contraseña"]
-    P["Ingresar nueva contraseña"]
-    Q["Actualizar credencial"]
-    R["Invalidar token"]
-    S["Registrar evento<br/>de auditoría"]
-    T["Confirmar cambio"]
+    M["410 · «Este enlace ya no sirve»"]
+    N["Pedir un enlace nuevo"]
+
+    Q["Cambiar el hash<br/>de la contraseña"]
+    R["Marcar el token como usado"]
+    S["Revocar todas las sesiones<br/>de la cuenta"]
+    T["/ingresar · «Contraseña actualizada»"]
 
     END((Fin))
 
@@ -821,23 +823,26 @@ flowchart TD
     C --> D
     D --> E
 
-    E -->|"No"| I
-    I --> J
-    J --> K
-    K --> L
-
+    E -->|"No (no existe,<br/>pendiente o suspendida)"| I
     E -->|"Sí"| F
     F --> G
     G --> H
     H --> I
 
+    I --> J
+    J --> P
+    P --> V
+
+    V -->|"No"| W
+    W --> P
+    V -->|"Sí"| K
+    K --> L
+
     L -->|"No"| M
     M --> N
-    N --> END
+    N --> B
 
-    L -->|"Sí"| O
-    O --> P
-    P --> Q
+    L -->|"Sí"| Q
     Q --> R
     R --> S
     S --> T
@@ -851,16 +856,16 @@ flowchart TD
     classDef success fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534;
 
     class START,END startEnd;
-    class A,B,C,J,O,P userAction;
-    class D,F,G,H,I,K,Q,R,S systemProcess;
-    class E,L decision;
-    class M,N error;
+    class A,B,J,P,N userAction;
+    class C,D,F,G,H,I,K,Q,R,S systemProcess;
+    class E,V,L decision;
+    class M,W error;
     class T success;
 
-    linkStyle 5,6,7,8 stroke:#38bdf8,stroke-width:2px;
-    linkStyle 9,10,11 stroke:#4ade80,stroke-width:2px;
-    linkStyle 12,13,14 stroke:#fb7185,stroke-width:2px;
-    linkStyle 15,16,17,18,19,20,21,22 stroke:#4ade80,stroke-width:2px;
+    linkStyle 5 stroke:#38bdf8,stroke-width:2px;
+    linkStyle 6,7,8,9 stroke:#4ade80,stroke-width:2px;
+    linkStyle 13,14,17,18,19 stroke:#fb7185,stroke-width:2px;
+    linkStyle 15,20,21,22,23,24 stroke:#4ade80,stroke-width:2px;
 ```
 
 ### 4.2 M2 Suscripciones y pagos + M9 Administración
@@ -1710,12 +1715,24 @@ classDiagram
         +cerrar(token) void
         +usuarioDe(token) UsuarioSesion
     }
+    class RecuperacionService {
+        -usuarios RepositorioUsuarios
+        -tokens RepositorioTokensCuenta
+        -sesiones RepositorioSesiones
+        -hash HashContrasena
+        -generador GeneradorToken
+        -correo CorreoPuerto
+        -reloj Reloj
+        +solicitar(correo) void
+        +restablecer(solicitud) void
+    }
     class RepositorioSesiones {
         <<abstract>>
         +crear(sesion) Sesion
         +porHuella(hashToken) Sesion
         +registrarActividad(id, marca) void
         +revocar(id, marca) void
+        +revocarTodasDe(usuarioId, marca) void
     }
     class UsuarioActual {
         <<decorator>>
@@ -1726,12 +1743,14 @@ classDiagram
         +porId(id) Usuario
         +crear(usuario) Usuario
         +cambiarEstado(id, estado) void
+        +cambiarHash(id, hashContrasena) void
     }
     class RepositorioTokensCuenta {
         <<abstract>>
         +crear(token) TokenCuenta
         +porHuella(hashToken) TokenCuenta
         +marcarUsado(id, usadoEn) void
+        +invalidarVigentes(usuarioId, tipo, marca) void
     }
     class GeneradorToken {
         <<abstract>>
@@ -1776,6 +1795,7 @@ classDiagram
         +componer(datos) MensajeCorreo
     }
     class PlantillaVerificacion
+    class PlantillaRecuperacion
     class CorreoNoEnviado {
         <<error>>
     }
@@ -2215,6 +2235,14 @@ classDiagram
     SesionService --> HashContrasena
     SesionService --> GeneradorToken
     SesionGuard --> SesionService
+    RecuperacionService --> PoliticaContrasena
+    RecuperacionService --> RepositorioUsuarios
+    RecuperacionService --> RepositorioTokensCuenta
+    RecuperacionService --> RepositorioSesiones
+    RecuperacionService --> HashContrasena
+    RecuperacionService --> GeneradorToken
+    RecuperacionService --> CorreoPuerto
+    RecuperacionService ..> PlantillaRecuperacion : usa
     SesionGuard ..> UsuarioActual : request.usuario
     RolGuard ..> SesionGuard : va después
     RolGuard ..> Roles : lee los roles
@@ -2228,6 +2256,7 @@ classDiagram
     CorreoPuerto ..> PlantillaCorreo
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
+    PlantillaCorreo <|-- PlantillaRecuperacion
     SuscripcionesService --> PoliticaCicloSuscripcion
     ContratacionService --> PasarelaPago
     ContratacionService --> RepositorioPagos

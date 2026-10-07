@@ -6,23 +6,32 @@ import { Meter } from "@/components/ui/meter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { textoMiles } from "@/lib/planes";
 import type { ListaProyectos } from "@/lib/proyectos";
-import { fechaCorta, type MiSuscripcion } from "@/lib/suscripcion";
+import { fechaCorta, reinicioConsumo, type MiSuscripcion } from "@/lib/suscripcion";
 
 const COTA_AVISO = 0.8;
 
 /**
  * «Consumo del período» de 08. Proyectos sale de `GET /proyectos`; el conteo de
- * construcciones del mes es de M7-03 (Avance 3): mientras tanto se muestra el límite.
+ * construcciones del mes es de M7-03 (Avance 3): mientras tanto se muestra el límite. El período es el
+ * mes calendario en UTC (M5-03), no la vigencia: se reinicia el día 1 aunque la vigencia haya terminado.
  */
-export function PanelConsumo({ suscripcion, proyectos }: { suscripcion: MiSuscripcion; proyectos: ListaProyectos | null }) {
-  const { plan, vence } = suscripcion;
+export function PanelConsumo({
+  suscripcion,
+  proyectos,
+  ahora,
+}: {
+  suscripcion: MiSuscripcion;
+  proyectos: ListaProyectos | null;
+  ahora: Date;
+}) {
+  const { plan } = suscripcion;
   const alLimite = proyectos !== null && proyectos.usados >= proyectos.maximo;
 
   return (
     <Card className="flex flex-col">
       <CardHeader>
         <CardTitle className="flex-1 text-base">Consumo del período</CardTitle>
-        {vence ? <span className="text-[13px] text-muted-foreground">Se reinicia el {fechaCorta(vence)}</span> : null}
+        <span className="text-[13px] text-muted-foreground">Se reinicia el {fechaCorta(reinicioConsumo(ahora))}</span>
       </CardHeader>
       <div className="grid flex-1 grid-cols-1 gap-x-8 gap-y-6 px-4 pt-1 pb-5 sm:grid-cols-2">
         {proyectos ? (

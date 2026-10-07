@@ -7,22 +7,23 @@ import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  avisoEstado,
   fechaCorta,
   fechaLarga,
   progresoVigencia,
   rutaContratar,
+  sinVigencia,
   textoCuotaActual,
   textoDias,
   vigenciaDeParametro,
   type MiSuscripcion,
 } from "@/lib/suscripcion";
 
-const ESTADOS_SIN_SERVICIO = ["vencida", "suspendida", "cancelada"];
-
 /** Primera card de 08: plan actual, estado, vigencia con barra y acciones. */
 export function TarjetaPlanActual({ suscripcion, ahora }: { suscripcion: MiSuscripcion; ahora: Date }) {
   const { plan, vence, vigenciaDias, planSiguiente } = suscripcion;
   const renovable = vence !== null && vigenciaDias !== null;
+  const aviso = avisoEstado(suscripcion.estado);
 
   return (
     <div className="flex flex-col gap-3">
@@ -55,9 +56,9 @@ export function TarjetaPlanActual({ suscripcion, ahora }: { suscripcion: MiSuscr
           El {fechaLarga(vence)} pasas a {planSiguiente.nombre}. Hasta entonces sigues en {plan.nombre}; si renuevas, se cancela.
         </Banner>
       ) : null}
-      {ESTADOS_SIN_SERVICIO.includes(suscripcion.estado) ? (
-        <Banner variant="warn" title="Tu vigencia terminó">
-          Tus entornos siguen en línea durante la gracia, pero no puedes crear proyectos ni desplegar. Renueva para seguir.
+      {aviso ? (
+        <Banner variant="warn" title={aviso.titulo}>
+          {aviso.texto}
         </Banner>
       ) : null}
     </div>
@@ -70,10 +71,16 @@ function BarraVigencia({ suscripcion, vence, ahora }: { suscripcion: MiSuscripci
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between text-[13px]">
         <span className="text-muted-foreground">Vigencia</span>
-        <span>
-          <span className="font-medium">{textoDias(suscripcion.diasRestantes ?? 0)}</span>{" "}
-          <span className="text-muted-foreground">restantes</span>
-        </span>
+        {sinVigencia(suscripcion.estado) ? (
+          <span>
+            <span className="text-muted-foreground">Terminó el</span> <span className="font-medium">{fechaLarga(vence)}</span>
+          </span>
+        ) : (
+          <span>
+            <span className="font-medium">{textoDias(suscripcion.diasRestantes ?? 0)}</span>{" "}
+            <span className="text-muted-foreground">restantes</span>
+          </span>
+        )}
       </div>
       <div
         className="relative h-[18px]"

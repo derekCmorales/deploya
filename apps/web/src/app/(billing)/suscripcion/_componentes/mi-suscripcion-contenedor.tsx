@@ -50,7 +50,7 @@ export function MiSuscripcionContenedor() {
         <>
           <TarjetaPlanActual suscripcion={suscripcion.datos} ahora={ahora} />
           <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[3fr_2fr]">
-            <PanelConsumo suscripcion={suscripcion.datos} proyectos={proyectos} />
+            <PanelConsumo suscripcion={suscripcion.datos} proyectos={proyectos} ahora={ahora} />
             <PanelCambiarPlan
               suscripcion={suscripcion.datos}
               catalogo={catalogo.tipo === "listo" ? catalogo.planes : null}

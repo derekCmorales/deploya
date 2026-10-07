@@ -59,6 +59,43 @@ export const RUTA_PAGOS = "/pagos";
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const PORCIENTO = 100;
 
+/** Estados sin vigencia en curso (§4.4): no se crea ni se despliega, y no hay descenso que programar. */
+const ESTADOS_SIN_VIGENCIA: readonly EstadoSuscripcion[] = ["vencida", "suspendida", "cancelada"];
+
+export function sinVigencia(estado: EstadoSuscripcion): boolean {
+  return ESTADOS_SIN_VIGENCIA.includes(estado);
+}
+
+export interface AvisoEstado {
+  titulo: string;
+  texto: string;
+}
+
+const AVISOS_ESTADO: Partial<Record<EstadoSuscripcion, AvisoEstado>> = {
+  vencida: {
+    titulo: "Tu vigencia terminó",
+    texto: "Tus entornos siguen en línea durante la gracia de 5 días, pero no puedes crear proyectos ni desplegar. Renueva para seguir.",
+  },
+  suspendida: {
+    titulo: "Tu panel está en pausa",
+    texto: "Terminó el período de gracia: no puedes crear proyectos ni desplegar. Renueva para reactivar tu panel.",
+  },
+  cancelada: {
+    titulo: "Tu suscripción terminó",
+    texto: "No puedes crear proyectos ni desplegar. Contrata un plan para seguir.",
+  },
+};
+
+/** Banner de 08 según el estado; `null` mientras la vigencia sigue en curso. */
+export function avisoEstado(estado: EstadoSuscripcion): AvisoEstado | null {
+  return AVISOS_ESTADO[estado] ?? null;
+}
+
+/** Las construcciones se cuentan por mes calendario en UTC (M5-03): el consumo se reinicia el día 1 del mes siguiente. */
+export function reinicioConsumo(ahora: Date): string {
+  return new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth() + 1, 1)).toISOString();
+}
+
 /** «03 sep». En UTC: la vigencia se guarda en UTC y así no cambia con la zona del navegador. */
 export function fechaCorta(iso: string): string {
   const fecha = new Date(iso);
@@ -118,7 +155,7 @@ export function subtituloOperacion(c: Pick<Cotizacion, "tipo" | "desde" | "plan"
   return `Contratación desde ${c.desde.nombre}`;
 }
 
-export type TipoCambio = "ascenso" | "descenso";
+export type TipoCambio = "ascenso" | "descenso" | "contratacion";
 
 export interface OpcionCambio {
   plan: PlanCatalogo;
@@ -132,23 +169,34 @@ export interface OpcionCambio {
 /**
  * Filas del panel «Cambiar plan» de 08: cada plan del catálogo menos el actual, en el orden
  * del catálogo. Por encima del actual es ascenso (se paga y arranca hoy); por debajo, descenso
- * (aplica al vencer). Desde Sandbox todo es ascenso.
+ * (aplica al vencer). Desde Sandbox todo es ascenso. Sin vigencia en curso (Vencida, Suspendida,
+ * Cancelada) no hay descenso que esperar: cualquier plan de pago es una contratación desde hoy y los
+ * gratuitos no se ofrecen (la API rechaza ambos casos).
  */
-export function opcionesCambio(catalogo: PlanCatalogo[], actual: Pick<MiSuscripcion, "plan" | "planSiguiente">): OpcionCambio[] {
+export function opcionesCambio(
+  catalogo: PlanCatalogo[],
+  actual: Pick<MiSuscripcion, "plan" | "planSiguiente" | "estado">,
+): OpcionCambio[] {
   const nivelActual = catalogo.findIndex((p) => p.codigo === actual.plan.codigo);
+  const terminada = sinVigencia(actual.estado);
   return catalogo
-    .filter((p) => p.codigo !== actual.plan.codigo)
+    .filter((p) => p.codigo !== actual.plan.codigo && !(terminada && p.precio30 === 0))
     .map((plan) => {
-      const tipo: TipoCambio = catalogo.indexOf(plan) > nivelActual ? "ascenso" : "descenso";
+      const tipo = tipoCambio(catalogo.indexOf(plan) > nivelActual, terminada);
       const precio = plan.precio30 === 0 ? "Sin costo" : textoMonto(plan.precio30);
       return {
         plan,
         tipo,
         programado: actual.planSiguiente?.codigo === plan.codigo,
         precio,
-        texto: tipo === "ascenso" ? `Pagas ${precio} y arrancan 30 días nuevos.` : "Aplica cuando termine tu vigencia actual.",
+        texto: tipo === "descenso" ? "Aplica cuando termine tu vigencia actual." : `Pagas ${precio} y arrancan 30 días nuevos.`,
       };
     });
+}
+
+function tipoCambio(esMayor: boolean, vigenciaTerminada: boolean): TipoCambio {
+  if (vigenciaTerminada) return esMayor ? "ascenso" : "contratacion";
+  return esMayor ? "ascenso" : "descenso";
 }
 
 // ───────── Tarjeta (07) ─────────

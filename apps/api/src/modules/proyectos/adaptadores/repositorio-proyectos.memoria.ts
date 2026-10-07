@@ -45,4 +45,8 @@ export class RepositorioProyectosMemoria extends RepositorioProyectos {
     }
     return false;
   }
+
+  async eliminar(id: string): Promise<void> {
+    this.proyectos.delete(id);
+  }
 }

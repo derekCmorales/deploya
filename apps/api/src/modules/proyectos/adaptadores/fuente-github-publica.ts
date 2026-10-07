@@ -35,7 +35,8 @@ export class FuenteGitHubPublica extends ProveedorFuente {
     super();
   }
 
-async validar(url: string, rama: string): Promise<ValidacionRepositorio> {    const repositorio = repositorioDesdeUrl(url);
+  async validar({ url, rama }: ConsultaRepositorio): Promise<ValidacionRepositorio> {
+    const repositorio = repositorioDesdeUrl(url);
     const base = `${this.api}/repos/${repositorio.dueno}/${repositorio.nombre}`;
     await this.exigir(await this.pedir(base));
     const ramas = await this.ramas(base);
@@ -74,6 +75,7 @@ async validar(url: string, rama: string): Promise<ValidacionRepositorio> {    co
     const contenido = (await (await this.exigir(respuesta)).json()) as ContenidoGitHub | unknown[];
     if (Array.isArray(contenido) || contenido.type !== "file") throw new RepositorioSinDockerfile(rama);
     if (contenido.content) return Buffer.from(contenido.content, "base64").toString("utf-8");
+    // La API omite `content` en archivos de más de 1 MB; se baja crudo.
     if (contenido.download_url) return (await this.exigir(await this.pedir(contenido.download_url))).text();
     throw new RepositorioSinDockerfile(rama);
   }
@@ -86,6 +88,7 @@ async validar(url: string, rama: string): Promise<ValidacionRepositorio> {    co
     }
   }
 
+  /** Límite de peticiones agotado o GitHub caído → no es culpa del repositorio. */
   private async exigir(respuesta: Response): Promise<Response> {
     if (respuesta.ok) return respuesta;
     const limiteAgotado = respuesta.headers.get("x-ratelimit-remaining") === "0";

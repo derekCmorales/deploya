@@ -1,7 +1,7 @@
 import { ForbiddenException, UnauthorizedException, type ExecutionContext } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import type { UsuarioSesion } from "./dominio/sesion";
-import { rolPermitido, RolGuard, SOLO_ADMINISTRACION } from "./rol.guard";
+import { exigeRol, rolPermitido, RolGuard, SOLO_ADMINISTRACION } from "./rol.guard";
 import { Roles } from "./roles.decorator";
 
 const CLIENTE: UsuarioSesion = { id: "u-cliente", correo: "cliente@deploya.app", nombre: "Cliente", rol: "cliente" };
@@ -77,5 +77,13 @@ describe("M1-04 · rolPermitido", () => {
   it("solo pasa el rol que está en la lista", () => {
     expect(rolPermitido("administrador", ["administrador"])).toBe(true);
     expect(rolPermitido("cliente", ["administrador"])).toBe(false);
+  });
+});
+
+describe("M1-04 · exigeRol", () => {
+  it("solo exige rol cuando @Roles trae al menos uno", () => {
+    expect(exigeRol(undefined)).toBe(false);
+    expect(exigeRol([])).toBe(false);
+    expect(exigeRol(["administrador"])).toBe(true);
   });
 });

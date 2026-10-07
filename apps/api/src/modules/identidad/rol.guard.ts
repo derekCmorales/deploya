@@ -10,15 +10,24 @@ import type { Rol } from "./dominio/cuenta";
 import { ROLES_PERMITIDOS } from "./roles.decorator";
 import type { SolicitudConSesion } from "./sesion.guard";
 
-/** Pantalla 28 · 403: el cuerpo que lee la web para mostrar «solo para administración». */
+/**
+ * Pantalla 28 · 403: el cuerpo que lee la web para mostrar «solo para administración».
+ * El núcleo solo restringe a administración; si aparece otro rol restringido, este cuerpo
+ * debe depender del rol exigido.
+ */
 export const SOLO_ADMINISTRACION = {
   codigo: "SoloAdministracion",
   mensaje: "Esta sección es solo para administración",
 } as const;
 
+/** La ruta pide un rol solo si `@Roles()` trae al menos uno. */
+export function exigeRol(permitidos: readonly Rol[] | undefined): permitidos is readonly Rol[] {
+  return permitidos !== undefined && permitidos.length > 0;
+}
+
 /** Decisión pura, aparte para probarla sin Nest: sin roles exigidos, cualquiera con sesión pasa. */
 export function rolPermitido(rol: Rol, permitidos: readonly Rol[] | undefined): boolean {
-  return !permitidos || permitidos.length === 0 || permitidos.includes(rol);
+  return !exigeRol(permitidos) || permitidos.includes(rol);
 }
 
 /**
@@ -35,7 +44,7 @@ export class RolGuard implements CanActivate {
       contexto.getHandler(),
       contexto.getClass(),
     ]);
-    if (!permitidos || permitidos.length === 0) return true;
+    if (!exigeRol(permitidos)) return true;
 
     const { usuario } = contexto.switchToHttp().getRequest<SolicitudConSesion>();
     if (!usuario) throw new UnauthorizedException({ codigo: "SinSesion", mensaje: "Inicia sesión para continuar." });

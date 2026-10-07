@@ -177,6 +177,10 @@ classDiagram
         +cobrar(cargo) ResultadoCobro
     }
     class PasarelaSimulada
+    class AdministracionController {
+        +health() Estado
+        +acceso(usuario) UsuarioSesion
+    }
     class AdministracionService {
         +suspender(adminId, usuarioId, motivo, detalle) void
     }
@@ -470,7 +474,8 @@ classDiagram
     SesionGuard ..> UsuarioActual : request.usuario
     RolGuard ..> SesionGuard : va después
     RolGuard ..> Roles : lee los roles
-    AdministracionService ..> RolGuard : protege
+    AdministracionController ..> RolGuard : protege
+    AdministracionController ..> SesionGuard : protege
     RepositorioUsuarios <|-- RepositorioUsuariosPrisma
     RepositorioTokensCuenta <|-- RepositorioTokensCuentaPrisma
     RepositorioSesiones <|-- RepositorioSesionesPrisma

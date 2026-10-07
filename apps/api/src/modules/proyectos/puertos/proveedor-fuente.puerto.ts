@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+import { ValidacionRepositorio } from "../dominio/proyecto";
+
+export abstract class ProveedorFuente {
+  /** Lanza RepositorioNoAccesible, RamaNoEncontrada o RepositorioSinDockerfile. */
+  abstract validar(url: string, rama: string): Promise<ValidacionRepositorio>;
+}
+=======
 import type { ConsultaRepositorio, ValidacionRepositorio } from "../dominio/proyecto";
 
 /**
@@ -11,3 +19,4 @@ export abstract class ProveedorFuente {
    */
   abstract validar(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio>;
 }
+>>>>>>> origin/main

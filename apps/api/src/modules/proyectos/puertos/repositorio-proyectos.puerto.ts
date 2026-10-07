@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+import { Proyecto } from "../dominio/proyecto";
+
+export abstract class RepositorioProyectos {
+  abstract guardar(proyecto: Omit<Proyecto, "id" | "creado">): Promise<Proyecto>;
+  abstract porId(id: string): Promise<Proyecto | null>;
+  abstract deUsuario(usuarioId: string): Promise<Proyecto[]>;
+  abstract existeSubdominio(subdominio: string): Promise<boolean>;
+}
+=======
 import type { Proyecto, ProyectoNuevo } from "../dominio/proyecto";
 
 /**
@@ -13,3 +23,4 @@ export abstract class RepositorioProyectos {
   /** Borra el proyecto; sus despliegues, artefactos y variables caen en cascada. */
   abstract eliminar(id: string): Promise<void>;
 }
+>>>>>>> origin/main

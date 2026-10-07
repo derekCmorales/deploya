@@ -18,6 +18,10 @@ Reutiliza lo del Avance 1: `TokenCuenta` (tipo `recuperacion`), `GeneradorToken`
 2. **Un solo token vivo.** Antes de crear uno nuevo, `RepositorioTokensCuenta.invalidarVigentes(usuarioId, "recuperacion", ahora)` marca como usados los anteriores. Así un enlace viejo deja de servir en cuanto se pide otro.
 3. **Restablecer en una sola operación del servicio:** validar política → buscar por huella → comprobar `expira > ahora` y `usadoEn = null` con `Reloj` → `cambiarHash` → `marcarUsado` → `revocarTodasDe`. La web vuelve a `/ingresar` con el aviso «Contraseña actualizada».
 4. **Constante con nombre:** `VIGENCIA_RECUPERACION_MS = 30 * 60 * 1000` junto a la de verificación (24 h).
+5. **Controlador aparte** (`RecuperacionController`, `identidad/recuperacion`), con el mismo `ErroresIdentidadFilter`; la confirmación se compara en el borde, como en el registro.
+6. **Restablecer exige una cuenta Activa**: si se suspendió después de pedir el enlace, responde el mismo 410 `TokenNoValido` y la contraseña no cambia.
+7. **Layout:** patrón A (acceso partido) de `docs/diseno/guia-construccion.md`, como 01 y 03; las tarjetas de estado del artboard viven en la columna del formulario, como 01b.
+8. **El paso 2 no muestra «Para <correo>»** del artboard: exigiría un endpoint que diga a quién pertenece un token, y eso revela datos a quien tenga un enlace viejo. La web vuelve a `/ingresar?restablecida=1` y ahí se ve «Contraseña actualizada».
 
 ## Diseño: SOLID y patrones
 

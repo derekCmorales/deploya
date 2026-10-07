@@ -2,7 +2,18 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
-import { destinoTrasIngreso, erroresRegistro, resultadoIngreso, resultadoRegistro, resultadoVerificacion } from "../src/lib/cuenta.ts";
+import {
+  DESTINO_TRAS_RESTABLECER,
+  destinoTrasIngreso,
+  errorCorreoRecuperacion,
+  erroresContrasenaNueva,
+  erroresRegistro,
+  resultadoIngreso,
+  resultadoRegistro,
+  resultadoRestablecer,
+  resultadoSolicitudRecuperacion,
+  resultadoVerificacion,
+} from "../src/lib/cuenta.ts";
 
 const VALIDOS = { correo: "derek@tiendademo.com", contrasena: "Deploya#2026seguro", confirmacion: "Deploya#2026seguro" };
 
@@ -118,4 +129,65 @@ test("design system · toda utilidad de movimiento dy-* se apaga con movimiento 
   assert.ok(conMovimiento.includes("dy-flota"));
   assert.ok(conMovimiento.includes("dy-giro-lento"));
   assert.deepEqual(conMovimiento.filter((clase) => !reducido.includes(`.${clase}`)), []);
+});
+
+test("04 · paso 1: solo valida el formato del correo", () => {
+  assert.equal(errorCorreoRecuperacion(" derek@tiendademo.com "), null);
+  assert.equal(errorCorreoRecuperacion("derek@"), "Escribe un correo válido.");
+});
+
+test("04 · paso 1: un 202 es «Revisa tu correo» exista o no la cuenta; lo demás, error", () => {
+  assert.equal(resultadoSolicitudRecuperacion(202), "enviada");
+  assert.equal(resultadoSolicitudRecuperacion(500), "error");
+  assert.equal(resultadoSolicitudRecuperacion(0), "error");
+});
+
+test("04 · paso 2: requisitos y confirmación como en el registro", () => {
+  assert.deepEqual(erroresContrasenaNueva({ contrasena: "Nueva#Clave2026", confirmacion: "Nueva#Clave2026" }, true), {});
+  assert.deepEqual(Object.keys(erroresContrasenaNueva({ contrasena: "corta", confirmacion: "otra" }, false)).sort(), [
+    "confirmacion",
+    "contrasena",
+  ]);
+});
+
+test("04 · paso 2: 204 vuelve a iniciar sesión; TokenNoValido es «Este enlace ya no sirve»", () => {
+  assert.deepEqual(resultadoRestablecer(204, {}), { tipo: "restablecida" });
+  assert.deepEqual(resultadoRestablecer(410, { codigo: "TokenNoValido" }), { tipo: "enlace-no-sirve" });
+  assert.deepEqual(resultadoRestablecer(400, { codigo: "ContrasenaDebil", mensaje: "La contraseña no cumple: Al menos un símbolo" }), {
+    tipo: "error",
+    mensaje: "La contraseña no cumple: Al menos un símbolo",
+  });
+  assert.equal(resultadoRestablecer(0, {}).tipo, "error");
+  assert.equal(DESTINO_TRAS_RESTABLECER, "/ingresar?restablecida=1");
+});
+
+test("04 · textos de la ficha, «Olvidé mi contraseña» lleva a /recuperar y sin fetch directo ni hex", () => {
+  const leer = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
+  const paso1 = leer("src/app/(auth)/recuperar/formulario-recuperacion.tsx");
+  const paso2 = leer("src/app/(auth)/restablecer/formulario-restablecer.tsx");
+  const tarjeta = leer("src/app/(auth)/recuperar/tarjeta-recuperacion.tsx");
+  for (const texto of [
+    "Recuperar contraseña",
+    "Escribe tu correo y te enviamos un enlace para crear una nueva.",
+    "Enviar enlace",
+    "Revisa tu correo",
+    "Si la cuenta existe, te enviamos un enlace. Caduca en 30 minutos y sirve una sola vez.",
+  ]) {
+    assert.ok(paso1.includes(texto), texto);
+  }
+  for (const texto of ["Nueva contraseña", "Confirmar contraseña", "Guardar contraseña", "Enlace de un solo uso · cierra tus otras sesiones"]) {
+    assert.ok(paso2.includes(texto), texto);
+  }
+  for (const texto of ["Este enlace ya no sirve", "Ya se usó o pasaron más de 30 minutos. Pide uno nuevo para continuar.", "Pedir un enlace nuevo"]) {
+    assert.ok(tarjeta.includes(texto), texto);
+  }
+  assert.match(paso2, /<RequisitosContrasena/);
+  for (const pagina of ["recuperar", "restablecer"]) {
+    assert.match(leer(`src/app/(auth)/${pagina}/page.tsx`), /lg:grid-cols-\[640px_1fr\]/, `${pagina} usa el patrón A`);
+  }
+  assert.match(leer("src/app/(auth)/ingresar/formulario-ingreso.tsx"), /href="\/recuperar"/);
+  for (const codigo of [paso1, paso2, tarjeta]) {
+    assert.doesNotMatch(codigo, /fetch\(/);
+    assert.doesNotMatch(codigo, /#[0-9a-fA-F]{3,8}\b/);
+  }
 });

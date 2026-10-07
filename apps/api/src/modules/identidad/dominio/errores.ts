@@ -55,9 +55,12 @@ export class CuentaNoVerificada extends Error {
   }
 }
 
-/** Pantalla 03b: suspendida por administración (M9); el motivo lo completa M1-04. */
+/** Pantalla 03b: suspendida por administración (M9), con el motivo y la fecha que registró M9. */
 export class CuentaSuspendida extends Error {
-  constructor() {
+  constructor(
+    readonly motivo: string | null = null,
+    readonly desde: Date | null = null,
+  ) {
     super("Cuenta suspendida por administración");
     this.name = "CuentaSuspendida";
   }

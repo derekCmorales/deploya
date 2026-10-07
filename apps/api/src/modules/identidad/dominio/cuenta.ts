@@ -12,10 +12,14 @@ export interface Usuario {
   hashContrasena: string;
   rol: Rol;
   estadoCuenta: EstadoCuenta;
+  /** Pantalla 03b: lo escribe M9 al suspender; `null` si nunca se suspendió. */
+  motivoSuspension: string | null;
+  /** Fecha de la suspensión vigente (la `AccionAdministrativa` más reciente de M9); `null` si no consta. */
+  suspendidaDesde: Date | null;
   creado: Date;
 }
 
-export type NuevoUsuario = Omit<Usuario, "id">;
+export type NuevoUsuario = Omit<Usuario, "id" | "motivoSuspension" | "suspendidaDesde">;
 
 export interface TokenCuenta {
   id: string;

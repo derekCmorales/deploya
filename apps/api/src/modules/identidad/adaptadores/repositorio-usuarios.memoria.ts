@@ -15,7 +15,7 @@ export class RepositorioUsuariosMemoria extends RepositorioUsuarios {
   }
 
   async crear(usuario: NuevoUsuario): Promise<Usuario> {
-    const creado = { ...usuario, id: randomUUID() };
+    const creado = { ...usuario, id: randomUUID(), motivoSuspension: null, suspendidaDesde: null };
     this.usuarios.set(creado.id, creado);
     return creado;
   }
@@ -23,5 +23,11 @@ export class RepositorioUsuariosMemoria extends RepositorioUsuarios {
   async cambiarEstado(id: string, estado: EstadoCuenta): Promise<void> {
     const usuario = this.usuarios.get(id);
     if (usuario) this.usuarios.set(id, { ...usuario, estadoCuenta: estado });
+  }
+
+  /** Solo para pruebas: lo que en la base escribe M9 (motivo en `Usuario` y fecha en `AccionAdministrativa`). */
+  suspender(id: string, motivo: string, desde: Date): void {
+    const usuario = this.usuarios.get(id);
+    if (usuario) this.usuarios.set(id, { ...usuario, estadoCuenta: "suspendida", motivoSuspension: motivo, suspendidaDesde: desde });
   }
 }

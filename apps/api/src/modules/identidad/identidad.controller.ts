@@ -55,7 +55,7 @@ export class ErroresIdentidadFilter implements ExceptionFilter {
       return;
     }
     if (error instanceof CuentaSuspendida) {
-      respuesta.status(HTTP_PROHIBIDO).json(cuerpo);
+      respuesta.status(HTTP_PROHIBIDO).json({ ...cuerpo, motivo: error.motivo, desde: error.desde?.toISOString() ?? null });
       return;
     }
     if (error instanceof CorreoYaRegistrado) {

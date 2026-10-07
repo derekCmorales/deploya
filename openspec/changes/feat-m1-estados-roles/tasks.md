@@ -9,8 +9,8 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 
 ## 2. Estados del login
 
-- [ ] 2.1 `CuentaSuspendida(motivo, desde)` y su cuerpo en el filtro; `GET /identidad/sesion` con `rol`
-- [ ] 2.2 Pruebas: «Cuenta suspendida» devuelve motivo y fecha; «Cuenta sin verificar» devuelve el correo enmascarado
+- [x] 2.1 `CuentaSuspendida(motivo, desde)` y su cuerpo en el filtro (`desde` en ISO 8601); el adaptador Prisma de usuarios lee la fecha de la `AccionAdministrativa` `suspender-cuenta` más reciente (sin cambios de schema); `GET /identidad/sesion` ya trae `rol`
+- [x] 2.2 Pruebas: «Cuenta suspendida» devuelve motivo y fecha (servicio y filtro 403); sin acción registrada no inventa fecha; «Cuenta sin verificar» devuelve el correo enmascarado; adaptador Prisma con doble (acción más reciente, `null` si no hay)
 
 ## 3. Roles
 
@@ -19,7 +19,7 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 
 ## 4. Web (02, 03b, 28)
 
-- [ ] 4.1 02: «Reenviar correo» con cuenta atrás desde el 429; 03b: reenviar y suspendida con motivo; 28: 403 y sesión expirada; `/admin` muestra 403 a un Cliente
+- [ ] 4.1 02: «Reenviar correo» con cuenta atrás desde el 429; 03b: reenviar y suspendida con motivo; 28: 403 y sesión expirada; `/admin` muestra 403 a un Cliente. Hecho: `/admin` → 403 (`components/estados/sin-permisos.tsx`, guard en `app/(admin)/layout.tsx`), 03b suspendida con motivo y fecha, «Sesión expirada» (`pedirApi` avisa el 401 y `SesionProvider` distingue sesión vencida de «nunca hubo»). Falta: reenvío en 02 y 03b
 - [ ] 4.2 Pruebas `node --test`: formato de la cuenta atrás, decisión «expirada» frente a «sin sesión», textos de las fichas
 - [ ] 4.3 Revisión contra los artboards 02, 03b y 28 en claro y oscuro
 

@@ -79,10 +79,26 @@ describe("M1-03 · Iniciar sesión", () => {
     expect(sesiones.sesiones.size).toBe(0);
   });
 
-  it("Cuenta suspendida no entra", async () => {
+  it("Cuenta suspendida: no entra y el error trae el motivo y la fecha que registró M9", async () => {
+    const { servicio, usuarios, usuario, sesiones } = await armar();
+    const desde = new Date("2026-09-22T15:00:00.000Z");
+    usuarios.suspender(usuario.id, "Uso que incumple los términos de servicio (§7.2).", desde);
+
+    const error = await servicio.iniciar({ correo: "derek@tiendademo.com", contrasena: CLAVE }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(CuentaSuspendida);
+    expect(error).toMatchObject({ motivo: "Uso que incumple los términos de servicio (§7.2).", desde });
+    expect(sesiones.sesiones.size).toBe(0);
+  });
+
+  it("una cuenta suspendida sin acción registrada no entra y no inventa motivo ni fecha", async () => {
     const { servicio } = await armar("suspendida");
 
-    await expect(servicio.iniciar({ correo: "derek@tiendademo.com", contrasena: CLAVE })).rejects.toBeInstanceOf(CuentaSuspendida);
+    await expect(servicio.iniciar({ correo: "derek@tiendademo.com", contrasena: CLAVE })).rejects.toMatchObject({
+      name: "CuentaSuspendida",
+      motivo: null,
+      desde: null,
+    });
   });
 });
 

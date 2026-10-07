@@ -2,7 +2,7 @@
 
 ## Context
 
-`SesionGuard` y `@UsuarioActual()` existen desde M1-03. `TokenCuenta`, `GeneradorToken`, `CorreoPuerto` y `PlantillaVerificacion` existen desde M1-01/M1-02/M10-01. `Usuario` tiene `rol`, `estadoCuenta`, `estadoDesde` y `motivoSuspension`.
+`SesionGuard` y `@UsuarioActual()` existen desde M1-03. `TokenCuenta`, `GeneradorToken`, `CorreoPuerto` y `PlantillaVerificacion` existen desde M1-01/M1-02/M10-01. `Usuario` tiene `rol`, `estadoCuenta` y `motivoSuspension`; la fecha de la suspensión no está en `Usuario`: es el `creado` de la `AccionAdministrativa` `suspender-cuenta` más reciente (M9). El adaptador Prisma de usuarios la lee; el servicio no sabe de dónde sale (D).
 
 **Orden de archivo:** el delta parte del texto de `feat/m1-registro-verificacion` y `feat/m1-sesion`; se archiva después de ambos.
 

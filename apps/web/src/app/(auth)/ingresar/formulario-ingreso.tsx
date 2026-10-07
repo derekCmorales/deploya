@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { useSesion } from "@/hooks/use-sesion";
 import { iniciarSesion } from "@/lib/api-identidad";
 import { destinoTrasIngreso, type ResultadoIngreso } from "@/lib/cuenta";
+import { fechaCorta } from "@/lib/fechas";
+
+import { AvisoSesionExpirada } from "./aviso-sesion-expirada";
 
 type Aviso = Exclude<ResultadoIngreso, { tipo: "dentro" }> | null;
 
@@ -40,7 +43,9 @@ export function FormularioIngreso() {
     setAviso(resultado);
   }
 
-  if (aviso?.tipo === "suspendida") return <CuentaSuspendida onVolver={() => setAviso(null)} />;
+  if (aviso?.tipo === "suspendida") {
+    return <CuentaSuspendida motivo={aviso.motivo} desde={aviso.desde} onVolver={() => setAviso(null)} />;
+  }
 
   const credencialesMal = aviso?.tipo === "credenciales";
 
@@ -63,6 +68,7 @@ export function FormularioIngreso() {
           activarla.
         </Banner>
       ) : null}
+      {aviso ? null : <AvisoSesionExpirada />}
       {aviso?.tipo === "error" ? <Banner variant="bad" title={aviso.mensaje} /> : null}
 
       <Field id="correo" label="Correo">
@@ -125,13 +131,22 @@ export function FormularioIngreso() {
   );
 }
 
-function CuentaSuspendida({ onVolver }: { onVolver: () => void }) {
+/** 03b · Suspendida: el motivo y la fecha los registró M9; si no constan, no se inventan. */
+function CuentaSuspendida({ motivo, desde, onVolver }: { motivo: string | null; desde: string | null; onVolver: () => void }) {
+  const fecha = desde ? fechaCorta(desde) : null;
   return (
     <Card className="flex w-[400px] max-w-full flex-col gap-4 p-7" role="alert">
       <h1 className="text-xl font-semibold tracking-[-0.02em]">Cuenta suspendida por administración</h1>
       <p className="text-muted-foreground">
         No puedes iniciar sesión mientras dure la suspensión. Tus proyectos y datos se conservan.
       </p>
+      {motivo ? (
+        <Sunken className="flex flex-col gap-1 px-3 py-2.5 text-sm">
+          <span className="text-xs text-muted-foreground">Motivo registrado</span>
+          <span className="text-foreground">{motivo}</span>
+          {fecha ? <span className="font-mono text-xs text-muted-foreground">{fecha}</span> : null}
+        </Sunken>
+      ) : null}
       <Sunken className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm">
         Escribir a soporte
         <a href="mailto:soporte@deploya.app" className="font-mono text-[13px] text-foreground">

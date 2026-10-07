@@ -4,21 +4,24 @@ import { RotateCw } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
-import { RUTA_INGRESAR } from "@/components/shell/menu-usuario";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSesion } from "@/hooks/use-sesion";
+import { destinoSinSesion } from "@/lib/sesion-expirada";
 
-/** Rutas del panel (M1-03): sin sesión vigente se va a `/ingresar` y se vuelve después. */
+/**
+ * Rutas del panel (M1-03): sin sesión vigente se va a `/ingresar` y se vuelve después. Si la
+ * sesión venció mientras se usaba el panel, con el aviso «Tu sesión expiró» (M1-04, 28).
+ */
 export function RequiereSesion({ children }: { children: ReactNode }) {
-  const { estado, recargar } = useSesion();
+  const { estado, expirada, recargar } = useSesion();
   const router = useRouter();
   const ruta = usePathname();
 
   useEffect(() => {
-    if (estado === "sin-sesion") router.replace(`${RUTA_INGRESAR}?siguiente=${encodeURIComponent(ruta)}`);
-  }, [estado, ruta, router]);
+    if (estado === "sin-sesion") router.replace(destinoSinSesion(expirada, ruta));
+  }, [estado, expirada, ruta, router]);
 
   if (estado === "con-sesion") return <>{children}</>;
   if (estado === "sin-conexion") {

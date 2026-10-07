@@ -41,7 +41,7 @@ export class SesionService {
   async iniciar(credenciales: Credenciales): Promise<SesionIniciada> {
     const usuario = await this.usuarioConClave(credenciales.correo, credenciales.contrasena);
     if (usuario.estadoCuenta === "pendiente") throw new CuentaNoVerificada(enmascararCorreo(usuario.correo));
-    if (usuario.estadoCuenta === "suspendida") throw new CuentaSuspendida();
+    if (usuario.estadoCuenta === "suspendida") throw new CuentaSuspendida(usuario.motivoSuspension, usuario.suspendidaDesde);
 
     const token = this.generador.generar();
     const ahora = this.reloj.ahora();

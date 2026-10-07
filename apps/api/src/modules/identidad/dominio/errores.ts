@@ -55,10 +55,21 @@ export class CuentaNoVerificada extends Error {
   }
 }
 
-/** Pantalla 03b: suspendida por administración (M9); el motivo lo completa M1-04. */
+/** Pantalla 03b: suspendida por administración (M9), con el motivo y la fecha que registró M9. */
 export class CuentaSuspendida extends Error {
-  constructor() {
+  constructor(
+    readonly motivo: string | null = null,
+    readonly desde: Date | null = null,
+  ) {
     super("Cuenta suspendida por administración");
     this.name = "CuentaSuspendida";
+  }
+}
+
+/** Pantallas 02 y 03b: el reenvío llegó antes de la cuenta atrás; `segundos` es lo que falta. */
+export class EsperaReenvio extends Error {
+  constructor(readonly segundos: number) {
+    super(`Podrás reenviar el correo en ${segundos} s`);
+    this.name = "EsperaReenvio";
   }
 }

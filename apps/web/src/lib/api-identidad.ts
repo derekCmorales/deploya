@@ -1,3 +1,4 @@
+import { ErrorApi, pedirApi } from "@/lib/api";
 import {
   resultadoIngreso,
   resultadoRegistro,
@@ -10,6 +11,7 @@ import {
   type ResultadoSolicitudRecuperacion,
   type ResultadoVerificacion,
 } from "@/lib/cuenta";
+import { resultadoReenvio, type ResultadoReenvio } from "@/lib/reenvio";
 
 const URL_API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -98,4 +100,20 @@ export async function leerSesion(): Promise<UsuarioSesion | null> {
 /** `DELETE /identidad/sesion`. */
 export async function cerrarSesion(): Promise<void> {
   await llamar("/identidad/sesion", "DELETE").catch(() => undefined);
+}
+
+/** Pantallas 02 y 03b: por el correo, o por el token del enlace vencido en 02 (c). */
+export type DestinoReenvio = { correo: string } | { token: string };
+
+const HTTP_ACEPTADO = 202;
+
+/** `POST /identidad/verificacion/reenvio`: 202 neutro o 429 con los segundos que faltan. */
+export async function reenviarVerificacion(destino: DestinoReenvio): Promise<ResultadoReenvio> {
+  try {
+    const { segundos } = await pedirApi<{ segundos?: number }>("/identidad/verificacion/reenvio", { metodo: "POST", cuerpo: destino });
+    return resultadoReenvio(HTTP_ACEPTADO, "", segundos);
+  } catch (error) {
+    if (error instanceof ErrorApi) return resultadoReenvio(error.estado, error.codigo, error.detalle.segundos);
+    throw error;
+  }
 }

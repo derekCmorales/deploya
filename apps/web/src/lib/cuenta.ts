@@ -55,7 +55,7 @@ export type ResultadoIngreso =
   | { tipo: "dentro" }
   | { tipo: "credenciales" }
   | { tipo: "sin-verificar"; correoEnmascarado: string }
-  | { tipo: "suspendida" }
+  | { tipo: "suspendida"; motivo: string | null; desde: string | null }
   | { tipo: "error"; mensaje: string };
 
 const MENSAJE_INGRESO = "No pudimos iniciar sesión. Intenta de nuevo en unos segundos.";
@@ -66,7 +66,10 @@ export function resultadoIngreso(estado: number, cuerpo: Record<string, unknown>
   if (cuerpo.codigo === "CuentaNoVerificada") {
     return { tipo: "sin-verificar", correoEnmascarado: typeof cuerpo.correoEnmascarado === "string" ? cuerpo.correoEnmascarado : "tu correo" };
   }
-  if (cuerpo.codigo === "CuentaSuspendida") return { tipo: "suspendida" };
+  if (cuerpo.codigo === "CuentaSuspendida") {
+    const texto = (valor: unknown) => (typeof valor === "string" && valor !== "" ? valor : null);
+    return { tipo: "suspendida", motivo: texto(cuerpo.motivo), desde: texto(cuerpo.desde) };
+  }
   return { tipo: "error", mensaje: MENSAJE_INGRESO };
 }
 

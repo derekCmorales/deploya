@@ -26,4 +26,9 @@ export class RepositorioTokensCuentaMemoria extends RepositorioTokensCuenta {
       if (token.usuarioId === usuarioId && token.tipo === tipo && !token.usadoEn) this.tokens.set(token.id, { ...token, usadoEn: marca });
     }
   }
+
+  async ultimoDe(usuarioId: string, tipo: TipoTokenCuenta): Promise<TokenCuenta | null> {
+    const delUsuario = [...this.tokens.values()].filter((t) => t.usuarioId === usuarioId && t.tipo === tipo);
+    return delUsuario.sort((a, b) => b.creado.getTime() - a.creado.getTime())[0] ?? null;
+  }
 }

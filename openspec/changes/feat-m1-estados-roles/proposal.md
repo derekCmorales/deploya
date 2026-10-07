@@ -9,7 +9,7 @@ El Avance 1 dejó el login funcionando, pero tres huecos quedan a la vista en la
 ## What Changes
 
 - `POST /identidad/verificacion/reenvio` `{ correo }` → **202** neutro. Si la cuenta está pendiente: invalida el token de verificación anterior, crea uno nuevo de 24 h y envía la plantilla de verificación. Cuenta atrás de **60 s** por cuenta: antes de tiempo responde **429** `{ codigo: "EsperaReenvio", segundos }`.
-- `CuentaSuspendida` lleva `motivo` y `desde` (de `Usuario.motivoSuspension` y `estadoDesde`); el login los devuelve en el cuerpo del error para 03b.
+- `CuentaSuspendida` lleva `motivo` y `desde`: el motivo sale de `Usuario.motivoSuspension` y la fecha de `AccionAdministrativa.creado` (la acción `suspender-cuenta` más reciente de ese usuario, que escribe M9). Si no hay ninguna, `desde` es `null` y la web no muestra la fecha. El login los devuelve en el cuerpo del 403 para 03b.
 - `RolGuard` + decorador `@Roles("administrador")`, exportados por `IdentidadModule` junto a `SesionGuard`. `AdministracionController` los usa: un Cliente recibe **403** `{ codigo: "SoloAdministracion" }`.
 - `GET /identidad/sesion` incluye `rol` (si no lo trae ya).
 - Web: 02 con «Reenviar correo» y cuenta atrás; 03b «Cuenta sin verificar» con «Reenviar correo» y «Suspendida» con motivo y fecha; 28 «Esta sección es solo para administración» (403) y «Sesión expirada» (un 401 `SinSesion` en una página con sesión lleva a `/ingresar?expirada=1`).
@@ -34,4 +34,4 @@ El Avance 1 dejó el login funcionando, pero tres huecos quedan a la vista en la
 
 - Código: `identidad/verificacion.service.ts` (o método nuevo en el servicio de registro), `rol.guard.ts`, `roles.decorator.ts`, `CuentaSuspendida`; `administracion.controller.ts` con el guard.
 - Web: `(auth)/verificar`, `(auth)/ingresar`, `components/shell/requiere-sesion.tsx`, página 403 y `app/(admin)`.
-- Sin cambios de schema (`motivoSuspension` y `estadoDesde` ya existen). `clases-unificado.mmd`: `RolGuard`, `@Roles`.
+- Sin cambios de schema: la fecha sale de `AccionAdministrativa.creado` (tabla de Javier, solo lectura desde el adaptador Prisma de M1); `Usuario` no tiene `estadoDesde` (ese campo es de `Suscripcion`). `clases-unificado.mmd`: `RolGuard`, `@Roles`, `PoliticaReenvio`, `ultimoDe`.

@@ -1704,6 +1704,7 @@ classDiagram
         -reloj Reloj
         +registrar(correo, clave) CuentaRegistrada
         +verificar(token) CuentaVerificada
+        +reenviarVerificacion(solicitud) void
     }
     class SesionService {
         -usuarios RepositorioUsuarios
@@ -1751,6 +1752,7 @@ classDiagram
         +porHuella(hashToken) TokenCuenta
         +marcarUsado(id, usadoEn) void
         +invalidarVigentes(usuarioId, tipo, marca) void
+        +ultimoDe(usuarioId, tipo) TokenCuenta
     }
     class GeneradorToken {
         <<abstract>>
@@ -1760,6 +1762,9 @@ classDiagram
     class AsignacionSandboxPuerto {
         <<abstract>>
         +asignarSandbox(usuarioId) void
+    }
+    class PoliticaReenvio {
+        +segundosRestantes(creadoUltimo, ahora) Number
     }
     class PoliticaContrasena {
         +validar(clave) ResultadoPolitica
@@ -2222,6 +2227,7 @@ classDiagram
 
     %% ───────── Relaciones ─────────
     IdentidadService --> PoliticaContrasena
+    IdentidadService --> PoliticaReenvio : 60 s
     IdentidadService --> HashContrasena
     IdentidadService --> CorreoPuerto
     IdentidadService --> RepositorioUsuarios

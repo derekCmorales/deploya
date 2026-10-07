@@ -108,7 +108,12 @@ describe("SesionController", () => {
   it.each([
     [new CredencialesInvalidas(), 401, { codigo: "CredencialesInvalidas" }],
     [new CuentaNoVerificada("d•••k@t•••••••o.com"), 403, { codigo: "CuentaNoVerificada", correoEnmascarado: "d•••k@t•••••••o.com" }],
-    [new CuentaSuspendida(), 403, { codigo: "CuentaSuspendida" }],
+    [new CuentaSuspendida(), 403, { codigo: "CuentaSuspendida", motivo: null, desde: null }],
+    [
+      new CuentaSuspendida("Uso que incumple los términos (§7.2).", new Date("2026-09-22T15:00:00.000Z")),
+      403,
+      { codigo: "CuentaSuspendida", motivo: "Uso que incumple los términos (§7.2).", desde: "2026-09-22T15:00:00.000Z" },
+    ],
   ])("el filtro traduce %p a HTTP %i", (error, estado, cuerpo) => {
     const json = jest.fn();
     const status = jest.fn(() => ({ json }));

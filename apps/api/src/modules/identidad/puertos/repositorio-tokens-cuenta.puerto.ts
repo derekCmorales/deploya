@@ -7,4 +7,6 @@ export abstract class RepositorioTokensCuenta {
   abstract marcarUsado(id: string, usadoEn: Date): Promise<void>;
   /** Marca como usados los tokens sin usar de ese tipo: solo queda vivo el que se cree después. */
   abstract invalidarVigentes(usuarioId: string, tipo: TipoTokenCuenta, marca: Date): Promise<void>;
+  /** El token más reciente de ese tipo, usado o no: de él parte la cuenta atrás del reenvío. */
+  abstract ultimoDe(usuarioId: string, tipo: TipoTokenCuenta): Promise<TokenCuenta | null>;
 }

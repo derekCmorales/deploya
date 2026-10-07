@@ -1,14 +1,18 @@
 import { BadRequestException, type ArgumentsHost } from "@nestjs/common";
 import { HTTP_CODE_METADATA } from "@nestjs/common/constants";
 import { Test } from "@nestjs/testing";
-import { ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, TokenNoValido } from "./dominio/errores";
-import { ErroresIdentidadFilter, IdentidadController, textoDe } from "./identidad.controller";
+import { ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
+import { ErroresIdentidadFilter, IdentidadController, REENVIO_ACEPTADO, textoDe } from "./identidad.controller";
 import { IdentidadService } from "./identidad.service";
 
 const CUENTA = { usuarioId: "u-1", correoEnmascarado: "d•••k@t•••••••o.com", estadoCuenta: "pendiente" as const, correoEnviado: true };
 
 async function armar() {
-  const servicio = { registrar: jest.fn().mockResolvedValue(CUENTA), verificar: jest.fn().mockResolvedValue({ estadoCuenta: "activa" }) };
+  const servicio = {
+    registrar: jest.fn().mockResolvedValue(CUENTA),
+    verificar: jest.fn().mockResolvedValue({ estadoCuenta: "activa" }),
+    reenviarVerificacion: jest.fn().mockResolvedValue(undefined),
+  };
   const moduleRef = await Test.createTestingModule({
     controllers: [IdentidadController],
     providers: [{ provide: IdentidadService, useValue: servicio }],
@@ -87,5 +91,36 @@ describe("ErroresIdentidadFilter", () => {
 
     expect(status).toHaveBeenCalledWith(400);
     expect(json).toHaveBeenCalledWith(expect.objectContaining({ codigo: "ContrasenaDebil", reglasIncumplidas: ["Al menos un símbolo"] }));
+  });
+});
+
+describe("IdentidadController · reenvío de verificación (M1-04)", () => {
+  it("POST /identidad/verificacion/reenvio responde 202 con el mismo cuerpo exista o no la cuenta", async () => {
+    const { controller, servicio } = await armar();
+
+    const conCuenta = await controller.reenviar({ correo: "derek@tiendademo.com" });
+    const sinCuenta = await controller.reenviar({ correo: "nadie@tiendademo.com" });
+
+    expect(Reflect.getMetadata(HTTP_CODE_METADATA, IdentidadController.prototype.reenviar)).toBe(202);
+    expect(conCuenta).toEqual(REENVIO_ACEPTADO);
+    expect(sinCuenta).toEqual(conCuenta);
+    expect(REENVIO_ACEPTADO.segundos).toBe(60);
+    expect(servicio.reenviarVerificacion).toHaveBeenNthCalledWith(1, { correo: "derek@tiendademo.com" });
+  });
+
+  it("acepta el token del enlace vencido y rechaza un cuerpo sin correo ni token", async () => {
+    const { controller, servicio } = await armar();
+
+    await controller.reenviar({ token: "abc" });
+
+    expect(servicio.reenviarVerificacion).toHaveBeenCalledWith({ token: "abc" });
+    await expect(controller.reenviar({})).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it("EsperaReenvio → 429 con los segundos que faltan", () => {
+    const { status, json } = respuestaDe(new EsperaReenvio(40));
+
+    expect(status).toHaveBeenCalledWith(429);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ codigo: "EsperaReenvio", segundos: 40 }));
   });
 });

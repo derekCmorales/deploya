@@ -26,4 +26,8 @@ export class RepositorioTokensCuentaPrisma extends RepositorioTokensCuenta {
   async invalidarVigentes(usuarioId: string, tipo: TipoTokenCuenta, marca: Date): Promise<void> {
     await this.prisma.tokenCuenta.updateMany({ where: { usuarioId, tipo, usadoEn: null }, data: { usadoEn: marca } });
   }
+
+  async ultimoDe(usuarioId: string, tipo: TipoTokenCuenta): Promise<TokenCuenta | null> {
+    return this.prisma.tokenCuenta.findFirst({ where: { usuarioId, tipo }, orderBy: { creado: "desc" } });
+  }
 }

@@ -82,7 +82,7 @@ test("03b · credenciales incorrectas, cuenta sin verificar y suspendida", () =>
     tipo: "sin-verificar",
     correoEnmascarado: "d•••k@t•••••••o.com",
   });
-  assert.deepEqual(resultadoIngreso(403, { codigo: "CuentaSuspendida" }), { tipo: "suspendida" });
+  assert.deepEqual(resultadoIngreso(403, { codigo: "CuentaSuspendida" }), { tipo: "suspendida", motivo: null, desde: null });
   assert.equal(resultadoIngreso(0, {}).tipo, "error");
 });
 

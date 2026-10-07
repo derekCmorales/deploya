@@ -12,8 +12,9 @@ import {
   type EstadoCuenta,
   type Usuario,
 } from "./dominio/cuenta";
-import { ContrasenaDebil, CorreoYaRegistrado, TokenNoValido } from "./dominio/errores";
+import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
 import { PoliticaContrasena } from "./dominio/politica-contrasena";
+import { PoliticaReenvio } from "./dominio/politica-reenvio";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
 import { HashContrasena } from "./puertos/hash-contrasena.puerto";
@@ -37,6 +38,9 @@ export interface CuentaVerificada {
   estadoCuenta: EstadoCuenta;
 }
 
+/** Pantallas 02 y 03b: se reenvía por el correo (03b, 02 tras registrarse) o por el enlace vencido (02 c). */
+export type SolicitudReenvio = { correo: string } | { token: string };
+
 /**
  * M1: orquesta registro y verificación. No arma HTML ni habla SMTP (M10), no calcula
  * hashes (puerto) y no lee el reloj del sistema (Reloj inyectado).
@@ -45,6 +49,7 @@ export interface CuentaVerificada {
 export class IdentidadService {
   private readonly registro = new Logger(IdentidadService.name);
   private readonly politica = new PoliticaContrasena();
+  private readonly reenvio = new PoliticaReenvio();
 
   constructor(
     private readonly usuarios: RepositorioUsuarios,
@@ -93,6 +98,37 @@ export class IdentidadService {
     if (usuario.estadoCuenta !== "pendiente") return { estadoCuenta: usuario.estadoCuenta };
     await this.usuarios.cambiarEstado(usuario.id, "activa");
     return { estadoCuenta: "activa" };
+  }
+
+  /**
+   * M1-04: reenvío neutro. Un correo inexistente o una cuenta que ya no está pendiente no
+   * reciben nada y no lanzan error. Antes de 60 s desde el último enlace: `EsperaReenvio`.
+   * El nuevo enlace invalida los anteriores; un fallo del correo tampoco cambia la respuesta.
+   */
+  async reenviarVerificacion(solicitud: SolicitudReenvio): Promise<void> {
+    const usuario = await this.cuentaDelReenvio(solicitud);
+    if (!usuario || usuario.estadoCuenta !== "pendiente") return;
+
+    const ahora = this.reloj.ahora();
+    const ultimo = await this.tokens.ultimoDe(usuario.id, "verificacion");
+    const segundos = ultimo ? this.reenvio.segundosRestantes(ultimo.creado, ahora) : 0;
+    if (segundos > 0) throw new EsperaReenvio(segundos);
+
+    await this.tokens.invalidarVigentes(usuario.id, "verificacion", ahora);
+    await this.enviarVerificacion(usuario);
+  }
+
+  private async cuentaDelReenvio(solicitud: SolicitudReenvio): Promise<Usuario | null> {
+    if ("token" in solicitud) {
+      const guardado = await this.tokens.porHuella(this.generador.huella(solicitud.token));
+      return guardado?.tipo === "verificacion" ? this.usuarios.porId(guardado.usuarioId) : null;
+    }
+    try {
+      return await this.usuarios.porCorreo(normalizarCorreo(solicitud.correo));
+    } catch (error) {
+      if (error instanceof CorreoInvalido) return null;
+      throw error;
+    }
   }
 
   /**

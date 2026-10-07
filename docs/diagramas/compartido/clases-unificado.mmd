@@ -32,12 +32,24 @@ classDiagram
         +cerrar(token) void
         +usuarioDe(token) UsuarioSesion
     }
+    class RecuperacionService {
+        -usuarios RepositorioUsuarios
+        -tokens RepositorioTokensCuenta
+        -sesiones RepositorioSesiones
+        -hash HashContrasena
+        -generador GeneradorToken
+        -correo CorreoPuerto
+        -reloj Reloj
+        +solicitar(correo) void
+        +restablecer(solicitud) void
+    }
     class RepositorioSesiones {
         <<abstract>>
         +crear(sesion) Sesion
         +porHuella(hashToken) Sesion
         +registrarActividad(id, marca) void
         +revocar(id, marca) void
+        +revocarTodasDe(usuarioId, marca) void
     }
     class UsuarioActual {
         <<decorator>>
@@ -48,12 +60,14 @@ classDiagram
         +porId(id) Usuario
         +crear(usuario) Usuario
         +cambiarEstado(id, estado) void
+        +cambiarHash(id, hashContrasena) void
     }
     class RepositorioTokensCuenta {
         <<abstract>>
         +crear(token) TokenCuenta
         +porHuella(hashToken) TokenCuenta
         +marcarUsado(id, usadoEn) void
+        +invalidarVigentes(usuarioId, tipo, marca) void
     }
     class GeneradorToken {
         <<abstract>>
@@ -98,6 +112,7 @@ classDiagram
         +componer(datos) MensajeCorreo
     }
     class PlantillaVerificacion
+    class PlantillaRecuperacion
     class CorreoNoEnviado {
         <<error>>
     }
@@ -537,6 +552,14 @@ classDiagram
     SesionService --> HashContrasena
     SesionService --> GeneradorToken
     SesionGuard --> SesionService
+    RecuperacionService --> PoliticaContrasena
+    RecuperacionService --> RepositorioUsuarios
+    RecuperacionService --> RepositorioTokensCuenta
+    RecuperacionService --> RepositorioSesiones
+    RecuperacionService --> HashContrasena
+    RecuperacionService --> GeneradorToken
+    RecuperacionService --> CorreoPuerto
+    RecuperacionService ..> PlantillaRecuperacion : usa
     SesionGuard ..> UsuarioActual : request.usuario
     RolGuard ..> SesionGuard : va después
     RolGuard ..> Roles : lee los roles
@@ -550,6 +573,7 @@ classDiagram
     CorreoPuerto ..> PlantillaCorreo
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
+    PlantillaCorreo <|-- PlantillaRecuperacion
     SuscripcionesService --> PoliticaCicloSuscripcion
     ContratacionService --> PasarelaPago
     ContratacionService --> RepositorioPagos

@@ -35,6 +35,7 @@ export type NuevoTokenCuenta = Omit<TokenCuenta, "id" | "usadoEn">;
 
 export const HORAS_VIGENCIA_VERIFICACION = 24;
 export const MS_POR_HORA = 60 * 60 * 1000;
+export const VIGENCIA_RECUPERACION_MS = 30 * 60 * 1000;
 export const LARGO_MAXIMO_NOMBRE = 64;
 
 const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

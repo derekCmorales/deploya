@@ -22,7 +22,9 @@ type Aviso = Exclude<ResultadoIngreso, { tipo: "dentro" }> | null;
 /** Pantalla 03 y sus estados 03b: credenciales incorrectas, cuenta sin verificar y suspendida. */
 export function FormularioIngreso() {
   const router = useRouter();
-  const destino = destinoTrasIngreso(useSearchParams().get("siguiente"));
+  const parametros = useSearchParams();
+  const destino = destinoTrasIngreso(parametros.get("siguiente"));
+  const restablecida = parametros.get("restablecida") === "1";
   const { recargar } = useSesion();
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -57,6 +59,9 @@ export function FormularioIngreso() {
         <p className="text-muted-foreground">Tus proyectos siguen donde los dejaste.</p>
       </div>
 
+      {restablecida && !aviso ? (
+        <Banner title="Contraseña actualizada">Inicia sesión con tu contraseña nueva. Cerramos tus otras sesiones.</Banner>
+      ) : null}
       {credencialesMal ? (
         <Banner variant="bad" title="Correo o contraseña incorrectos">
           Revisa los datos e inténtalo de nuevo.

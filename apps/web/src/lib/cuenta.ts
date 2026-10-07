@@ -82,3 +82,44 @@ export function destinoTrasIngreso(siguiente: string | null | undefined): string
   }
   return siguiente;
 }
+
+/** Pantalla 04 · paso 1: solo se valida el formato; la respuesta de la API es neutra. */
+export function errorCorreoRecuperacion(correo: string): string | null {
+  return FORMATO_CORREO.test(correo.trim()) ? null : "Escribe un correo válido.";
+}
+
+/**
+ * Pantalla 04 · paso 1: un 202 es siempre «Revisa tu correo», exista o no la cuenta. La web
+ * no distingue nada más: así tampoco puede revelar si el correo está registrado.
+ */
+export type ResultadoSolicitudRecuperacion = "enviada" | "error";
+
+export function resultadoSolicitudRecuperacion(estado: number): ResultadoSolicitudRecuperacion {
+  return estado === 202 ? "enviada" : "error";
+}
+
+/** Pantalla 04 · paso 2: los mismos requisitos y la misma confirmación que el registro. */
+export function erroresContrasenaNueva(
+  datos: Pick<DatosRegistro, "contrasena" | "confirmacion">,
+  contrasenaCumple: boolean,
+): Omit<ErroresRegistro, "correo"> {
+  const errores: Omit<ErroresRegistro, "correo"> = {};
+  if (!contrasenaCumple) errores.contrasena = "La contraseña no cumple los requisitos.";
+  if (datos.confirmacion !== datos.contrasena) errores.confirmacion = "Las contraseñas no coinciden.";
+  return errores;
+}
+
+/** Pantalla 04 · paso 2: 204 vuelve a `/ingresar`; 410 es «Este enlace ya no sirve». */
+export type ResultadoRestablecer = { tipo: "restablecida" } | { tipo: "enlace-no-sirve" } | { tipo: "error"; mensaje: string };
+
+const MENSAJE_RESTABLECER = "No pudimos guardar la contraseña. Intenta de nuevo en unos segundos.";
+
+export function resultadoRestablecer(estado: number, cuerpo: Record<string, unknown>): ResultadoRestablecer {
+  if (estado === 204) return { tipo: "restablecida" };
+  if (cuerpo.codigo === "TokenNoValido") return { tipo: "enlace-no-sirve" };
+  if (estado === 400 && typeof cuerpo.mensaje === "string") return { tipo: "error", mensaje: cuerpo.mensaje };
+  return { tipo: "error", mensaje: MENSAJE_RESTABLECER };
+}
+
+/** `/ingresar?restablecida=1`: aviso «Contraseña actualizada» tras el paso 2 de 04. */
+export const DESTINO_TRAS_RESTABLECER = "/ingresar?restablecida=1";

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { NuevoTokenCuenta, TokenCuenta } from "../dominio/cuenta";
+import type { NuevoTokenCuenta, TipoTokenCuenta, TokenCuenta } from "../dominio/cuenta";
 import { RepositorioTokensCuenta } from "../puertos/repositorio-tokens-cuenta.puerto";
 
 /** Mientras DB-01 no esté en `main`; el adaptador Prisma lo reemplaza en `identidad.module.ts`. */
@@ -19,5 +19,11 @@ export class RepositorioTokensCuentaMemoria extends RepositorioTokensCuenta {
   async marcarUsado(id: string, usadoEn: Date): Promise<void> {
     const token = this.tokens.get(id);
     if (token) this.tokens.set(id, { ...token, usadoEn });
+  }
+
+  async invalidarVigentes(usuarioId: string, tipo: TipoTokenCuenta, marca: Date): Promise<void> {
+    for (const token of this.tokens.values()) {
+      if (token.usuarioId === usuarioId && token.tipo === tipo && !token.usadoEn) this.tokens.set(token.id, { ...token, usadoEn: marca });
+    }
   }
 }

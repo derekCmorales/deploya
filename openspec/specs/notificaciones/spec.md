@@ -12,6 +12,8 @@ Entregar por correo los enlaces que M1 necesita, a través de un proveedor exter
 
 El envío SHALL hacerse a través de `CorreoPuerto` (`abstract class`, sin prefijo `I`). Ni M1 ni el servicio de M10 conocen el proveedor concreto: dependen solo del puerto, inyectado por constructor. Mailpit es una herramienta de desarrollo y demo, no el proveedor de producción.
 
+La firma del puerto SHALL ser `enviar(destinatario, plantilla, datos)`: la plantilla compone el mensaje y el adaptador solo lo transporta. M10 SHALL exponer a los demás módulos el puerto, las plantillas y `CorreoNoEnviado` desde `notificaciones/index.ts`; ningún otro módulo importa carpetas internas de M10.
+
 #### Scenario: Envío de verificación
 
 - **WHEN** M1 pide notificar la verificación de correo
@@ -25,6 +27,8 @@ El binding `CorreoPuerto` → adaptador SHALL decidirse en un solo lugar (el `no
 - `CorreoConsolaAdaptador`: escribe el mensaje en el log; para pruebas y para correr la API sin Mailpit.
 
 Cambiar de proveedor SMTP SHALL requerir solo cambiar variables de entorno. Un proveedor sin SMTP SHALL entrar como una clase nueva que extienda `CorreoPuerto` y se registre en el mismo binding, sin editar servicios ni plantillas (OCP). Todos los adaptadores SHALL cumplir el mismo contrato y lanzar el mismo error de dominio (`CorreoNoEnviado`) cuando el envío falla (LSP).
+
+El módulo SHALL delegar la decisión en `correoSegun(configuracion, crearTransporte)`, que recibe el transporte SMTP como dependencia para poder probarse sin abrir conexiones; nodemailer SHALL usarse solo en `adaptadores/transporte-nodemailer.ts`. Sin variables definidas, el adaptador SMTP SHALL apuntar a Mailpit en `localhost:1025`.
 
 #### Scenario: Producción con proveedor externo
 
@@ -49,6 +53,13 @@ Cambiar de proveedor SMTP SHALL requerir solo cambiar variables de entorno. Un p
 ### Requirement: Plantillas
 
 El sistema SHALL tener dos plantillas en español con el kit visual: verificación de cuenta (caduca en 24 horas) y recuperación de contraseña (un solo uso, caduca en 30 minutos). Ambas SHALL incluir el enlace en texto plano por si el botón no funciona.
+
+Las plantillas SHALL armarse con un esqueleto común (Template Method, `PlantillaCorreo`): marca, título, párrafo, botón, enlace en texto plano, aviso y pie «deploya · soporte@deploya.app». Cada plantilla aporta solo su asunto, título, párrafo, texto del botón y aviso. Los datos que vienen del usuario (nombre, correo, enlace) SHALL escaparse antes de entrar al HTML.
+
+#### Scenario: Correo de verificación
+
+- **WHEN** M1 pide notificar la verificación a «derek@tiendademo.com»
+- **THEN** el mensaje dice «Hola Derek, para activar tu cuenta en deploya confirma que derek@tiendademo.com es tuyo. El enlace caduca en 24 horas.», con el botón «Verificar correo» y el enlace en texto plano
 
 #### Scenario: Correo de recuperación
 

@@ -20,7 +20,7 @@ Cada tarea de código tiene su prueba. Sin SMTP, red ni reloj reales: `Transport
 - [x] 3.3 `nodemailer` instalado desde el lockfile y `pnpm build` en verde: CI en `65517cb` y la imagen de `docker compose up --build`
 - [x] 3.4 En compose (junto con `feat/m1-registro-verificacion`): el registro dejó el correo «Confirma tu correo en deploya» en Mailpit (http://localhost:8025) con el enlace a `/verificar?token=`
 - [x] 3.5 Spec delta corregido tras la revisión: cada requisito conserva el texto vivo (incluida la plantilla de recuperación y el párrafo OCP/LSP) y solo agrega lo nuevo
-- [ ] 3.6 `/opsx-archive` tras el merge
+- [x] 3.6 `/opsx-archive` tras el merge
 
 ## Notas
 

@@ -1754,6 +1754,13 @@ classDiagram
         -sesiones SesionService
         +canActivate(contexto) Boolean
     }
+    class RolGuard {
+        -reflector Reflector
+        +canActivate(contexto) Boolean
+    }
+    class Roles {
+        <<decorator>>
+    }
     class RepositorioUsuariosPrisma
     class RepositorioTokensCuentaPrisma
     class RepositorioSesionesPrisma
@@ -1848,6 +1855,10 @@ classDiagram
         +cobrar(cargo) ResultadoCobro
     }
     class PasarelaSimulada
+    class AdministracionController {
+        +health() Estado
+        +acceso(usuario) UsuarioSesion
+    }
     class AdministracionService {
         +suspender(adminId, usuarioId, motivo, detalle) void
     }
@@ -2205,6 +2216,10 @@ classDiagram
     SesionService --> GeneradorToken
     SesionGuard --> SesionService
     SesionGuard ..> UsuarioActual : request.usuario
+    RolGuard ..> SesionGuard : va después
+    RolGuard ..> Roles : lee los roles
+    AdministracionController ..> RolGuard : protege
+    AdministracionController ..> SesionGuard : protege
     RepositorioUsuarios <|-- RepositorioUsuariosPrisma
     RepositorioTokensCuenta <|-- RepositorioTokensCuentaPrisma
     RepositorioSesiones <|-- RepositorioSesionesPrisma

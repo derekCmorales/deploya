@@ -90,6 +90,8 @@ Utilidades en `globals.css`, todas se apagan con `prefers-reduced-motion`:
 | `dy-cursor` | Cursor de la bitácora en vivo |
 | `dy-entrada` | Aparición de un bloque |
 | `dy-esqueleto` | Brillo de carga (`Skeleton`) |
+| `dy-flota` | Punto de Señal de las ilustraciones de acceso (01, 03): sube 9 px y vuelve, 4,2 s |
+| `dy-giro-lento` | Órbita de la ilustración de 01: una vuelta en 18 s |
 | `animate-spin` | Solo `loader-circle` en estados en curso |
 
 Un efecto de borde (`BorderBeam`) por pantalla como máximo.

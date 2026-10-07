@@ -82,3 +82,40 @@ test("03 · tras iniciar sesión vuelve solo a rutas propias", () => {
   assert.equal(destinoTrasIngreso("https://evil.com"), "/projects");
   assert.equal(destinoTrasIngreso("/\\evil.com"), "/projects");
 });
+
+/** Guardia de diseño de una ilustración de acceso: la página la monta, es decorativa y no trae hex. */
+async function revisarIlustracion(pagina, componente, nombre) {
+  const { readFileSync } = await import("node:fs");
+  const leer = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
+  const ilustracion = leer(componente);
+  assert.match(leer(pagina), new RegExp(`<${nombre}`));
+  assert.match(ilustracion, /aria-hidden="true"/);
+  assert.doesNotMatch(ilustracion, /#[0-9a-fA-F]{3,8}\b/);
+}
+
+test("01 · la columna derecha lleva la ilustración de acceso, decorativa y sin hex", async () => {
+  await revisarIlustracion(
+    "src/app/(auth)/registro/page.tsx",
+    "src/app/(auth)/registro/ilustracion-registro.tsx",
+    "IlustracionRegistro",
+  );
+});
+
+test("03 · la columna derecha lleva la ilustración de acceso, decorativa y sin hex", async () => {
+  await revisarIlustracion(
+    "src/app/(auth)/ingresar/page.tsx",
+    "src/app/(auth)/ingresar/ilustracion-ingreso.tsx",
+    "IlustracionIngreso",
+  );
+});
+
+test("design system · toda utilidad de movimiento dy-* se apaga con movimiento reducido", async () => {
+  const { readFileSync } = await import("node:fs");
+  const css = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
+  const conMovimiento = [...css.matchAll(/\.(dy-[a-z-]+)\s*\{[^}]*animation:/g)].map((m) => m[1]);
+  const reducido = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/)[1];
+
+  assert.ok(conMovimiento.includes("dy-flota"));
+  assert.ok(conMovimiento.includes("dy-giro-lento"));
+  assert.deepEqual(conMovimiento.filter((clase) => !reducido.includes(`.${clase}`)), []);
+});

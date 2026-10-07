@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { FormularioRegistro } from "./formulario-registro";
+import { IlustracionRegistro } from "./ilustracion-registro";
 
 export const metadata: Metadata = { title: "Crear cuenta · Deploya" };
 
@@ -11,7 +12,9 @@ export default function RegistroPage() {
       <section className="grid place-items-center p-6 sm:p-12">
         <FormularioRegistro />
       </section>
-      <aside aria-hidden className="puntos hidden border-l border-border bg-sunken lg:block" />
+      <aside aria-hidden className="puntos hidden place-items-center border-l border-border bg-sunken p-12 lg:grid">
+        <IlustracionRegistro className="w-[430px] max-w-full" />
+      </aside>
     </div>
   );
 }

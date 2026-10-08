@@ -42,3 +42,21 @@ test("28 · /ingresar?expirada=1 muestra el aviso con el texto exacto de la fich
   assert.match(aviso, /Por seguridad cerramos las sesiones tras 7 días sin actividad\. Inicia sesión de nuevo y volverás a esta página\./);
   assert.match(leer("src/components/shell/requiere-sesion.tsx"), /destinoSinSesion\(expirada, ruta\)/);
 });
+
+test("28 · Sesión expirada: diálogo sobre el panel con «Iniciar sesión»; sin sesión previa se redirige directo", () => {
+  const guard = leer("src/components/shell/requiere-sesion.tsx");
+
+  assert.match(guard, /if \(estado === "sin-sesion" && !expirada\) router\.replace\(destino\)/);
+  assert.match(guard, /<SesionExpirada destino=\{destino\}/);
+  assert.match(guard, /<Dialog\s+open/);
+  assert.match(guard, /Tu sesión expiró/);
+  assert.match(guard, /Por seguridad cerramos las sesiones tras 7 días sin actividad\. Inicia sesión de nuevo y volverás a esta página\./);
+  assert.match(guard, /<Link href=\{destino\} ref=\{accion\}>[\s\S]*Iniciar sesión/);
+});
+
+test("28 · el diálogo de sesión expirada enfoca «Iniciar sesión» y cerrarlo también lleva a /ingresar", () => {
+  const guard = leer("src/components/shell/requiere-sesion.tsx");
+
+  assert.match(guard, /useEffect\(\(\) => accion\.current\?\.focus\(\), \[\]\)/);
+  assert.match(guard, /alCerrar=\{\(\) => router\.replace\(destino\)\}/);
+});

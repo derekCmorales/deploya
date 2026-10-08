@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { fechaCorta } from "../src/lib/fechas.ts";
@@ -24,4 +25,15 @@ test("03b · la tarjeta de suspendida muestra «Motivo registrado» y la fecha s
   assert.match(ingreso, /Motivo registrado/);
   assert.match(ingreso, /motivo=\{aviso\.motivo\} desde=\{aviso\.desde\}/);
   assert.match(ingreso, /fechaCorta\(desde\)/);
+  assert.match(ingreso, /\{motivo \|\| fecha \? \(/, "la fecha se muestra aunque no conste el motivo");
+});
+
+test("03b · suspendida con la estructura del artboard: banner, motivo y «Escribir a soporte»", () => {
+  const ingreso = readFileSync(new URL("../src/app/(auth)/ingresar/formulario-ingreso.tsx", import.meta.url), "utf8");
+  const tarjeta = ingreso.slice(ingreso.indexOf("function CuentaSuspendida"));
+
+  assert.match(tarjeta, />Iniciar sesión<\/h1>/);
+  assert.match(tarjeta, /<Banner variant="bad" title="Cuenta suspendida por administración">/);
+  assert.match(tarjeta, /No puedes iniciar sesión mientras dure la suspensión\. Tus proyectos y datos se conservan\./);
+  assert.match(tarjeta, /<a href="mailto:soporte@deploya\.app">[\s\S]*Escribir a soporte/);
 });

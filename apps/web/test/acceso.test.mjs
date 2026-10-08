@@ -32,9 +32,15 @@ test("28 · el 403 lleva el texto exacto de la ficha y es un componente reutiliz
 
   assert.match(sinPermisos, /export function SinPermisos/);
   assert.match(sinPermisos, />Esta sección es solo para administración</);
-  assert.match(sinPermisos, /Tu cuenta es de tipo <Badge/);
+  assert.match(sinPermisos, /Tu cuenta es de tipo <span className="font-medium text-foreground">\{rol\}<\/span>/);
   assert.match(sinPermisos, /Si crees que es un error, escribe a/);
   assert.match(sinPermisos, /soporte@deploya\.app/);
+});
+
+test("28 · el 403 ofrece «Ir a proyectos» como acción principal", () => {
+  const sinPermisos = leer("src/components/estados/sin-permisos.tsx");
+
+  assert.match(sinPermisos, /<Button asChild size="sm">\s*<Link href="\/projects">Ir a proyectos<\/Link>/);
 });
 
 test("/admin exige sesión y pregunta a la API antes de mostrarse", () => {

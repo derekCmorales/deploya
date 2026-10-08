@@ -4,6 +4,9 @@
  */
 
 const SEGUNDOS_POR_MINUTO = 60;
+const MS_POR_SEGUNDO = 1000;
+/** Espejo de `ESPERA_REENVIO_MS` de la API (60 s); quien decide sigue siendo la API. */
+export const ESPERA_REENVIO_S = 60;
 const HTTP_ACEPTADO = 202;
 const HTTP_DEMASIADAS_SOLICITUDES = 429;
 
@@ -27,6 +30,16 @@ export function resultadoReenvio(estado: number, codigo: string, segundos: unkno
   if (estado === HTTP_ACEPTADO) return { tipo: "enviado", segundos: espera };
   if (estado === HTTP_DEMASIADAS_SOLICITUDES && codigo === "EsperaReenvio") return { tipo: "esperar", segundos: espera };
   return { tipo: "error", mensaje: MENSAJE_REENVIO };
+}
+
+/**
+ * 02 (a) al llegar desde 01b: lo que falta de la espera desde que se envió el primer correo,
+ * para que el botón aparezca deshabilitado con la cuenta atrás corriendo (artboard 02 a).
+ */
+export function segundosTrasEnvio(enviadoEn: number | null, ahora: number): number {
+  if (enviadoEn === null) return 0;
+  const faltanMs = ESPERA_REENVIO_S * MS_POR_SEGUNDO - (ahora - enviadoEn);
+  return faltanMs > 0 ? Math.min(ESPERA_REENVIO_S, Math.ceil(faltanMs / MS_POR_SEGUNDO)) : 0;
 }
 
 /** El botón se habilita cuando la cuenta atrás llega a cero. */

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -51,6 +51,13 @@ export function FormularioIngreso() {
   }
 
   const credencialesMal = aviso?.tipo === "credenciales";
+  const sinVerificar = aviso?.tipo === "sin-verificar";
+
+  /** 03b · sin verificar: al cambiar los datos se vuelve al formulario normal (y a «Iniciar sesión»). */
+  function editar(cambiar: (valor: string) => void, valor: string) {
+    cambiar(valor);
+    if (sinVerificar) setAviso(null);
+  }
 
   return (
     <form className="flex w-[400px] max-w-full flex-col gap-5" onSubmit={enviar} noValidate aria-busy={enviando}>
@@ -69,11 +76,7 @@ export function FormularioIngreso() {
         </Banner>
       ) : null}
       {aviso?.tipo === "sin-verificar" ? (
-        <Banner
-          variant="warn"
-          title="Tu cuenta aún no está verificada"
-          actions={<BotonReenviar destino={{ correo: correo.trim() }} compacto />}
-        >
+        <Banner variant="warn" title="Tu cuenta aún no está verificada">
           Abre el enlace que enviamos a <span className="font-medium text-foreground">{aviso.correoEnmascarado}</span> para
           activarla.
         </Banner>
@@ -88,7 +91,7 @@ export function FormularioIngreso() {
           autoComplete="email"
           placeholder="derek@tiendademo.com"
           value={correo}
-          onChange={(e) => setCorreo(e.target.value)}
+          onChange={(e) => editar(setCorreo, e.target.value)}
           disabled={enviando}
           aria-invalid={credencialesMal}
           required
@@ -110,26 +113,35 @@ export function FormularioIngreso() {
           autoComplete="current-password"
           placeholder="••••••••••••••"
           value={contrasena}
-          onChange={(e) => setContrasena(e.target.value)}
+          onChange={(e) => editar(setContrasena, e.target.value)}
           disabled={enviando}
           aria-invalid={credencialesMal}
           required
         />
       </Field>
 
-      <Button size="lg" className="w-full" type="submit" disabled={enviando || !correo || !contrasena}>
-        {enviando ? (
-          <>
-            <Loader2 className="animate-spin" aria-hidden />
-            Iniciando sesión…
-          </>
-        ) : (
-          <>
+      {sinVerificar ? (
+        <div className="flex gap-2">
+          <BotonReenviar destino={{ correo: correo.trim() }} conAyuda={false} className="flex-1" />
+          <Button size="lg" className="flex-1" type="submit" disabled>
             Iniciar sesión
-            <ArrowRight aria-hidden />
-          </>
-        )}
-      </Button>
+          </Button>
+        </div>
+      ) : (
+        <Button size="lg" className="w-full" type="submit" disabled={enviando || !correo || !contrasena}>
+          {enviando ? (
+            <>
+              <Loader2 className="animate-spin" aria-hidden />
+              Iniciando sesión…
+            </>
+          ) : (
+            <>
+              Iniciar sesión
+              <ArrowRight aria-hidden />
+            </>
+          )}
+        </Button>
+      )}
 
       <p className="flex items-center justify-between gap-2 border-t border-border pt-4 text-sm text-muted-foreground">
         ¿Nuevo en deploya?
@@ -141,29 +153,37 @@ export function FormularioIngreso() {
   );
 }
 
-/** 03b · Suspendida: el motivo y la fecha los registró M9; si no constan, no se inventan. */
+/**
+ * 03b · Suspendida: el motivo y la fecha los registró M9; si no constan, no se inventan.
+ * «Volver» (fuera del artboard) deja corregir el correo sin recargar la página.
+ */
 function CuentaSuspendida({ motivo, desde, onVolver }: { motivo: string | null; desde: string | null; onVolver: () => void }) {
   const fecha = desde ? fechaCorta(desde) : null;
   return (
-    <Card className="flex w-[400px] max-w-full flex-col gap-4 p-7" role="alert">
-      <h1 className="text-xl font-semibold tracking-[-0.02em]">Cuenta suspendida por administración</h1>
-      <p className="text-muted-foreground">
+    <Card className="flex w-[400px] max-w-full flex-col gap-4 p-7">
+      <h1 className="text-xl font-semibold tracking-[-0.02em]">Iniciar sesión</h1>
+      <Banner variant="bad" title="Cuenta suspendida por administración">
         No puedes iniciar sesión mientras dure la suspensión. Tus proyectos y datos se conservan.
-      </p>
-      {motivo ? (
-        <Sunken className="flex flex-col gap-1 px-3 py-2.5 text-sm">
-          <span className="text-xs text-muted-foreground">Motivo registrado</span>
-          <span className="text-foreground">{motivo}</span>
-          {fecha ? <span className="font-mono text-xs text-muted-foreground">{fecha}</span> : null}
+      </Banner>
+      {motivo || fecha ? (
+        <Sunken className="flex flex-col gap-2 px-3.5 py-3">
+          {motivo ? (
+            <>
+              <span className="text-xs font-medium text-muted-foreground">Motivo registrado</span>
+              <span className="text-sm text-foreground">{motivo}</span>
+            </>
+          ) : null}
+          {fecha ? <span className="font-mono text-xs text-muted-foreground">Suspendida el {fecha}</span> : null}
         </Sunken>
       ) : null}
-      <Sunken className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm">
-        Escribir a soporte
-        <a href="mailto:soporte@deploya.app" className="font-mono text-[13px] text-foreground">
-          soporte@deploya.app
+      <Button asChild variant="outline" size="lg" className="w-full">
+        <a href="mailto:soporte@deploya.app">
+          <Mail aria-hidden />
+          Escribir a soporte
         </a>
-      </Sunken>
-      <Button variant="outline" onClick={onVolver}>
+      </Button>
+      <p className="text-center text-xs text-muted-foreground">soporte@deploya.app</p>
+      <Button variant="ghost" size="sm" className="self-center" onClick={onVolver}>
         Volver
       </Button>
     </Card>

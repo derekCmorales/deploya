@@ -23,9 +23,17 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 - [x] 4.2 Pruebas `node --test`: formato de la cuenta atrás, decisión «expirada» frente a «sin sesión», acceso a administración, fecha de la suspensión, textos de las fichas
 - [x] 4.3 Revisión en la app (compose) en claro y oscuro contra las fichas 02, 03b y 28: 403 en `/admin`, 03b suspendida con motivo y fecha, aviso «Tu sesión expiró» y la cuenta atrás de «Reenviar correo» en 02 (a), 02 (c) y 03b
 
+## 4b. Revisión contra el canvas v4.1 (después del #25)
+
+- [x] 4b.1 28 · 403: centrado sobre el fondo hundido, icono neutro, «Cliente» en negrita, soporte en monoespaciada y la acción **«Ir a proyectos»**
+- [x] 4b.2 28 · Sesión expirada: diálogo sobre el panel atenuado con «Iniciar sesión» (foco en la acción principal); cerrarlo también lleva a `/ingresar?expirada=1`
+- [x] 4b.3 02 (a): llega con el botón deshabilitado y la cuenta atrás corriendo (`segundosTrasEnvio` con la hora que guarda 01b); 02 (c): «Reenviar correo» como acción principal y «Volver a iniciar sesión» como enlace
+- [x] 4b.4 03b sin verificar: «Reenviar correo» junto a «Iniciar sesión» deshabilitado (al editar los datos vuelve el formulario); 03b suspendida con la estructura del artboard (banner, «Motivo registrado», fecha aunque no conste el motivo, «Escribir a soporte»)
+- [x] 4b.5 Pruebas `node --test` de cada punto (`segundosTrasEnvio`, `correoPendienteDesde`, textos y estructura) y revisión en claro y oscuro con una API simulada
+
 ## 5. Cierre
 
 - [x] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync` (`RolGuard`, `Roles`, `PoliticaReenvio`, `ultimoDe`, `reenviarVerificacion`)
 - [x] 5.2 Pruebas en verde (API 480; web 84); cobertura de `identidad/` 90 % (dominio 100 %). En Windows solo falla `lector-fuente-local.spec.ts` (M4, ruta `/clon` → `D:\clon`); en CI pasa
-- [ ] 5.3 Avisar a Javier (M9 usa `RolGuard`) y a Eduardo (28 comparte componentes)
+- [x] 5.3 Avisar a Javier (M9 usa `RolGuard`) y a Eduardo (28 comparte componentes)
 - [ ] 5.4 `/opsx-archive` después del merge

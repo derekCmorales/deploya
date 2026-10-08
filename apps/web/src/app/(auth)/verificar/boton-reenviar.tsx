@@ -1,21 +1,32 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { reenviarVerificacion, type DestinoReenvio } from "@/lib/api-identidad";
 import { formatoCuentaAtras, puedeReenviar } from "@/lib/reenvio";
+import { cn } from "@/lib/utils";
 
 const UN_SEGUNDO_MS = 1000;
+
+interface BotonReenviarProps {
+  destino: DestinoReenvio;
+  /** Cuenta atrás con la que llega la pantalla (02 a tras registrarse); por defecto, ninguna. */
+  segundosIniciales?: number;
+  /** 02 (c) lo usa como acción principal; en 02 (a) y 03b es secundaria. */
+  principal?: boolean;
+  /** Texto de apoyo bajo el botón mientras corre la cuenta atrás (02); 03b no lo lleva. */
+  conAyuda?: boolean;
+  className?: string;
+}
 
 /**
  * «Reenviar correo» de 02 y 03b (M1-04). La cuenta atrás arranca con los segundos que devuelve
  * la API (202 o 429 `EsperaReenvio`) y el botón queda deshabilitado hasta que llega a cero.
- * `compacto` es la versión para las acciones de un `Banner` (03b), sin texto de apoyo.
  */
-export function BotonReenviar({ destino, compacto = false }: { destino: DestinoReenvio; compacto?: boolean }) {
-  const [segundos, setSegundos] = useState(0);
+export function BotonReenviar({ destino, segundosIniciales = 0, principal = false, conAyuda = true, className }: BotonReenviarProps) {
+  const [segundos, setSegundos] = useState(segundosIniciales);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,23 +46,30 @@ export function BotonReenviar({ destino, compacto = false }: { destino: DestinoR
   }
 
   const esperando = !puedeReenviar(segundos);
-  const etiqueta = esperando ? `Reenviar correo · ${formatoCuentaAtras(segundos)}` : "Reenviar correo";
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={cn("flex flex-col gap-1.5", className)}>
       <Button
         type="button"
-        variant="outline"
-        size={compacto ? "sm" : "lg"}
-        className={compacto ? undefined : "w-full"}
+        variant={principal ? "default" : "outline"}
+        size="lg"
+        className="w-full"
         onClick={() => void reenviar()}
         disabled={enviando || esperando}
       >
-        {enviando ? <Loader2 className="animate-spin" aria-hidden /> : null}
-        <span className="tabular-nums">{etiqueta}</span>
+        {enviando ? <Loader2 className="animate-spin" aria-hidden /> : <RefreshCw aria-hidden />}
+        <span>
+          Reenviar correo
+          {esperando ? (
+            <>
+              {" · "}
+              <span className="font-mono tabular-nums">{formatoCuentaAtras(segundos)}</span>
+            </>
+          ) : null}
+        </span>
       </Button>
-      {esperando && !compacto ? (
-        <p className="text-xs text-muted-foreground" aria-live="polite">
+      {esperando && conAyuda ? (
+        <p className="text-center text-xs text-muted-foreground" aria-live="polite">
           Podrás reenviarlo cuando termine la cuenta atrás.
         </p>
       ) : null}

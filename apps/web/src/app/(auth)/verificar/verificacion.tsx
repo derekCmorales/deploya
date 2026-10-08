@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { verificarCorreo } from "@/lib/api-identidad";
 import { leerCorreoPendiente } from "@/lib/correo-pendiente";
 import type { ResultadoVerificacion } from "@/lib/cuenta";
+import { segundosTrasEnvio } from "@/lib/reenvio";
 
 import { BotonReenviar } from "./boton-reenviar";
 
@@ -55,9 +56,13 @@ function TarjetaEstado({ icono, titulo, children }: { icono: ReactNode; titulo: 
 }
 
 function RevisaTuBandeja({ correo }: { correo: string | null }) {
-  const [correoReal, setCorreoReal] = useState<string | null>(null);
-  // Solo en el navegador: el correo real lo guardó 01b en esta pestaña (lib/correo-pendiente).
-  useEffect(() => setCorreoReal(leerCorreoPendiente()), []);
+  const [reenvio, setReenvio] = useState<{ correo: string; segundos: number } | null>(null);
+  // Solo en el navegador: el correo real y la hora del envío los guardó 01b en esta pestaña;
+  // con ellos 02 (a) llega con el botón deshabilitado y la cuenta atrás corriendo.
+  useEffect(() => {
+    const pendiente = leerCorreoPendiente();
+    if (pendiente) setReenvio({ correo: pendiente.correo, segundos: segundosTrasEnvio(pendiente.enviadoEn, Date.now()) });
+  }, []);
   return (
     <TarjetaEstado icono={<Mail aria-hidden />} titulo="Revisa tu bandeja">
       <p className="text-muted-foreground">
@@ -70,7 +75,7 @@ function RevisaTuBandeja({ correo }: { correo: string | null }) {
         . Caduca en 24 horas.
       </p>
       <p className="text-sm text-muted-foreground">¿No llegó? Revisa spam o promociones.</p>
-      {correoReal ? <BotonReenviar destino={{ correo: correoReal }} /> : null}
+      {reenvio ? <BotonReenviar destino={{ correo: reenvio.correo }} segundosIniciales={reenvio.segundos} /> : null}
     </TarjetaEstado>
   );
 }
@@ -98,10 +103,12 @@ function EnlaceNoValido({ token }: { token: string }) {
       <p className="text-muted-foreground">
         Caducó o ya se usó. Los enlaces de verificación duran 24 horas y sirven una sola vez.
       </p>
-      <BotonReenviar destino={{ token }} />
-      <Button asChild variant="outline" size="lg" className="w-full">
-        <Link href="/ingresar">Volver a iniciar sesión</Link>
-      </Button>
+      <BotonReenviar destino={{ token }} principal />
+      <p className="text-center text-xs text-muted-foreground">
+        <Link href="/ingresar" className="text-foreground underline-offset-[3px] hover:underline">
+          Volver a iniciar sesión
+        </Link>
+      </p>
     </TarjetaEstado>
   );
 }

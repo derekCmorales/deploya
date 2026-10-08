@@ -8,6 +8,8 @@ import { ProyectosLecturaPuerto } from "../modules/construccion/puertos/proyecto
 import { RecetaProyectoPuerto } from "../modules/construccion/puertos/receta-proyecto.puerto";
 import { RepositorioArtefactos } from "../modules/construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
+import { RepositorioConstruccion } from "../modules/construccion/puertos/repositorio-construccion.puerto";
+import { MotorConstruccionPuerto } from "../modules/construccion/puertos/motor-construccion.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
 import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
@@ -18,6 +20,8 @@ import { RecetaProyectoPrisma } from "./prisma/receta-proyecto.prisma";
 import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
+import { PrismaConstruccionRepositorio as RepositorioConstruccionPrisma } from "../modules/construccion/adaptadores/prisma-construccion.repositorio";
+import { MotorConstruccionLocalAdaptador } from "../modules/construccion/adaptadores/motor-construccion-local.adaptador";
 import { ClonadorGit } from "./reales/clonador-git";
 import { ColaBullMq, ColaOperacionBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
@@ -34,7 +38,6 @@ import { VerificacionEntornoStub } from "./stubs/verificacion-entorno.stub";
 
 type Fabrica<T> = { docker: (c: ConfiguracionMotor, reloj: Reloj) => T; stub: () => T };
 
-/** Elige stub o real según `MOTOR_ADAPTADORES`; el único lugar que conoce las implementaciones (C3). */
 export function puerto<T>(token: abstract new (...args: never[]) => T, fabrica: Fabrica<T>): Provider {
   return {
     provide: token,
@@ -46,17 +49,13 @@ export function puerto<T>(token: abstract new (...args: never[]) => T, fabrica: 
 
 const socketDocker = (): Docker => new Docker({ socketPath: "/var/run/docker.sock" });
 
-/**
- * Despliegues, artefactos y proyectos en PostgreSQL (DB-01) en ambos modos: la API y el
- * trabajador son procesos distintos y solo comparten la base. Los repositorios en memoria
- * quedan para las pruebas. El motor lee los proyectos del mismo almacén en el que M3 los guarda.
- */
 const PERSISTENCIA: Provider[] = [
   { provide: RepositorioDespliegues, useClass: RepositorioDesplieguesPrisma },
   { provide: RepositorioArtefactos, useClass: RepositorioArtefactosPrisma },
   { provide: RepositorioProyectos, useClass: RepositorioProyectosPrisma },
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
   { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
+  { provide: RepositorioConstruccion, useClass: RepositorioConstruccionPrisma }, // <-- Registrado globalmente
 ];
 
 const COMUNES: Provider[] = [
@@ -65,6 +64,7 @@ const COMUNES: Provider[] = [
   ...PERSISTENCIA,
   puerto(ColaConstruccionPuerto, { docker: (c) => new ColaBullMq(c.redisUrl), stub: () => new ColaMemoria() }),
   puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
+  { provide: MotorConstruccionPuerto, useClass: MotorConstruccionLocalAdaptador }, // <-- Registrado globalmente para API y tests
 ];
 
 const SOLO_TRABAJADOR: Provider[] = [
@@ -87,12 +87,10 @@ const tokens = (proveedores: Provider[]) => proveedores.map((p) => (typeof p ===
 @Global()
 @Module({})
 export class AdaptersModule {
-  /** Proceso API: solo produce trabajos y lee; nunca recibe adaptadores de Docker. */
   static paraApi(): DynamicModule {
     return { module: AdaptersModule, providers: COMUNES, exports: tokens(COMUNES) };
   }
 
-  /** Proceso trabajador: además clona, construye, corre contenedores y publica rutas. */
   static paraTrabajador(): DynamicModule {
     const proveedores = [...COMUNES, ...SOLO_TRABAJADOR];
     return { module: AdaptersModule, providers: proveedores, exports: tokens(proveedores) };

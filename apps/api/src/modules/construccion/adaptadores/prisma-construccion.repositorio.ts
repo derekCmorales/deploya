@@ -4,8 +4,24 @@ import { Construccion, EstadoConstruccion } from '../dominio/construccion';
 import { PrismaService } from '../../../compartido/prisma/prisma.service';
 
 @Injectable()
-export class PrismaConstruccionRepositorio implements RepositorioConstruccion {
+export class PrismaConstruccionRepositorio implements RepositorioConstruccion { // <--- ¡Añade 'export' aquí!
   constructor(private prisma: PrismaService) {}
+  async ultimosDeProyectos(proyectosIds: string[]): Promise<Record<string, unknown>> {
+    if (proyectosIds.length === 0) return {};
+
+    const construcciones = await (this.prisma as any).construccion.findMany({
+      where: { proyectoId: { in: proyectosIds } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const ultimas: Record<string, unknown> = {};
+    for (const construccion of construcciones) {
+      if (!(construccion.proyectoId in ultimas)) {
+        ultimas[construccion.proyectoId] = this.mapear(construccion);
+      }
+    }
+    return ultimas;
+  }
 
   async iniciar(proyectoId: string): Promise<Construccion> {
     const creada = await (this.prisma as any).construccion.create({

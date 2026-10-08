@@ -78,3 +78,16 @@ El cliente SHALL poder cambiar nombre (no cambia el subdominio), repositorio, ra
 - Repositorios privados (OAuth de GitHub).
 - Receta y comando de arranque sin `Dockerfile` (detección de stack).
 - Espacios de trabajo con varios miembros.
+
+
+# Especificación Delta: Módulo de Proyectos (M3)
+
+## Comportamiento del Dominio y Errores
+- **UrlRepositorioInvalida (HTTP 400):** Se lanza cuando la URL provista no cumple con el formato estándar de repositorios públicos de GitHub (`https://github.com/<dueño>/<repo>`).
+- **DatosAltaInvalidos (HTTP 400):** Se lanza si faltan campos obligatorios en el alta o si el puerto especificado está fuera del rango válido (1 a 65535).
+- **RepositorioNoAccesible (HTTP 422):** Se lanza cuando GitHub responde con 404, 401 o 403 por tratarse de un repositorio privado o inexistente.
+- **RamaNoEncontrada (HTTP 422):** Se lanza si la rama especificada no existe en el repositorio remoto.
+- **RepositorioSinDockerfile (HTTP 422):** Se lanza cuando el archivo `Dockerfile` no se encuentra en la raíz de la rama seleccionada.
+- **FuenteNoDisponible (HTTP 503):** Se lanza si GitHub limita las peticiones por exceso de tasa (*rate limit*) o experimenta caídas en sus servidores.
+- **SubdominioEnUso (HTTP 409):** Se lanza si el subdominio derivado del nombre del proyecto ya se encuentra registrado en el sistema.
+- **LimiteProyectosAlcanzado (HTTP 409):** Se lanza si el usuario activo ha alcanzado o superado el número máximo de proyectos permitidos por su cuota sandbox.

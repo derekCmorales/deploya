@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ConstruccionService } from "../construccion/construccion.service";
-import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
+import { ConstruccionService } from '../construccion/aplicacion/construccion.service';import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
 import { ConfirmacionNoCoincide, LimiteProyectosAlcanzado, ProyectoNoEncontrado, SubdominioEnUso } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
@@ -9,8 +8,15 @@ import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
 
-type Ultimos = Awaited<ReturnType<ConstruccionService["ultimosDespliegues"]>>;
-type DespliegueCreado = Awaited<ReturnType<ConstruccionService["crearDespliegue"]>>;
+type Ultimos = Record<string, { estado: string; [propiedad: string]: unknown } | undefined>;
+type ServicioCreacionDespliegue = {
+  crearDespliegue(proyectoId: string, origen: "alta"): Promise<unknown>;
+};
+type DespliegueCreado = Awaited<ReturnType<ServicioCreacionDespliegue["crearDespliegue"]>>;
+
+type ConsultaUltimos = {
+  ultimosDespliegues(ids: string[]): Promise<Ultimos>;
+};
 
 export interface ProyectoEnLista extends Proyecto {
   ultimoDespliegue: Ultimos[string] | null;
@@ -46,7 +52,7 @@ export class ProyectosService {
 
   async listar(usuarioId: string): Promise<ListaProyectos> {
     const [proyectos, cuota] = await Promise.all([this.repositorio.deUsuario(usuarioId), this.cuota.cuotaDe(usuarioId)]);
-    const ultimos = await this.construccion.ultimosDespliegues(proyectos.map((p) => p.id));
+    const ultimos = await (this.construccion as unknown as ConsultaUltimos).ultimosDespliegues(proyectos.map((p) => p.id));
     return {
       proyectos: masRecientesPrimero(proyectos).map((p) => ({ ...p, ultimoDespliegue: ultimos[p.id] ?? null })),
       usados: proyectos.filter((proyecto) => cuentaParaElPlan(ultimos[proyecto.id])).length,
@@ -69,7 +75,7 @@ export class ProyectosService {
       rutaDockerfile: RUTA_DOCKERFILE,
       puertoInterno: alta.puerto ?? validacion.puerto,
     });
-    const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");
+    const despliegue = await (this.construccion as unknown as ServicioCreacionDespliegue).crearDespliegue(proyecto.id, "alta");
     return { proyecto, despliegue };
   }
 
@@ -88,7 +94,7 @@ export class ProyectosService {
 
   private async exigirCupo(usuarioId: string): Promise<void> {
     const [existentes, cuota] = await Promise.all([this.repositorio.deUsuario(usuarioId), this.cuota.cuotaDe(usuarioId)]);
-    const ultimos = await this.construccion.ultimosDespliegues(existentes.map((p) => p.id));
+    const ultimos = await (this.construccion as unknown as ConsultaUltimos).ultimosDespliegues(existentes.map((p) => p.id));
     const usados = existentes.filter((proyecto) => cuentaParaElPlan(ultimos[proyecto.id])).length;
     if (usados >= cuota.maxProyectos) throw new LimiteProyectosAlcanzado(cuota.maxProyectos);
   }

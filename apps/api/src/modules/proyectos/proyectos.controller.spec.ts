@@ -111,8 +111,7 @@ describe("ProyectosController", () => {
 
     expect(despliegue).toMatchObject({ numero: 1, estado: "encolado" });
     expect(await lecturaMotor.porId(proyecto.id)).toMatchObject({ usuarioId: "usuario-1", subdominio: "hola-deploya", puertoInterno: 3000 });
-    expect((await motor.consultar(despliegue.id, "usuario-1")).proyectoId).toBe(proyecto.id);
-  });
+    expect((await motor.consultar((despliegue as any).id, "usuario-1")).proyectoId).toBe(proyecto.id);  });
 
   it("GET /proyectos lista solo los del usuario de la sesión, con su último despliegue", async () => {
     const { controlador } = await montarApi();

@@ -3,6 +3,7 @@
 import { ExternalLink, FolderGit2, Globe } from "lucide-react";
 import type { ReactNode } from "react";
 
+import PanelConstruccion from "@/components/deploya/panel-construccion";
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ export function DetalleProyecto({
   plan,
   onEliminado,
 }: {
-  proyecto: ProyectoEnLista;
+  proyecto: ProyectoEnLista & { id?: string };
   plan: PlanProyectos;
   onEliminado: () => void;
 }) {
@@ -94,6 +95,14 @@ export function DetalleProyecto({
             <Skeleton className="h-4 w-full" />
           </div>
         )}
+      </div>
+
+      {/* Integración del Panel de Construcción y Logs en tiempo real */}
+      <div className="border-b border-border px-7 py-6">
+        <PanelConstruccion 
+          proyectoId={(proyecto as any).id || proyecto.nombre} 
+          urlRepo={proyecto.urlRepositorio} 
+        />
       </div>
 
       <dl className="grid grid-cols-1 border-b border-border sm:grid-cols-3">

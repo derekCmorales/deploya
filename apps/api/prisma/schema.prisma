@@ -214,6 +214,16 @@ model VariableEntorno {
   @@unique([proyectoId, clave])
 }
 
+model Construccion {
+  id         String   @id @default(uuid())
+  proyectoId String   @map("proyecto_id")
+  estado     String   // PENDIENTE, CLONANDO, CONSTRUYENDO, EXITOSO, FALLIDO
+  logs       String   @db.Text
+  creado     DateTime @default(now())
+
+  @@map("construcciones")
+}
+
 // ───────────── M4 · M5 · M6 Motor (Derek) ─────────────
 
 enum EstadoDespliegue {

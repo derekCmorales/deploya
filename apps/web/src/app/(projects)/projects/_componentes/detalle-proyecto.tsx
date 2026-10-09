@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
+import { VariablesProyectoComponent } from "@/components/deploya/variables-proyecto";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDespliegue } from "@/hooks/use-despliegue";
@@ -28,7 +29,7 @@ export function DetalleProyecto({
   plan,
   onEliminado,
 }: {
-  proyecto: ProyectoEnLista;
+  proyecto: ProyectoEnLista & { variables?: any[] };
   plan: PlanProyectos;
   onEliminado: () => void;
 }) {
@@ -37,6 +38,19 @@ export function DetalleProyecto({
   const despliegue = vista ?? ultimo;
   const url = vista?.url ?? urlProyecto(proyecto.subdominio, DOMINIO_APPS, ESQUEMA_APPS);
   const enLinea = despliegue?.estado === "saludable";
+
+  const guardarVariables = async (nuevasVariables: any[]) => {
+    try {
+      const res = await fetch(`/api/proyectos/${proyecto.id}/variables`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variables: nuevasVariables }),
+      });
+      if (!res.ok) throw new Error("Error al guardar variables");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="flex min-w-0 flex-col overflow-auto">
@@ -107,6 +121,14 @@ export function DetalleProyecto({
           <span className="text-xs text-muted-foreground">Subdominio automático con HTTPS</span>
         </Dato>
       </dl>
+
+      {/* Sección de Variables de Entorno del Proyecto (M3-03) */}
+      <div className="border-b border-border px-7 py-6">
+        <VariablesProyectoComponent
+          variablesIniciales={proyecto.variables ?? []}
+          onGuardar={guardarVariables}
+        />
+      </div>
 
       <EliminarProyecto proyecto={proyecto} onEliminado={onEliminado} />
     </div>

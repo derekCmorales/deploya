@@ -65,3 +65,24 @@ export function avisoVersionAnterior(numeroAnterior?: number): string | null {
   }
   return `La versión #${numeroAnterior} sigue sirviendo tráfico`;
 }
+
+export interface SiguientePasoSondeo {
+  siguienteDesde: number;
+  terminado: boolean;
+}
+
+export function calcularSiguientePasoSondeo(
+  respuesta: { siguiente: number; terminado: boolean },
+  actualDesde: number
+): SiguientePasoSondeo {
+  if (respuesta.terminado) {
+    return {
+      siguienteDesde: actualDesde,
+      terminado: true,
+    };
+  }
+  return {
+    siguienteDesde: respuesta.siguiente ?? actualDesde,
+    terminado: false,
+  };
+}

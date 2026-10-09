@@ -1,3 +1,4 @@
+import { calcularSiguientePasoSondeo } from '../src/lib/despliegues.ts';
 import test from 'node:test';
 import assert from 'node:assert';
 import {
@@ -46,4 +47,16 @@ test('Tiempo transcurrido con ahora fijo', () => {
   const ahora = '2026-06-06T10:01:25.000Z';
   const t = tiempoTranscurrido(desde, ahora);
   assert.strictEqual(t, '1m 25s');
+});
+
+test('El polling avanza el cursor o termina cuando el despliegue finaliza', () => {
+  const respuestaEnCurso = { siguiente: 15, terminado: false };
+  const paso1 = calcularSiguientePasoSondeo(respuestaEnCurso, 0);
+  assert.strictEqual(paso1.siguienteDesde, 15);
+  assert.strictEqual(paso1.terminado, false);
+
+  const respuestaTerminada = { siguiente: 15, terminado: true };
+  const paso2 = calcularSiguientePasoSondeo(respuestaTerminada, 15);
+  assert.strictEqual(paso2.siguienteDesde, 15);
+  assert.strictEqual(paso2.terminado, true);
 });

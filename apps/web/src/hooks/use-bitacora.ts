@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useSondeo } from './use-sondeo';
-import { fusionarLineas, LineaBitacora } from '../lib/despliegues';
+import { fusionarLineas, LineaBitacora, calcularSiguientePasoSondeo } from '../lib/despliegues';
 import { pedirApi } from '../lib/api';
 
 interface RespuestaBitacora {
@@ -23,11 +23,9 @@ export function useBitacora(id: string) {
       if (data && data.lineas) {
         setLineas((prev) => fusionarLineas(prev, data.lineas));
       }
-      if (data?.terminado) {
-        setTerminado(true);
-      } else if (data?.siguiente !== undefined) {
-        setDesde(data.siguiente);
-      }
+      const siguientePaso = calcularSiguientePasoSondeo(data, desde);
+      setTerminado(siguientePaso.terminado);
+      setDesde(siguientePaso.siguienteDesde);
     } catch {
       // Manejo de error de sondeo
     }

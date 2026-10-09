@@ -55,6 +55,9 @@ class FuenteDoble extends ProveedorFuente {
  * persistencia en memoria: sin base de datos, la cuota queda en Sandbox.
  */
 async function montarApi() {
+  // Asegurar clave de cifrado requerida por CifradorAesGcm en el módulo de proyectos
+  process.env.CLAVE_CIFRADO_VARIABLES = "12345678901234567890123456789012";
+
   const modulo = await Test.createTestingModule({ imports: [AdaptersModule.paraApi(), PrismaModule, ProyectosModule] })
     .overrideProvider(PrismaService)
     .useValue({})

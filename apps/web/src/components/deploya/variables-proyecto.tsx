@@ -43,7 +43,7 @@ export const VariablesProyectoComponent: React.FC<VariablesProyectoProps> = ({
 
   const agregarVariable = () => {
     const nueva: VariableItem = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       clave: '',
       valor: '',
       actualizada: 'Ahora',
@@ -178,4 +178,4 @@ export const VariablesProyectoComponent: React.FC<VariablesProyectoProps> = ({
       </div>
     </div>
   );
-};
+}

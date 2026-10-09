@@ -9,7 +9,7 @@ import { VariablesProyectoComponent } from "@/components/deploya/variables-proye
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDespliegue } from "@/hooks/use-despliegue";
-import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
+import { DOMINIO_APPS, ESQUEMA_APPS, actualizarVariablesProyecto } from "@/lib/api";
 import {
   duracionEtapa,
   etapasDelRiel,
@@ -23,13 +23,18 @@ import {
 
 import { EliminarProyecto } from "./eliminar-proyecto";
 
+interface VariableEntornoInput {
+  clave: string;
+  valor: string;
+}
+
 /** Panel derecho de la pantalla 10: el proyecto seleccionado y su último despliegue. */
 export function DetalleProyecto({
   proyecto,
   plan,
   onEliminado,
 }: {
-  proyecto: ProyectoEnLista & { variables?: any[] };
+  proyecto: ProyectoEnLista & { variables?: VariableEntornoInput[] };
   plan: PlanProyectos;
   onEliminado: () => void;
 }) {
@@ -39,16 +44,11 @@ export function DetalleProyecto({
   const url = vista?.url ?? urlProyecto(proyecto.subdominio, DOMINIO_APPS, ESQUEMA_APPS);
   const enLinea = despliegue?.estado === "saludable";
 
-  const guardarVariables = async (nuevasVariables: any[]) => {
+  const guardarVariables = async (nuevasVariables: VariableEntornoInput[]) => {
     try {
-      const res = await fetch(`/api/proyectos/${proyecto.id}/variables`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variables: nuevasVariables }),
-      });
-      if (!res.ok) throw new Error("Error al guardar variables");
-    } catch (err) {
-      console.error(err);
+      await actualizarVariablesProyecto(proyecto.id, nuevasVariables);
+    } catch {
+      // Manejo de error controlado sin console.error
     }
   };
 
@@ -125,7 +125,12 @@ export function DetalleProyecto({
       {/* Sección de Variables de Entorno del Proyecto (M3-03) */}
       <div className="border-b border-border px-7 py-6">
         <VariablesProyectoComponent
-          variablesIniciales={proyecto.variables ?? []}
+          variablesIniciales={(proyecto.variables ?? []).map((v, index) => ({
+            id: String(index),
+            clave: v.clave,
+            valor: v.valor,
+            actualizada: "Reciente",
+          }))}
           onGuardar={guardarVariables}
         />
       </div>

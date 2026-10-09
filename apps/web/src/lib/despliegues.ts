@@ -3,13 +3,13 @@ export interface LineaBitacora {
   marca: string;
   etapa: string;
   texto: string;
-  nivel?: string;
+  nivel?: 'aviso' | 'info' | 'error';
 }
 
 export interface VistaDespliegue {
   id: string;
   numero: number;
-  estado: string;
+  estado: 'construyendo' | 'encolado' | 'saludable' | 'fallido' | 'aprovisionando' | 'publicando' | 'cancelado' | 'detenido';
   imagen?: string;
   recursos?: string;
   codigoSalida?: number;

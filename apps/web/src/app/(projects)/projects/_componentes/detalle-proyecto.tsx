@@ -5,10 +5,11 @@ import type { ReactNode } from "react";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
+import { VariablesProyectoComponent } from "@/components/deploya/variables-proyecto";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDespliegue } from "@/hooks/use-despliegue";
-import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
+import { DOMINIO_APPS, ESQUEMA_APPS, actualizarVariablesProyecto } from "@/lib/api";
 import {
   duracionEtapa,
   etapasDelRiel,
@@ -22,13 +23,18 @@ import {
 
 import { EliminarProyecto } from "./eliminar-proyecto";
 
+interface VariableEntornoInput {
+  clave: string;
+  valor: string;
+}
+
 /** Panel derecho de la pantalla 10: el proyecto seleccionado y su último despliegue. */
 export function DetalleProyecto({
   proyecto,
   plan,
   onEliminado,
 }: {
-  proyecto: ProyectoEnLista;
+  proyecto: ProyectoEnLista & { variables?: VariableEntornoInput[] };
   plan: PlanProyectos;
   onEliminado: () => void;
 }) {
@@ -37,6 +43,14 @@ export function DetalleProyecto({
   const despliegue = vista ?? ultimo;
   const url = vista?.url ?? urlProyecto(proyecto.subdominio, DOMINIO_APPS, ESQUEMA_APPS);
   const enLinea = despliegue?.estado === "saludable";
+
+  const guardarVariables = async (nuevasVariables: VariableEntornoInput[]) => {
+    try {
+      await actualizarVariablesProyecto(proyecto.id, nuevasVariables);
+    } catch {
+      // Manejo de error controlado sin console.error
+    }
+  };
 
   return (
     <div className="flex min-w-0 flex-col overflow-auto">
@@ -107,6 +121,19 @@ export function DetalleProyecto({
           <span className="text-xs text-muted-foreground">Subdominio automático con HTTPS</span>
         </Dato>
       </dl>
+
+      {/* Sección de Variables de Entorno del Proyecto (M3-03) */}
+      <div className="border-b border-border px-7 py-6">
+        <VariablesProyectoComponent
+          variablesIniciales={(proyecto.variables ?? []).map((v, index) => ({
+            id: String(index),
+            clave: v.clave,
+            valor: v.valor,
+            actualizada: "Reciente",
+          }))}
+          onGuardar={guardarVariables}
+        />
+      </div>
 
       <EliminarProyecto proyecto={proyecto} onEliminado={onEliminado} />
     </div>

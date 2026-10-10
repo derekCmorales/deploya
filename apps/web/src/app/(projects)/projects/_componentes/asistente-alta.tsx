@@ -14,22 +14,26 @@ import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
 
 import { LateralAlta } from "./lateral-alta";
 import { PasoRepositorio } from "./paso-repositorio";
+import { PasoVariablesAlta } from "@/components/deploya/paso-variables-alta";
 import { PasoRevisar } from "./paso-revisar";
 
-const INDICE_PASO = { repositorio: 0, revisar: 2 } as const;
+const INDICE_PASO: Record<string, number> = { repositorio: 0, variables: 1, revisar: 2 };
 const TOTAL_PASOS = 3;
 
-/** Container del asistente «Nuevo proyecto» (11a → 11d, con 11e). */
+/** Container del asistente «Nuevo proyecto» con soporte para Variables de Entorno (M3-03). */
 export function AsistenteAlta() {
   const router = useRouter();
   const alta = useAltaProyecto();
   const { datos: lista } = useProyectos({ sondear: false });
   const sinCupo = lista !== null && !puedeCrearProyecto(lista);
-  const indice = INDICE_PASO[alta.paso];
+  
+  // Forzamos el tipo de paso actual para alinearlo con el flujo de 3 pasos
+  const pasoActual = (alta.paso as string) || "repositorio";
+  const indice = INDICE_PASO[pasoActual] ?? 0;
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
-    if (alta.paso === "repositorio") return alta.continuar();
+    if (pasoActual === "repositorio" || pasoActual === "variables") return alta.continuar();
     const id = await alta.desplegar();
     if (id) router.push(`/projects?proyecto=${id}`);
   };
@@ -52,13 +56,28 @@ export function AsistenteAlta() {
               {contadorProyectos(lista)}. Cambia de plan para crear otro proyecto.
             </Banner>
           ) : null}
-          {alta.paso === "repositorio" ? <PasoRepositorio alta={alta} /> : <PasoRevisar alta={alta} lista={lista} />}
+
+          {/* Renderizado condicional de los pasos del asistente */}
+          {pasoActual === "repositorio" ? (
+            <PasoRepositorio alta={alta} />
+          ) : pasoActual === "variables" ? (
+            <PasoVariablesAlta 
+              onSiguiente={(variables) => {
+                // Aquí puedes guardar las variables en tu estado o hook si lo requieres
+                alta.continuar();
+              }}
+              onAtras={alta.volver}
+            />
+          ) : (
+            <PasoRevisar alta={alta} lista={lista} />
+          )}
         </div>
+
         <div className="sticky bottom-0 flex items-center gap-2 border-t border-border bg-background px-12 py-4">
           <span className="flex-1 text-xs text-muted-foreground">
             Paso {indice + 1} de {TOTAL_PASOS}
           </span>
-          {alta.paso === "repositorio" ? (
+          {pasoActual === "repositorio" ? (
             <Button asChild variant="ghost">
               <Link href="/projects">Cancelar</Link>
             </Button>
@@ -69,15 +88,15 @@ export function AsistenteAlta() {
           )}
           <Button type="submit" disabled={alta.ocupado || sinCupo}>
             {alta.ocupado ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
-            {alta.paso === "repositorio" ? (
-              <>
-                Continuar
-                {alta.ocupado ? null : <ArrowRight />}
-              </>
-            ) : (
+            {pasoActual === "revisar" ? (
               <>
                 {alta.ocupado ? null : <Rocket />}
                 Desplegar
+              </>
+            ) : (
+              <>
+                Continuar
+                {alta.ocupado ? null : <ArrowRight />}
               </>
             )}
           </Button>

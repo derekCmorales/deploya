@@ -111,3 +111,43 @@ export class ConfirmacionNoCoincide extends ErrorProyectos {
     super("Escribe el nombre exacto del proyecto para eliminarlo.");
   }
 }
+
+export class ClaveInvalida extends ErrorProyectos {
+  readonly codigo = "clave-invalida";
+
+  constructor(mensaje = "Clave de variable inválida") {
+    super(mensaje);
+  }
+}
+
+export class ClaveReservada extends ErrorProyectos {
+  readonly codigo = "clave-reservada";
+
+  constructor(mensaje = "La clave PORT está reservada") {
+    super(mensaje);
+  }
+}
+
+export class ValorDemasiadoLargo extends ErrorProyectos {
+  readonly codigo = "valor-demasiado-largo";
+
+  constructor(mensaje = "El valor excede el límite de bytes permitidos") {
+    super(mensaje);
+  }
+}
+
+export class DemasiadasVariables extends ErrorProyectos {
+  readonly codigo = "demasiadas-variables";
+
+  constructor(mensaje = "Se ha superado el número máximo de variables permitidas") {
+    super(mensaje);
+  }
+}
+
+export class VariableIlegible extends ErrorProyectos {
+  readonly codigo = "variable-ilegible";
+
+  constructor(mensaje = "No se pudo descifrar la variable de entorno") {
+    super(mensaje);
+  }
+}

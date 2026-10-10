@@ -195,11 +195,13 @@ model Proyecto {
   creado             DateTime           @default(now())
   actualizado        DateTime           @updatedAt
 
-  variables   VariableEntorno[]
-  despliegues Despliegue[]      @relation("DesplieguesDelProyecto")
-  artefactos  Artefacto[]
+  variables          VariableProyecto[]
+  variablesEntorno   VariableEntorno[]
+  despliegues        Despliegue[]       @relation("DesplieguesDelProyecto")
+  artefactos         Artefacto[]
 
   @@unique([usuarioId, nombre])
+  @@map("proy_proyectos")
 }
 
 model VariableEntorno {
@@ -212,6 +214,20 @@ model VariableEntorno {
   actualizado  DateTime @updatedAt
 
   @@unique([proyectoId, clave])
+}
+
+model VariableProyecto {
+  id            String   @id @default(cuid())
+  proyectoId    String   @map("proyecto_id")
+  clave         String
+  valorCifrado  String   @map("valor_cifrado")
+  creadoEn      DateTime @default(now()) @map("creado_en")
+  actualizadoEn DateTime @updatedAt @map("actualizado_en")
+
+  proyecto      Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+
+  @@unique([proyectoId, clave])
+  @@map("variables_proyecto")
 }
 
 // ───────────── M4 · M5 · M6 Motor (Derek) ─────────────

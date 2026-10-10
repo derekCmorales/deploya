@@ -68,3 +68,17 @@ function textoDe(valor: unknown): string | undefined {
   if (Array.isArray(valor) && typeof valor[0] === "string") return valor[0];
   return undefined;
 }
+
+export async function actualizarVariablesProyecto(
+  proyectoId: string,
+  variables: { clave: string; valor: string }[]
+): Promise<void> {
+  const res = await fetch(`/api/proyectos/${proyectoId}/variables`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ variables }),
+  });
+  if (!res.ok) {
+    throw new Error("Error al guardar variables de entorno");
+  }
+}

@@ -4,7 +4,14 @@ function sistemaFalso(archivos: Record<string, string>): { leer: LeerArchivo; pe
   const pedidos: string[] = [];
   const leer: LeerArchivo = async (ruta) => {
     pedidos.push(ruta);
-    if (ruta in archivos) return archivos[ruta];
+    const rutaNorm = ruta.replace(/\\/g, "/");
+    for (const [key, val] of Object.entries(archivos)) {
+      const keyNorm = key.replace(/\\/g, "/");
+      // Coincidencia exacta o ruta termina exactamente en la clave simulada (ej: /clon/package.json)
+      if (rutaNorm === keyNorm || rutaNorm.endsWith(keyNorm)) {
+        return val;
+      }
+    }
     throw Object.assign(new Error("no existe"), { code: "ENOENT" });
   };
   return { leer, pedidos };

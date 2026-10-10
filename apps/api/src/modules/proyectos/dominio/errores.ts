@@ -104,6 +104,46 @@ export class ProyectoNoEncontrado extends ErrorProyectos {
   }
 }
 
+export class ClaveInvalida extends ErrorProyectos {
+  readonly codigo = "clave-invalida";
+
+  constructor(mensaje = "La clave usa MAYÚSCULAS y guiones bajos, hasta 128 caracteres.") {
+    super(mensaje);
+  }
+}
+
+export class ClaveReservada extends ErrorProyectos {
+  readonly codigo = "clave-reservada";
+
+  constructor() {
+    super("PORT es reservada: la tomamos del puerto del proyecto.");
+  }
+}
+
+export class ValorDemasiadoLargo extends ErrorProyectos {
+  readonly codigo = "valor-demasiado-largo";
+
+  constructor() {
+    super("El valor supera los 4 KiB.");
+  }
+}
+
+export class DemasiadasVariables extends ErrorProyectos {
+  readonly codigo = "demasiadas-variables";
+
+  constructor(maximo: number) {
+    super(`Un proyecto admite hasta ${maximo} variables.`);
+  }
+}
+
+export class VariableIlegible extends ErrorProyectos {
+  readonly codigo = "variable-ilegible";
+
+  constructor() {
+    super("No se pudo descifrar una variable. El despliegue no arranca.");
+  }
+}
+
 export class ConfirmacionNoCoincide extends ErrorProyectos {
   readonly codigo = "confirmacion-no-coincide";
 

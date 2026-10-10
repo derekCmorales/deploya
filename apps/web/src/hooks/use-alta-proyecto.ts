@@ -11,8 +11,11 @@ import {
   type ErrorAlta,
   type ValidacionRepositorio,
 } from "@/lib/proyectos";
+import { errorClave, variablesDeAlta, type FilaAlta } from "@/lib/variables";
 
-export type PasoAlta = "repositorio" | "revisar";
+export type PasoAlta = "repositorio" | "variables" | "revisar";
+
+const FILA_VACIA: FilaAlta = { clave: "", valor: "" };
 
 interface ProyectoCreado {
   proyecto: { id: string };
@@ -32,6 +35,7 @@ export function useAltaProyecto() {
   const [nombre, setNombre] = useState("");
   const [nombreEditado, setNombreEditado] = useState(false);
   const [puerto, setPuerto] = useState("");
+  const [variables, setVariables] = useState<FilaAlta[]>([FILA_VACIA]);
   const [validacion, setValidacion] = useState<ValidacionRepositorio | null>(null);
   const [error, setError] = useState<ErrorAlta | null>(null);
   const [ocupado, setOcupado] = useState(false);
@@ -68,11 +72,19 @@ export function useAltaProyecto() {
   };
 
   const continuar = async () => {
+    if (paso === "repositorio") return continuarRepositorio();
+    const clave = variables.map((fila) => errorClave(fila.clave)).find((mensaje) => mensaje);
+    if (clave) return setError({ tipo: "aviso", mensaje: clave });
+    setError(null);
+    setPaso("revisar");
+  };
+
+  const continuarRepositorio = async () => {
     if (!validacion) return validar();
     const local = errorLocal();
     if (local) return setError(local);
     setError(null);
-    setPaso("revisar");
+    setPaso("variables");
   };
 
   /** Devuelve el proyecto y el número del despliegue, o `null` si la API lo rechazó. */
@@ -82,7 +94,13 @@ export function useAltaProyecto() {
     try {
       const creado = await pedirApi<ProyectoCreado>("/proyectos", {
         metodo: "POST",
-        cuerpo: { url: validacion.urlNormalizada, rama, nombre, puerto: Number(puerto) },
+        cuerpo: {
+          url: validacion.urlNormalizada,
+          rama,
+          nombre,
+          puerto: Number(puerto),
+          variables: variablesDeAlta(variables),
+        },
       });
       return { id: creado.proyecto.id, numero: creado.despliegue.numero };
     } catch (e) {
@@ -101,6 +119,7 @@ export function useAltaProyecto() {
     rama,
     nombre,
     puerto,
+    variables,
     validacion,
     error,
     ocupado,
@@ -125,7 +144,13 @@ export function useAltaProyecto() {
     validar,
     continuar,
     desplegar,
-    volver: () => setPaso("repositorio"),
+    anadirVariable: () => setVariables((filas) => [...filas, { ...FILA_VACIA }]),
+    editarVariable: (indice: number, cambio: Partial<FilaAlta>) => {
+      setVariables((filas) => filas.map((fila, i) => (i === indice ? { ...fila, ...cambio } : fila)));
+      setError(null);
+    },
+    irA: (destino: PasoAlta) => setPaso(destino),
+    volver: () => setPaso(paso === "revisar" ? "variables" : "repositorio"),
   };
 }
 

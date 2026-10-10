@@ -1,8 +1,10 @@
 import { RepositorioProyectosMemoria } from "../../adapters/memoria/repositorio-proyectos.memoria";
+import { RepositorioVariablesMemoria } from "../../adapters/memoria/repositorio-variables.memoria";
 import { RelojFijo } from "../../compartido/reloj";
 import type { ConstruccionService } from "../construccion/construccion.service";
 import { CUOTA_SANDBOX } from "./adaptadores/cuota-proyectos.stub";
 import {
+  ClaveInvalida,
   ConfirmacionNoCoincide,
   LimiteProyectosAlcanzado,
   ProyectoNoEncontrado,
@@ -12,7 +14,9 @@ import {
 } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, ValidacionRepositorio } from "./dominio/proyecto";
 import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
+import { CifradorFalso } from "./adaptadores/cifrador-falso";
 import { ProyectosService } from "./proyectos.service";
+import { VariablesProyectoService } from "./servicios/variables-proyecto.service";
 import { CuotaProyectosPuerto, type CuotaProyectos } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 
@@ -56,14 +60,16 @@ function montar() {
     ultimosDespliegues: jest.fn(async (): Promise<Record<string, unknown>> => ({})),
   };
   const acciones = { pedirEliminacion: jest.fn(async () => undefined) };
+  const variables = new VariablesProyectoService(new CifradorFalso(), new RepositorioVariablesMemoria(reloj), repositorio);
   const servicio = new ProyectosService(
     fuente,
     repositorio,
     cuota,
     construccion as unknown as ConstruccionService,
     acciones as unknown as AccionesProyectoService,
+    variables,
   );
-  return { servicio, fuente, reloj, repositorio, cuota, construccion, acciones };
+  return { servicio, fuente, reloj, repositorio, cuota, construccion, acciones, variables };
 }
 
 const alta = (cambios: Partial<AltaProyecto> = {}): AltaProyecto => ({ url: URL, rama: "main", nombre: "Hola Deploya", ...cambios });
@@ -86,6 +92,32 @@ describe("ProyectosService", () => {
       });
       expect(construccion.crearDespliegue).toHaveBeenCalledWith(proyecto.id, "alta");
       expect(despliegue).toEqual({ id: "despliegue-1", numero: 1, estado: "encolado" });
+    });
+
+    it("Clave inválida en el alta no guarda el proyecto", async () => {
+      const { servicio, repositorio, construccion } = montar();
+      await expect(servicio.crear("usuario-1", alta({ variables: [{ clave: "saludo", valor: "hola" }] }))).rejects.toThrow(ClaveInvalida);
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
+      expect(construccion.crearDespliegue).not.toHaveBeenCalled();
+    });
+
+    it("Guardar y desplegar", async () => {
+      const { servicio, construccion, variables } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta({ variables: [{ clave: "SALUDO", valor: "hola" }] }));
+      construccion.crearDespliegue.mockClear();
+
+      const guardado = await servicio.guardarVariables("usuario-1", proyecto.id, {
+        variables: [{ clave: "SALUDO", valor: "nuevo" }],
+        desplegar: true,
+      });
+
+      expect(construccion.crearDespliegue).toHaveBeenCalledWith(proyecto.id, "variables");
+      expect(guardado.despliegue?.estado).toBe("encolado");
+      expect(await variables.descifradasDe(proyecto.id)).toEqual({ SALUDO: "nuevo" });
+      construccion.crearDespliegue.mockClear();
+      await servicio.guardarVariables("usuario-1", proyecto.id, { variables: [{ clave: "SALUDO" }], desplegar: false });
+      expect(construccion.crearDespliegue).not.toHaveBeenCalled();
+      expect(await variables.descifradasDe(proyecto.id)).toEqual({ SALUDO: "nuevo" });
     });
 
     it("el puerto elegido por el usuario gana al de EXPOSE", async () => {

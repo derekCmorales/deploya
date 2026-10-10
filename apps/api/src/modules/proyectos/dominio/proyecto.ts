@@ -19,6 +19,8 @@ export interface AltaProyecto {
   rama: string;
   nombre: string;
   puerto?: number;
+  /** Paso 11c. Cada entrada trae valor: todavía no hay cifrado previo que conservar. */
+  variables?: { clave: string; valor: string }[];
 }
 
 export interface ConsultaRepositorio {

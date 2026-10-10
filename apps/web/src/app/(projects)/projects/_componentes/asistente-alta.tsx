@@ -16,8 +16,9 @@ import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
 import { LateralAlta } from "./lateral-alta";
 import { PasoRepositorio } from "./paso-repositorio";
 import { PasoRevisar } from "./paso-revisar";
+import { PasoVariables } from "./paso-variables";
 
-const INDICE_PASO = { repositorio: 0, revisar: 2 } as const;
+const INDICE_PASO = { repositorio: 0, variables: 1, revisar: 2 } as const;
 const TOTAL_PASOS = 3;
 
 /** Container del asistente «Nuevo proyecto» (11a → 11d, con 11e). */
@@ -30,7 +31,7 @@ export function AsistenteAlta() {
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
-    if (alta.paso === "repositorio") return alta.continuar();
+    if (alta.paso !== "revisar") return alta.continuar();
     const creado = await alta.desplegar();
     if (creado) router.push(rutaDespliegue(creado.id, creado.numero));
   };
@@ -53,7 +54,9 @@ export function AsistenteAlta() {
               {contadorProyectos(lista)}. Cambia de plan para crear otro proyecto.
             </Banner>
           ) : null}
-          {alta.paso === "repositorio" ? <PasoRepositorio alta={alta} /> : <PasoRevisar alta={alta} lista={lista} />}
+          {alta.paso === "repositorio" ? <PasoRepositorio alta={alta} /> : null}
+          {alta.paso === "variables" ? <PasoVariables alta={alta} /> : null}
+          {alta.paso === "revisar" ? <PasoRevisar alta={alta} lista={lista} /> : null}
         </div>
         <div className="sticky bottom-0 flex items-center gap-2 border-t border-border bg-background px-12 py-4">
           <span className="flex-1 text-xs text-muted-foreground">
@@ -70,15 +73,15 @@ export function AsistenteAlta() {
           )}
           <Button type="submit" disabled={alta.ocupado || sinCupo}>
             {alta.ocupado ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
-            {alta.paso === "repositorio" ? (
-              <>
-                Continuar
-                {alta.ocupado ? null : <ArrowRight />}
-              </>
-            ) : (
+            {alta.paso === "revisar" ? (
               <>
                 {alta.ocupado ? null : <Rocket />}
                 Desplegar
+              </>
+            ) : (
+              <>
+                Continuar
+                {alta.ocupado ? null : <ArrowRight />}
               </>
             )}
           </Button>

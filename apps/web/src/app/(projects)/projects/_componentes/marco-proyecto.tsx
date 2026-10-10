@@ -2,6 +2,7 @@
 
 import { ExternalLink, GitBranch } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import { TabsNav } from "@/components/ui/tabs";
@@ -11,12 +12,14 @@ import { useProyectos } from "@/hooks/use-proyectos";
 import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
 import { shaCorto, urlProyecto, type ProyectoEnLista } from "@/lib/proyectos";
 
-const PESTANAS_LUEGO = ["Resumen", "Despliegues", "Variables", "Configuración"] as const;
+const PESTANAS_LUEGO = ["Resumen", "Despliegues"] as const;
 
 /** Cabecera y pestañas de 13–19. Resumen, historial, variables y configuración llegan después. */
 export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
+  const ruta = usePathname();
   const { datos } = useProyectos({ sondear: false });
   const proyecto = datos?.proyectos.find((p) => p.id === proyectoId) ?? null;
+  const variables = `/projects/${proyectoId}/variables`;
 
   return (
     <header className="flex flex-col gap-4 border-b border-border px-8 pt-6">
@@ -30,6 +33,12 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
             {nombre}
           </span>
         ))}
+        <Link href={variables} aria-current={ruta === variables ? "page" : undefined}>
+          Variables
+        </Link>
+        <span className="inline-flex h-10 cursor-not-allowed items-center px-3 text-sm text-muted-foreground" title="Llega en el Avance 3">
+          Configuración
+        </span>
       </TabsNav>
     </header>
   );

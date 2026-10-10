@@ -13,10 +13,14 @@ import { RepositorioDespliegues } from "../construccion/puertos/repositorio-desp
 import { ConstruccionService } from "../construccion/construccion.service";
 import { ProyectosLecturaPuerto } from "../construccion/puertos/proyectos-lectura.puerto";
 import { CuotaPlanPuerto } from "../orquestacion/puertos/cuota-plan.puerto";
+import { MAXIMO_VARIABLES } from "./dominio/variable";
 import {
   DatosAltaInvalidos,
   ErrorProyectos,
+  ClaveInvalida,
+  ClaveReservada,
   ConfirmacionNoCoincide,
+  DemasiadasVariables,
   FuenteNoDisponible,
   LimiteProyectosAlcanzado,
   ProyectoNoEncontrado,
@@ -165,6 +169,9 @@ describe("ProyectosController", () => {
     [new LimiteProyectosAlcanzado(1), 409, { codigo: "limite-proyectos", maximo: 1 }],
     [new ProyectoNoEncontrado("p-1"), 404, { codigo: "proyecto-no-encontrado" }],
     [new ConfirmacionNoCoincide(), 400, { codigo: "confirmacion-no-coincide" }],
+    [new ClaveInvalida(), 400, { codigo: "clave-invalida" }],
+    [new ClaveReservada(), 400, { codigo: "clave-reservada" }],
+    [new DemasiadasVariables(MAXIMO_VARIABLES), 400, { codigo: "demasiadas-variables" }],
   ])("el filtro traduce %p a HTTP %i con su código", (error, estado, cuerpo) => {
     const { respuesta, host } = respuestaFalsa();
     new ErroresProyectosFilter().catch(error, host);

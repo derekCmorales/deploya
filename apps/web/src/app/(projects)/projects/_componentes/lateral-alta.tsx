@@ -9,7 +9,7 @@ import { contadorProyectos, recursosPlan, type ListaProyectos } from "@/lib/proy
 
 const PASOS = [
   { titulo: "Repositorio", detalle: "URL, rama y Dockerfile" },
-  { titulo: "Variables", detalle: "Llega en la próxima entrega", deshabilitado: true },
+  { titulo: "Variables", detalle: "Claves cifradas" },
   { titulo: "Revisar", detalle: "Confirmar y desplegar" },
 ] as const;
 

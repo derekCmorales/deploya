@@ -8,6 +8,8 @@ import { subdominioDesdeNombre } from "./dominio/subdominio";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
+import { validarConjuntoVariables } from "./dominio/variable";
+import { VariablesProyectoService, type VariablePublica } from "./servicios/variables-proyecto.service";
 
 type Ultimos = Awaited<ReturnType<ConstruccionService["ultimosDespliegues"]>>;
 type DespliegueCreado = Awaited<ReturnType<ConstruccionService["crearDespliegue"]>>;
@@ -29,6 +31,16 @@ export interface ProyectoCreado {
   despliegue: DespliegueCreado;
 }
 
+export interface VariablesGuardadas {
+  variables: VariablePublica[];
+  despliegue: DespliegueCreado | null;
+}
+
+export interface PedidoVariables {
+  variables: { clave: string; valor?: string }[];
+  desplegar: boolean;
+}
+
 /** Caso de uso de M3: valida la fuente, guarda el proyecto y pide a M4 el despliegue #1. */
 @Injectable()
 export class ProyectosService {
@@ -38,6 +50,7 @@ export class ProyectosService {
     private readonly cuota: CuotaProyectosPuerto,
     private readonly construccion: ConstruccionService,
     private readonly acciones: AccionesProyectoService,
+    private readonly variables: VariablesProyectoService,
   ) {}
 
   validarRepositorio(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
@@ -60,6 +73,7 @@ export class ProyectosService {
     const validacion = await this.fuente.validar({ url: alta.url, rama: alta.rama });
     const subdominio = subdominioDesdeNombre(alta.nombre);
     if (await this.repositorio.existeSubdominio(subdominio)) throw new SubdominioEnUso(subdominio);
+    if (alta.variables) validarConjuntoVariables(alta.variables);
     const proyecto = await this.repositorio.guardar({
       usuarioId,
       nombre: alta.nombre,
@@ -69,8 +83,24 @@ export class ProyectosService {
       rutaDockerfile: RUTA_DOCKERFILE,
       puertoInterno: alta.puerto ?? validacion.puerto,
     });
+    if (alta.variables?.length) await this.variables.reemplazar(usuarioId, proyecto.id, alta.variables);
     const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");
     return { proyecto, despliegue };
+  }
+
+  /** 17: guarda el conjunto y, si se pide, encola un despliegue con disparador `variables`. */
+  async guardarVariables(usuarioId: string, proyectoId: string, pedido: PedidoVariables): Promise<VariablesGuardadas> {
+    const variables = await this.variables.reemplazar(usuarioId, proyectoId, pedido.variables);
+    if (!pedido.desplegar) return { variables, despliegue: null };
+    return { variables, despliegue: await this.construccion.crearDespliegue(proyectoId, "variables") };
+  }
+
+  listarVariables(usuarioId: string, proyectoId: string): Promise<VariablePublica[]> {
+    return this.variables.listar(usuarioId, proyectoId);
+  }
+
+  mostrarVariable(usuarioId: string, proyectoId: string, clave: string) {
+    return this.variables.mostrar(usuarioId, proyectoId, clave);
   }
 
   /**

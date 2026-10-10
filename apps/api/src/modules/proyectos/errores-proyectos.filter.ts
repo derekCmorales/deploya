@@ -14,6 +14,10 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   "limite-proyectos": HttpStatus.CONFLICT,
   "proyecto-no-encontrado": HttpStatus.NOT_FOUND,
   "confirmacion-no-coincide": HttpStatus.BAD_REQUEST,
+  "clave-invalida": HttpStatus.BAD_REQUEST,
+  "clave-reservada": HttpStatus.BAD_REQUEST,
+  "valor-demasiado-largo": HttpStatus.BAD_REQUEST,
+  "demasiadas-variables": HttpStatus.BAD_REQUEST,
 };
 
 /** Traduce los errores de dominio de M3 a `{ codigo, mensaje, ...detalle }` en el borde. */

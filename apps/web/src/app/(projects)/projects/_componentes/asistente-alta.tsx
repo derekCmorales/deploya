@@ -9,6 +9,7 @@ import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { useAltaProyecto } from "@/hooks/use-alta-proyecto";
 import { useProyectos } from "@/hooks/use-proyectos";
+import { rutaDespliegue } from "@/lib/despliegues";
 import { contadorProyectos, puedeCrearProyecto } from "@/lib/proyectos";
 import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
 
@@ -30,8 +31,8 @@ export function AsistenteAlta() {
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
     if (alta.paso === "repositorio") return alta.continuar();
-    const id = await alta.desplegar();
-    if (id) router.push(`/projects?proyecto=${id}`);
+    const creado = await alta.desplegar();
+    if (creado) router.push(rutaDespliegue(creado.id, creado.numero));
   };
 
   return (

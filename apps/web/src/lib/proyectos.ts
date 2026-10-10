@@ -66,13 +66,21 @@ export interface ValidacionRepositorio {
   puerto: number;
 }
 
-/** `GET /despliegues/:id` (solo lo que usa el detalle de la pantalla 10). */
+/** `GET /despliegues/:id` y la consulta por número (10, 12, 12b, 12c). */
 export interface VistaDespliegue {
   id: string;
   numero: number;
+  proyectoId?: string;
   estado: EstadoDespliegue;
+  disparador?: string;
   commit: { sha: string; mensaje: string; rama: string; autor: string } | null;
   url: string | null;
+  imagen?: { numero: number; digest: string; tamanoBytes: number; receta: string | null } | null;
+  recursos?: { cpus: number; memoriaMb: number } | null;
+  codigoSalida?: number | null;
+  motivoFallo?: string | null;
+  creado?: string;
+  terminado?: string | null;
   etapas: EtapaDespliegue[];
 }
 

@@ -75,8 +75,8 @@ export function useAltaProyecto() {
     setPaso("revisar");
   };
 
-  /** Devuelve el id del proyecto creado, o `null` si la API lo rechazó. */
-  const desplegar = async (): Promise<string | null> => {
+  /** Devuelve el proyecto y el número del despliegue, o `null` si la API lo rechazó. */
+  const desplegar = async (): Promise<{ id: string; numero: number } | null> => {
     if (!validacion) return null;
     setOcupado(true);
     try {
@@ -84,7 +84,7 @@ export function useAltaProyecto() {
         metodo: "POST",
         cuerpo: { url: validacion.urlNormalizada, rama, nombre, puerto: Number(puerto) },
       });
-      return creado.proyecto.id;
+      return { id: creado.proyecto.id, numero: creado.despliegue.numero };
     } catch (e) {
       const alta = errorDe(e);
       setError(alta);

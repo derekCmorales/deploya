@@ -36,7 +36,7 @@ export class ErrorApi extends Error {
   }
 }
 
-export async function pedirApi<T>(ruta: string, opciones: { metodo?: "GET" | "POST" | "DELETE"; cuerpo?: unknown } = {}): Promise<T> {
+export async function pedirApi<T>(ruta: string, opciones: { metodo?: "GET" | "POST" | "PUT" | "DELETE"; cuerpo?: unknown } = {}): Promise<T> {
   const respuesta = await enviar(ruta, opciones);
   const json = (await respuesta.json().catch(() => ({}))) as Record<string, unknown>;
   if (respuesta.ok) return json as T;

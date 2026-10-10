@@ -62,17 +62,26 @@ export interface ValidacionRepositorio {
   rama: string;
   ramas: string[];
   commit: { sha: string; mensaje: string; autor: string; fecha: string };
-  dockerfile: string;
+  dockerfile: string | null;
   puerto: number;
+  deteccion?: { receta: string; nombre: string; descripcion: string };
 }
 
-/** `GET /despliegues/:id` (solo lo que usa el detalle de la pantalla 10). */
+/** `GET /despliegues/:id` y la consulta por número (10, 12, 12b, 12c). */
 export interface VistaDespliegue {
   id: string;
   numero: number;
+  proyectoId?: string;
   estado: EstadoDespliegue;
+  disparador?: string;
   commit: { sha: string; mensaje: string; rama: string; autor: string } | null;
   url: string | null;
+  imagen?: { numero: number; digest: string; tamanoBytes: number; receta: string | null } | null;
+  recursos?: { cpus: number; memoriaMb: number } | null;
+  codigoSalida?: number | null;
+  motivoFallo?: string | null;
+  creado?: string;
+  terminado?: string | null;
   etapas: EtapaDespliegue[];
 }
 
@@ -163,6 +172,33 @@ export function shaCorto(sha: string): string {
   return sha.slice(0, LONGITUD_SHA_CORTO);
 }
 
+/** Tarjeta de 11a: Dockerfile propio o «Stack detectado: Node.js 22 · receta Deploya». */
+export function tituloDeteccion(validacion: Pick<ValidacionRepositorio, "dockerfile" | "deteccion">): { titulo: string; detalle: string } {
+  const deteccion = validacion.deteccion;
+  if (deteccion && deteccion.receta !== "dockerfile") {
+    return { titulo: `Stack detectado: ${deteccion.nombre} · receta Deploya`, detalle: deteccion.descripcion };
+  }
+  return { titulo: "Dockerfile encontrado", detalle: validacion.dockerfile ? resumenDockerfile(validacion.dockerfile) : "Dockerfile en la raíz" };
+}
+
+/** Línea «Construcción» de 11d. */
+export function textoConstruccion(validacion: Pick<ValidacionRepositorio, "deteccion">): string {
+  if (validacion.deteccion && validacion.deteccion.receta !== "dockerfile") return validacion.deteccion.descripcion;
+  return "docker build · /Dockerfile";
+}
+
+export interface BloqueoDespliegue {
+  titulo: string;
+  accion: "Renovar" | "Cambiar de plan";
+}
+
+/** Banner de 11d y 17. `null` si el código no es un bloqueo de M5. */
+export function bloqueoDespliegue(codigo: string, mensaje: string): BloqueoDespliegue | null {
+  if (codigo === "suscripcion-no-permite") return { titulo: mensaje, accion: "Renovar" };
+  if (codigo === "cuota-construcciones-agotada") return { titulo: "Usaste las construcciones de tu plan este mes", accion: "Cambiar de plan" };
+  return null;
+}
+
 /** «/Dockerfile · FROM node:20-alpine · EXPOSE 8080». */
 export function resumenDockerfile(dockerfile: string): string {
   const instrucciones = dockerfile
@@ -178,6 +214,15 @@ export function resumenDockerfile(dockerfile: string): string {
 export function etapasDelRiel(despliegue: Pick<ResumenDespliegue, "etapas"> | null): EstadoEtapa[] {
   if (!despliegue) return ["pendiente", "pendiente", "pendiente", "pendiente", "pendiente"];
   return despliegue.etapas.map((e) => e.estado);
+}
+
+/** Texto bajo cada segmento del riel grande (12, 12b, 12c). */
+export function textoEtapa(nombre: string, estado: string, duracionMs: number | null, todoBien: boolean): string {
+  if (estado === "pendiente" || estado === "omitida") return "Pendiente";
+  if (estado === "en-curso") return "En curso";
+  if (estado === "fallida") return duracionMs === null ? "Falló" : `Falló · ${duracionEtapa(duracionMs)}`;
+  if (todoBien && nombre === "operacion") return "estable";
+  return duracionEtapa(duracionMs);
 }
 
 /** «1.4 s» · «01:10» · «—». */
@@ -207,6 +252,8 @@ export function haceCuanto(fechaIso: string, ahora: Date): string {
 export type ErrorAlta =
   | { tipo: "no-accesible"; estadoHttp: number }
   | { tipo: "sin-dockerfile"; rama: string }
+  | { tipo: "stack-no-reconocido"; rama: string; pista: string; mensaje: string }
+  | { tipo: "bloqueo"; codigo: string; titulo: string; accion: "Renovar" | "Cambiar de plan"; mensaje: string }
   | { tipo: "campo"; campo: "url" | "rama" | "nombre" | "puerto"; mensaje: string }
   | { tipo: "aviso"; mensaje: string };
 
@@ -219,6 +266,11 @@ const CAMPO_POR_CODIGO: Record<string, "url" | "rama" | "nombre"> = {
 export function errorDeAlta(codigo: string, mensaje: string, detalle: Record<string, unknown>): ErrorAlta {
   if (codigo === "repositorio-no-accesible") return { tipo: "no-accesible", estadoHttp: Number(detalle.estadoHttp) };
   if (codigo === "sin-dockerfile") return { tipo: "sin-dockerfile", rama: String(detalle.rama) };
+  if (codigo === "stack-no-reconocido") {
+    return { tipo: "stack-no-reconocido", rama: String(detalle.rama), pista: String(detalle.pista ?? ""), mensaje };
+  }
+  const bloqueo = bloqueoDespliegue(codigo, mensaje);
+  if (bloqueo) return { tipo: "bloqueo", codigo, ...bloqueo, mensaje };
   if (codigo === "datos-invalidos" && /puerto/i.test(mensaje)) return { tipo: "campo", campo: "puerto", mensaje };
   if (codigo === "datos-invalidos" && /nombre/i.test(mensaje)) return { tipo: "campo", campo: "nombre", mensaje };
   const campo = CAMPO_POR_CODIGO[codigo];

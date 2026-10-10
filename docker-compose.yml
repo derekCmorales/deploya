@@ -58,6 +58,7 @@ services:
       SMTP_PORT: 1025
       CORREO_REMITENTE: Deploya <no-responder@deploya.localhost>
       URL_WEB: http://localhost:${WEB_PORT:-3000}
+      CLAVE_CIFRADO_VARIABLES: ${CLAVE_CIFRADO_VARIABLES:-deploya-dev-clave-variables-032b}
     ports:
       - "${API_PORT:-3001}:3000"
     depends_on:
@@ -83,6 +84,7 @@ services:
       TRAEFIK_CONTENEDOR: deploya-traefik
       TRABAJADOR_CONTENEDOR: deploya-worker
       TRABAJADOR_CONCURRENCIA: ${TRABAJADOR_CONCURRENCIA:-1}
+      CLAVE_CIFRADO_VARIABLES: ${CLAVE_CIFRADO_VARIABLES:-deploya-dev-clave-variables-032b}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - traefik_dinamico:/traefik/dinamico

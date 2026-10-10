@@ -20,8 +20,8 @@ Requiere `feat/m4-motor-construccion` en `main`. Pruebas con mapas de archivos e
 
 ## 4. Alta (con Eduardo)
 
-- [ ] 4.1 Eduardo: `LectorFuenteGitHub` y llamada en 11a; textos de 11a y 11e según el contrato v2
-- [ ] 4.2 Pruebas de M3 (Eduardo): «Repositorio sin Dockerfile con stack reconocido», «Falta el Dockerfile y no se reconoce el stack»
+- [x] 4.1 Eduardo: `LectorFuenteGitHub` y llamada en 11a; textos de 11a y 11e según el contrato v2
+- [x] 4.2 Pruebas de M3 (Eduardo): «Repositorio sin Dockerfile con stack reconocido», «Falta el Dockerfile y no se reconoce el stack»
 
 ## 5. Cierre
 

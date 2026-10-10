@@ -1,13 +1,15 @@
-import { FuenteNoDisponible, RamaNoEncontrada, RepositorioNoAccesible, RepositorioSinDockerfile } from "../dominio/errores";
+import { LectorFuente } from "../../construccion/puertos/lector-fuente.puerto";
+import { FuenteNoDisponible, RamaNoEncontrada, RepositorioNoAccesible } from "../dominio/errores";
 import type { CommitFuente, ConsultaRepositorio, ValidacionRepositorio } from "../dominio/proyecto";
 import { PUERTO_POR_DEFECTO, RUTA_DOCKERFILE } from "../dominio/proyectos.constantes";
 import { puertoDesdeExpose } from "../dominio/puerto-expose";
 import { repositorioDesdeUrl } from "../dominio/repositorio-github";
 import { ProveedorFuente } from "../puertos/proveedor-fuente.puerto";
+import { API_GITHUB, type ClienteHttp } from "./cliente-github";
+import { LectorFuenteGitHub } from "./lector-fuente.github";
 
-export type ClienteHttp = (url: string, opciones: RequestInit) => Promise<Response>;
-
-export const API_GITHUB = "https://api.github.com";
+export type { ClienteHttp };
+export { API_GITHUB };
 const TIEMPO_ESPERA_GITHUB_MS = 10_000;
 const RAMAS_POR_PAGINA = 100;
 const HTTP_NO_ENCONTRADO = 404;
@@ -50,8 +52,12 @@ export class FuenteGitHubPublica extends ProveedorFuente {
       ramas,
       commit,
       dockerfile,
-      puerto: puertoDesdeExpose(dockerfile) ?? PUERTO_POR_DEFECTO,
+      puerto: dockerfile ? (puertoDesdeExpose(dockerfile) ?? PUERTO_POR_DEFECTO) : PUERTO_POR_DEFECTO,
     };
+  }
+
+  lector({ url, rama }: ConsultaRepositorio): LectorFuente {
+    return new LectorFuenteGitHub(this.http, this.token, this.api, repositorioDesdeUrl(url), rama);
   }
 
   private async ramas(base: string): Promise<string[]> {
@@ -69,15 +75,16 @@ export class FuenteGitHubPublica extends ProveedorFuente {
     return { sha, mensaje: commit.message.split("\n")[0], autor: commit.author.name, fecha: commit.author.date };
   }
 
-  private async dockerfile(base: string, rama: string): Promise<string> {
+  /** `null` si no hay archivo: el servicio pide la receta a M4 antes de rechazar. */
+  private async dockerfile(base: string, rama: string): Promise<string | null> {
     const respuesta = await this.pedir(`${base}/contents/${RUTA_DOCKERFILE}?ref=${encodeURIComponent(rama)}`);
-    if (respuesta.status === HTTP_NO_ENCONTRADO) throw new RepositorioSinDockerfile(rama);
+    if (respuesta.status === HTTP_NO_ENCONTRADO) return null;
     const contenido = (await (await this.exigir(respuesta)).json()) as ContenidoGitHub | unknown[];
-    if (Array.isArray(contenido) || contenido.type !== "file") throw new RepositorioSinDockerfile(rama);
+    if (Array.isArray(contenido) || contenido.type !== "file") return null;
     if (contenido.content) return Buffer.from(contenido.content, "base64").toString("utf-8");
     // La API omite `content` en archivos de más de 1 MB; se baja crudo.
     if (contenido.download_url) return (await this.exigir(await this.pedir(contenido.download_url))).text();
-    throw new RepositorioSinDockerfile(rama);
+    return null;
   }
 
   private async pedir(url: string): Promise<Response> {

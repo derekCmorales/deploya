@@ -10,7 +10,8 @@ import { CuotaPlanSuscripciones } from "./adaptadores/cuota-plan.suscripciones";
 import { OrquestacionService } from "./orquestacion.service";
 import { PasoEjecucion } from "./paso-ejecucion";
 import { PasoOperacion } from "./paso-operacion";
-import { VariablesEntornoPendientes } from "./adaptadores/variables-entorno.pendientes";
+import { VariablesModule } from "../proyectos/variables.module";
+import { VariablesEntornoProyecto } from "./adaptadores/variables-entorno.proyecto";
 import { CuotaPlanPuerto } from "./puertos/cuota-plan.puerto";
 import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
 
@@ -19,13 +20,13 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
  * el consumidor de la cola `operacion` con un manejador por acción.
  */
 @Module({
-  imports: [SuscripcionesModule, EnrutamientoTrabajadorModule],
+  imports: [SuscripcionesModule, EnrutamientoTrabajadorModule, VariablesModule],
   providers: [
     OrquestacionService,
     PasoEjecucion,
     PasoOperacion,
     { provide: CuotaPlanPuerto, useClass: CuotaPlanSuscripciones },
-    { provide: VariablesEntornoPuerto, useClass: VariablesEntornoPendientes },
+    { provide: VariablesEntornoPuerto, useClass: VariablesEntornoProyecto },
     ReiniciarManejador,
     DetenerManejador,
     EliminarManejador,

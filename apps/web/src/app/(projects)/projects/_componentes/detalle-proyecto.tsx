@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink, FolderGit2, Globe } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDespliegue } from "@/hooks/use-despliegue";
 import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
+import { rutaDespliegue } from "@/lib/despliegues";
 import {
   duracionEtapa,
   etapasDelRiel,
@@ -74,7 +76,9 @@ export function DetalleProyecto({
         {despliegue ? (
           <>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold">Despliegue #{despliegue.numero}</span>
+              <Link href={rutaDespliegue(proyecto.id, despliegue.numero)} className="text-sm font-semibold hover:underline">
+                Despliegue #{despliegue.numero}
+              </Link>
               {vista?.commit ? (
                 <span className="font-mono text-xs text-muted-foreground">
                   {shaCorto(vista.commit.sha)} · {vista.commit.mensaje}

@@ -10,7 +10,9 @@ import {
   contadorProyectos,
   despliegueEnCurso,
   duracionEtapa,
+  bloqueoDespliegue,
   errorDeAlta,
+  tituloDeteccion,
   etapasDelRiel,
   filtrarProyectos,
   haceCuanto,
@@ -22,6 +24,7 @@ import {
   resumenDockerfile,
   subdominioDesdeNombre,
   subtituloProyectos,
+  textoEtapa,
   urlProyecto,
 } from "../src/lib/proyectos.ts";
 
@@ -109,6 +112,13 @@ test("11a · puerto válido entre 1 y 65535", () => {
   for (const p of ["0", "65536", "80.5", "abc", ""]) assert.equal(puertoValido(p), false, p);
 });
 
+test("12 · el riel grande dice el estado de la etapa", () => {
+  assert.equal(textoEtapa("construccion", "en-curso", 70_000, false), "En curso");
+  assert.equal(textoEtapa("construccion", "fallida", 38_000, false), "Falló · 38.0 s");
+  assert.equal(textoEtapa("operacion", "completada", 9_000, true), "estable");
+  assert.equal(textoEtapa("recepcion", "pendiente", null, false), "Pendiente");
+});
+
 test("11e · cada código de la API se pinta donde dice el diseño", () => {
   assert.deepEqual(errorDeAlta("repositorio-no-accesible", "x", { estadoHttp: 404 }), { tipo: "no-accesible", estadoHttp: 404 });
   assert.deepEqual(errorDeAlta("sin-dockerfile", "x", { rama: "main" }), { tipo: "sin-dockerfile", rama: "main" });
@@ -117,6 +127,10 @@ test("11e · cada código de la API se pinta donde dice el diseño", () => {
   assert.deepEqual(errorDeAlta("subdominio-en-uso", "ocupado", {}), { tipo: "campo", campo: "nombre", mensaje: "ocupado" });
   assert.deepEqual(errorDeAlta("datos-invalidos", "El puerto debe…", {}), { tipo: "campo", campo: "puerto", mensaje: "El puerto debe…" });
   assert.deepEqual(errorDeAlta("limite-proyectos", "Tu plan permite 1 proyecto.", {}), { tipo: "aviso", mensaje: "Tu plan permite 1 proyecto." });
+  assert.equal(errorDeAlta("stack-no-reconocido", "falta Dockerfile y no se reconoce el stack", { rama: "main", pista: "agrega un script start o un Dockerfile" }).tipo, "stack-no-reconocido");
+  assert.equal(errorDeAlta("suscripcion-no-permite", "Tu suscripción está vencida: renuévala para volver a desplegar", {}).tipo, "bloqueo");
+  assert.equal(bloqueoDespliegue("cuota-construcciones-agotada", "Usaste las 30 construcciones de tu plan este mes")?.accion, "Cambiar de plan");
+  assert.equal(tituloDeteccion({ dockerfile: null, deteccion: { receta: "node", nombre: "Node.js 22", descripcion: "Node.js 22 · npm start" } }).titulo, "Stack detectado: Node.js 22 · receta Deploya");
   assert.deepEqual(errorDeAlta("fuente-no-disponible", "GitHub no respondió.", {}), { tipo: "aviso", mensaje: "GitHub no respondió." });
 });
 

@@ -2,6 +2,7 @@
 
 import { GitBranch, Plus, Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
@@ -9,6 +10,7 @@ import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Meter } from "@/components/ui/meter";
+import { rutaDespliegue } from "@/lib/despliegues";
 import {
   contadorProyectos,
   etapasDelRiel,
@@ -117,11 +119,16 @@ function FilaProyecto({
   onSeleccionar: (id: string) => void;
 }) {
   const ultimo = proyecto.ultimoDespliegue;
+  const router = useRouter();
+  const abrir = () => {
+    onSeleccionar(proyecto.id);
+    if (ultimo) router.push(rutaDespliegue(proyecto.id, ultimo.numero));
+  };
   return (
     <li className="border-b border-border last:border-b-0">
       <button
         type="button"
-        onClick={() => onSeleccionar(proyecto.id)}
+        onClick={abrir}
         aria-current={activo ? "true" : undefined}
         className={cn(
           "relative flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",

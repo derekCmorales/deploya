@@ -1898,6 +1898,7 @@ classDiagram
         +listar(usuarioId) ListaProyectos
         +crear(usuarioId, alta) ProyectoCreado
         +eliminar(usuarioId, proyectoId, confirmacion) void
+        -bloqueos BloqueosService
     }
     class ProveedorFuente {
         <<abstract>>
@@ -1905,6 +1906,7 @@ classDiagram
         +lector(url, rama) LectorFuente
     }
     class FuenteGitHubPublica
+    class LectorFuenteGitHub
     class RepositorioProyectos {
         <<abstract>>
         +guardar(proyecto) Proyecto
@@ -2309,6 +2311,9 @@ classDiagram
     ProyectosService --> DeteccionStackService : detectar
     ProyectosService --> ConstruccionService : crearDespliegue
     ProveedorFuente <|-- FuenteGitHubPublica
+    FuenteGitHubPublica --> LectorFuenteGitHub
+    LectorFuente <|-- LectorFuenteGitHub
+    ProyectosService --> BloqueosService : verificar
     FuenteGitHubPublica --> ParserExpose
     RepositorioProyectos <|-- RepositorioProyectosPrisma
     CuotaProyectosPuerto <|-- CuotaProyectosSuscripciones

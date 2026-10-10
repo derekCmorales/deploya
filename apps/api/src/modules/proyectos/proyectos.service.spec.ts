@@ -2,7 +2,14 @@ import { RepositorioProyectosMemoria } from "../../adapters/memoria/repositorio-
 import { RepositorioVariablesMemoria } from "../../adapters/memoria/repositorio-variables.memoria";
 import { RelojFijo } from "../../compartido/reloj";
 import type { ConstruccionService } from "../construccion/construccion.service";
+import { DeteccionStackService } from "../construccion/deteccion/deteccion-stack.service";
+import { recetasEnOrden } from "../construccion/deteccion/recetas-stack";
+import { LectorFuente } from "../construccion/puertos/lector-fuente.puerto";
+import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
+import { BloqueosService } from "../orquestacion/bloqueos.service";
+import { CuotaConstruccionesAgotada, SuscripcionNoPermite } from "../orquestacion/dominio/errores";
 import { CUOTA_SANDBOX } from "./adaptadores/cuota-proyectos.stub";
+import { CifradorFalso } from "./adaptadores/cifrador-falso";
 import {
   ClaveInvalida,
   ConfirmacionNoCoincide,
@@ -10,25 +17,42 @@ import {
   ProyectoNoEncontrado,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
+  StackNoReconocidoEnAlta,
   SubdominioEnUso,
 } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, ValidacionRepositorio } from "./dominio/proyecto";
-import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
-import { CifradorFalso } from "./adaptadores/cifrador-falso";
 import { ProyectosService } from "./proyectos.service";
-import { VariablesProyectoService } from "./servicios/variables-proyecto.service";
 import { CuotaProyectosPuerto, type CuotaProyectos } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
+import { VariablesProyectoService } from "./servicios/variables-proyecto.service";
 
 const URL = "https://github.com/derekCmorales/hola-deploya";
 
+class LectorMapa extends LectorFuente {
+  constructor(private readonly archivos: Map<string, string>) {
+    super();
+  }
+
+  async existe(ruta: string): Promise<boolean> {
+    return this.archivos.has(ruta);
+  }
+
+  async leer(ruta: string): Promise<string | null> {
+    return this.archivos.get(ruta) ?? null;
+  }
+}
+
+const DOCKERFILE = "FROM node\nEXPOSE 3000";
+
 class FuenteDoble extends ProveedorFuente {
   error: Error | null = null;
+  archivos = new Map<string, string>([["Dockerfile", DOCKERFILE]]);
   readonly consultas: ConsultaRepositorio[] = [];
 
   async validar(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
     this.consultas.push(consulta);
     if (this.error) throw this.error;
+    const dockerfile = this.archivos.get("Dockerfile") ?? null;
     return {
       accesible: true,
       urlNormalizada: URL,
@@ -36,9 +60,21 @@ class FuenteDoble extends ProveedorFuente {
       rama: consulta.rama,
       ramas: ["main"],
       commit: { sha: "a1b2c3d", mensaje: "feat: hola", autor: "Derek", fecha: "2026-09-29T10:00:00Z" },
-      dockerfile: "FROM node\nEXPOSE 3000",
+      dockerfile,
       puerto: 3000,
     };
+  }
+
+  lector(): LectorFuente {
+    return new LectorMapa(this.archivos);
+  }
+}
+
+class BloqueosDoble {
+  error: Error | null = null;
+
+  async verificar(): Promise<void> {
+    if (this.error) throw this.error;
   }
 }
 
@@ -61,6 +97,7 @@ function montar() {
   };
   const acciones = { pedirEliminacion: jest.fn(async () => undefined) };
   const variables = new VariablesProyectoService(new CifradorFalso(), new RepositorioVariablesMemoria(reloj), repositorio);
+  const bloqueos = new BloqueosDoble();
   const servicio = new ProyectosService(
     fuente,
     repositorio,
@@ -68,13 +105,41 @@ function montar() {
     construccion as unknown as ConstruccionService,
     acciones as unknown as AccionesProyectoService,
     variables,
+    new DeteccionStackService(recetasEnOrden()),
+    bloqueos as unknown as BloqueosService,
   );
-  return { servicio, fuente, reloj, repositorio, cuota, construccion, acciones, variables };
+  return { servicio, fuente, reloj, repositorio, cuota, construccion, acciones, variables, bloqueos };
 }
 
 const alta = (cambios: Partial<AltaProyecto> = {}): AltaProyecto => ({ url: URL, rama: "main", nombre: "Hola Deploya", ...cambios });
 
 describe("ProyectosService", () => {
+  describe("validarRepositorio", () => {
+    it("Repositorio válido", async () => {
+      const { servicio } = montar();
+      const validacion = await servicio.validarRepositorio({ url: URL, rama: "main" });
+      expect(validacion.deteccion).toMatchObject({ receta: "dockerfile", descripcion: "Dockerfile en la raíz" });
+      expect(validacion.puerto).toBe(3000);
+    });
+
+    it("Repositorio sin Dockerfile con stack reconocido", async () => {
+      const { servicio, fuente } = montar();
+      fuente.archivos = new Map([["package.json", JSON.stringify({ scripts: { start: "node server.js" } })]]);
+      const validacion = await servicio.validarRepositorio({ url: URL, rama: "main" });
+      expect(validacion.dockerfile).toBeNull();
+      expect(validacion.deteccion?.nombre).toBe("Node.js 22");
+      expect(validacion.puerto).toBe(8080);
+    });
+
+    it("Falta el Dockerfile y no se reconoce el stack", async () => {
+      const { servicio, fuente } = montar();
+      fuente.archivos = new Map([["package.json", JSON.stringify({ scripts: {} })]]);
+      const error = await servicio.validarRepositorio({ url: URL, rama: "main" }).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(StackNoReconocidoEnAlta);
+      expect(error).toMatchObject({ rama: "main", pista: "agrega un script start o un Dockerfile" });
+    });
+  });
+
   describe("crear", () => {
     it("Desplegar: guarda el proyecto y pide el despliegue #1 encolado con disparador «alta»", async () => {
       const { servicio, repositorio, construccion } = montar();
@@ -120,10 +185,36 @@ describe("ProyectosService", () => {
       expect(await variables.descifradasDe(proyecto.id)).toEqual({ SALUDO: "nuevo" });
     });
 
+    it("Guardar y desplegar con la suscripción vencida no cambia las variables", async () => {
+      const { servicio, bloqueos, variables } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta({ variables: [{ clave: "SALUDO", valor: "hola" }] }));
+      bloqueos.error = new SuscripcionNoPermite("vencida");
+      await expect(
+        servicio.guardarVariables("usuario-1", proyecto.id, { variables: [{ clave: "SALUDO", valor: "nuevo" }], desplegar: true }),
+      ).rejects.toThrow(SuscripcionNoPermite);
+      expect(await variables.descifradasDe(proyecto.id)).toEqual({ SALUDO: "hola" });
+    });
+
     it("el puerto elegido por el usuario gana al de EXPOSE", async () => {
       const { servicio } = montar();
       const { proyecto } = await servicio.crear("usuario-1", alta({ puerto: 9000 }));
       expect(proyecto.puertoInterno).toBe(9000);
+    });
+
+    it("Alta con la suscripción vencida", async () => {
+      const { servicio, fuente, repositorio, bloqueos } = montar();
+      bloqueos.error = new SuscripcionNoPermite("vencida");
+      await expect(servicio.crear("usuario-1", alta())).rejects.toThrow(SuscripcionNoPermite);
+      expect(fuente.consultas).toHaveLength(0);
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
+    });
+
+    it("Construcciones agotadas en el alta", async () => {
+      const { servicio, repositorio, bloqueos, construccion } = montar();
+      bloqueos.error = new CuotaConstruccionesAgotada(30);
+      await expect(servicio.crear("usuario-1", alta())).rejects.toThrow(CuotaConstruccionesAgotada);
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
+      expect(construccion.crearDespliegue).not.toHaveBeenCalled();
     });
 
     it("Repositorio no accesible: propaga el error de 11e y no guarda nada", async () => {

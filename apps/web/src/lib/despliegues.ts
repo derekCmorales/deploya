@@ -123,3 +123,12 @@ export function etiquetaEtapaActual(etapas: readonly { estado: string }[]): stri
   const nombre = NOMBRES_ETAPA[indice];
   return nombre ? `${String(indice + 1).padStart(2, "0")} · ${nombre}` : null;
 }
+
+/** 12b: reiniciar desde Saludable o Detenido; detener solo desde Saludable. En curso, ambos quietos. */
+export function puedeReiniciar(estado: string): boolean {
+  return estado === "saludable" || estado === "detenido";
+}
+
+export function puedeDetener(estado: string): boolean {
+  return estado === "saludable";
+}

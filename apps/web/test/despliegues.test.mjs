@@ -11,6 +11,8 @@ import {
   fusionarLineas,
   lineaDeError,
   marcaVisible,
+  puedeDetener,
+  puedeReiniciar,
   rutaDespliegue,
   sondearBitacora,
   textoParaCopiar,
@@ -81,5 +83,18 @@ test("12 · la vista no muestra Cancelar y usa la bitácora del sistema", () => 
   assert.match(panel, /Se actualiza cada 3 s/);
   assert.match(panel, /Copiar/);
   assert.doesNotMatch(panel, /Cancelar despliegue/);
+  assert.doesNotMatch(panel, /Reintentar/);
+  assert.match(panel, /Reiniciar/);
+  assert.match(panel, /Detener/);
   assert.doesNotMatch(panel, /\bfetch\(/);
 });
+
+test("12b · Reiniciar y Detener solo cuando el contrato lo permite", () => {
+  assert.equal(puedeReiniciar("saludable"), true);
+  assert.equal(puedeReiniciar("detenido"), true);
+  assert.equal(puedeReiniciar("construyendo"), false);
+  assert.equal(puedeDetener("saludable"), true);
+  assert.equal(puedeDetener("detenido"), false);
+  assert.equal(puedeDetener("fallido"), false);
+});
+

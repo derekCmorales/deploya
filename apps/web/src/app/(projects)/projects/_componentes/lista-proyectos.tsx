@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Banner } from "@/components/ui/banner";
+import { useMiSuscripcion } from "@/hooks/use-suscripcion";
+
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { Button } from "@/components/ui/button";
@@ -20,7 +23,7 @@ import {
   type ListaProyectos as Lista,
   type ProyectoEnLista,
 } from "@/lib/proyectos";
-import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
+import { avisoEstado, RUTA_SUSCRIPCION, sinVigencia } from "@/lib/suscripcion";
 import { cn } from "@/lib/utils";
 
 import { DetalleProyecto } from "./detalle-proyecto";
@@ -41,9 +44,25 @@ export function ListaProyectos({
   const visibles = filtrarProyectos(lista.proyectos, busqueda);
   const activo = lista.proyectos.find((p) => p.id === seleccionado) ?? lista.proyectos[0];
   const contador = contadorProyectos(lista);
+  const suscripcion = useMiSuscripcion();
+  const bloqueada = suscripcion.datos ? sinVigencia(suscripcion.datos.estado) : false;
+  const aviso = suscripcion.datos ? avisoEstado(suscripcion.datos.estado) : null;
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-background">
+      {bloqueada && aviso ? (
+        <Banner
+          variant="bad"
+          title={aviso.titulo}
+          actions={
+            <Button asChild variant="outline" size="sm">
+              <Link href={RUTA_SUSCRIPCION}>Renovar</Link>
+            </Button>
+          }
+        >
+          {aviso.texto}
+        </Banner>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
         <label htmlFor="buscar-proyecto" className="sr-only">
           Buscar proyecto
@@ -61,26 +80,26 @@ export function ListaProyectos({
         </div>
         <span className="flex-1" />
         <span className="text-xs text-muted-foreground">{contador}</span>
-        {puedeCrearProyecto(lista) ? (
-          <Button asChild size="sm">
-            <Link href="/projects/nuevo">
-              <Plus />
-              Nuevo proyecto
-            </Link>
-          </Button>
-        ) : (
+        {bloqueada || !puedeCrearProyecto(lista) ? (
           <>
             <Button asChild variant="link" size="sm" className="text-xs">
-              <Link href={RUTA_SUSCRIPCION}>Cambiar plan</Link>
+              <Link href={RUTA_SUSCRIPCION}>{bloqueada ? "Renovar" : "Cambiar plan"}</Link>
             </Button>
             <Button size="sm" disabled aria-describedby="limite-proyectos">
               <Plus />
               Nuevo proyecto
             </Button>
             <span id="limite-proyectos" className="sr-only">
-              {contador}. Cambia de plan para crear más.
+              {bloqueada ? aviso?.texto : `${contador}. Cambia de plan para crear más.`}
             </span>
           </>
+        ) : (
+          <Button asChild size="sm">
+            <Link href="/projects/nuevo">
+              <Plus />
+              Nuevo proyecto
+            </Link>
+          </Button>
         )}
       </div>
 

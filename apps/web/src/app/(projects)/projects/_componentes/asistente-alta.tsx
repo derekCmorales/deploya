@@ -8,10 +8,11 @@ import type { FormEvent } from "react";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { useAltaProyecto } from "@/hooks/use-alta-proyecto";
+import { useMiSuscripcion } from "@/hooks/use-suscripcion";
 import { useProyectos } from "@/hooks/use-proyectos";
 import { rutaDespliegue } from "@/lib/despliegues";
 import { contadorProyectos, puedeCrearProyecto } from "@/lib/proyectos";
-import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
+import { avisoEstado, RUTA_SUSCRIPCION, sinVigencia } from "@/lib/suscripcion";
 
 import { LateralAlta } from "./lateral-alta";
 import { PasoRepositorio } from "./paso-repositorio";
@@ -26,7 +27,10 @@ export function AsistenteAlta() {
   const router = useRouter();
   const alta = useAltaProyecto();
   const { datos: lista } = useProyectos({ sondear: false });
+  const suscripcion = useMiSuscripcion();
   const sinCupo = lista !== null && !puedeCrearProyecto(lista);
+  const sinVigenciaActual = suscripcion.datos ? sinVigencia(suscripcion.datos.estado) : false;
+  const aviso = suscripcion.datos ? avisoEstado(suscripcion.datos.estado) : null;
   const indice = INDICE_PASO[alta.paso];
 
   const enviar = async (e: FormEvent) => {
@@ -41,6 +45,19 @@ export function AsistenteAlta() {
       <LateralAlta actual={indice} lista={lista} />
       <form onSubmit={enviar} className="flex min-w-0 flex-col" noValidate aria-busy={alta.ocupado}>
         <div className="flex max-w-[860px] flex-1 flex-col gap-6 px-12 py-8">
+          {sinVigenciaActual && aviso ? (
+            <Banner
+              variant="bad"
+              title={aviso.titulo}
+              actions={
+                <Button asChild variant="outline" size="sm">
+                  <Link href={RUTA_SUSCRIPCION}>Renovar</Link>
+                </Button>
+              }
+            >
+              {aviso.texto}
+            </Banner>
+          ) : null}
           {sinCupo && lista ? (
             <Banner
               variant="warn"
@@ -71,7 +88,7 @@ export function AsistenteAlta() {
               Atrás
             </Button>
           )}
-          <Button type="submit" disabled={alta.ocupado || sinCupo}>
+          <Button type="submit" disabled={alta.ocupado || sinCupo || sinVigenciaActual}>
             {alta.ocupado ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
             {alta.paso === "revisar" ? (
               <>

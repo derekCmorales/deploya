@@ -43,7 +43,10 @@ export interface ValidacionRepositorio {
   rama: string;
   ramas: string[];
   commit: CommitFuente;
-  dockerfile: string;
-  /** `EXPOSE` del Dockerfile o el puerto por defecto. */
+  /** `null` si no hay Dockerfile: la receta de M4 decide cómo se construye. */
+  dockerfile: string | null;
+  /** `EXPOSE` del Dockerfile, el de la receta, o el puerto por defecto. */
   puerto: number;
+  /** Lo llena el servicio tras `DeteccionStackService.detectar`. */
+  deteccion?: { receta: string; nombre: string; descripcion: string };
 }

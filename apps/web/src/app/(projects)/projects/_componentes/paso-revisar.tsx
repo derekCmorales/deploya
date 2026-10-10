@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { useAltaProyecto } from "@/hooks/use-alta-proyecto";
 import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
-import { recursosPlan, shaCorto, urlProyecto, type ListaProyectos } from "@/lib/proyectos";
+import { recursosPlan, shaCorto, textoConstruccion, urlProyecto, type ListaProyectos } from "@/lib/proyectos";
 import { variablesDeAlta } from "@/lib/variables";
+
+import { BannerBloqueo } from "./banner-bloqueo";
 
 type Alta = ReturnType<typeof useAltaProyecto>;
 
@@ -41,6 +43,7 @@ export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos
       </div>
 
       {alta.error?.tipo === "aviso" ? <Banner variant="bad" title={alta.error.mensaje} /> : null}
+      {alta.error?.tipo === "bloqueo" ? <BannerBloqueo codigo={alta.error.codigo} mensaje={alta.error.mensaje} /> : null}
 
       <Card className="overflow-hidden">
         <dl>
@@ -48,7 +51,7 @@ export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos
             {validacion.repositorio} · {alta.rama} · {shaCorto(validacion.commit.sha)}
           </Fila>
           <Fila icono={Package} titulo="Construcción" accion={editarFuente}>
-            docker build · /Dockerfile
+            {textoConstruccion(validacion)}
           </Fila>
           <Fila icono={Terminal} titulo="Puerto" accion={editarFuente}>
             {alta.puerto} → {ESQUEMA_APPS}

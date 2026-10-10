@@ -7,20 +7,31 @@ import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMiSuscripcion } from "@/hooks/use-suscripcion";
 import { useVariablesProyecto } from "@/hooks/use-variables-proyecto";
-import { haceCuanto } from "@/lib/proyectos";
+import { bloqueoDespliegue, haceCuanto } from "@/lib/proyectos";
+import { avisoEstado, sinVigencia } from "@/lib/suscripcion";
 import { errorClave, textoCambios, valorVisible, type FilaVariable } from "@/lib/variables";
+
+import { BannerBloqueo } from "./banner-bloqueo";
 
 /** Pantalla 17. Los cambios no tocan el contenedor hasta el próximo despliegue. */
 export function PanelVariables({ proyectoId }: { proyectoId: string }) {
   const variables = useVariablesProyecto(proyectoId);
+  const suscripcion = useMiSuscripcion();
+  const bloqueada = suscripcion.datos ? sinVigencia(suscripcion.datos.estado) : false;
+  const aviso = suscripcion.datos ? avisoEstado(suscripcion.datos.estado) : null;
   const [ahora] = useState(() => new Date());
   if (variables.cargando) return <Skeleton className="mx-8 mt-6 h-40" />;
 
   return (
     <div className="flex flex-col gap-5 px-8 py-6">
-      <CambiosPendientes variables={variables} />
-      {variables.error ? <Banner variant="bad" title={variables.error} /> : null}
+      {bloqueada && aviso ? <BannerBloqueo codigo="suscripcion-no-permite" mensaje={aviso.texto} /> : null}
+      <CambiosPendientes variables={variables} desplegarBloqueado={bloqueada} />
+      {variables.codigo && variables.error && bloqueoDespliegue(variables.codigo, variables.error) ? (
+        <BannerBloqueo codigo={variables.codigo} mensaje={variables.error} />
+      ) : null}
+      {variables.error && !bloqueoDespliegue(variables.codigo ?? "", variables.error) ? <Banner variant="bad" title={variables.error} /> : null}
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border text-left text-xs text-muted-foreground">
@@ -52,7 +63,7 @@ export function PanelVariables({ proyectoId }: { proyectoId: string }) {
 
 type Borrador = ReturnType<typeof useVariablesProyecto>;
 
-function CambiosPendientes({ variables }: { variables: Borrador }) {
+function CambiosPendientes({ variables, desplegarBloqueado }: { variables: Borrador; desplegarBloqueado: boolean }) {
   if (variables.cambios === 0) return null;
   return (
     <Banner
@@ -66,7 +77,7 @@ function CambiosPendientes({ variables }: { variables: Borrador }) {
           <Button type="button" variant="outline" size="sm" onClick={variables.guardar} disabled={variables.ocupado}>
             Guardar
           </Button>
-          <Button type="button" size="sm" onClick={variables.guardarYDesplegar} disabled={variables.ocupado}>
+              <Button type="button" size="sm" onClick={variables.guardarYDesplegar} disabled={variables.ocupado || desplegarBloqueado}>
             Guardar y desplegar
           </Button>
         </>

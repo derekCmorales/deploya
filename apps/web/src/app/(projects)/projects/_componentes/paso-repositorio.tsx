@@ -10,7 +10,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { useAltaProyecto } from "@/hooks/use-alta-proyecto";
 import { DOMINIO_APPS } from "@/lib/api";
-import { haceCuanto, resumenDockerfile, shaCorto, type ErrorAlta } from "@/lib/proyectos";
+import { haceCuanto, shaCorto, tituloDeteccion, type ErrorAlta, type ValidacionRepositorio } from "@/lib/proyectos";
 
 type Alta = ReturnType<typeof useAltaProyecto>;
 
@@ -25,7 +25,7 @@ CMD ["npm", "start"]`;
 /** Paso 1 del asistente: pantalla 11a y sus errores de 11e. */
 export function PasoRepositorio({ alta }: { alta: Alta }) {
   const { validacion, error } = alta;
-  const accesible = validacion !== null || error?.tipo === "sin-dockerfile";
+  const accesible = validacion !== null || error?.tipo === "sin-dockerfile" || error?.tipo === "stack-no-reconocido";
   const errorDe = (campo: string) => (error?.tipo === "campo" && error.campo === campo ? error.mensaje : undefined);
   const errorUrl = error?.tipo === "no-accesible" ? `No pudimos acceder al repositorio (HTTP ${error.estadoHttp}).` : errorDe("url");
 
@@ -112,9 +112,13 @@ export function PasoRepositorio({ alta }: { alta: Alta }) {
               label="Puerto interno"
               error={errorDe("puerto")}
               hint={
-                <>
-                  Tomado de <span className="font-mono">EXPOSE</span>. Puedes cambiarlo.
-                </>
+                validacion.deteccion && validacion.deteccion.receta !== "dockerfile" ? (
+                  <>Lo toma la receta. Puedes cambiarlo.</>
+                ) : (
+                  <>
+                    Tomado de <span className="font-mono">EXPOSE</span>. Puedes cambiarlo.
+                  </>
+                )
               }
             >
               <div className="relative">
@@ -138,14 +142,7 @@ export function PasoRepositorio({ alta }: { alta: Alta }) {
 
       {validacion ? (
         <>
-          <Card className="dy-entrada flex items-center gap-4 border-ok/40 px-4 py-3.5">
-            <CircleCheck className="size-[18px] shrink-0 text-ok" aria-hidden />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <p className="font-medium">Dockerfile encontrado</p>
-              <p className="truncate font-mono text-xs text-muted-foreground">{resumenDockerfile(validacion.dockerfile)}</p>
-            </div>
-            <Badge variant="ok">Listo para construir</Badge>
-          </Card>
+          <TarjetaDeteccion validacion={validacion} />
           <Sunken className="dy-entrada flex items-center gap-3 px-4 py-3.5">
             <GitCommitHorizontal className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             <div className="flex min-w-0 flex-col">
@@ -182,6 +179,16 @@ function ErrorRepositorio({ error, onReintentar, ocupado }: { error: ErrorAlta; 
       </div>
     );
   }
+  if (error.tipo === "stack-no-reconocido") {
+    return (
+      <div className="flex flex-col gap-4">
+        <Banner variant="bad" title={error.mensaje}>
+          {error.pista}
+        </Banner>
+        <EjemploDockerfile onReintentar={onReintentar} ocupado={ocupado} />
+      </div>
+    );
+  }
   if (error.tipo === "sin-dockerfile") {
     return (
       <div className="flex flex-col gap-4">
@@ -195,21 +202,43 @@ function ErrorRepositorio({ error, onReintentar, ocupado }: { error: ErrorAlta; 
         >
           deploya solo construye proyectos que traen su propio Dockerfile.
         </Banner>
-        <Sunken className="flex flex-col gap-2 px-3.5 py-3">
-          <p className="text-xs">
-            Agrega un archivo <span className="font-mono">Dockerfile</span> como este y vuelve a intentar:
-          </p>
-          <pre className="font-mono text-xs leading-5 whitespace-pre-wrap text-muted-foreground">{DOCKERFILE_EJEMPLO}</pre>
-        </Sunken>
-        <Button type="button" size="sm" className="self-start" onClick={onReintentar} disabled={ocupado}>
-          <RotateCw />
-          Volver a revisar
-        </Button>
+        <EjemploDockerfile onReintentar={onReintentar} ocupado={ocupado} />
       </div>
     );
   }
   if (error.tipo === "aviso") return <Banner variant="warn" title={error.mensaje} />;
   return null;
+}
+
+function TarjetaDeteccion({ validacion }: { validacion: ValidacionRepositorio }) {
+  const { titulo, detalle } = tituloDeteccion(validacion);
+  return (
+    <Card className="dy-entrada flex items-center gap-4 border-ok/40 px-4 py-3.5">
+      <CircleCheck className="size-[18px] shrink-0 text-ok" aria-hidden />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <p className="font-medium">{titulo}</p>
+        <p className="truncate font-mono text-xs text-muted-foreground">{detalle}</p>
+      </div>
+      <Badge variant="ok">Listo para construir</Badge>
+    </Card>
+  );
+}
+
+function EjemploDockerfile({ onReintentar, ocupado }: { onReintentar: () => void; ocupado: boolean }) {
+  return (
+    <>
+      <Sunken className="flex flex-col gap-2 px-3.5 py-3">
+        <p className="text-xs">
+          Agrega un archivo <span className="font-mono">Dockerfile</span> como este y vuelve a intentar:
+        </p>
+        <pre className="font-mono text-xs leading-5 whitespace-pre-wrap text-muted-foreground">{DOCKERFILE_EJEMPLO}</pre>
+      </Sunken>
+      <Button type="button" size="sm" className="self-start" onClick={onReintentar} disabled={ocupado}>
+        <RotateCw />
+        Volver a revisar
+      </Button>
+    </>
+  );
 }
 
 function cantidadRamas(n: number): string {

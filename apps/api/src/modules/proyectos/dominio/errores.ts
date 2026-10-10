@@ -64,6 +64,22 @@ export class RepositorioSinDockerfile extends ErrorProyectos {
   }
 }
 
+/** 11e cuando no hay Dockerfile y M4 no reconoce el stack. */
+export class StackNoReconocidoEnAlta extends ErrorProyectos {
+  readonly codigo = "stack-no-reconocido";
+
+  constructor(
+    readonly rama: string,
+    readonly pista: string,
+  ) {
+    super("falta Dockerfile y no se reconoce el stack");
+  }
+
+  detalle(): Record<string, unknown> {
+    return { rama: this.rama, pista: this.pista };
+  }
+}
+
 export class FuenteNoDisponible extends ErrorProyectos {
   readonly codigo = "fuente-no-disponible";
 

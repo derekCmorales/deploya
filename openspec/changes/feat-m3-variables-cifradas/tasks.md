@@ -28,6 +28,6 @@ Requiere el layout del proyecto de `feat/m7-vista-despliegue` para la pantalla 1
 ## 5. Cierre
 
 - [x] 5.1 `CLAVE_CIFRADO_VARIABLES` en `docker-compose.yml` y `.env.example`; `clases-unificado.mmd` y `pnpm diagramas:sync`
-- [ ] 5.2 `pnpm check` en verde; cobertura ≥ 80 % en `proyectos/` y `orquestacion/`
+- [x] 5.2 `pnpm check` en verde; cobertura ≥ 80 % en `proyectos/` y `orquestacion/`
 - [ ] 5.3 Demo en compose: `hola-deploya` muestra `SALUDO`; cambiarla en 17 → Guardar y desplegar → la app nueva responde con el valor nuevo sin corte
 - [ ] 5.4 `/opsx-archive` después del merge

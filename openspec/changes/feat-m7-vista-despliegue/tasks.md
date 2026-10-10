@@ -25,6 +25,6 @@ Requiere `feat/m4-motor-construccion` en `main` (ya está). Pruebas web con `nod
 
 ## 5. Cierre
 
-- [ ] 5.1 `pnpm check` en verde
+- [x] 5.1 `pnpm check` en verde
 - [ ] 5.2 Demo en compose: `hola-deploya` de punta a punta en 12; rama `roto` termina en 12c con la línea resaltada
 - [ ] 5.3 `/opsx-archive` después del merge

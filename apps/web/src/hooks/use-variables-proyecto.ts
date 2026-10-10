@@ -29,6 +29,7 @@ export function useVariablesProyecto(proyectoId: string) {
   const sondeo = useSondeo(leer, unaVez);
   const [borrador, setBorrador] = useState<FilaVariable[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [codigo, setCodigo] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const base = sondeo.datos ?? [];
   const filas = borrador ?? filasDesdeGuardadas(base);
@@ -43,9 +44,13 @@ export function useVariablesProyecto(proyectoId: string) {
 
   const guardar = async (desplegar: boolean) => {
     const invalida = filas.map((fila) => errorClave(fila.clave)).find((mensaje) => mensaje);
-    if (invalida) return setError(invalida);
+    if (invalida) {
+      setCodigo(null);
+      return setError(invalida);
+    }
     setOcupado(true);
     setError(null);
+    setCodigo(null);
     try {
       const respuesta = await pedirApi<RespuestaGuardado>(`/proyectos/${proyectoId}/variables`, {
         metodo: "PUT",
@@ -56,6 +61,7 @@ export function useVariablesProyecto(proyectoId: string) {
       if (respuesta.despliegue) router.push(rutaDespliegue(proyectoId, respuesta.despliegue.numero));
     } catch (e) {
       setError(e instanceof ErrorApi ? e.message : "No pudimos guardar las variables.");
+      setCodigo(e instanceof ErrorApi ? e.codigo : null);
     } finally {
       setOcupado(false);
     }
@@ -77,6 +83,7 @@ export function useVariablesProyecto(proyectoId: string) {
     filas,
     cambios,
     error: error ?? sondeo.error?.message ?? null,
+    codigo,
     cargando: sondeo.cargando,
     ocupado,
     guardadas: base,

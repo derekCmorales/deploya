@@ -1,3 +1,4 @@
+import type { LectorFuente } from "../../construccion/puertos/lector-fuente.puerto";
 import type { ConsultaRepositorio, ValidacionRepositorio } from "../dominio/proyecto";
 
 /**
@@ -6,8 +7,11 @@ import type { ConsultaRepositorio, ValidacionRepositorio } from "../dominio/proy
  */
 export abstract class ProveedorFuente {
   /**
-   * Lanza `RepositorioNoAccesible`, `RamaNoEncontrada`, `RepositorioSinDockerfile`
-   * o `FuenteNoDisponible`.
+   * Lanza `RepositorioNoAccesible`, `RamaNoEncontrada` o `FuenteNoDisponible`.
+   * Sin Dockerfile, `dockerfile` llega `null` para que M4 intente una receta.
    */
   abstract validar(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio>;
+
+  /** Archivos de esa rama, para `DeteccionStackService` (contrato v2). */
+  abstract lector(consulta: ConsultaRepositorio): LectorFuente;
 }

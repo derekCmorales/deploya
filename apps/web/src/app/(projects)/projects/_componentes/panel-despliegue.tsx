@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, ExternalLink } from "lucide-react";
+import { Copy, ExternalLink, RotateCw, Square } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useBitacora } from "@/hooks/use-bitacora";
 import { useDespliegue } from "@/hooks/use-despliegue";
 import { useDesplieguePorNumero } from "@/hooks/use-despliegue-por-numero";
+import { ErrorApi, pedirApi } from "@/lib/api";
 import {
   INTERVALO_RELOJ_MS,
   avisoVersionAnterior,
@@ -20,19 +21,22 @@ import {
   etiquetaEtapaActual,
   lineaDeError,
   numeroAnterior,
+  puedeDetener,
+  puedeReiniciar,
   textoParaCopiar,
   tiempoTranscurrido,
 } from "@/lib/despliegues";
-import { duracionEtapa, recursosPlan, shaCorto, type VistaDespliegue } from "@/lib/proyectos";
+import { haceCuanto, recursosPlan, shaCorto, textoEtapa, type VistaDespliegue } from "@/lib/proyectos";
 
 const HTTP_NO_ENCONTRADO = 404;
 
 /** Pantallas 12, 12b y 12c: riel grande y bitácora en vivo. Sin «Cancelar» (es del Avance 3). */
 export function PanelDespliegue({ proyectoId, numeroTexto }: { proyectoId: string; numeroTexto: string }) {
   const numero = Number(numeroTexto);
+  const [origen, setOrigen] = useState<string | null>(null);
   const inicial = useDesplieguePorNumero(proyectoId, numero);
   const id = inicial.datos?.id ?? null;
-  const vivo = useDespliegue(id);
+  const vivo = useDespliegue(id, origen);
   const bitacora = useBitacora(id);
   const despliegue = vivo.datos ?? inicial.datos;
 
@@ -40,17 +44,32 @@ export function PanelDespliegue({ proyectoId, numeroTexto }: { proyectoId: strin
   if (inicial.error) return <Banner variant="bad" title="No pudimos cargar el despliegue">{inicial.error.message}</Banner>;
   if (inicial.cargando || !despliegue) return <Cargando />;
 
-  return <Vista despliegue={despliegue} lineas={bitacora.lineas} enCurso={!bitacora.terminado && despliegueEnPantalla(despliegue)} />;
+  return (
+    <Vista
+      proyectoId={proyectoId}
+      despliegue={despliegue}
+      lineas={bitacora.lineas}
+      enCurso={!bitacora.terminado && despliegueEnPantalla(despliegue)}
+      alAccionar={() => {
+        setOrigen(despliegue.estado);
+        vivo.recargar();
+      }}
+    />
+  );
 }
 
 function Vista({
+  proyectoId,
   despliegue,
   lineas,
   enCurso,
+  alAccionar,
 }: {
+  proyectoId: string;
   despliegue: VistaDespliegue;
   lineas: Parameters<typeof lineaDeError>[0];
   enCurso: boolean;
+  alAccionar: () => void;
 }) {
   const ahora = useAhora(enCurso);
   const error = lineaDeError(lineas, etapaFallida(despliegue));
@@ -64,11 +83,15 @@ function Vista({
       <RielEtapas
         size="lg"
         etapas={despliegue.etapas.map((etapa) => etapa.estado)}
-        detalle={despliegue.etapas.map((etapa) => ({ duracion: duracionEtapa(etapa.duracionMs) }))}
+        detalle={despliegue.etapas.map((etapa) => ({
+          duracion: textoEtapa(etapa.nombre, etapa.estado, etapa.duracionMs, despliegue.estado === "saludable"),
+        }))}
         saludable={despliegue.estado === "saludable"}
       />
       {despliegue.estado === "fallido" ? <Fallo despliegue={despliegue} error={error} aviso={aviso} /> : null}
-      {despliegue.estado === "saludable" ? <Saludable despliegue={despliegue} aviso={aviso} /> : null}
+      {despliegue.estado === "saludable" || despliegue.estado === "detenido" ? (
+        <Saludable proyectoId={proyectoId} despliegue={despliegue} aviso={aviso} ahora={ahora} alAccionar={alAccionar} />
+      ) : null}
       <BitacoraPanel lineas={lineas} resaltada={error?.n} enCurso={enCurso} />
     </div>
   );
@@ -126,27 +149,79 @@ function Fallo({
         ) : null
       }
     >
-      {error ? <span className="font-mono">{error.texto}</span> : despliegue.motivoFallo} {aviso ? `· ${aviso}` : null}
+      {error ? <span className="font-mono">{error.texto}</span> : despliegue.motivoFallo}
+      {error ? ` · línea ${error.n}.` : null} {aviso ? aviso : null}
     </Banner>
   );
 }
 
-function Saludable({ despliegue, aviso }: { despliegue: VistaDespliegue; aviso: string | null }) {
+function Saludable({
+  proyectoId,
+  despliegue,
+  aviso,
+  ahora,
+  alAccionar,
+}: {
+  proyectoId: string;
+  despliegue: VistaDespliegue;
+  aviso: string | null;
+  ahora: string;
+  alAccionar: () => void;
+}) {
   const digest = despliegue.imagen?.digest;
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm">
-      {despliegue.url ? (
-        <a href={despliegue.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-mono text-[13px]">
-          <ExternalLink className="size-3.5" aria-hidden />
-          {despliegue.url}
-        </a>
-      ) : null}
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {despliegue.url ? (
+          <a href={despliegue.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-mono text-[13px]">
+            <ExternalLink className="size-3.5" aria-hidden />
+            {despliegue.url}
+          </a>
+        ) : (
+          <span />
+        )}
+        <Acciones proyectoId={proyectoId} estado={despliegue.estado} alAccionar={alAccionar} />
+      </div>
       <p className="text-muted-foreground">
         {digest ? `Imagen ${acortarDigest(digest)}` : "Imagen"}
         {despliegue.imagen?.receta ? ` · receta ${despliegue.imagen.receta}` : null}
         {despliegue.recursos ? ` · ${recursosPlan(despliegue.recursos)}` : null}
+        {despliegue.url?.startsWith("https://") ? " · TLS activo" : null}
       </p>
+      {despliegue.terminado ? <p className="text-muted-foreground">Publicado {haceCuanto(despliegue.terminado, new Date(ahora))}</p> : null}
       {aviso ? <p>{aviso}</p> : null}
+    </div>
+  );
+}
+
+function Acciones({ proyectoId, estado, alAccionar }: { proyectoId: string; estado: string; alAccionar: () => void }) {
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pedir = async (accion: "reiniciar" | "detener") => {
+    setOcupado(true);
+    setError(null);
+    try {
+      await pedirApi(`/proyectos/${proyectoId}/${accion}`, { metodo: "POST" });
+      alAccionar();
+    } catch (e) {
+      setError(e instanceof ErrorApi ? e.message : "No pudimos completar la acción.");
+    } finally {
+      setOcupado(false);
+    }
+  };
+  return (
+    <div className="flex flex-col items-end gap-2">
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" size="sm" disabled={ocupado || !puedeReiniciar(estado)} onClick={() => pedir("reiniciar")}>
+          <RotateCw />
+          Reiniciar
+        </Button>
+        <Button type="button" variant="outline" size="sm" disabled={ocupado || !puedeDetener(estado)} onClick={() => pedir("detener")}>
+          <Square />
+          Detener
+        </Button>
+      </div>
+      {error ? <p className="text-xs text-bad">{error}</p> : null}
     </div>
   );
 }
@@ -162,8 +237,12 @@ function BitacoraPanel({
 }) {
   const [copiado, setCopiado] = useState(false);
   const copiar = async () => {
-    await navigator.clipboard.writeText(textoParaCopiar(lineas));
-    setCopiado(true);
+    try {
+      await navigator.clipboard.writeText(textoParaCopiar(lineas));
+      setCopiado(true);
+    } catch {
+      setCopiado(false);
+    }
   };
   return (
     <section className="flex flex-col gap-3">

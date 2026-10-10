@@ -9,6 +9,7 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   "repositorio-no-accesible": HttpStatus.UNPROCESSABLE_ENTITY,
   "rama-no-encontrada": HttpStatus.UNPROCESSABLE_ENTITY,
   "sin-dockerfile": HttpStatus.UNPROCESSABLE_ENTITY,
+  "stack-no-reconocido": HttpStatus.UNPROCESSABLE_ENTITY,
   "fuente-no-disponible": HttpStatus.SERVICE_UNAVAILABLE,
   "subdominio-en-uso": HttpStatus.CONFLICT,
   "limite-proyectos": HttpStatus.CONFLICT,

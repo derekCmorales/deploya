@@ -2,7 +2,7 @@
 
 > **Para cada integrante:** copia **tu** sección completa como primer mensaje a tu agente (Claude Code, Cursor, Copilot) dentro del repo `derekCmorales/deploya`, con `main` actualizado. Los changes de OpenSpec **ya están propuestos**: el agente los revisa, ajusta con `/opsx-update` si algo no cuadra y los implementa con `/opsx-apply`. Si un contrato no te cuadra, **no lo cambies en silencio**: avisa a su dueño antes de mergear.
 >
-> Fuentes: [plan-avances.md § Avance 3](../plan-avances.md#avance-3--85--entrega-miércoles-21-de-octubre-en-la-noche), [ingenieria.md §5.5](../ingenieria.md#55-pruebas-mínimas-del-avance-3), [contratos/despliegues.md](../contratos/despliegues.md) v3, [contratos/datos-nucleo.md](../contratos/datos-nucleo.md) 1.3 y el canvas Deploya v4.1, página **Avance 3 · 85 % · guía**. Si difieren de este archivo, manda el repo.
+> Fuentes: [plan-avances.md § Avance 3](../plan-avances.md#avance-3--85--entrega-viernes-23-de-octubre-en-la-noche), [ingenieria.md §5.5](../ingenieria.md#55-pruebas-mínimas-del-avance-3), [contratos/despliegues.md](../contratos/despliegues.md) v3, [contratos/datos-nucleo.md](../contratos/datos-nucleo.md) 1.3 y el canvas Deploya v4.1, página **Avance 3 · 85 % · guía**. Si difieren de este archivo, manda el repo.
 
 ## Lo común a los cuatro (va al principio de cada prompt)
 
@@ -24,7 +24,7 @@ Reglas que no se negocian:
 - Si cambias un puerto, clase o estado: docs/diagramas/compartido/clases-unificado.mmd y
   pnpm diagramas:sync en el mismo PR.
 - Antes de pedir revisión: pnpm check. PR con la plantilla. Tras el merge: /opsx-archive.
-- Plazo: miércoles 21 de octubre a las 20:00 todo en main y desplegado en el VPS; el domingo 18
+- Plazo: viernes 23 de octubre a las 20:00 todo en main y desplegado en el VPS; el martes 20
   a las 20:00 ya debe estar en main para probarlo en el VPS.
 ```
 
@@ -43,7 +43,6 @@ Historias del Avance 3 (4 pts):
      DELETE /identidad/sesiones revoca TODAS y borra la cookie.
    - Web: /cuenta (05) y /cuenta/seguridad (05b) según docs/diseno/pantallas/05-*.md.
 
-Antes del martes: /opsx-archive de feat-m1-estados-roles y feat-m1-recuperacion.
 Jueves 15: con Derek, variables SMTP del proveedor de correo en el VPS (ADR 0001: solo variables).
 CI verde en cada PR. Si sobra tiempo, sin prometerlo: esqueleto del recorrido e2e de QA-01.
 
@@ -105,8 +104,6 @@ Historias del Avance 3 (4 pts):
    - Componentes <ConsumoPeriodo /> (dos Meter) y <ActividadProyecto proyectoId /> (MapaActividad),
      en main el jueves 15 a las 20:00: Javier los monta en 08 y Derek en 13.
 
-Lunes 12: revisa el PR #31 (M7-01 y M3-03); cuando entre, cierra #23, #28 y #29 y haz
-/opsx-archive de feat-m3-alta-proyecto, feat-m7-vista-despliegue y feat-m3-variables-cifradas.
 Revisa los PRs con UI de los demás contra docs/diseno/.
 
 Demuestras en la entrega: la lista con la cuenta Vencida, el consumo en 08, el mapa de actividad
@@ -123,9 +120,9 @@ diagramas y ADR. En el Avance 3 también construyes las pantallas 13, 14, 19 y 1
 Historias del Avance 3 (19 pts). Sigue los pasos 0 a 8 de docs/plan-avances.md § Derek (Avance 3);
 en resumen:
 
-0) Lunes 12: PR #31 a main tras la revisión de Eduardo; tareas de compose del A2 (8.2 motor,
-   5.2 detección, 6.3 acciones, 4.3 bloqueos); /opsx-archive en orden: motor → detección →
-   alta → eliminar → acciones → bloqueos.
+0) Lunes 12: el PR #31 ya está en main. Demo del A2 en compose (8.2 motor, 5.2 detección,
+   6.3 acciones, 4.3 bloqueos, 5.2 vista, 5.3 variables) y /opsx-archive en orden: motor →
+   detección → acciones → bloqueos → vista de despliegue → variables.
 1) Lunes 12 – martes 13: dominio, DNS (A para la raíz y *), VPS con Docker; docker-compose.vps.yml
    y Traefik con Let's Encrypt por DNS-01 (change feat-m6-vps-https, tareas 1.x).
 2) Martes 13, 12:00: AccionesProyectoService.detenerTodosDe / reanudarTodosDe y el adaptador
@@ -140,10 +137,10 @@ en resumen:
    <ActividadProyecto /> de Eduardo en 13.
 6) Sábado 17 – domingo 18: change feat-m3-configuracion-proyecto — M3-04 (3 pts). PATCH /proyectos/:id
    con CambiosProyecto; pantalla 19 con borrador y el Dialog 19b que ya existe.
-7) Domingo 18 – lunes 19: ConfiguracionEnrutamiento (DOMINIO_BASE, ESQUEMA_PUBLICO, CERT_RESOLVER),
+7) Lunes 19 – martes 20: ConfiguracionEnrutamiento (DOMINIO_BASE, ESQUEMA_PUBLICO, CERT_RESOLVER),
    CertificadoPuerto, scripts/desplegar-vps.sh; SMTP del proveedor con Eddy; ADR 0007 y ADR
    0002/0003/0005/0006 a Aceptado (M6-02, 5 pts, y ADR, 2 pts).
-8) Martes 20: ensayo completo en el VPS y video de respaldo. Miércoles 21 20:00: main congelado y desplegado.
+8) Miércoles 21: pruebas en el VPS. Jueves 22: ensayo completo y video de respaldo. Viernes 23 20:00: main congelado y desplegado.
 
 Contrato ya publicado: despliegues v3. Revisa todos los PRs que tocan motor, adapters, compose y contratos.
 

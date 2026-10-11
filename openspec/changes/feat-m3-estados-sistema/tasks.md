@@ -17,4 +17,4 @@ Requiere PR #31 en `main` (`banner-bloqueo.tsx`). Pruebas web con `node --test`.
 ## 3. Cierre
 
 - [ ] 3.1 Revisión contra los artboards 10c y 28 en claro y oscuro
-- [ ] 3.2 `pnpm check` en verde; `/opsx-archive` después del merge
+- [ ] 3.2 `pnpm check` en verde; `/opsx-archive` después del merge y después de `feat-m5-bloqueos-cuota` (los dos modifican «Límite y estado de la suscripción»)

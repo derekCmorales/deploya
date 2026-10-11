@@ -21,7 +21,12 @@ El cliente SHALL poder cambiar nombre (no cambia el subdominio), repositorio, ra
 
 ### Requirement: Límite y estado de la suscripción
 
-El alta SHALL bloquearse si el cliente alcanzó el límite de proyectos de su plan o si su suscripción está Vencida o Suspendida. Un proyecto cuyo último despliegue está Fallido SHALL NOT contar contra el límite.
+El alta SHALL bloquearse si el cliente alcanzó el límite de proyectos de su plan o si su suscripción está Vencida o Suspendida. El bloqueo por límite SHALL ocurrir antes de consultar GitHub. Un proyecto cuyo último despliegue está Fallido SHALL NOT contar contra el límite.
+
+#### Scenario: Límite de proyectos del plan
+
+- **WHEN** un cliente en Sandbox con 1 proyecto intenta otro
+- **THEN** se rechaza con `limite-proyectos` (409), no se consulta GitHub, no se guarda nada ni se pide despliegue, y en la web «Nuevo proyecto» queda deshabilitado con «Cambiar plan»
 
 #### Scenario: Suscripción vencida
 

@@ -34,5 +34,5 @@ Cada tarea de código tiene su tarea de pruebas. Sin Docker, red, base ni reloj 
 
 - [x] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync`
 - [x] 5.2 `pnpm check` en verde
-- [ ] 5.3 Escenario «Suscripción vencida»: queda para M2-05 / M5-03
-- [ ] 5.4 `/opsx-archive` después del merge
+- [x] 5.3 Escenario «Suscripción vencida»: cubierto por M5-03 («Alta con la suscripción vencida» en `proyectos.service.spec.ts`, PR #31)
+- [x] 5.4 `/opsx-archive` después del merge

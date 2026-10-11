@@ -36,4 +36,4 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 - [x] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync` (`RolGuard`, `Roles`, `PoliticaReenvio`, `ultimoDe`, `reenviarVerificacion`)
 - [x] 5.2 Pruebas en verde (API 480; web 84); cobertura de `identidad/` 90 % (dominio 100 %). En Windows solo falla `lector-fuente-local.spec.ts` (M4, ruta `/clon` → `D:\clon`); en CI pasa
 - [x] 5.3 Avisar a Javier (M9 usa `RolGuard`) y a Eduardo (28 comparte componentes)
-- [ ] 5.4 `/opsx-archive` después del merge
+- [x] 5.4 `/opsx-archive` después del merge

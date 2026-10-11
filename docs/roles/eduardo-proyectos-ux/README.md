@@ -47,7 +47,7 @@ Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eduardo](../../plan
 
 **Avance 2 (50 %):** [plan-avances.md § Eduardo (A2)](../../plan-avances.md#eduardo--proyectos-y-experiencia-8-pts) · changes `feat-m7-vista-despliegue` (M7-01) y `feat-m3-variables-cifradas` (M3-03); con Derek, 11a y 11e de `feat-m4-deteccion-stack` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#eduardo). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
 
-**Avance 3 (85 %):** [plan-avances.md § Avance 3](../../plan-avances.md#avance-3--85--entrega-miércoles-21-de-octubre-en-la-noche) · prompt para tu agente: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#eduardo) · pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
+**Avance 3 (85 %):** [plan-avances.md § Avance 3](../../plan-avances.md#avance-3--85--entrega-viernes-23-de-octubre-en-la-noche) · prompt para tu agente: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#eduardo) · pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
 
 **Dependencias:** schema de Javier (lunes), contrato de despliegues ([docs/contratos/despliegues.md](../../contratos/despliegues.md), ya publicado), guard de sesión de Eddy (martes 12:00; antes usa el usuario del seed).
 

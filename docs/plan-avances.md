@@ -281,16 +281,16 @@ También: textos de 11a y 11e con la detección de stack (`LectorFuenteGitHub`, 
 
 Sin ensayo por ahora; si se agenda una presentación, se graba un video de respaldo antes.
 
-## Avance 3 — 85 % (entrega: miércoles 21 de octubre en la noche)
+## Avance 3 — 85 % (entrega: viernes 23 de octubre en la noche)
 
-La versión visual de esta sección (resumen, una hoja por persona, integración y calidad, con las pantallas de cada quien) está en la página **Avance 3 · 85 % · guía** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Entrega: **miércoles 21 de octubre en la noche** (la fase F4 de la propuesta cierra el 23). Todo en `main` ese día a las 20:00 y **desplegado en el VPS**.
+La versión visual de esta sección (resumen, una hoja por persona, integración y calidad, con las pantallas de cada quien) está en la página **Avance 3 · 85 % · guía** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Entrega: **viernes 23 de octubre en la noche** (cierre de la fase F4 de la propuesta). Todo en `main` ese día a las 20:00 y **desplegado en el VPS**.
 
 ### Dónde estamos (11 de octubre)
 
 | | Puntos | Acumulado | % |
 |---|---|---|---|
 | En `main`: Avance 1, cobro de Javier, cuentas de Eddy y motor de Derek | 75 | 75 | 52 % |
-| PR #31 (M7-01 y M3-03, 8 pts): lista para revisión, entra el lunes 12 | 8 | 83 | 57 % |
+| PR #31 (M7-01 y M3-03, 8 pts), en `main` desde el 11 de octubre | 8 | 83 | 57 % |
 | **Avance 3** (este plan) | 40 | 123 | **85 %** |
 | Entrega final | 22 | 145 | 100 % |
 
@@ -329,7 +329,7 @@ Están en `openspec/changes/` y validan con `openspec validate --all`. Cada due�
 | M1-06 | Mi cuenta · Perfil (05): `GET`/`PATCH /identidad/cuenta`, nombre de 1 a 64 caracteres, correo y rol de solo lectura | El nombre nuevo aparece en el encabezado; 65 caracteres se rechazan |
 | M1-07 | Mi cuenta · Seguridad (05b): cambiar contraseña con la actual (cierra las **otras** sesiones), «Cerrar todas» (incluida la actual) | Con dos navegadores, cambiar la contraseña en uno cierra el otro; «Cerrar todas» lleva a 03 |
 
-También: `/opsx-archive` de `feat-m1-estados-roles` y `feat-m1-recuperacion`; CI verde en cada PR (dueño de workflows); variables SMTP del proveedor en el VPS con Derek (jueves 15). Si sobra tiempo, **sin prometerlo**: el esqueleto del recorrido e2e de QA-01 (entrega final).
+También: CI verde en cada PR (dueño de workflows); variables SMTP del proveedor en el VPS con Derek (jueves 15). Si sobra tiempo, **sin prometerlo**: el esqueleto del recorrido e2e de QA-01 (entrega final).
 
 **Demuestra en la entrega:** Mi cuenta, cambiar la contraseña con dos navegadores, «Cerrar todas»; el correo de verificación llegando a un buzón real desde el VPS.
 
@@ -353,7 +353,7 @@ Orden sugerido: M2-05 primero (es lo que más pesa y lo usa la demo de todos), l
 | WEB-02 | Estados del sistema: banner de vencida en la lista (10c) reutilizando `banner-bloqueo.tsx`; 404, error de conexión con la API (reintento a los 8, 16 y 30 s) y esqueleto de carga de 28 | Con `vencida@` la lista avisa con la fecha de gracia y bloquea «Nuevo proyecto»; apagar la API muestra el error y se recupera sola |
 | M7-03 | Consumo y actividad: `GET /observabilidad/consumo` y `GET /proyectos/:id/actividad`; componentes `<ConsumoPeriodo />` (dos `Meter`) y `<ActividadProyecto />` (`MapaActividad`) | 08 muestra construcciones usadas y «Se reinicia el 1 nov»; 13 muestra «12 semanas · N despliegues · M con fallo» |
 
-También: revisar el PR #31 (M7-01 y M3-03) el **lunes 12**, cerrar #23, #28 y #29 cuando #31 entre, y `/opsx-archive` de `feat-m3-alta-proyecto`, `feat-m7-vista-despliegue` y `feat-m3-variables-cifradas`. Revisa los PRs con UI de los demás contra el design system.
+También: revisa los PRs con UI de los demás contra el design system.
 
 **Demuestra en la entrega:** la lista con la cuenta Vencida, el consumo en 08, el mapa de actividad en 13 y el estado de error de la API.
 
@@ -374,9 +374,9 @@ Es la parte más larga del avance, así que va con más detalle: qué es cada hi
 
 #### Paso 0 · lunes 12: cerrar el Avance 2
 
-1. **PR #31 a `main`** (M7-01 y M3-03, 8 pts). Ya está limpio contra `main`; pide la revisión de Eduardo y mergea. Después, en `docker compose down -v && docker compose up --build`, corre la demo que dice el PR: alta con `SALUDO`, riel hasta Saludable, rama `roto` en 12c, «Guardar y desplegar», `vencida@` con el banner.
+1. **PR #31 ya está en `main`** (M7-01 y M3-03, 8 pts; reemplazó a #23, #28, #29 y #30, que quedaron cerrados). En `docker compose down -v && docker compose up --build`, corre la demo que dice el PR: alta con `SALUDO`, riel hasta Saludable, rama `roto` en 12c, «Guardar y desplegar», `vencida@` con el banner.
 2. **Tareas de compose pendientes del A2:** 8.2 de `feat-m4-motor-construccion` (recorrido desde la API), 5.2 de `feat-m4-deteccion-stack` (`sin-dockerfile` Saludable con receta `node`), 6.3 de `feat-m5-acciones-contenedor` (detener / reiniciar / eliminar) y 4.3 de `feat-m5-bloqueos-cuota`. Márcalas solo si las viste funcionar.
-3. **Archivar en orden** (`/opsx-archive`): `feat-m4-motor-construccion` → `feat-m4-deteccion-stack` → `feat-m3-alta-proyecto` → `feat-m3-eliminar-proyecto` → `feat-m5-acciones-contenedor` → `feat-m5-bloqueos-cuota`. Eduardo archiva los suyos (`feat-m7-vista-despliegue`, `feat-m3-variables-cifradas`) después de #31.
+3. **Archivar en orden** (`/opsx-archive`) cuando su demo en compose esté hecha: `feat-m4-motor-construccion` → `feat-m4-deteccion-stack` → `feat-m5-acciones-contenedor` → `feat-m5-bloqueos-cuota` → `feat-m7-vista-despliegue` → `feat-m3-variables-cifradas`. Ya están archivados `feat-m1-estados-roles`, `feat-m1-recuperacion`, `feat-m3-alta-proyecto` y `feat-m3-eliminar-proyecto`.
 
 #### Paso 1 · lunes 12 – martes 13: VPS y dominio (M6-02, parte de infraestructura)
 
@@ -422,18 +422,18 @@ Se arranca primero porque depende de terceros (DNS y certificados tardan) y es l
 - **Web:** `configuracion/page.tsx` (19) con borrador, `cambiosDe(original, borrador)`, «Descartar», «Guardar cambios» y «Zona de peligro» que abre el diálogo 19b que ya existe (`eliminar-proyecto.tsx`), ahora con conteos reales; se quita «Eliminar» del detalle de la lista.
 - **Pruebas:** «Renombrar no cambia el subdominio», «Cambiar la rama aplica en el próximo despliegue», «Rama inexistente», «Nombre repetido», `cambiosDe`.
 
-#### Paso 7 · domingo 18 – lunes 19: HTTPS en el código y `main` en el VPS (M6-02 y ADR)
+#### Paso 7 · lunes 19 – martes 20: HTTPS en el código y `main` en el VPS (M6-02 y ADR)
 
 - **Código:** `ConfiguracionEnrutamiento { dominioBase, esquema, certResolver }` (variables `DOMINIO_BASE`, `ESQUEMA_PUBLICO`, `CERT_RESOLVER`); `EnrutamientoTraefikArchivo` agrega `tls` solo si hay resolvedor; la URL del despliegue sale de la configuración. `CertificadoPuerto` con `CertificadoAcmeArchivo` (lee `acme.json`) y `CertificadoAusente` (desarrollo) para mostrar el vencimiento en 12b.
 - **Pruebas:** «Certificado comodín» (la ruta lleva `tls.certResolver`), «Desarrollo sin TLS» (igual que hoy), «Vencimiento visible».
 - **Publicar:** `scripts/desplegar-vps.sh` (pull, compose con los dos archivos, `prisma migrate deploy`, seed). Con Eddy, las variables SMTP del proveedor (Resend o Brevo) con SPF y DKIM.
 - **ADR:** 0007 con la decisión DNS-01; 0002, 0003, 0005 y 0006 a Aceptado. `despliegue-infraestructura.mmd` con el VPS.
 
-#### Paso 8 · martes 20 – miércoles 21: ensayo y entrega
+#### Paso 8 · miércoles 21 – viernes 23: pruebas en el VPS, ensayo y entrega
 
-Martes: recorrido completo **en el VPS** con las cuentas de demo y video de respaldo. Miércoles 20:00: `main` congelado, `scripts/desplegar-vps.sh` una última vez y comprobar `https://hola-deploya.deploya.app`.
+Miércoles: cada quien comprueba su parte en el VPS y se corrige. Jueves: recorrido completo **en el VPS** con las cuentas de demo y video de respaldo. Viernes 20:00: `main` congelado, `scripts/desplegar-vps.sh` una última vez y comprobar `https://hola-deploya.deploya.app`.
 
-**Entrega a otros:** contrato de despliegues **v3** (ya en `docs/contratos/despliegues.md`); `detenerTodosDe` y `reanudarTodosDe` el **martes 13 a las 12:00** (Javier); el VPS con HTTPS el **domingo 18** para que todos prueben ahí; revisa todos los PRs que tocan motor, adapters, compose y contratos.
+**Entrega a otros:** contrato de despliegues **v3** (ya en `docs/contratos/despliegues.md`); `detenerTodosDe` y `reanudarTodosDe` el **martes 13 a las 12:00** (Javier); el VPS con HTTPS el **martes 20** para que todos prueben ahí; revisa todos los PRs que tocan motor, adapters, compose y contratos.
 
 **Demuestra en la entrega:** todo desde `https://…deploya.app`: 13 y 14 con datos reales, revertir a #1 en segundos (con la app abierta en otra pestaña: nunca da error), cancelar un despliegue en Construyendo, reintentar `roto`, cambiar la rama en 19 y eliminar el proyecto.
 
@@ -441,26 +441,27 @@ Martes: recorrido completo **en el VPS** con las cuentas de demo y video de resp
 
 | Qué | Quién |
 |---|---|
-| PR #31 a `main` y cerrar #23, #28, #29 | Derek (merge) · Eduardo (revisión y cierre) |
-| Tareas de compose: 8.2 motor, 5.2 detección, 6.3 acciones, 4.3 bloqueos | Derek |
-| `/opsx-archive` de `feat-m1-estados-roles`, `feat-m1-recuperacion` | Eddy |
-| `/opsx-archive` de `feat-m3-alta-proyecto`, `feat-m7-vista-despliegue`, `feat-m3-variables-cifradas` (tras #31) | Eduardo |
-| `/opsx-archive` de `feat-m4-motor-construccion`, `feat-m4-deteccion-stack`, `feat-m3-eliminar-proyecto`, `feat-m5-acciones-contenedor`, `feat-m5-bloqueos-cuota` | Derek |
+| PR #31 a `main`; #23, #28, #29 y #30 cerrados | **Hecho** (11 de octubre) |
+| `/opsx-archive` de `feat-m1-estados-roles`, `feat-m1-recuperacion`, `feat-m3-alta-proyecto`, `feat-m3-eliminar-proyecto` | **Hecho** (11 de octubre) |
+| Demo en compose y revisión visual: 8.2 motor, 5.2 detección, 6.3 acciones, 4.3 bloqueos, 5.2 vista de despliegue, 5.3 variables | Derek |
+| `/opsx-archive` de `feat-m4-motor-construccion`, `feat-m4-deteccion-stack`, `feat-m5-acciones-contenedor`, `feat-m5-bloqueos-cuota`, `feat-m7-vista-despliegue`, `feat-m3-variables-cifradas` (tras la demo) | Derek |
 
-### Calendario hasta el miércoles 21
+### Calendario hasta el viernes 23
 
 | Día | Qué |
 |---|---|
-| Dom 11 | Este plan en `main` (PR 0). Cada quien lee su guía y **revisa** sus changes |
-| Lun 12 | PR #31 en `main`; archivar el A2. Dominio, DNS y VPS (Derek). Política del ciclo (Javier). Perfil (Eddy). Banner de 10c (Eduardo) |
+| Dom 11 | PR #31 y este plan en `main` (PR 0). Cada quien lee su guía y **revisa** sus changes |
+| Lun 12 | Demo del A2 en compose y archivar lo que falta (Derek). Dominio, DNS y VPS (Derek). Política del ciclo (Javier). Perfil (Eddy). Banner de 10c (Eduardo) |
 | Mar 13 | **12:00** `detenerTodosDe` / `reanudarTodosDe` en `main` (Derek). Reversión: dominio y servicio (Derek). Servicio del ciclo y tarea diaria (Javier). Seguridad (Eddy). 404, error de API y carga (Eduardo) |
 | Mié 14 | Reversión en compose y M4-02 (Derek). M9-01 usuarios (Javier). Consumo y actividad: API (Eduardo) |
 | Jue 15 | **20:00** `ConsumoPeriodo` y `ActividadProyecto` en `main` (Eduardo). API de 13 y 14 (Derek). M9-02 suspender (Javier). SMTP del proveedor con Derek (Eddy) |
 | Vie 16 – sáb 17 | Pantallas 13 y 14 (Derek). M2-06 pagos y PDF (Javier). Revisión visual de los PRs con UI (Eduardo) |
-| Dom 18 | Configuración 19 (Derek). **20:00** todo en `main` y el VPS con HTTPS listo para que todos prueben |
-| Lun 19 | `main` en el VPS; cada quien comprueba su parte en `https://…deploya.app` y corrige |
-| Mar 20 | **Ensayo completo en el VPS** y video de respaldo |
-| Mié 21 | **20:00** `main` congelado y desplegado. **Entrega en la noche** |
+| Dom 18 | Configuración 19 (Derek). Últimas historias de cada quien |
+| Lun 19 | HTTPS en el código y `scripts/desplegar-vps.sh` (Derek). Correcciones de revisión |
+| Mar 20 | **20:00** todo en `main` y el VPS con HTTPS listo para que todos prueben |
+| Mié 21 | `main` en el VPS; cada quien comprueba su parte en `https://…deploya.app` y corrige |
+| Jue 22 | **Ensayo completo en el VPS** y video de respaldo |
+| Vie 23 | **20:00** `main` congelado y desplegado. **Entrega en la noche** |
 
 ### Guion de la demo (≈ 14 min)
 

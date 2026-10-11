@@ -29,4 +29,4 @@ Cada tarea de código tiene su tarea de pruebas. Sin SMTP, base ni reloj reales.
 - [x] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync`; `m1-actividad-recuperacion-contrasena.mmd` con el flujo real (sin auditoría)
 - [x] 5.2 `pnpm check` en verde; cobertura ≥ 80 % en `identidad/` y `notificaciones/dominio`
 - [x] 5.3 Demo en compose: pedir enlace → Mailpit → nueva contraseña → la sesión de otro navegador queda cerrada (Playwright con dos navegadores contra Postgres y Mailpit: la otra sesión pasa de 200 a 401, el enlace reusado muestra «Este enlace ya no sirve», la clave vieja da 401)
-- [ ] 5.4 `/opsx-archive` después del merge
+- [x] 5.4 `/opsx-archive` después del merge

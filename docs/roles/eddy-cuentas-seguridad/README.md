@@ -40,7 +40,7 @@ Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eddy](../../plan-av
 
 **Avance 2 (50 %):** [plan-avances.md § Eddy (A2)](../../plan-avances.md#eddy--cuentas-6-pts) · changes `feat-m1-estados-roles` (M1-04) y `feat-m1-recuperacion` (M1-05, M10-02) · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#eddy). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
 
-**Avance 3 (85 %):** [plan-avances.md § Avance 3](../../plan-avances.md#avance-3--85--entrega-miércoles-21-de-octubre-en-la-noche) · prompt para tu agente: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#eddy) · pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
+**Avance 3 (85 %):** [plan-avances.md § Avance 3](../../plan-avances.md#avance-3--85--entrega-viernes-23-de-octubre-en-la-noche) · prompt para tu agente: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#eddy) · pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
 
 **Dependencia crítica:** el resto de módulos necesita `SesionGuard` y `@UsuarioActual()`. Publícalos pronto, aunque el login todavía no tenga todos los estados.
 

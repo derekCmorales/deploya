@@ -37,10 +37,10 @@ Un cliente se registra, verifica su correo, contrata un plan con pago simulado, 
 | 25, 25b | Admin · Usuarios y Suspender cuenta | M9 | Javier |
 | 10, 10b, 10c | Proyectos: lista, primer proyecto, suscripción vencida | M3 | Eduardo |
 | 11a, 11c, 11d, 11e | Nuevo proyecto: Repositorio, Variables, Revisar, errores | M3 | Eduardo |
-| 13 | Proyecto · Resumen | M7 | Eduardo |
-| 14 | Proyecto · Despliegues | M7 (+ M4) | Eduardo |
+| 13 | Proyecto · Resumen | M7 | Derek (actividad: Eduardo) |
+| 14 | Proyecto · Despliegues | M7 (+ M4, M5) | Derek |
 | 17 | Proyecto · Variables de entorno | M3 | Eduardo |
-| 19, 19b | Proyecto · Configuración y eliminar | M3 (+ M5) | Eduardo |
+| 19, 19b | Proyecto · Configuración y eliminar | M3 (+ M5) | Derek |
 | 12, 12b, 12c | Despliegue en curso, Saludable, Fallido | UI: Eduardo · motor: Derek | Eduardo + Derek |
 | 28 | Estados del sistema (404, 403, sesión expirada, suscripción suspendida, error de API, carga) | transversal web | Eduardo (+ Javier: suspendida) |
 | Main | Identidad visual v4.1 → migrada a [diseno/](diseno/README.md) y `apps/web/src/components` | design system | Eduardo (hecho) |

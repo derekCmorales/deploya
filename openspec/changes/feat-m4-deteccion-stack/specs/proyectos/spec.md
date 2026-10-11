@@ -30,3 +30,33 @@ El sistema SHALL crear un proyecto desde la URL de un repositorio **público de 
 
 - **WHEN** la rama no tiene `Dockerfile` y M4 lanza `StackNoReconocido`
 - **THEN** se rechaza con «falta Dockerfile y no se reconoce el stack», la pista de M4 y un `Dockerfile` de ejemplo (11e)
+
+#### Scenario: Rama inexistente
+
+- **WHEN** la rama indicada no existe en el repositorio
+- **THEN** se rechaza con `rama-no-encontrada` junto al campo Rama
+
+#### Scenario: URL que no es de GitHub
+
+- **WHEN** la URL es de otro host, usa `http` o apunta a una ruta interna del repositorio
+- **THEN** se rechaza con `url-invalida` sin llamar a GitHub
+
+#### Scenario: GitHub no disponible
+
+- **WHEN** GitHub no responde, falla con 5xx o se agotó el límite de peticiones
+- **THEN** se rechaza con `fuente-no-disponible` (503), no como repositorio no accesible
+
+#### Scenario: Puerto desde EXPOSE
+
+- **WHEN** el `Dockerfile` tiene uno o varios `EXPOSE`
+- **THEN** se propone el primero; sin `EXPOSE` se propone 8080; el cliente puede cambiarlo y el elegido es el que se guarda
+
+#### Scenario: Subdominio desde el nombre
+
+- **WHEN** el cliente escribe «Mi App Web»
+- **THEN** el subdominio es `mi-app-web`
+
+#### Scenario: Subdominio duplicado
+
+- **WHEN** el subdominio derivado ya existe
+- **THEN** se rechaza con `subdominio-en-uso` (409) junto al campo Nombre

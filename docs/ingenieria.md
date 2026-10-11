@@ -150,6 +150,26 @@ Cada fila sale de los escenarios del change; el nombre del `it(...)` es el del e
 
 Web: cada historia con UI agrega sus pruebas `node --test` de lógica pura (`apps/web/test`) y se revisa contra su artboard en claro y oscuro.
 
+### 5.5 Pruebas mínimas del Avance 3
+
+Cada fila sale de los escenarios del change; el nombre del `it(...)` es el del escenario.
+
+| Historia | Dueño | Change | Pruebas unitarias mínimas |
+|---|---|---|---|
+| M1-06 · M1-07 | Eddy | `feat-m1-cuenta` | Nombre recortado, vacío y de 65 caracteres; cambiar contraseña revoca las **otras** sesiones y no la actual; actual incorrecta y nueva débil no revocan nada; «Cerrar todas» revoca también la actual |
+| M2-05 | Javier (+ Derek) | `feat-m2-ciclo-suscripcion` | `PoliticaCiclo` con fechas literales: Por vencer (7 días), Vencida, fin de la gracia (5), Cancelada (30), Sandbox no vence, descenso programado al vencer, dos corridas el mismo día; Suspendida pide detener y renovar pide reanudar (doble del puerto); M5: un `detener` por proyecto Saludable y los demás omitidos |
+| M2-06 | Javier | `feat-m2-historial-pagos` | Orden y concepto del historial; lista vacía; comprobante con número, vigencia, método, total y «sin valor fiscal» (`ComprobanteTextoFalso`); pago ajeno o rechazado → 404 |
+| M9-01 · M9-02 | Javier | `feat-m9-usuarios-suspension` | Búsqueda por correo, filtro por suscripción, detalle, Cliente → 403; suspender revoca sesiones, registra la acción y pide detener contenedores; no se suspende a un administrador; ya suspendida; motivo fuera de la lista |
+| M5-04 | Derek | `feat-m5-reversion-instantanea` | Transiciones de `revirtiendo`; retención de cinco y el activo nunca se retira; revertir a un disponible (etapas `omitida`), no consume construcciones, no disponible, ya activo, en curso, salud fallida deja el activo |
+| M4-02 | Derek | `feat-m4-acciones-despliegue` | Tabla de `PoliticaAcciones`; cancelar encolado (sale de la cola), en Construyendo (la señal aborta, con `CancelacionesMemoria`), tarde → 409; reintentar un fallido y uno saludable; redesplegar reconstruye y cuenta; commit desconocido |
+| M7-02 | Derek | `feat-m7-resumen-historial` | `historialDe` con filtro y cursor sin repetir filas; fila activa; resumen saludable y sin despliegue Saludable; línea de tiempo con cuatro hitos; web: `accionDeFila` para cada caso |
+| M3-04 | Derek | `feat-m3-configuracion-proyecto` | Reglas de `CambiosProyecto`; renombrar no cambia el subdominio; cambiar la rama no despliega; rama inexistente; nombre repetido; web: `cambiosDe` |
+| M6-02 | Derek | `feat-m6-vps-https` | Ruta con `tls.certResolver` y `Host` del dominio configurado; desarrollo sin TLS; vencimiento del certificado desde un `acme.json` en memoria y `null` sin TLS |
+| M7-03 | Eduardo | `feat-m7-consumo-actividad` | `periodoDe` (mes UTC y reinicio); consumo con reversión que no suma; `agruparPorDia` con 84 días, días vacíos en 0 y fallidos contados |
+| WEB-02 | Eduardo | `feat-m3-estados-sistema` | `finDeGracia` y `textoVencida`; `esperaDeReintento` (8, 16, 30, 30 s); 404 con la ruta pedida |
+
+Web: cada historia con UI agrega sus pruebas `node --test` de lógica pura (`apps/web/test`) y se revisa contra su artboard en claro y oscuro. Infraestructura del VPS (DNS, certificados, SMTP): se verifica a mano y queda en el manual técnico.
+
 ---
 
 ## 6. Cómo se aplica en el flujo

@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | Ruta | `/projects/[proyecto]/despliegues` |
-| Dueño | Eduardo |
-| Historias | M7-02 · M4-02 |
+| Dueño | Derek |
+| Historias | M7-02 · M4-02 · M5-04 |
 | Entrega | A3 |
 | Diseño | Canvas Deploya v4.1, artboard `14-Proyecto-despliegues` (https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT) |
 

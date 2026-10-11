@@ -1,6 +1,6 @@
 # Proposal
 
-Change: `feat/m5-reversion-instantanea`. Módulo dueño: **orquestacion (M5)** — Derek. Specs tocadas: `orquestacion`, `motor-construccion`. Historia: **M5-04** (3 pts, Avance 3). ADR: [0004](../../../docs/adr/0004-versionado-y-reversion-sin-reconstruir.md).
+Change: `feat/m5-reversion-instantanea`. Módulo dueño: **orquestacion (M5)** — Derek. Spec tocada: `orquestacion` (la diferencia redesplegar / revertir en `motor-construccion` la escribe `feat-m4-acciones-despliegue`). Historia: **M5-04** (3 pts, Avance 3). ADR: [0004](../../../docs/adr/0004-versionado-y-reversion-sin-reconstruir.md).
 
 ## Why
 
@@ -29,10 +29,9 @@ El curso pidió concentrar esfuerzo en el **versionamiento y la reversión**. Ho
 ### Modified Capabilities
 
 - `orquestacion`: nuevas **Versionado y retención** y **Reversión sin reconstruir**.
-- `motor-construccion`: «Acciones sobre despliegues» distingue redesplegar (reconstruye) de revertir (no reconstruye).
 
 ## Impact
 
 - Código: `orquestacion/reversion/`, `orquestacion/retencion/`, `PipelineDespliegue` (plan `reversion`), `ContenedorPuerto.eliminarImagen`, `RepositorioArtefactos`.
-- Web (Eduardo, A3): pantalla 14 y `estados.ts`.
+- Web (Derek, A3): «Revertir a esta versión» en 14 (pantalla de `feat-m7-resumen-historial`), insignia `revirtiendo` en `estados.ts`.
 - Depende de `feat/m4-motor-construccion`; puede ir antes o después de la detección de stack.

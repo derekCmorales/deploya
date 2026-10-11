@@ -30,11 +30,11 @@ Se generan desde las fuentes del canvas; si cambias una pantalla en el diseño, 
 | 12 | [Despliegue en curso](12-Despliegue-construyendo.md) | `/projects/[proyecto]/despliegues/[n]` | Eduardo (datos: Derek) | A2 (A1: el estado se ve en la lista) |
 | 12b | [Despliegue · Saludable](12b-Despliegue-saludable.md) | `/projects/[proyecto]/despliegues/[n]` | Eduardo (datos: Derek) | A2 |
 | 12c | [Despliegue · Fallido](12c-Despliegue-fallido.md) | `/projects/[proyecto]/despliegues/[n]` | Eduardo (datos: Derek) | A2 (reintentar: A3) |
-| 13 | [Proyecto · Resumen](13-Proyecto-resumen.md) | `/projects/[proyecto]` | Eduardo | A3 |
-| 14 | [Proyecto · Despliegues](14-Proyecto-despliegues.md) | `/projects/[proyecto]/despliegues` | Eduardo | A3 |
+| 13 | [Proyecto · Resumen](13-Proyecto-resumen.md) | `/projects/[proyecto]` | Derek (actividad: Eduardo) | A3 |
+| 14 | [Proyecto · Despliegues](14-Proyecto-despliegues.md) | `/projects/[proyecto]/despliegues` | Derek | A3 |
 | 17 | [Proyecto · Variables de entorno](17-Proyecto-variables.md) | `/projects/[proyecto]/variables` | Eduardo | A2 |
-| 19 | [Proyecto · Configuración](19-Proyecto-configuracion.md) | `/projects/[proyecto]/configuracion` | Eduardo | A3 |
-| 19b | [Eliminar proyecto · confirmación](19b-Eliminar-dialogo.md) | `/projects/[proyecto]/configuracion` | Eduardo | A3 |
+| 19 | [Proyecto · Configuración](19-Proyecto-configuracion.md) | `/projects/[proyecto]/configuracion` | Derek | A3 |
+| 19b | [Eliminar proyecto · confirmación](19b-Eliminar-dialogo.md) | `/projects/[proyecto]/configuracion` | Derek | A3 |
 | 24 | [Correos del sistema](24-Correos.md) | `— (plantillas M10)` | Eddy | A1 (recuperación: A2) |
 | 25 | [Admin · Usuarios](25-Admin-usuarios.md) | `/admin/usuarios` | Javier | A3 |
 | 25b | [Admin · Suspender cuenta](25b-Admin-suspender.md) | `/admin/usuarios` | Javier | A3 |

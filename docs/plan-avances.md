@@ -11,7 +11,7 @@ Cada historia del núcleo tiene puntos (1 = medio día, 5 = casi una semana a ti
 | Ya entregado (bootstrap, diagramas, design system v4.1) | 13 | 13 | 9 % |
 | **Avance 1** | 33 | 46 | **32 %** |
 | Avance 2 | 37 (11 ya en `main`) | 83 | 57 % |
-| Avance 3 | 40 | 123 | 85 % |
+| **Avance 3** | 40 | 123 | **85 %** |
 | Entrega final | 22 | 145 | 100 % |
 
 El Avance 1 queda por encima del 30 % a propósito. Con la detección de stack (M4-03, 5 pts) y la reversión sin reconstruir (M5-04, 3 pts), que volvieron al núcleo por la retroalimentación de la entrega 1, el total pasa de 137 a 145 puntos y el Avance 1 baja de 34 % a 32 %: sigue habiendo margen, pero ahora es de una historia pequeña.
@@ -20,8 +20,8 @@ El Avance 1 queda por encima del 30 % a propósito. Con la detección de stack (
 |---|---|---|---|---|---|---|
 | Eddy | — | 10 | 6 | 4 | 5 | 25 |
 | Javier | — | 5 | 11 | 13 | 3 | 32 |
-| Eduardo | 3 | 8 | 8 | 10 | 3 | 32 |
-| Derek | 5 | 10 | 12 | 13 | 3 | 43 |
+| Eduardo | 3 | 8 | 8 | 4 | 3 | 26 |
+| Derek | 5 | 10 | 12 | 19 | 3 | 49 |
 | Todos | 5 | — | — | — | 8 | 13 |
 
 Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene que estar en `main` el lunes.
@@ -58,8 +58,8 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M3-02 | Nuevo proyecto: repositorio, revisar y desplegar | 11a, 11d, 11e | Eduardo | 5 | **A1** |
 | M7-01 | Vista de despliegue: riel de etapas y bitácora | 12, 12b, 12c | Eduardo | 5 | A2 |
 | M3-03 | Variables de entorno cifradas | 11c, 17 | Eduardo | 3 | A2 |
-| M7-02 | Resumen e historial del proyecto | 13, 14 | Eduardo | 3 | A3 |
-| M3-04 | Configuración y eliminar proyecto | 19, 19b | Eduardo | 3 | A3 |
+| M7-02 | Resumen e historial del proyecto | 13, 14 | Derek | 3 | A3 |
+| M3-04 | Configuración y eliminar proyecto | 19, 19b | Derek | 3 | A3 |
 | WEB-02 | Estados del sistema + banner de vencida | 10c, 28 | Eduardo | 2 | A3 |
 | M7-03 | Consumo del período y actividad | 08, 13 | Eduardo | 2 | A3 |
 | DOC-02 | Guion de demo, video y revisión de accesibilidad | — | Eduardo | 3 | Final |
@@ -71,7 +71,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M5-03 | Bloqueos por suscripción y cuota de construcciones | 10c | Derek | 2 | A2 |
 | M4-03 | Detección de stack sin `Dockerfile` (Node, Python, Go, estático) con recetas de Deploya | 11a, 11e, 12 | Derek (+ Eduardo en 11a/11e) | 5 | A2 |
 | M4-02 | Cancelar, reintentar y redesplegar | 12, 12c, 14 | Derek | 3 | A3 |
-| M5-04 | Versionado con retención (5 artefactos) y reversión sin reconstruir (estado Revirtiendo) | 13, 14 | Derek (+ Eduardo en 14) | 3 | A3 |
+| M5-04 | Versionado con retención (5 artefactos) y reversión sin reconstruir (estado Revirtiendo) | 13, 14 | Derek | 3 | A3 |
 | M6-02 | VPS con `*.deploya.app`, HTTPS comodín y credenciales SMTP del proveedor de correo (SPF/DKIM) | — | Derek | 5 | A3 |
 | ADR | ADR: Dockerfile, cola, polling, Traefik | — | Derek | 2 | A3 |
 | DOC-03 | Documento de diseño final y manual técnico | — | Derek | 3 | Final |
@@ -281,16 +281,199 @@ También: textos de 11a y 11e con la detección de stack (`LectorFuenteGitHub`, 
 
 Sin ensayo por ahora; si se agenda una presentación, se graba un video de respaldo antes.
 
-## Avance 3 — 80 %
+## Avance 3 — 85 % (entrega: viernes 23 de octubre en la noche)
 
-Recorrido: todo + ciclo §4.4 (vencida bloquea, suspendida detiene), historial de pagos, administración de usuarios con suspensión, configuración y borrado de proyecto, **revertir a una versión anterior en segundos sin reconstruir**, plataforma en el VPS con HTTPS.
+La versión visual de esta sección (resumen, una hoja por persona, integración y calidad, con las pantallas de cada quien) está en la página **Avance 3 · 85 % · guía** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Entrega: **viernes 23 de octubre en la noche** (cierre de la fase F4 de la propuesta). Todo en `main` ese día a las 20:00 y **desplegado en el VPS**.
 
-| Persona | Historias |
+### Dónde estamos (11 de octubre)
+
+| | Puntos | Acumulado | % |
+|---|---|---|---|
+| En `main`: Avance 1, cobro de Javier, cuentas de Eddy y motor de Derek | 75 | 75 | 52 % |
+| PR #31 (M7-01 y M3-03, 8 pts), en `main` desde el 11 de octubre | 8 | 83 | 57 % |
+| **Avance 3** (este plan) | 40 | 123 | **85 %** |
+| Entrega final | 22 | 145 | 100 % |
+
+El 85 % es el techo del Avance 3: no hay margen para historias de *Fuera de alcance*. Lo que más pesa: M2-05 ciclo §4.4 (5), M6-02 VPS con HTTPS (5) y las tres de 3 puntos alrededor de la pantalla 14 (M4-02, M5-04, M7-02), que van juntas.
+
+### Regla de calidad (igual que en los avances 1 y 2)
+
+Cada historia entra con su change de OpenSpec (diseño en SOLID y patrones en el `design.md`) y con **una prueba unitaria por escenario** en verde en CI. Los mínimos por historia están en [ingenieria.md §5.5](ingenieria.md#55-pruebas-mínimas-del-avance-3). Sin eso la historia no suma.
+
+### Qué se demuestra
+
+> Todo lo del Avance 2, ahora en **`https://<proyecto>.deploya.app`** en el VPS, y además: el cliente edita su nombre y cambia su contraseña (la otra sesión cae); descarga el **comprobante PDF** de su pago; abre el **resumen** y el **historial** de su proyecto, **revierte a la versión #1 en segundos sin reconstruir**, cancela un despliegue en curso, reintenta uno fallido y redespliega un commit; cambia la rama en **Configuración** y elimina un proyecto. Con la tarea diaria, una suscripción pasa a **Vencida** (la lista avisa y bloquea) y luego a **Suspendida** (sus contenedores se detienen); al renovar, vuelven. El administrador busca una cuenta, ve su detalle y la **suspende**: no entra (ve el motivo) y su app deja de responder.
+
+### Changes de OpenSpec del Avance 3 (ya propuestos)
+
+Están en `openspec/changes/` y validan con `openspec validate --all`. Cada dueño los **revisa** (si algo no le cuadra, `/opsx-update`) y luego `/opsx-apply`.
+
+| Change | Historias | Dueño | Toca a |
+|---|---|---|---|
+| `feat-m1-cuenta` | M1-06, M1-07 | Eddy | — |
+| `feat-m2-ciclo-suscripcion` | M2-05 | Javier (+ Derek, tarea 3) | Derek (`detenerTodosDe`, `reanudarTodosDe`) |
+| `feat-m2-historial-pagos` | M2-06 | Javier | — |
+| `feat-m9-usuarios-suspension` | M9-01, M9-02 | Javier | Eddy (`RolGuard`, ya en `main`), Derek (contenedores) |
+| `feat-m5-reversion-instantanea` | M5-04 | Derek | — |
+| `feat-m4-acciones-despliegue` | M4-02 | Derek | — |
+| `feat-m7-resumen-historial` | M7-02 | Derek | Eduardo (monta `ActividadProyecto`) |
+| `feat-m3-configuracion-proyecto` | M3-04 | Derek | — |
+| `feat-m6-vps-https` | M6-02, ADR | Derek | Eddy (SMTP del proveedor) |
+| `feat-m7-consumo-actividad` | M7-03 | Eduardo | Javier (08) y Derek (13) montan sus componentes |
+| `feat-m3-estados-sistema` | WEB-02 | Eduardo | — |
+
+### Eddy — cuentas (4 pts)
+
+| Id | Entrega | Terminado cuando |
+|---|---|---|
+| M1-06 | Mi cuenta · Perfil (05): `GET`/`PATCH /identidad/cuenta`, nombre de 1 a 64 caracteres, correo y rol de solo lectura | El nombre nuevo aparece en el encabezado; 65 caracteres se rechazan |
+| M1-07 | Mi cuenta · Seguridad (05b): cambiar contraseña con la actual (cierra las **otras** sesiones), «Cerrar todas» (incluida la actual) | Con dos navegadores, cambiar la contraseña en uno cierra el otro; «Cerrar todas» lleva a 03 |
+
+También: CI verde en cada PR (dueño de workflows); variables SMTP del proveedor en el VPS con Derek (jueves 15). Si sobra tiempo, **sin prometerlo**: el esqueleto del recorrido e2e de QA-01 (entrega final).
+
+**Demuestra en la entrega:** Mi cuenta, cambiar la contraseña con dos navegadores, «Cerrar todas»; el correo de verificación llegando a un buzón real desde el VPS.
+
+### Javier — monetización y administración (13 pts)
+
+| Id | Entrega | Terminado cuando |
+|---|---|---|
+| M2-05 | Ciclo §4.4: `PoliticaCiclo` pura, `CicloSuscripcionService`, tarea diaria (BullMQ 00:05 UTC) y `POST /admin/ciclo/ejecutar` para la demo; descenso programado al vencer; renovar una Suspendida la reactiva; panel «Suscripción suspendida» de 28 | `suspendida@` con un proyecto Saludable: ejecutar el ciclo → su app deja de responder; renovar → vuelve |
+| M2-06 | Historial de pagos (09, 09b) y comprobante PDF detrás de `ComprobantePdfPuerto` | Contratar Starter y descargar el PDF con número, vigencia, método y total; una cuenta nueva ve 09b |
+| M9-01 | Admin · Usuarios (25): búsqueda por correo, filtro por suscripción, detalle con proyectos y pagos | Filtrar por Vencida solo muestra cuentas vencidas; un Cliente recibe 403 |
+| M9-02 | Admin · Suspender (25b): motivo de la lista, detalle, sesiones revocadas, `AccionAdministrativa` y contenedores detenidos | La cuenta suspendida no entra (03b con el motivo) y su app deja de responder |
+
+Orden sugerido: M2-05 primero (es lo que más pesa y lo usa la demo de todos), luego M9-01/M9-02 y al final M2-06. Monta `<ConsumoPeriodo />` de Eduardo en 08 cuando esté (jueves 15).
+
+**Demuestra en la entrega:** comprobante PDF; ejecutar el ciclo con las cuentas de demo (Vencida → banner en 10c; Suspendida → contenedores detenidos → renovar); admin busca, abre y suspende una cuenta.
+
+### Eduardo — proyectos y experiencia (4 pts)
+
+| Id | Entrega | Terminado cuando |
+|---|---|---|
+| WEB-02 | Estados del sistema: banner de vencida en la lista (10c) reutilizando `banner-bloqueo.tsx`; 404, error de conexión con la API (reintento a los 8, 16 y 30 s) y esqueleto de carga de 28 | Con `vencida@` la lista avisa con la fecha de gracia y bloquea «Nuevo proyecto»; apagar la API muestra el error y se recupera sola |
+| M7-03 | Consumo y actividad: `GET /observabilidad/consumo` y `GET /proyectos/:id/actividad`; componentes `<ConsumoPeriodo />` (dos `Meter`) y `<ActividadProyecto />` (`MapaActividad`) | 08 muestra construcciones usadas y «Se reinicia el 1 nov»; 13 muestra «12 semanas · N despliegues · M con fallo» |
+
+También: revisa los PRs con UI de los demás contra el design system.
+
+**Demuestra en la entrega:** la lista con la cuenta Vencida, el consumo en 08, el mapa de actividad en 13 y el estado de error de la API.
+
+**Entrega a otros:** `<ConsumoPeriodo />` y `<ActividadProyecto />` el **jueves 15 a las 20:00** (Javier los monta en 08 y Derek en 13).
+
+### Derek — motor, operación del proyecto y VPS (19 pts)
+
+Es la parte más larga del avance, así que va con más detalle: qué es cada historia, en qué orden, qué archivos tocar, cómo se prueba y cómo saber que quedó.
+
+| Id | Entrega | Terminado cuando |
+|---|---|---|
+| M5-04 | Reversión sin reconstruir: retención de 5 artefactos, `POST /proyectos/:id/reversiones`, `GET /proyectos/:id/artefactos`, estado Revirtiendo | Tres despliegues de `hola-deploya`, revertir a #1 en segundos y la app vieja responde; `docker images` muestra a lo sumo 5 + el activo |
+| M4-02 | Cancelar (Encolado, Construyendo, Revirtiendo), reintentar (Fallido) y redesplegar un commit (reconstruye) | Cancelar en Construyendo no deja un `docker build` colgado; reintentar `roto` crea #n+1 con el mismo commit |
+| M7-02 | Pantallas 13 (Resumen) y 14 (Despliegues) con `GET /proyectos/:id/resumen` y `GET /proyectos/:id/despliegues?filtro=&antesDe=`; acciones por fila | 14 filtra fallidos, «Cargar más» no repite filas y cada fila ofrece revertir, redesplegar o reintentar según su estado |
+| M3-04 | Pantalla 19 (Configuración) con `PATCH /proyectos/:id` y el diálogo 19b (ya existe) movido a «Zona de peligro» | Cambiar la rama a `sin-dockerfile` y desplegar detecta Node; eliminar deja `docker ps -a` limpio |
+| M6-02 | VPS con `*.deploya.app`, HTTPS comodín por DNS-01, correo del proveedor (SPF/DKIM) y `scripts/desplegar-vps.sh` | `https://hola-deploya.deploya.app` con candado; el correo de verificación llega a un buzón real |
+| ADR | ADR 0007 (certificado comodín por DNS-01); 0002, 0003, 0005 y 0006 a Aceptado; 0004 al archivar la reversión | Índice de `docs/adr/README.md` sin «Por escribir» |
+
+#### Paso 0 · lunes 12: cerrar el Avance 2
+
+1. **PR #31 ya está en `main`** (M7-01 y M3-03, 8 pts; reemplazó a #23, #28, #29 y #30, que quedaron cerrados). En `docker compose down -v && docker compose up --build`, corre la demo que dice el PR: alta con `SALUDO`, riel hasta Saludable, rama `roto` en 12c, «Guardar y desplegar», `vencida@` con el banner.
+2. **Tareas de compose pendientes del A2:** 8.2 de `feat-m4-motor-construccion` (recorrido desde la API), 5.2 de `feat-m4-deteccion-stack` (`sin-dockerfile` Saludable con receta `node`), 6.3 de `feat-m5-acciones-contenedor` (detener / reiniciar / eliminar) y 4.3 de `feat-m5-bloqueos-cuota`. Márcalas solo si las viste funcionar.
+3. **Archivar en orden** (`/opsx-archive`) cuando su demo en compose esté hecha: `feat-m4-motor-construccion` → `feat-m4-deteccion-stack` → `feat-m5-acciones-contenedor` → `feat-m5-bloqueos-cuota` → `feat-m7-vista-despliegue` → `feat-m3-variables-cifradas`. Ya están archivados `feat-m1-estados-roles`, `feat-m1-recuperacion`, `feat-m3-alta-proyecto` y `feat-m3-eliminar-proyecto`.
+
+#### Paso 1 · lunes 12 – martes 13: VPS y dominio (M6-02, parte de infraestructura)
+
+Se arranca primero porque depende de terceros (DNS y certificados tardan) y es lo que más puede fallar.
+
+- **Qué haces:** compra o usa el dominio (`deploya.app` o el que esté disponible; el nombre real va en `.env.vps`), crea los registros A de la raíz y de `*` hacia la IP del VPS (2 vCPU, 4 GB, Ubuntu 24.04, Docker, usuario sin root). Pide un token del proveedor DNS con permiso **solo** sobre esa zona.
+- **Archivos:** `docker-compose.vps.yml` (extiende el de desarrollo: Traefik en 80/443, web en la raíz, API en `api.`, sin Mailpit), `infra/traefik/traefik.vps.yml` (resolvedor Let's Encrypt por **DNS-01** y redirección 80 → 443), `.env.vps.example` (sin secretos).
+- **Cómo sabes que quedó:** `curl -I https://algo.deploya.app` devuelve el certificado de `*.deploya.app` (aunque responda 404 de Traefik).
+- **Cuidado:** HTTP-01 emitiría un certificado por proyecto y choca con los límites de Let's Encrypt; por eso DNS-01 (va en el ADR 0007).
+
+#### Paso 2 · martes 13 a las 12:00: contenedores de un cliente para Javier (tarea 3 de `feat-m2-ciclo-suscripcion`)
+
+- **Qué es:** cuando M2 suspende una suscripción o M9 una cuenta, M5 detiene todos los contenedores del cliente; al renovar, los vuelve a arrancar.
+- **Qué haces:** en `orquestacion/acciones/acciones-proyecto.service.ts`, `detenerTodosDe(usuarioId)` y `reanudarTodosDe(usuarioId)`: por cada proyecto del usuario con despliegue activo Saludable encola `detener`; con Detenido, `reiniciar`. Reutiliza la cola `operacion` y los manejadores que ya existen (no hay `switch` nuevo). Exporta el adaptador `ContenedoresClienteM5` para que M2 y M9 lo inyecten por su puerto `ContenedoresClientePuerto`.
+- **Pruebas:** «Suscripción suspendida» (un `detener` por proyecto Saludable, los demás se omiten), «Reanudar al renovar», «Proyecto sin despliegue activo». Con la cola en memoria.
+- **Avísale a Javier** en cuanto esté en `main`: lo necesita para M2-05 y M9-02.
+
+#### Paso 3 · martes 13 – miércoles 14: reversión sin reconstruir (M5-04, `feat-m5-reversion-instantanea`)
+
+- **Qué es:** cada construcción ya deja un artefacto `deploya/<subdominio>:<n>`. Revertir es crear un despliegue nuevo que **reusa** esa imagen: se saltan Recepción y Construcción (`omitida`) y sigue Ejecución → Enrutamiento → Operación con la misma conmutación sin corte. No gasta construcciones del mes.
+- **Qué haces, en orden:** (1) dominio: `revirtiendo` en `TransicionesDespliegue` (ya está en `transiciones-despliegue.ts`, revisa que aparezca también en `estados.ts` de la web), `PoliticaRetencion.aRetirar` y `ARTEFACTOS_RETENIDOS = 5`; (2) `ReversionService` + `POST /proyectos/:id/reversiones` + `GET /proyectos/:id/artefactos`; (3) `PlanPipeline.reversion = [PasoEjecucion, PasoEnrutamiento, PasoOperacion]`: `PasoEjecucion` toma la imagen del artefacto en vez de la construcción; (4) `RetencionArtefactos` escucha `DespliegueTerminado` y llama a `ContenedorPuerto.eliminarImagen`.
+- **Pruebas** (todas con dobles): «Revertir a una versión disponible», «No consume construcciones», «Artefacto no disponible», «Artefacto ya activo», «Despliegue en curso», «Reversión que no pasa la salud», «Retención de cinco», «El activo nunca se retira».
+- **Cómo sabes que quedó:** en compose, tres despliegues con `SALUDO` distinto, `curl -X POST …/reversiones` al artefacto #1 y la página vuelve a decir el primer saludo en segundos; `docker images deploya/hola-deploya` no pasa de 6.
+
+#### Paso 4 · miércoles 14 – jueves 15: cancelar, reintentar y redesplegar (M4-02, `feat-m4-acciones-despliegue`)
+
+- **Cancelar:** desde Encolado, `ColaConstruccionPuerto.quitar(id)`; desde Construyendo o Revirtiendo la API escribe una señal (`CancelacionesPuerto`, clave Redis `cancelacion:<id>`) y el trabajador la ve con `VigiaCancelacion` (cada 1 s), aborta el `AbortController` del despliegue y `ConstructorImagenDocker` mata el `docker build`. El trabajador escribe `cancelado`. Desde Aprovisionando → 409 `ya-no-se-puede-cancelar`.
+- **Reintentar y redesplegar:** los dos llaman a `crearDespliegue(proyectoId, disparador, { commitSha })`; `PasoRecepcion` hace `git checkout <sha>`. Pasan por `BloqueosService` y cuentan como construcción.
+- **Pruebas:** la tabla de `PoliticaAcciones`, «Cancelar encolado», «Cancelar» en Construyendo (la señal aborta y la versión activa no cambia), «Cancelar tarde», «Reintentar un fallido», «Reintentar uno saludable», «Redesplegar reconstruye», «Commit desconocido».
+- **Web:** «Cancelar» en 12 y «Reintentar» en 12c (la página ya existe por #31); `accionesDe(estado)` como función pura con su prueba.
+
+#### Paso 5 · jueves 15 – sábado 17: pantallas 13 y 14 (M7-02, `feat-m7-resumen-historial`)
+
+- **API primero (jueves):** `RepositorioDespliegues.historialDe(proyectoId, filtro, antesDe, 20)` y `GET /proyectos/:id/despliegues`; `ResumenProyectoService` en `observabilidad/` y `GET /proyectos/:id/resumen`, con `LineaTiempoDespliegue` (los cuatro hitos de 13 con textos fijos de la ficha).
+- **Web 13 (viernes):** `app/(projects)/projects/[proyecto]/page.tsx` dentro del layout que ya existe (`MarcoProyecto`). Lee la ficha [13-Proyecto-resumen.md](diseno/pantallas/13-Proyecto-resumen.md): `RielEtapas`, `CopyField`, versión activa, imagen, recursos, `LineaTiempo` y las acciones Visitar / Reiniciar / Detener / Desplegar (ya tienen API). Deja el hueco donde va `<ActividadProyecto />` de Eduardo.
+- **Web 14 (sábado):** `despliegues/page.tsx` con `Segmented`, `Table`, fila activa, «Cargar más» (cursor `antesDe`) y la acción por fila con `accionDeFila(fila)`: revertir, redesplegar, reintentar, «imagen retirada» o «Versión activa». Revertir y redesplegar piden confirmación con `Dialog` y llevan a 12 del despliegue nuevo.
+- **Pruebas:** API «Filtrar fallidos», «Cargar más», «Fila activa marcada», «Proyecto saludable», «Proyecto sin despliegue Saludable», «Línea de tiempo»; web `accionDeFila` y el armado de la consulta.
+- **Revisión visual:** contra los artboards 13 y 14 en claro y oscuro, solo con componentes de `apps/web/src/components` (guía: [diseno/guia-construccion.md](diseno/guia-construccion.md)).
+
+#### Paso 6 · sábado 17 – domingo 18: configuración (M3-04, `feat-m3-configuracion-proyecto`)
+
+- **API:** `CambiosProyecto` (VO que reutiliza las reglas del alta), `ProyectosService.configurar` y `PATCH /proyectos/:id`. Si cambian repositorio o rama, valida con `ProveedorFuente` como en el alta. El subdominio no está en el tipo de `actualizar`: no se puede cambiar por error. No despliega al guardar.
+- **Web:** `configuracion/page.tsx` (19) con borrador, `cambiosDe(original, borrador)`, «Descartar», «Guardar cambios» y «Zona de peligro» que abre el diálogo 19b que ya existe (`eliminar-proyecto.tsx`), ahora con conteos reales; se quita «Eliminar» del detalle de la lista.
+- **Pruebas:** «Renombrar no cambia el subdominio», «Cambiar la rama aplica en el próximo despliegue», «Rama inexistente», «Nombre repetido», `cambiosDe`.
+
+#### Paso 7 · lunes 19 – martes 20: HTTPS en el código y `main` en el VPS (M6-02 y ADR)
+
+- **Código:** `ConfiguracionEnrutamiento { dominioBase, esquema, certResolver }` (variables `DOMINIO_BASE`, `ESQUEMA_PUBLICO`, `CERT_RESOLVER`); `EnrutamientoTraefikArchivo` agrega `tls` solo si hay resolvedor; la URL del despliegue sale de la configuración. `CertificadoPuerto` con `CertificadoAcmeArchivo` (lee `acme.json`) y `CertificadoAusente` (desarrollo) para mostrar el vencimiento en 12b.
+- **Pruebas:** «Certificado comodín» (la ruta lleva `tls.certResolver`), «Desarrollo sin TLS» (igual que hoy), «Vencimiento visible».
+- **Publicar:** `scripts/desplegar-vps.sh` (pull, compose con los dos archivos, `prisma migrate deploy`, seed). Con Eddy, las variables SMTP del proveedor (Resend o Brevo) con SPF y DKIM.
+- **ADR:** 0007 con la decisión DNS-01; 0002, 0003, 0005 y 0006 a Aceptado. `despliegue-infraestructura.mmd` con el VPS.
+
+#### Paso 8 · miércoles 21 – viernes 23: pruebas en el VPS, ensayo y entrega
+
+Miércoles: cada quien comprueba su parte en el VPS y se corrige. Jueves: recorrido completo **en el VPS** con las cuentas de demo y video de respaldo. Viernes 20:00: `main` congelado, `scripts/desplegar-vps.sh` una última vez y comprobar `https://hola-deploya.deploya.app`.
+
+**Entrega a otros:** contrato de despliegues **v3** (ya en `docs/contratos/despliegues.md`); `detenerTodosDe` y `reanudarTodosDe` el **martes 13 a las 12:00** (Javier); el VPS con HTTPS el **martes 20** para que todos prueben ahí; revisa todos los PRs que tocan motor, adapters, compose y contratos.
+
+**Demuestra en la entrega:** todo desde `https://…deploya.app`: 13 y 14 con datos reales, revertir a #1 en segundos (con la app abierta en otra pestaña: nunca da error), cancelar un despliegue en Construyendo, reintentar `roto`, cambiar la rama en 19 y eliminar el proyecto.
+
+### Deuda del Avance 2 (lunes 12)
+
+| Qué | Quién |
 |---|---|
-| Eddy | M1-06 Perfil · M1-07 Seguridad |
-| Javier | M2-05 ciclo §4.4 · M2-06 historial · M9-01 usuarios · M9-02 suspender |
-| Eduardo | M7-02 resumen e historial · M3-04 configuración y eliminar · WEB-02 estados del sistema · M7-03 consumo y actividad |
-| Derek | M4-02 cancelar, reintentar, redesplegar · **M5-04 reversión sin reconstruir** · M6-02 VPS con HTTPS · ADR |
+| PR #31 a `main`; #23, #28, #29 y #30 cerrados | **Hecho** (11 de octubre) |
+| `/opsx-archive` de `feat-m1-estados-roles`, `feat-m1-recuperacion`, `feat-m3-alta-proyecto`, `feat-m3-eliminar-proyecto` | **Hecho** (11 de octubre) |
+| Demo en compose y revisión visual: 8.2 motor, 5.2 detección, 6.3 acciones, 4.3 bloqueos, 5.2 vista de despliegue, 5.3 variables | Derek |
+| `/opsx-archive` de `feat-m4-motor-construccion`, `feat-m4-deteccion-stack`, `feat-m5-acciones-contenedor`, `feat-m5-bloqueos-cuota`, `feat-m7-vista-despliegue`, `feat-m3-variables-cifradas` (tras la demo) | Derek |
+
+### Calendario hasta el viernes 23
+
+| Día | Qué |
+|---|---|
+| Dom 11 | PR #31 y este plan en `main` (PR 0). Cada quien lee su guía y **revisa** sus changes |
+| Lun 12 | Demo del A2 en compose y archivar lo que falta (Derek). Dominio, DNS y VPS (Derek). Política del ciclo (Javier). Perfil (Eddy). Banner de 10c (Eduardo) |
+| Mar 13 | **12:00** `detenerTodosDe` / `reanudarTodosDe` en `main` (Derek). Reversión: dominio y servicio (Derek). Servicio del ciclo y tarea diaria (Javier). Seguridad (Eddy). 404, error de API y carga (Eduardo) |
+| Mié 14 | Reversión en compose y M4-02 (Derek). M9-01 usuarios (Javier). Consumo y actividad: API (Eduardo) |
+| Jue 15 | **20:00** `ConsumoPeriodo` y `ActividadProyecto` en `main` (Eduardo). API de 13 y 14 (Derek). M9-02 suspender (Javier). SMTP del proveedor con Derek (Eddy) |
+| Vie 16 – sáb 17 | Pantallas 13 y 14 (Derek). M2-06 pagos y PDF (Javier). Revisión visual de los PRs con UI (Eduardo) |
+| Dom 18 | Configuración 19 (Derek). Últimas historias de cada quien |
+| Lun 19 | HTTPS en el código y `scripts/desplegar-vps.sh` (Derek). Correcciones de revisión |
+| Mar 20 | **20:00** todo en `main` y el VPS con HTTPS listo para que todos prueben |
+| Mié 21 | `main` en el VPS; cada quien comprueba su parte en `https://…deploya.app` y corrige |
+| Jue 22 | **Ensayo completo en el VPS** y video de respaldo |
+| Vie 23 | **20:00** `main` congelado y desplegado. **Entrega en la noche** |
+
+### Guion de la demo (≈ 14 min)
+
+1. **Qué cambió (Derek, 1 min):** plataforma en el VPS con HTTPS; porcentaje con la tabla de arriba.
+2. **Cuentas (Eddy, 2 min):** Mi cuenta; cambiar la contraseña con dos navegadores; «Cerrar todas»; correo real desde el VPS.
+3. **Cobro y ciclo (Javier, 3 min):** comprobante PDF; ejecutar el ciclo: Vencida bloquea, Suspendida detiene, renovar reanuda.
+4. **Proyecto (Eduardo, 2 min):** banner de vencida en 10c, consumo en 08, actividad en 13, estado de error de la API.
+5. **Operar el proyecto (Derek, 4 min):** 13 y 14; **revertir a #1 en segundos sin reconstruir**; cancelar y reintentar; cambiar la rama en 19; eliminar.
+6. **Administración (Javier, 1 min):** buscar, ver el detalle y suspender una cuenta; el login muestra el motivo.
+7. **Proceso y calidad (Eddy, 1 min):** changes archivados, pruebas por escenario en CI, SOLID y patrones por historia, ADR.
+
+Plan B: el video del martes y compose local, por si el VPS o la red fallan durante la presentación.
 
 ## Entrega final — 100 %
 

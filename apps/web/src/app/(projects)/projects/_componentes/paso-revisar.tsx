@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { useAltaProyecto } from "@/hooks/use-alta-proyecto";
 import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
-import { recursosPlan, shaCorto, urlProyecto, type ListaProyectos } from "@/lib/proyectos";
+import { recursosPlan, shaCorto, textoConstruccion, urlProyecto, type ListaProyectos } from "@/lib/proyectos";
+import { variablesDeAlta } from "@/lib/variables";
+
+import { BannerBloqueo } from "./banner-bloqueo";
 
 type Alta = ReturnType<typeof useAltaProyecto>;
 
@@ -17,12 +20,19 @@ const SIN_EMPEZAR = ["pendiente", "pendiente", "pendiente", "pendiente", "pendie
 export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos | null }) {
   const { validacion } = alta;
   if (!validacion) return null;
-  const editar = (
-    <Button type="button" variant="ghost" size="xs" onClick={alta.volver}>
+  const editarFuente = (
+    <Button type="button" variant="ghost" size="xs" onClick={() => alta.irA("repositorio")}>
       <Pencil />
       Editar
     </Button>
   );
+  const editarVariables = (
+    <Button type="button" variant="ghost" size="xs" onClick={() => alta.irA("variables")}>
+      <Pencil />
+      Editar
+    </Button>
+  );
+  const cantidad = variablesDeAlta(alta.variables).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -33,20 +43,21 @@ export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos
       </div>
 
       {alta.error?.tipo === "aviso" ? <Banner variant="bad" title={alta.error.mensaje} /> : null}
+      {alta.error?.tipo === "bloqueo" ? <BannerBloqueo codigo={alta.error.codigo} mensaje={alta.error.mensaje} /> : null}
 
       <Card className="overflow-hidden">
         <dl>
-          <Fila icono={FolderGit2} titulo="Fuente" accion={editar}>
+          <Fila icono={FolderGit2} titulo="Fuente" accion={editarFuente}>
             {validacion.repositorio} · {alta.rama} · {shaCorto(validacion.commit.sha)}
           </Fila>
-          <Fila icono={Package} titulo="Construcción" accion={editar}>
-            docker build · /Dockerfile
+          <Fila icono={Package} titulo="Construcción" accion={editarFuente}>
+            {textoConstruccion(validacion)}
           </Fila>
-          <Fila icono={Terminal} titulo="Puerto" accion={editar}>
+          <Fila icono={Terminal} titulo="Puerto" accion={editarFuente}>
             {alta.puerto} → {ESQUEMA_APPS}
           </Fila>
-          <Fila icono={Variable} titulo="Variables" nota="Llega en la próxima entrega">
-            <span className="text-muted-foreground">Sin variables</span>
+          <Fila icono={Variable} titulo="Variables" accion={editarVariables}>
+            {cantidad === 0 ? <span className="text-muted-foreground">Sin variables</span> : `${cantidad} cifradas`}
           </Fila>
           <Fila icono={Cpu} titulo="Recursos" nota="según tu plan">
             {lista ? `${recursosPlan(lista.plan)} (${lista.plan.nombre})` : "—"}

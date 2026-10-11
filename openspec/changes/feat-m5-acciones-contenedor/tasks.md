@@ -24,7 +24,7 @@ Requiere `feat/m4-motor-construccion` en `main` (ya está). Sin Docker, Redis ni
 
 ## 5. Web (con Eduardo)
 
-- [ ] 5.1 «Reiniciar» y «Detener» en 12b; deshabilitados mientras el despliegue está en curso
+- [x] 5.1 «Reiniciar» y «Detener» en 12b; deshabilitados mientras el despliegue está en curso
 - [ ] 5.2 Revisión contra el artboard 12b
 
 ## 6. Cierre

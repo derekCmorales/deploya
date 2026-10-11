@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseFilters, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, UseFilters, UseGuards } from "@nestjs/common";
 import { SesionGuard } from "../identidad/sesion.guard";
 import { UsuarioActual } from "../identidad/usuario-actual.decorator";
-import { validarAltaProyecto, validarConfirmacionEliminar, validarConsultaRepositorio } from "./dominio/alta-proyecto";
+import { validarAltaProyecto, validarConfirmacionEliminar, validarConsultaRepositorio, validarReemplazoVariables } from "./dominio/alta-proyecto";
 import type { ValidacionRepositorio } from "./dominio/proyecto";
 import { ErroresProyectosFilter } from "./errores-proyectos.filter";
 import { ProyectosService, type ListaProyectos, type ProyectoCreado } from "./proyectos.service";
@@ -34,6 +34,24 @@ export class ProyectosController {
   @UseGuards(SesionGuard)
   crear(@UsuarioActual("id") usuarioId: string, @Body() cuerpo: unknown): Promise<ProyectoCreado> {
     return this.proyectos.crear(usuarioId, validarAltaProyecto(cuerpo));
+  }
+
+  @Get(":id/variables")
+  @UseGuards(SesionGuard)
+  listarVariables(@UsuarioActual("id") usuarioId: string, @Param("id") id: string) {
+    return this.proyectos.listarVariables(usuarioId, id);
+  }
+
+  @Get(":id/variables/:clave")
+  @UseGuards(SesionGuard)
+  mostrarVariable(@UsuarioActual("id") usuarioId: string, @Param("id") id: string, @Param("clave") clave: string) {
+    return this.proyectos.mostrarVariable(usuarioId, id, clave);
+  }
+
+  @Put(":id/variables")
+  @UseGuards(SesionGuard)
+  guardarVariables(@UsuarioActual("id") usuarioId: string, @Param("id") id: string, @Body() cuerpo: unknown) {
+    return this.proyectos.guardarVariables(usuarioId, id, validarReemplazoVariables(cuerpo));
   }
 
   @Delete(":id")

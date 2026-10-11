@@ -1,13 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { ConstruccionService } from "../construccion/construccion.service";
+import { StackNoReconocido } from "../construccion/dominio/errores";
+import { DeteccionStackService, type ResultadoDeteccion } from "../construccion/deteccion/deteccion-stack.service";
 import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
-import { ConfirmacionNoCoincide, LimiteProyectosAlcanzado, ProyectoNoEncontrado, SubdominioEnUso } from "./dominio/errores";
+import { BloqueosService } from "../orquestacion/bloqueos.service";
+import { ConfirmacionNoCoincide, LimiteProyectosAlcanzado, ProyectoNoEncontrado, StackNoReconocidoEnAlta, SubdominioEnUso } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
 import { subdominioDesdeNombre } from "./dominio/subdominio";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
+import { validarConjuntoVariables } from "./dominio/variable";
+import { VariablesProyectoService, type VariablePublica } from "./servicios/variables-proyecto.service";
 
 type Ultimos = Awaited<ReturnType<ConstruccionService["ultimosDespliegues"]>>;
 type DespliegueCreado = Awaited<ReturnType<ConstruccionService["crearDespliegue"]>>;
@@ -29,6 +34,16 @@ export interface ProyectoCreado {
   despliegue: DespliegueCreado;
 }
 
+export interface VariablesGuardadas {
+  variables: VariablePublica[];
+  despliegue: DespliegueCreado | null;
+}
+
+export interface PedidoVariables {
+  variables: { clave: string; valor?: string }[];
+  desplegar: boolean;
+}
+
 /** Caso de uso de M3: valida la fuente, guarda el proyecto y pide a M4 el despliegue #1. */
 @Injectable()
 export class ProyectosService {
@@ -38,10 +53,15 @@ export class ProyectosService {
     private readonly cuota: CuotaProyectosPuerto,
     private readonly construccion: ConstruccionService,
     private readonly acciones: AccionesProyectoService,
+    private readonly variables: VariablesProyectoService,
+    private readonly deteccion: DeteccionStackService,
+    private readonly bloqueos: BloqueosService,
   ) {}
 
-  validarRepositorio(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
-    return this.fuente.validar(consulta);
+  async validarRepositorio(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
+    const base = await this.fuente.validar(consulta);
+    const deteccion = await this.detectarOFallar(consulta);
+    return conDeteccion(base, deteccion);
   }
 
   async listar(usuarioId: string): Promise<ListaProyectos> {
@@ -57,9 +77,11 @@ export class ProyectosService {
 
   async crear(usuarioId: string, alta: AltaProyecto): Promise<ProyectoCreado> {
     await this.exigirCupo(usuarioId);
-    const validacion = await this.fuente.validar({ url: alta.url, rama: alta.rama });
+    await this.bloqueos.verificar(usuarioId);
+    const validacion = await this.validarRepositorio({ url: alta.url, rama: alta.rama });
     const subdominio = subdominioDesdeNombre(alta.nombre);
     if (await this.repositorio.existeSubdominio(subdominio)) throw new SubdominioEnUso(subdominio);
+    if (alta.variables) validarConjuntoVariables(alta.variables);
     const proyecto = await this.repositorio.guardar({
       usuarioId,
       nombre: alta.nombre,
@@ -69,8 +91,25 @@ export class ProyectosService {
       rutaDockerfile: RUTA_DOCKERFILE,
       puertoInterno: alta.puerto ?? validacion.puerto,
     });
+    if (alta.variables?.length) await this.variables.reemplazar(usuarioId, proyecto.id, alta.variables);
     const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");
     return { proyecto, despliegue };
+  }
+
+  /** 17: guarda el conjunto y, si se pide, encola un despliegue con disparador `variables`. */
+  async guardarVariables(usuarioId: string, proyectoId: string, pedido: PedidoVariables): Promise<VariablesGuardadas> {
+    if (pedido.desplegar) await this.bloqueos.verificar(usuarioId);
+    const variables = await this.variables.reemplazar(usuarioId, proyectoId, pedido.variables);
+    if (!pedido.desplegar) return { variables, despliegue: null };
+    return { variables, despliegue: await this.construccion.crearDespliegue(proyectoId, "variables") };
+  }
+
+  listarVariables(usuarioId: string, proyectoId: string): Promise<VariablePublica[]> {
+    return this.variables.listar(usuarioId, proyectoId);
+  }
+
+  mostrarVariable(usuarioId: string, proyectoId: string, clave: string) {
+    return this.variables.mostrar(usuarioId, proyectoId, clave);
   }
 
   /**
@@ -84,6 +123,15 @@ export class ProyectosService {
     if (confirmacion !== proyecto.nombre) throw new ConfirmacionNoCoincide();
     await this.acciones.pedirEliminacion(proyecto);
     await this.repositorio.eliminar(proyecto.id);
+  }
+
+  private async detectarOFallar(consulta: ConsultaRepositorio): Promise<ResultadoDeteccion> {
+    try {
+      return await this.deteccion.detectar(this.fuente.lector(consulta));
+    } catch (error) {
+      if (error instanceof StackNoReconocido) throw new StackNoReconocidoEnAlta(consulta.rama, error.pista);
+      throw error;
+    }
   }
 
   private async exigirCupo(usuarioId: string): Promise<void> {
@@ -101,4 +149,12 @@ function cuentaParaElPlan(ultimo: Ultimos[string] | undefined): boolean {
 
 function masRecientesPrimero(proyectos: Proyecto[]): Proyecto[] {
   return [...proyectos].sort((a, b) => b.creado.getTime() - a.creado.getTime());
+}
+
+function conDeteccion(base: ValidacionRepositorio, deteccion: ResultadoDeteccion): ValidacionRepositorio {
+  return {
+    ...base,
+    puerto: deteccion.puertoSugerido,
+    deteccion: { receta: deteccion.receta, nombre: deteccion.nombre, descripcion: deteccion.descripcion },
+  };
 }

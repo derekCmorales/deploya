@@ -15,7 +15,7 @@ El equipo usa Scrum adaptado a cuatro personas con dedicación parcial. Cada cic
 
 ### Avances del curso
 
-Cada entrega evaluada (30 %, 50 %, 80 %, final) cierra un ciclo. El porcentaje se calcula con los puntos de [docs/plan-avances.md](docs/plan-avances.md): solo cuentan historias que cumplen la definición de terminado. Lo de *fuera de alcance* no suma.
+Cada entrega evaluada (30 %, 50 %, 85 %, final) cierra un ciclo. El porcentaje se calcula con los puntos de [docs/plan-avances.md](docs/plan-avances.md): solo cuentan historias que cumplen la definición de terminado. Lo de *fuera de alcance* no suma.
 
 ### Definición de terminado
 

@@ -24,9 +24,9 @@ El motor no tiene pantallas propias: hace **reales** las de Eduardo. Lo que tu A
 | 12 | Etapa actual, duración por etapa, líneas de bitácora desde una posición, cancelar |
 | 12b | Digest y tamaño de imagen, URL, vencimiento del certificado, contenedor anterior detenido |
 | 12c | Código de salida, línea del error, versión que sigue sirviendo, reintentar |
-| 13 | Versión activa, recursos aplicados, reiniciar, detener |
-| 14 | Historial con digest y duración, redesplegar |
-| 19b | Borrar contenedor e imágenes |
+| 13 | Versión activa, recursos aplicados, reiniciar, detener (en el A3 también construyes la pantalla) |
+| 14 | Historial con digest y duración, redesplegar, revertir (en el A3 también construyes la pantalla) |
+| 19, 19b | Configuración y borrar contenedor e imágenes (en el A3 también construyes las pantallas) |
 
 Estados de despliegue: Encolado, Construyendo, Aprovisionando, Publicando, Saludable, Fallido, Cancelado, Detenido y Revirtiendo (≠ §4.4 de suscripción).
 
@@ -36,12 +36,14 @@ Estados de despliegue: Encolado, Construyendo, Aprovisionando, Publicando, Salud
 |---|---|---|
 | **A1 (30 %)** | ENG-01 compose con trabajador, Traefik y Mailpit · M4-01 cola + build + bitácora + API · M5-01 contenedor con límites + salud | 10 |
 | A2 (50 %) | M6-01 subdominio · M5-02 conmutación, reiniciar, detener · M5-03 bloqueos por suscripción y cuota · **M4-03 detección de stack** | 12 |
-| A3 (80 %) | M4-02 cancelar, reintentar, redesplegar · **M5-04 reversión sin reconstruir** · M6-02 VPS con HTTPS · ADR | 13 |
+| A3 (85 %) | M4-02 cancelar, reintentar, redesplegar · **M5-04 reversión sin reconstruir** · M7-02 resumen e historial (13, 14) · M3-04 configuración y eliminar (19, 19b) · M6-02 VPS con HTTPS · ADR | 19 |
 | Final | DOC-03 diseño final y manual técnico | 3 |
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Derek](../../plan-avances.md#derek--motor-10-pts).
 
 **Avance 2 (50 %):** [plan-avances.md § Derek (A2)](../../plan-avances.md#derek--motor-12-pts) · changes `feat-m4-deteccion-stack`, `feat-m5-acciones-contenedor` (M5-02 y cierre de M6-01), `feat-m5-bloqueos-cuota` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#derek). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+
+**Avance 3 (85 %):** [plan-avances.md § Derek (A3)](../../plan-avances.md#derek--motor-operación-del-proyecto-y-vps-19-pts) (pasos 0 a 8, con detalle) · changes `feat-m5-reversion-instantanea`, `feat-m4-acciones-despliegue`, `feat-m7-resumen-historial`, `feat-m3-configuracion-proyecto`, `feat-m6-vps-https` y la tarea 3 de `feat-m2-ciclo-suscripcion` · prompt: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#derek). Pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
 
 **Dependencia crítica:** el contrato ya está en [docs/contratos/despliegues.md](../../contratos/despliegues.md); tu implementación debe cumplirlo para que Eduardo conecte **Desplegar** el martes. También migraste el design system v4.1 (WEB-01, hecho).
 
@@ -51,7 +53,7 @@ Buildpacks · dominios personalizados · métricas en vivo (`docker stats`) · a
 
 ## Qué no tocas en solitario
 
-Auth (Eddy), pagos (Javier), pantallas de proyecto (Eduardo). Revisa esos PRs; no los sustituyas.
+Auth (Eddy), pagos (Javier) y las pantallas de proyecto que no son tuyas (10, 11, 12, 17: Eduardo). En el A3 construyes 13, 14, 19 y 19b con el design system; Eduardo revisa esos PRs.
 
 ## Diagramas
 

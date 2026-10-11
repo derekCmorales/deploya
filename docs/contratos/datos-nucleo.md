@@ -428,3 +428,4 @@ SuscripcionesService.cuotaDe(usuarioId: string): Promise<Cuota>; // lanza Suscri
 | 1 | 2026-09-27 | Firma inicial para DB-01 (incluye detección de stack y reversión, que volvieron al núcleo) |
 | 1.1 | 2026-10-02 | Seed: cuentas de demo Vencida y Suspendida para M5-03. Sin cambios de tablas en el Avance 2 |
 | 1.2 | 2026-10-06 | Seed: las cuentas Vencida y Suspendida quedan en Starter de 30 días con `vence` en el pasado (gracia de 5 días); el hash del seed es scrypt, igual que M1. Sin cambios de tablas |
+| 1.3 | 2026-10-11 | Avance 3: sin cambios de tablas. M2-05 escribe `Suscripcion.estado` y `estadoDesde` desde la tarea diaria; M9-02 escribe `Usuario.estadoCuenta`, `motivoSuspension` y una `AccionAdministrativa` por suspensión |

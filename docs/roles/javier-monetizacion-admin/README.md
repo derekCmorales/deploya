@@ -47,12 +47,14 @@ Activa → Por vencer (≤ 7 días) → Vencida (gracia 5 días; entornos en lí
 |---|---|---|
 | **A1 (30 %)** | DB-01 schema del núcleo + seed + Sandbox al registrarse · M2-01 catálogo | 5 |
 | A2 (50 %) | M2-02 contratación · M2-03 Mi suscripción · M2-04 cambiar plan | 11 |
-| A3 (80 %) | M2-05 ciclo §4.4 · M2-06 historial · M9-01 usuarios · M9-02 suspender | 13 |
+| A3 (85 %) | M2-05 ciclo §4.4 · M2-06 historial · M9-01 usuarios · M9-02 suspender | 13 |
 | Final | DOC-01 requisitos y manual de usuario | 3 |
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Javier](../../plan-avances.md#javier--monetización-5-pts).
 
 **Avance 2 (50 %):** [plan-avances.md § Javier (A2)](../../plan-avances.md#javier--monetización-11-pts-ya-en-main) · changes `feat-m2-contratacion-suscripcion` (hecho: falta archivar) y el seed de demo de `feat-m5-bloqueos-cuota` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#javier). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+
+**Avance 3 (85 %):** [plan-avances.md § Avance 3](../../plan-avances.md#avance-3--85--entrega-miércoles-21-de-octubre-en-la-noche) · prompt para tu agente: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#javier) · pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
 
 **Dependencia crítica:** tu schema bloquea a todos. PR el lunes; pide antes los campos a cada módulo. Si te sobra tiempo en el Avance 1, adelanta M2-02.
 

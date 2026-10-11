@@ -19,14 +19,17 @@ Requiere `feat/m4-motor-construccion` en `main`. Pruebas sin Docker, red, base n
 
 ## 4. Acciones de M4
 
-- [ ] 4.1 Prueba del escenario «Redesplegar reconstruye» cuando llegue M4-02
+- [ ] 4.1 «Redesplegar reconstruye» queda en `feat-m4-acciones-despliegue` (M4-02); aquí solo se comprueba que la reversión no pasa por `PasoConstruccion`
 
-## 5. Web (Eduardo, A3)
+## 5. Web (Derek, A3)
 
-- [ ] 5.1 `estados.ts` con `revirtiendo`; acción «Revertir a esta versión» en 14; riel con etapas `omitida`
+- [ ] 5.1 `estados.ts` con `revirtiendo` (mismo tono que *Construyendo*); riel con etapas `omitida` en 12
+- [ ] 5.2 En 14, por fila: «Revertir a esta versión» si el artefacto está `disponible` y no es el activo; «imagen retirada» deshabilitado si no; confirma con `Dialog` y lleva a 12 del despliegue nuevo
+- [ ] 5.3 Pruebas `node --test`: `accionDeFila(fila)` (revertir, imagen retirada, versión activa)
 
 ## 6. Cierre
 
 - [ ] 6.1 `pnpm check` en verde; cobertura ≥ 80 % en `orquestacion/`
 - [ ] 6.2 En compose: tres despliegues de `hola-deploya`, revertir al primero en segundos y ver la app anterior
-- [ ] 6.3 Quitar «Reversión instantánea» de *Fuera de alcance* en `openspec/specs/orquestacion/spec.md` y `motor-construccion/spec.md` al archivar; ADR 0004 a Aceptado
+- [ ] 6.3 `pnpm diagramas:sync` si cambió `clases-unificado.mmd`
+- [ ] 6.4 Quitar «Reversión instantánea» de *Fuera de alcance* en `openspec/specs/orquestacion/spec.md` y `motor-construccion/spec.md` al archivar; ADR 0004 a Aceptado

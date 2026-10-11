@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Ruta | `/projects/[proyecto]/configuracion` |
-| Dueño | Eduardo |
+| Dueño | Derek |
 | Historias | M3-04 |
 | Entrega | A3 |
 | Diseño | Canvas Deploya v4.1, artboard `19b-Eliminar-dialogo` (https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT) |

@@ -23,8 +23,6 @@ M8 (UI del asistente) quedó **fuera de alcance**.
 | 11a, 11d, 11e | Nuevo proyecto: Repositorio, Revisar, errores | M3-02 |
 | 11c, 17 | Variables (alta y proyecto) | M3-03 |
 | 12, 12b, 12c | Despliegue en curso, Saludable, Fallido | M7-01 (motor: Derek) |
-| 13, 14 | Resumen e historial | M7-02 |
-| 19, 19b | Configuración y eliminar | M3-04 |
 | 10c, 28 | Suscripción vencida y estados del sistema | WEB-02 |
 | 08 (consumo), 13 (actividad) | Consumo del período y actividad | M7-03 |
 
@@ -42,12 +40,14 @@ Accesibilidad: semántica, foco visible, contraste en ambos temas, botones reale
 |---|---|---|
 | **A1 (30 %)** | M3-01 lista · M3-02 alta, revisar y desplegar (WEB-01, el design system, ya está hecho) | 8 |
 | A2 (50 %) | M7-01 vista de despliegue · M3-03 variables cifradas | 8 |
-| A3 (80 %) | M7-02 resumen e historial · M3-04 configuración y eliminar · WEB-02 estados del sistema · M7-03 consumo y actividad | 10 |
+| A3 (85 %) | WEB-02 estados del sistema · M7-03 consumo y actividad | 4 |
 | Final | DOC-02 guion, video y accesibilidad | 3 |
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Eduardo](../../plan-avances.md#eduardo--proyectos-8-pts).
 
 **Avance 2 (50 %):** [plan-avances.md § Eduardo (A2)](../../plan-avances.md#eduardo--proyectos-y-experiencia-8-pts) · changes `feat-m7-vista-despliegue` (M7-01) y `feat-m3-variables-cifradas` (M3-03); con Derek, 11a y 11e de `feat-m4-deteccion-stack` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#eduardo). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+
+**Avance 3 (85 %):** [plan-avances.md § Avance 3](../../plan-avances.md#avance-3--85--entrega-miércoles-21-de-octubre-en-la-noche) · prompt para tu agente: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#eduardo) · pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
 
 **Dependencias:** schema de Javier (lunes), contrato de despliegues ([docs/contratos/despliegues.md](../../contratos/despliegues.md), ya publicado), guard de sesión de Eddy (martes 12:00; antes usa el usuario del seed).
 

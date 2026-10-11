@@ -1,10 +1,12 @@
 # Contrato · API de despliegues (M4 → web, M3 → M4)
 
-Versión 2.1 · dueño: Derek · consumidores: Eduardo (web, M3). Cambiarlo exige avisar antes de mergear. Specs: [motor-construccion](../../openspec/specs/motor-construccion/spec.md), [orquestacion](../../openspec/specs/orquestacion/spec.md). Datos: [datos-nucleo.md](datos-nucleo.md).
+Versión 3 · dueño: Derek · consumidores: Eduardo (web, M3). Cambiarlo exige avisar antes de mergear. Specs: [motor-construccion](../../openspec/specs/motor-construccion/spec.md), [orquestacion](../../openspec/specs/orquestacion/spec.md). Datos: [datos-nucleo.md](datos-nucleo.md).
 
 **v1 no cambia para el Avance 1.** La v2 solo **agrega**: detección de stack (A2), acciones (A2–A3), artefactos y reversión (A3), y el estado `revirtiendo`. Nada de v1 se renombra ni se quita.
 
 **v2.1 (Avance 2)** agrega la consulta por número (M7-01), las variables de M3 → M5 (M3-03) y `BloqueosService` (M5-03), y cambia `detener` de 200 a **202**: la API encola la acción y no espera a Docker (M5-02). Changes: `feat-m7-vista-despliegue`, `feat-m3-variables-cifradas`, `feat-m5-acciones-contenedor`, `feat-m5-bloqueos-cuota`.
+
+**v3 (Avance 3)** solo **agrega**: historial y resumen del proyecto (M7-02), códigos de cancelar y redesplegar (M4-02), configuración del proyecto (M3-04), consumo y actividad (M7-03), `certificado` en la vista (M6-02) y el servicio de M5 que detiene y reanuda los contenedores de un cliente (M2-05, M9-02). Changes: `feat-m7-resumen-historial`, `feat-m4-acciones-despliegue`, `feat-m5-reversion-instantanea`, `feat-m3-configuracion-proyecto`, `feat-m7-consumo-actividad`, `feat-m6-vps-https`, `feat-m2-ciclo-suscripcion`, `feat-m9-usuarios-suspension`.
 
 ## Servicio interno (M3 → M4)
 
@@ -58,6 +60,15 @@ VariablesProyectoService.descifradasDe(proyectoId: string): Promise<Record<strin
 // la bitácora registra solo «N variables aplicadas»; PORT la pone el motor con puertoInterno
 // M5: VariablesEntornoPuerto.deProyecto(proyectoId). El adaptador sobre descifradasDe traduce
 // VariableIlegible (M3) a VariablesIlegibles (FalloDespliegue en Ejecución, motivo «Variable ilegible»)
+```
+
+```ts
+// v3 · A3 · M5 → M2 (ciclo §4.4) y M9 (suspender cuenta). Exportado por OrquestacionModule.
+AccionesProyectoService.detenerTodosDe(usuarioId: string): Promise<{ encolados: number }>
+// un trabajo «detener» por proyecto con despliegue activo Saludable; los demás se omiten
+AccionesProyectoService.reanudarTodosDe(usuarioId: string): Promise<{ encolados: number }>
+// un trabajo «reiniciar» por proyecto con despliegue activo Detenido
+// M2 y M9 los ven por su puerto ContenedoresClientePuerto { detenerTodos, reanudarTodos } (adaptador en M2)
 ```
 
 ### Variables de entorno (M3, HTTP · v2.1 · A2)
@@ -137,13 +148,47 @@ POST /proyectos/:id/reversiones         (A3, M5-04) body { artefactoId }
   → 409 { codigo: "artefacto-no-disponible" | "artefacto-ya-activo" | "despliegue-en-curso" }
 ```
 
+### v3 · Avance 3
+
+```text
+POST /despliegues/:id/cancelar          (M4-02) → además 409 { codigo: "ya-no-se-puede-cancelar" } desde aprovisionando en adelante
+                                        · desde encolado sale de la cola; desde construyendo o revirtiendo el trabajador corta en < 5 s
+POST /despliegues/:id/reintentar        (M4-02) → 409 { codigo: "solo-se-reintenta-un-fallido" } · mismos 409 de bloqueo que crear
+POST /proyectos/:id/redespliegues       (M4-02) → 409 { codigo: "commit-desconocido" } si ese commit nunca se desplegó en el proyecto
+
+GET  /proyectos/:id/despliegues?filtro=todos|saludables|fallidos&antesDe=<numero>     (M7-02, pantalla 14)
+  → 200 { despliegues: [{ id, numero, estado, disparador, commit: { sha, mensaje, rama } | null, creado,
+                          duracionMs, imagen: { digest, disponible } | null, artefactoId, activo }],
+          siguiente: number | null }          // 20 por página, del más reciente al más antiguo; siguiente = antesDe de la próxima
+
+GET  /proyectos/:id/resumen             (M7-02, pantalla 13)
+  → 200 { proyecto: { id, nombre, subdominio, url, repositorio, rama, receta, puertoInterno },
+          plan: { codigo, nombre },
+          activo: <cuerpo de GET /despliegues/:id> | null,
+          ultimo: <cuerpo de GET /despliegues/:id> | null,
+          recursos: { cpus, memoriaMb } | null,
+          lineaTiempo: [{ etapa, titulo, detalle, marca }] }   // Commit recibido · Imagen construida · Contenedor iniciado · Tráfico redirigido
+
+PATCH /proyectos/:id                    (M3-04, pantalla 19) body { nombre?, urlRepositorio?, rama?, rutaDockerfile?, puertoInterno? }
+  → 200 { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno }   · aplica en el próximo despliegue
+  → 400 { codigo: "RutaInvalida" | "PuertoInvalido" | "RepositorioInaccesible" | "RamaInexistente" } · 409 { codigo: "NombreRepetido" }
+
+GET  /observabilidad/consumo            (M7-03, pantalla 08)
+  → 200 { periodo: { desde, reinicia }, proyectos: { usados, limite }, construcciones: { usadas, limite } }   // mes calendario UTC (I7)
+
+GET  /proyectos/:id/actividad           (M7-03, pantalla 13)
+  → 200 { dias: [{ fecha, total, fallidos }], total, fallidos }   // 84 días que terminan hoy (UTC)
+
+GET  /despliegues/:id                   (M6-02) → agrega certificado: { vence } | null   // null en desarrollo (sin TLS)
+```
+
 Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa** el artefacto (no clona ni construye). Sus etapas `recepcion` y `construccion` llegan como `omitida`; `ejecucion`, `enrutamiento` y `operacion` avanzan como en cualquier despliegue. No consume construcciones del mes. Si la salud falla, la versión activa no cambia.
 
 ## Lista de proyectos (M3)
 
 `GET /proyectos` incluye por proyecto `ultimoDespliegue: { id, numero, estado, etapas, creado } | null` para el riel de 55px de la pantalla 10.
 
-## Qué cambia para la web (Eduardo) con v2
+## Qué cambia para la web con v2 y v3
 
 | Dónde | Qué | Cuándo |
 |---|---|---|
@@ -155,6 +200,11 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 11a / 11e | Mostrar `ResultadoDeteccion.descripcion`; nuevo texto de error cuando `StackNoReconocido` | A2 |
 | 12 | Riel con etapas `omitida` en una reversión (el componente ya soporta `omitida`) | A3 |
 | 14 | Por fila, «Revertir a esta versión» si el artefacto está `disponible` y no es el activo | A3 |
+| 13, 14 | `GET /proyectos/:id/resumen` y `GET /proyectos/:id/despliegues?filtro=&antesDe=` | A3 · v3 |
+| 12, 12c, 14 | «Cancelar» (Encolado y Construyendo), «Reintentar» (Fallido), «Redesplegar» por fila | A3 · v3 |
+| 19 | `PATCH /proyectos/:id` con borrador y «Guardar cambios» | A3 · v3 |
+| 08, 13 | `GET /observabilidad/consumo` y `GET /proyectos/:id/actividad` | A3 · v3 |
+| 12b | Vencimiento del certificado (`certificado.vence`) en el VPS | A3 · v3 |
 
 ## Historial
 
@@ -166,3 +216,4 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 2 | 2026-09-27 | Solo agrega: detección de stack, acciones, artefactos, reversión y `revirtiendo`; campos `disparador`, `recursos`, `motivoFallo`, `imagen.numero`, `imagen.receta` |
 | 2.1 | 2026-10-02 | Avance 2: consulta por número, variables (HTTP y M3 → M5), `BloqueosService`; `detener` responde 202 |
 | 2.1 | 2026-10-06 | Solo agrega: `detectar` acepta `rutaDockerfile`; `ResultadoDeteccion.nombre` y `.dockerfile`; `StackNoReconocido.pista` |
+| 3 | 2026-10-11 | Avance 3, solo agrega: historial y resumen (M7-02), códigos de cancelar, reintentar y redesplegar (M4-02), `PATCH /proyectos/:id` (M3-04), consumo y actividad (M7-03), `certificado` (M6-02), `detenerTodosDe` / `reanudarTodosDe` para M2 y M9 |

@@ -37,10 +37,10 @@ Cómo pasar de una pantalla del canvas Deploya v4.1 a código en `apps/web`, a m
 | 10 Proyectos | `/projects` | `(projects)` | Eduardo |
 | 11 Nuevo proyecto | `/projects/nuevo` | `(projects)` | Eduardo |
 | 12 Despliegue | `/projects/[proyecto]/despliegues/[n]` | `(projects)` | Eduardo |
-| 13 Resumen | `/projects/[proyecto]` | `(projects)` | Eduardo |
-| 14 Despliegues | `/projects/[proyecto]/despliegues` | `(projects)` | Eduardo |
+| 13 Resumen | `/projects/[proyecto]` | `(projects)` | Derek |
+| 14 Despliegues | `/projects/[proyecto]/despliegues` | `(projects)` | Derek |
 | 17 Variables | `/projects/[proyecto]/variables` | `(projects)` | Eduardo |
-| 19 Configuración | `/projects/[proyecto]/configuracion` | `(projects)` | Eduardo |
+| 19 Configuración | `/projects/[proyecto]/configuracion` | `(projects)` | Derek |
 | 25 Admin · Usuarios | `/admin/usuarios` | `(admin)` | Javier |
 | 28 Estados del sistema | `not-found.tsx`, `error.tsx`, `loading.tsx` y componentes | raíz | Eduardo |
 

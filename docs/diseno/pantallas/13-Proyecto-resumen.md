@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Ruta | `/projects/[proyecto]` |
-| Dueño | Eduardo |
+| Dueño | Derek (actividad de 12 semanas: Eduardo, M7-03) |
 | Historias | M7-02 · M7-03 |
 | Entrega | A3 |
 | Diseño | Canvas Deploya v4.1, artboard `13-Proyecto-resumen` (https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT) |

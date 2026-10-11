@@ -1898,6 +1898,7 @@ classDiagram
         +listar(usuarioId) ListaProyectos
         +crear(usuarioId, alta) ProyectoCreado
         +eliminar(usuarioId, proyectoId, confirmacion) void
+        -bloqueos BloqueosService
     }
     class ProveedorFuente {
         <<abstract>>
@@ -1905,6 +1906,7 @@ classDiagram
         +lector(url, rama) LectorFuente
     }
     class FuenteGitHubPublica
+    class LectorFuenteGitHub
     class RepositorioProyectos {
         <<abstract>>
         +guardar(proyecto) Proyecto
@@ -1919,6 +1921,27 @@ classDiagram
         +cuotaDe(usuarioId) CuotaProyectos
     }
     class CuotaProyectosSuscripciones
+    class ClaveVariable {
+        +valor String
+    }
+    class CifradorVariables {
+        <<abstract>>
+        +cifrar(valor) String
+        +descifrar(valorCifrado) String
+    }
+    class CifradorAesGcm
+    class RepositorioVariables {
+        <<abstract>>
+        +deProyecto(proyectoId) List~VariableGuardada~
+        +reemplazar(proyectoId, variables) List~VariableGuardada~
+    }
+    class VariablesProyectoService {
+        <<Facade>>
+        +listar(usuarioId, proyectoId) List~VariablePublica~
+        +mostrar(usuarioId, proyectoId, clave) Valor
+        +reemplazar(usuarioId, proyectoId, entradas) List~VariablePublica~
+        +descifradasDe(proyectoId) Map~String, String~
+    }
     class ParserExpose {
         +puertoDesdeExpose(dockerfile) Integer
     }
@@ -2055,6 +2078,7 @@ classDiagram
         <<abstract>>
         +deProyecto(proyectoId) Map~String, String~
     }
+    class VariablesEntornoProyecto
     class PasoOperacion {
         -contenedores ContenedorPuerto
     }
@@ -2287,6 +2311,9 @@ classDiagram
     ProyectosService --> DeteccionStackService : detectar
     ProyectosService --> ConstruccionService : crearDespliegue
     ProveedorFuente <|-- FuenteGitHubPublica
+    FuenteGitHubPublica --> LectorFuenteGitHub
+    LectorFuente <|-- LectorFuenteGitHub
+    ProyectosService --> BloqueosService : verificar
     FuenteGitHubPublica --> ParserExpose
     RepositorioProyectos <|-- RepositorioProyectosPrisma
     CuotaProyectosPuerto <|-- CuotaProyectosSuscripciones
@@ -2351,7 +2378,12 @@ classDiagram
     ContenedorPuerto <|-- ContenedorDocker
     ColaOperacionPuerto <|-- ColaOperacionBullMq
     PasoEjecucion --> VariablesEntornoPuerto
-    VariablesEntornoPuerto <|-- VariablesEntornoPendientes
+    VariablesEntornoPuerto <|-- VariablesEntornoProyecto
+    VariablesEntornoProyecto --> VariablesProyectoService : descifradasDe
+    VariablesProyectoService --> CifradorVariables
+    VariablesProyectoService --> RepositorioVariables
+    CifradorVariables <|-- CifradorAesGcm
+    ProyectosService --> VariablesProyectoService
     ProyectosService --> AccionesProyectoService : pedirEliminacion
     AccionesProyectoService --> ColaOperacionPuerto
     AccionesProyectoService ..> AccionContenedor : encola

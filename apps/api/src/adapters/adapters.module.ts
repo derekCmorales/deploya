@@ -13,11 +13,13 @@ import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operac
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
 import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verificacion-entorno.puerto";
 import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
+import { RepositorioVariables } from "../modules/proyectos/puertos/repositorio-variables.puerto";
 import { CONFIGURACION_MOTOR, configuracionDesde, type ConfiguracionMotor } from "./configuracion-motor";
 import { RecetaProyectoPrisma } from "./prisma/receta-proyecto.prisma";
 import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
+import { RepositorioVariablesPrisma } from "./prisma/repositorio-variables.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
 import { ColaBullMq, ColaOperacionBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
@@ -55,6 +57,7 @@ const PERSISTENCIA: Provider[] = [
   { provide: RepositorioDespliegues, useClass: RepositorioDesplieguesPrisma },
   { provide: RepositorioArtefactos, useClass: RepositorioArtefactosPrisma },
   { provide: RepositorioProyectos, useClass: RepositorioProyectosPrisma },
+  { provide: RepositorioVariables, useClass: RepositorioVariablesPrisma },
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
   { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
 ];

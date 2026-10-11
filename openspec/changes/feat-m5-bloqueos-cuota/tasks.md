@@ -16,8 +16,8 @@ Sin base ni reloj reales: `Reloj` falso y repositorios en memoria.
 ## 3. Puntos de entrada
 
 - [x] 3.1 Derek: `ConstruccionService.crearDespliegue` verifica; filtro 409 con `codigo`
-- [ ] 3.2 Eduardo: `POST /proyectos` verifica antes de persistir; banner en 11d y 17 con enlace a `/suscripcion`
-- [ ] 3.3 Pruebas: controlador de despliegues 409 con cada `codigo` (**hecho**, filtro global `RechazosOrquestacionFilter`); «Alta con la suscripción vencida» no persiste el proyecto (Eduardo, con 3.2)
+- [x] 3.2 Eduardo: `POST /proyectos` verifica antes de persistir; banner en 11d y 17 con enlace a `/suscripcion`
+- [x] 3.3 Pruebas: controlador de despliegues 409 con cada `codigo` (**hecho**, filtro global `RechazosOrquestacionFilter`); «Alta con la suscripción vencida» no persiste el proyecto (Eduardo, con 3.2)
 
 ## 4. Cierre
 

@@ -1,10 +1,4 @@
-import {
-  FuenteNoDisponible,
-  RamaNoEncontrada,
-  RepositorioNoAccesible,
-  RepositorioSinDockerfile,
-  UrlRepositorioInvalida,
-} from "../dominio/errores";
+import { FuenteNoDisponible, RamaNoEncontrada, RepositorioNoAccesible, UrlRepositorioInvalida } from "../dominio/errores";
 import { FuenteGitHubPublica, type ClienteHttp } from "./fuente-github-publica";
 
 const BASE = "https://api.github.com/repos/derekCmorales/hola-deploya";
@@ -82,16 +76,14 @@ describe("FuenteGitHubPublica", () => {
     await expect(new FuenteGitHubPublica(http).validar(consulta("no-existe"))).rejects.toThrow(RamaNoEncontrada);
   });
 
-  it("Falta el Dockerfile: lanza RepositorioSinDockerfile con la rama", async () => {
+  it("Falta el Dockerfile: dockerfile queda null para que M4 intente una receta", async () => {
     const { http } = github({ ...VALIDO, [`${BASE}/contents/Dockerfile`]: { estado: 404 } });
-    const error = await new FuenteGitHubPublica(http).validar(consulta()).catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(RepositorioSinDockerfile);
-    expect(error).toMatchObject({ rama: "main" });
+    await expect(new FuenteGitHubPublica(http).validar(consulta())).resolves.toMatchObject({ dockerfile: null, puerto: 8080 });
   });
 
   it("un directorio llamado Dockerfile cuenta como falta de Dockerfile", async () => {
     const { http } = github({ ...VALIDO, [`${BASE}/contents/Dockerfile`]: { cuerpo: [{ name: "x" }] } });
-    await expect(new FuenteGitHubPublica(http).validar(consulta())).rejects.toThrow(RepositorioSinDockerfile);
+    await expect(new FuenteGitHubPublica(http).validar(consulta())).resolves.toMatchObject({ dockerfile: null });
   });
 
   it("un Dockerfile de más de 1 MB se baja por download_url", async () => {

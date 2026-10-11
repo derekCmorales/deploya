@@ -9,20 +9,26 @@ import { PrismaModule } from "../../compartido/prisma/prisma.module";
 import { PrismaService } from "../../compartido/prisma/prisma.service";
 import { RelojFijo } from "../../compartido/reloj";
 import { RepositorioArtefactos } from "../construccion/puertos/repositorio-artefactos.puerto";
+import { LectorFuente } from "../construccion/puertos/lector-fuente.puerto";
 import { RepositorioDespliegues } from "../construccion/puertos/repositorio-despliegues.puerto";
 import { ConstruccionService } from "../construccion/construccion.service";
 import { ProyectosLecturaPuerto } from "../construccion/puertos/proyectos-lectura.puerto";
 import { CuotaPlanPuerto } from "../orquestacion/puertos/cuota-plan.puerto";
+import { MAXIMO_VARIABLES } from "./dominio/variable";
 import {
   DatosAltaInvalidos,
   ErrorProyectos,
+  ClaveInvalida,
+  ClaveReservada,
   ConfirmacionNoCoincide,
+  DemasiadasVariables,
   FuenteNoDisponible,
   LimiteProyectosAlcanzado,
   ProyectoNoEncontrado,
   RamaNoEncontrada,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
+  StackNoReconocidoEnAlta,
   SubdominioEnUso,
   UrlRepositorioInvalida,
 } from "./dominio/errores";
@@ -34,6 +40,16 @@ import { ProyectosModule } from "./proyectos.module";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
+
+class LectorDockerfile extends LectorFuente {
+  async existe(ruta: string): Promise<boolean> {
+    return ruta === "Dockerfile";
+  }
+
+  async leer(ruta: string): Promise<string | null> {
+    return ruta === "Dockerfile" ? "FROM node\nEXPOSE 3000" : null;
+  }
+}
 
 class FuenteDoble extends ProveedorFuente {
   async validar({ rama }: ConsultaRepositorio): Promise<ValidacionRepositorio> {
@@ -47,6 +63,10 @@ class FuenteDoble extends ProveedorFuente {
       dockerfile: "FROM node\nEXPOSE 3000",
       puerto: 3000,
     };
+  }
+
+  lector(): LectorFuente {
+    return new LectorDockerfile();
   }
 }
 
@@ -160,11 +180,15 @@ describe("ProyectosController", () => {
     [new RepositorioNoAccesible(404), 422, { codigo: "repositorio-no-accesible", estadoHttp: 404 }],
     [new RamaNoEncontrada("dev"), 422, { codigo: "rama-no-encontrada", rama: "dev" }],
     [new RepositorioSinDockerfile("main"), 422, { codigo: "sin-dockerfile", rama: "main" }],
+    [new StackNoReconocidoEnAlta("main", "agrega un script start o un Dockerfile"), 422, { codigo: "stack-no-reconocido", rama: "main" }],
     [new FuenteNoDisponible(), 503, { codigo: "fuente-no-disponible" }],
     [new SubdominioEnUso("hola"), 409, { codigo: "subdominio-en-uso", subdominio: "hola" }],
     [new LimiteProyectosAlcanzado(1), 409, { codigo: "limite-proyectos", maximo: 1 }],
     [new ProyectoNoEncontrado("p-1"), 404, { codigo: "proyecto-no-encontrado" }],
     [new ConfirmacionNoCoincide(), 400, { codigo: "confirmacion-no-coincide" }],
+    [new ClaveInvalida(), 400, { codigo: "clave-invalida" }],
+    [new ClaveReservada(), 400, { codigo: "clave-reservada" }],
+    [new DemasiadasVariables(MAXIMO_VARIABLES), 400, { codigo: "demasiadas-variables" }],
   ])("el filtro traduce %p a HTTP %i con su código", (error, estado, cuerpo) => {
     const { respuesta, host } = respuestaFalsa();
     new ErroresProyectosFilter().catch(error, host);

@@ -17,6 +17,8 @@ export interface VistaDespliegue {
   creado: string;
   terminado: string | null;
   etapas: { nombre: Etapa; estado: EstadoEtapa; duracionMs: number | null }[];
+  /** Vencimiento del certificado TLS (12b); `null` en desarrollo, sin TLS. */
+  certificado: { vence: string } | null;
 }
 
 /** `ultimoDespliegue` de cada proyecto en `GET /proyectos` (contrato de despliegues). */
@@ -41,7 +43,7 @@ export interface PaginaBitacora {
   terminado: boolean;
 }
 
-export function vistaDespliegue(despliegue: Despliegue, imagen: ImagenDeVista | null): VistaDespliegue {
+export function vistaDespliegue(despliegue: Despliegue, imagen: ImagenDeVista | null, vence: Date | null = null): VistaDespliegue {
   return {
     id: despliegue.id,
     numero: despliegue.numero,
@@ -57,6 +59,7 @@ export function vistaDespliegue(despliegue: Despliegue, imagen: ImagenDeVista | 
     creado: despliegue.creado.toISOString(),
     terminado: despliegue.terminado?.toISOString() ?? null,
     etapas: despliegue.etapas.map(vistaEtapa),
+    certificado: vence ? { vence: vence.toISOString() } : null,
   };
 }
 

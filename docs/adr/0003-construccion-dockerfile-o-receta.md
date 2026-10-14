@@ -1,6 +1,6 @@
 # 0003 — Construcción con el Dockerfile del repo o con una receta por stack detectado
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-27
 - **Autor:** @derekCmorales · **Módulos:** M4 (consumidor: M3)
 - **Change de OpenSpec:** `feat/m4-deteccion-stack` (y `feat/m4-motor-construccion` para el caso Dockerfile)

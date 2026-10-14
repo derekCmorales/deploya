@@ -23,6 +23,7 @@ import {
   SubdominioEnUso,
 } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, ValidacionRepositorio } from "./dominio/proyecto";
+import { SUBDOMINIOS_DE_PLATAFORMA } from "./dominio/subdominio";
 import { ProyectosService } from "./proyectos.service";
 import { CuotaProyectosPuerto, type CuotaProyectos } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
@@ -143,6 +144,26 @@ describe("ProyectosService", () => {
   });
 
   describe("crear", () => {
+    it("En el VPS un nombre que la plataforma usa (api, www…) se rechaza como subdominio en uso", async () => {
+      const { servicio: base, repositorio, fuente, cuota, construccion, acciones, variables, bloqueos } = montar();
+      const servicio = new ProyectosService(
+        fuente,
+        repositorio,
+        cuota,
+        construccion as unknown as ConstruccionService,
+        acciones as unknown as AccionesProyectoService,
+        variables,
+        new DeteccionStackService(recetasEnOrden()),
+        bloqueos as unknown as BloqueosService,
+        SUBDOMINIOS_DE_PLATAFORMA,
+      );
+
+      await expect(servicio.crear("usuario-1", alta({ nombre: "API" }))).rejects.toThrow(SubdominioEnUso);
+
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
+      await expect(base.crear("usuario-1", alta({ nombre: "API" }))).resolves.toMatchObject({ proyecto: { subdominio: "api" } });
+    });
+
     it("Desplegar: guarda el proyecto y pide el despliegue #1 encolado con disparador «alta»", async () => {
       const { servicio, repositorio, construccion } = montar();
       const { proyecto, despliegue } = await servicio.crear("usuario-1", alta());

@@ -590,6 +590,17 @@ classDiagram
         +publicar(ruta RutaPublica) UrlPublicada
         +retirar(subdominio) void
     }
+    class ConfiguracionEnrutamiento {
+        <<Objeto de configuración>>
+        +dominioBase String
+        +esquema String
+        +certResolver String
+        +configuracionEnrutamientoDesde(entorno) ConfiguracionEnrutamiento
+    }
+    class CertificadoPuerto {
+        <<abstract>>
+        +venceEl(host) Date
+    }
 
     %% ───────── Adaptadores (y stubs con la misma firma) ─────────
     class ColaBullMq
@@ -602,7 +613,17 @@ classDiagram
     class ColaOperacionBullMq
     class VariablesEntornoPendientes
     class VerificacionHttp
-    class EnrutamientoTraefikArchivo
+    class EnrutamientoTraefikArchivo {
+        -opciones ConfiguracionEnrutamiento
+        +configuracionRuta(ruta, configuracion) String
+    }
+    class CertificadoAcmeArchivo {
+        <<Adapter>>
+        -ruta String
+    }
+    class CertificadoAusente {
+        <<Null Object>>
+    }
 
     %% ───────── Entidades y enumeraciones ─────────
     class Despliegue {
@@ -827,6 +848,10 @@ classDiagram
     EliminarManejador --> EnrutamientoService
     VerificacionEntornoPuerto <|-- VerificacionHttp
     EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo
+    EnrutamientoTraefikArchivo --> ConfiguracionEnrutamiento
+    CertificadoPuerto <|-- CertificadoAcmeArchivo
+    CertificadoPuerto <|-- CertificadoAusente
+    ConstruccionService --> CertificadoPuerto : venceEl
 
     Despliegue --> EstadoDespliegue
     Despliegue "*" --> "0..1" Artefacto

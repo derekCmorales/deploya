@@ -15,7 +15,7 @@ describe("EnrutamientoTraefikArchivo", () => {
   });
 
   it("Publicación: escribe la ruta Host(subdominio.localhost) hacia el contenedor y devuelve la URL", async () => {
-    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominio: "localhost", esquema: "http" });
+    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominioBase: "localhost", esquema: "http", certResolver: null });
 
     const { url } = await enrutamiento.publicar(ruta);
 
@@ -26,7 +26,7 @@ describe("EnrutamientoTraefikArchivo", () => {
   });
 
   it("conmutar reescribe el mismo archivo hacia el contenedor nuevo", async () => {
-    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominio: "localhost", esquema: "http" });
+    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominioBase: "localhost", esquema: "http", certResolver: null });
     await enrutamiento.publicar(ruta);
 
     await enrutamiento.publicar({ ...ruta, host: "deploya-hola-deploya-2" });
@@ -35,7 +35,7 @@ describe("EnrutamientoTraefikArchivo", () => {
   });
 
   it("retirar borra la ruta del proyecto", async () => {
-    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominio: "localhost", esquema: "http" });
+    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominioBase: "localhost", esquema: "http", certResolver: null });
     await enrutamiento.publicar(ruta);
 
     await enrutamiento.retirar("hola-deploya");
@@ -44,12 +44,39 @@ describe("EnrutamientoTraefikArchivo", () => {
   });
 
   it("rechaza subdominios que no son una etiqueta DNS (evita inyectar reglas)", async () => {
-    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominio: "localhost", esquema: "http" });
+    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominioBase: "localhost", esquema: "http", certResolver: null });
 
     await expect(enrutamiento.publicar({ ...ruta, subdominio: "x`) || Host(`otro" })).rejects.toThrow(RutaInvalida);
   });
 
-  it("en el VPS usa https y el dominio real", () => {
-    expect(configuracionRuta(ruta, "deploya.app")).toContain("Host(`hola-deploya.deploya.app`)");
+  it("Desarrollo sin TLS: la ruta escucha en web, no declara TLS y la URL es http://<proyecto>.localhost", async () => {
+    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominioBase: "localhost", esquema: "http", certResolver: null });
+
+    const { url } = await enrutamiento.publicar(ruta);
+
+    const contenido = await readFile(join(directorio, "hola-deploya.yml"), "utf8");
+    expect(url).toBe("http://hola-deploya.localhost");
+    expect(contenido).toContain("entryPoints: [web]");
+    expect(contenido).not.toContain("tls");
+    expect(contenido).not.toContain("certResolver");
+  });
+
+  it("Certificado comodín: en el VPS la ruta lleva tls.certResolver, el comodín y Host(x.deploya.app)", async () => {
+    const enrutamiento = new EnrutamientoTraefikArchivo({ directorio, dominioBase: "deploya.app", esquema: "https", certResolver: "letsencrypt" });
+
+    const { url } = await enrutamiento.publicar(ruta);
+
+    const contenido = await readFile(join(directorio, "hola-deploya.yml"), "utf8");
+    expect(url).toBe("https://hola-deploya.deploya.app");
+    expect(contenido).toContain("Host(`hola-deploya.deploya.app`)");
+    expect(contenido).toContain("entryPoints: [websecure]");
+    expect(contenido).toContain("tls:\n        certResolver: letsencrypt");
+    expect(contenido).toContain('- main: "deploya.app"');
+    expect(contenido).toContain('sans: ["*.deploya.app"]');
+    expect(contenido).toContain('- url: "http://deploya-hola-deploya-1:8080"');
+  });
+
+  it("configuracionRuta es la misma función que usa publicar", () => {
+    expect(configuracionRuta(ruta, { dominioBase: "deploya.app", certResolver: null })).toContain("Host(`hola-deploya.deploya.app`)");
   });
 });

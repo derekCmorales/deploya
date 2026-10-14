@@ -154,3 +154,10 @@ export function rutaReintentar(despliegueId: string): string {
   return `/despliegues/${despliegueId}/reintentar`;
 }
 
+/** 12b: «Certificado hasta 12 ene 2027»; sin certificado (desarrollo) no hay nada que decir. */
+export function textoCertificado(certificado: { vence: string } | null | undefined, fecha: (iso: string) => string | null): string | null {
+  if (!certificado) return null;
+  const texto = fecha(certificado.vence);
+  return texto ? `Certificado hasta ${texto}` : null;
+}
+

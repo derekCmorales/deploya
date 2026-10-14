@@ -84,6 +84,8 @@ export interface VistaDespliegue {
   creado?: string;
   terminado?: string | null;
   etapas: EtapaDespliegue[];
+  /** M6-02: vencimiento del certificado TLS; `null` en desarrollo (sin TLS). */
+  certificado?: { vence: string } | null;
 }
 
 export const INTERVALO_SONDEO_MS = 3000;

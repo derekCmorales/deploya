@@ -1,6 +1,6 @@
 # 0002 — Cola BullMQ y un trabajador aparte con la misma imagen
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-27
 - **Autor:** @derekCmorales · **Módulos:** M4, M5, M6
 - **Change de OpenSpec:** `feat/m4-motor-construccion`

@@ -1,6 +1,6 @@
 # 0006 — Polling cada 3 s en vez de WebSocket o SSE
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-27
 - **Autor:** @derekCmorales · **Módulos:** M4, M7 (consumidor: web)
 - **Change de OpenSpec:** `feat/m4-motor-construccion`

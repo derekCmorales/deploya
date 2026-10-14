@@ -8,6 +8,14 @@ COPY e2e/package.json e2e/package.json
 RUN pnpm install --frozen-lockfile --filter @deploya/web...
 
 FROM deps AS build
+# Next hornea NEXT_PUBLIC_* al construir. Los valores por defecto son los de compose local; el VPS los
+# cambia con `build.args` en docker-compose.vps.yml (API en api.<dominio>, apps en <dominio>, https).
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+ARG NEXT_PUBLIC_DOMINIO_APPS=localhost
+ARG NEXT_PUBLIC_ESQUEMA_APPS=http
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_DOMINIO_APPS=$NEXT_PUBLIC_DOMINIO_APPS \
+    NEXT_PUBLIC_ESQUEMA_APPS=$NEXT_PUBLIC_ESQUEMA_APPS
 COPY apps/web apps/web
 RUN pnpm --filter @deploya/web build
 

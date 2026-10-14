@@ -349,7 +349,7 @@ flowchart LR
             WK["worker<br/>Dockerfile.api · node dist/trabajador.js<br/>git + docker.sock"]
             WEB["web<br/>Dockerfile.web<br/>:3000"]
             MP["mailpit<br/>:1025 SMTP · :8025 UI"]
-            TR["traefik:v3<br/>:80 (:443 en el VPS)"]
+            TR["traefik:v3<br/>:80 (:443 y redirección 80→443 en el VPS)"]
         end
 
         subgraph RED_P1["red deploya-p-hola-deploya"]
@@ -362,6 +362,13 @@ flowchart LR
 
         SOCK["/var/run/docker.sock"]
         VOL["volumen traefik_dinamico<br/>/traefik/dinamico/*.yml"]
+        ACME[("volumen traefik_acme<br/>/acme/acme.json · solo VPS")]
+    end
+
+    subgraph EXTERNOS["Solo en el VPS (docker-compose.vps.yml)"]
+        LE["Let's Encrypt<br/>certificado comodín *.deploya.app"]
+        DNS["Proveedor DNS<br/>registros A · desafío DNS-01<br/>token solo de la zona"]
+        SMTP["Proveedor SMTP<br/>Resend o Brevo · SPF y DKIM"]
     end
 
     NAV["Navegador"]
@@ -369,7 +376,13 @@ flowchart LR
     NAV -->|"localhost:3000"| WEB
     NAV -->|"localhost:3001"| API
     NAV -->|"hola-deploya.localhost"| TR
-    NAV -->|"localhost:8025"| MP
+    NAV -->|"localhost:8025 (sin Mailpit en el VPS)"| MP
+    NAV -->|"https://deploya.app · https://api.deploya.app · https://hola-deploya.deploya.app"| TR
+    TR -->|"emite y renueva por DNS-01"| LE
+    LE -->|"verifica el TXT"| DNS
+    TR -->|"escribe"| ACME
+    API -->|"lee solo el vencimiento"| ACME
+    API -->|"SMTP del proveedor"| SMTP
     API --> PG
     API --> RD
     API -->|SMTP| MP
@@ -386,10 +399,10 @@ flowchart LR
     classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef cliente fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
     classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
-    class PG,RD,VOL data
+    class PG,RD,VOL,ACME data
     class API,WK,WEB,MP,TR app
     class C1,C2 cliente
-    class SOCK,NAV ext
+    class SOCK,NAV,LE,DNS,SMTP ext
 ```
 
 ---
@@ -2273,6 +2286,17 @@ classDiagram
         +publicar(ruta RutaPublica) UrlPublicada
         +retirar(subdominio) void
     }
+    class ConfiguracionEnrutamiento {
+        <<Objeto de configuración>>
+        +dominioBase String
+        +esquema String
+        +certResolver String
+        +configuracionEnrutamientoDesde(entorno) ConfiguracionEnrutamiento
+    }
+    class CertificadoPuerto {
+        <<abstract>>
+        +venceEl(host) Date
+    }
 
     %% ───────── Adaptadores (y stubs con la misma firma) ─────────
     class ColaBullMq
@@ -2285,7 +2309,17 @@ classDiagram
     class ColaOperacionBullMq
     class VariablesEntornoPendientes
     class VerificacionHttp
-    class EnrutamientoTraefikArchivo
+    class EnrutamientoTraefikArchivo {
+        -opciones ConfiguracionEnrutamiento
+        +configuracionRuta(ruta, configuracion) String
+    }
+    class CertificadoAcmeArchivo {
+        <<Adapter>>
+        -ruta String
+    }
+    class CertificadoAusente {
+        <<Null Object>>
+    }
 
     %% ───────── Entidades y enumeraciones ─────────
     class Despliegue {
@@ -2510,6 +2544,10 @@ classDiagram
     EliminarManejador --> EnrutamientoService
     VerificacionEntornoPuerto <|-- VerificacionHttp
     EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo
+    EnrutamientoTraefikArchivo --> ConfiguracionEnrutamiento
+    CertificadoPuerto <|-- CertificadoAcmeArchivo
+    CertificadoPuerto <|-- CertificadoAusente
+    ConstruccionService --> CertificadoPuerto : venceEl
 
     Despliegue --> EstadoDespliegue
     Despliegue "*" --> "0..1" Artefacto

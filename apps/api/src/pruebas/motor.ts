@@ -9,6 +9,7 @@ import { ClonadorStub } from "../adapters/stubs/clonador.stub";
 import { ColaMemoria } from "../adapters/stubs/cola.memoria";
 import { ColaOperacionMemoria } from "../adapters/stubs/cola-operacion.memoria";
 import { ConstructorImagenStub } from "../adapters/stubs/constructor-imagen.stub";
+import { CertificadoFijo } from "../adapters/stubs/certificado-ausente";
 import { ContenedorStub } from "../adapters/stubs/contenedor.stub";
 import { CuotaPlanStub } from "../adapters/stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "../adapters/stubs/enrutamiento.stub";
@@ -87,7 +88,8 @@ export function motorDePrueba() {
   };
   const retencion = new RetencionArtefactos(artefactos, despliegues, orquestacion);
   const bloqueos = new BloqueosService(cuota, despliegues, reloj);
-  const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, bloqueos, reloj);
+  const certificado = new CertificadoFijo();
+  const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, bloqueos, reloj, certificado);
   const cancelaciones = new CancelacionesMemoria();
   const vigia = new VigiaCancelacion(cancelaciones, 0);
   const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, planes, [retencion], vigia);
@@ -109,7 +111,7 @@ export function motorDePrueba() {
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
     contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
-    colaOperacion, accionesProyecto, accionesContenedor, variables, reversion, retencion, planes, cancelaciones, vigia, accionesDespliegue, detalleProyectos, resumen,
+    colaOperacion, accionesProyecto, accionesContenedor, variables, reversion, retencion, planes, cancelaciones, vigia, certificado, accionesDespliegue, detalleProyectos, resumen,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);

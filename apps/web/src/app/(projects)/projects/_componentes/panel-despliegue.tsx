@@ -25,10 +25,12 @@ import {
   rutaCancelar,
   rutaDespliegue,
   rutaReintentar,
+  textoCertificado,
   textoParaCopiar,
   tiempoTranscurrido,
 } from "@/lib/despliegues";
 import { AccionesContenedor } from "./acciones-contenedor";
+import { fechaCorta } from "@/lib/fechas";
 import { haceCuanto, recursosPlan, shaCorto, textoEtapa, type VistaDespliegue } from "@/lib/proyectos";
 
 const HTTP_NO_ENCONTRADO = 404;
@@ -236,6 +238,7 @@ function Saludable({
   alAccionar: () => void;
 }) {
   const digest = despliegue.imagen?.digest;
+  const certificado = textoCertificado(despliegue.certificado, (iso) => fechaCorta(iso));
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -254,6 +257,7 @@ function Saludable({
         {despliegue.imagen?.receta ? ` · receta ${despliegue.imagen.receta}` : null}
         {despliegue.recursos ? ` · ${recursosPlan(despliegue.recursos)}` : null}
         {despliegue.url?.startsWith("https://") ? " · TLS activo" : null}
+        {certificado ? ` · ${certificado}` : null}
       </p>
       {despliegue.terminado ? <p className="text-muted-foreground">Publicado {haceCuanto(despliegue.terminado, new Date(ahora))}</p> : null}
       {aviso ? <p>{aviso}</p> : null}

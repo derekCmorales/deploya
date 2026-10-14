@@ -10,6 +10,7 @@ import { RecetaProyectoPuerto } from "../modules/construccion/puertos/receta-pro
 import { RepositorioArtefactos } from "../modules/construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
 import { DetalleProyectoPuerto } from "../modules/observabilidad/puertos/detalle-proyecto.puerto";
+import { CertificadoPuerto } from "../modules/enrutamiento/puertos/certificado.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
 import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
@@ -24,12 +25,14 @@ import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prism
 import { RepositorioVariablesPrisma } from "./prisma/repositorio-variables.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
 import { CancelacionesRedis } from "./reales/cancelaciones-redis";
+import { CertificadoAcmeArchivo } from "./reales/certificado-acme-archivo";
 import { ColaBullMq, ColaOperacionBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
 import { ContenedorDocker } from "./reales/contenedor-docker";
 import { EnrutamientoTraefikArchivo } from "./reales/enrutamiento-traefik-archivo";
 import { VerificacionHttp } from "./reales/verificacion-http";
 import { CancelacionesMemoria } from "./stubs/cancelaciones.memoria";
+import { CertificadoAusente } from "./stubs/certificado-ausente";
 import { ClonadorStub } from "./stubs/clonador.stub";
 import { ColaMemoria } from "./stubs/cola.memoria";
 import { ColaOperacionMemoria } from "./stubs/cola-operacion.memoria";
@@ -72,6 +75,10 @@ const COMUNES: Provider[] = [
   { provide: Reloj, useClass: RelojSistema },
   ...PERSISTENCIA,
   puerto(ColaConstruccionPuerto, { docker: (c) => new ColaBullMq(c.redisUrl), stub: () => new ColaMemoria() }),
+  puerto(CertificadoPuerto, {
+    docker: (c) => (c.enrutamiento.certResolver ? new CertificadoAcmeArchivo(c.acmeArchivo) : new CertificadoAusente()),
+    stub: () => new CertificadoAusente(),
+  }),
   puerto(CancelacionesPuerto, { docker: (c) => new CancelacionesRedis(c.redisUrl), stub: () => new CancelacionesMemoria() }),
   puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
 ];
@@ -86,7 +93,7 @@ const SOLO_TRABAJADOR: Provider[] = [
   puerto(VerificacionEntornoPuerto, { docker: (_c, reloj) => new VerificacionHttp(reloj), stub: () => new VerificacionEntornoStub() }),
   puerto(EnrutamientoPuerto, {
     docker: (c) =>
-      new EnrutamientoTraefikArchivo({ directorio: c.traefikDinamico, dominio: c.dominioApps, esquema: c.esquemaApps }),
+      new EnrutamientoTraefikArchivo({ directorio: c.traefikDinamico, ...c.enrutamiento }),
     stub: () => new EnrutamientoStub(),
   }),
 ];

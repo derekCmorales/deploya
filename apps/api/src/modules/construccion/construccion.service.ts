@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Reloj } from "../../compartido/reloj";
+import { CertificadoPuerto } from "../enrutamiento/puertos/certificado.puerto";
 import { BloqueosService } from "../orquestacion/bloqueos.service";
 import type { Commit, Despliegue, DespliegueCreado, ProyectoDesplegable } from "./dominio/despliegue";
 import { CommitDesconocido, DespliegueNoEncontrado, ProyectoNoEncontrado } from "./dominio/errores";
@@ -39,6 +40,7 @@ export class ConstruccionService {
     private readonly cola: ColaConstruccionPuerto,
     private readonly bloqueos: BloqueosService,
     private readonly reloj: Reloj,
+    private readonly certificado: CertificadoPuerto,
   ) {}
 
   /**
@@ -141,7 +143,13 @@ export class ConstruccionService {
     const imagen = artefacto
       ? { numero: artefacto.numero, digest: artefacto.digest, tamanoBytes: artefacto.tamanoBytes, receta: artefacto.receta }
       : null;
-    return vistaDespliegue(despliegue, imagen);
+    return vistaDespliegue(despliegue, imagen, await this.vencimientoDe(despliegue));
+  }
+
+  /** Solo un despliegue servido por HTTPS tiene certificado que mostrar. */
+  private async vencimientoDe(despliegue: Despliegue): Promise<Date | null> {
+    if (!despliegue.url?.startsWith("https://")) return null;
+    return this.certificado.venceEl(new URL(despliegue.url).hostname);
   }
 
   private async proyectoDe(proyectoId: string, usuarioId: string): Promise<ProyectoDesplegable> {

@@ -18,6 +18,7 @@ import {
   rutaDespliegue,
   rutaReintentar,
   sondearBitacora,
+  textoCertificado,
   textoParaCopiar,
   tiempoTranscurrido,
 } from "../src/lib/despliegues.ts";
@@ -118,3 +119,13 @@ test("las rutas de cancelar y reintentar son las del contrato", () => {
   assert.equal(rutaCancelar("d-1"), "/despliegues/d-1/cancelar");
   assert.equal(rutaReintentar("d-1"), "/despliegues/d-1/reintentar");
 });
+
+test("12b · el vencimiento del certificado solo se muestra cuando hay TLS", () => {
+  const fecha = (iso) => (iso === "2027-01-12T05:14:24.000Z" ? "12 ene 2027" : null);
+
+  assert.equal(textoCertificado({ vence: "2027-01-12T05:14:24.000Z" }, fecha), "Certificado hasta 12 ene 2027");
+  assert.equal(textoCertificado(null, fecha), null);
+  assert.equal(textoCertificado(undefined, fecha), null);
+  assert.equal(textoCertificado({ vence: "no es fecha" }, fecha), null);
+});
+

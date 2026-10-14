@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import { ConstruccionService } from "../construccion/construccion.service";
 import { StackNoReconocido } from "../construccion/dominio/errores";
 import { DeteccionStackService, type ResultadoDeteccion } from "../construccion/deteccion/deteccion-stack.service";
@@ -15,7 +15,7 @@ import {
 } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
-import { subdominioDesdeNombre } from "./dominio/subdominio";
+import { esSubdominioReservado, SUBDOMINIOS_RESERVADOS, subdominioDesdeNombre } from "./dominio/subdominio";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
@@ -72,6 +72,7 @@ export class ProyectosService {
     private readonly variables: VariablesProyectoService,
     private readonly deteccion: DeteccionStackService,
     private readonly bloqueos: BloqueosService,
+    @Optional() @Inject(SUBDOMINIOS_RESERVADOS) private readonly reservados: readonly string[] = [],
   ) {}
 
   async validarRepositorio(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
@@ -96,7 +97,7 @@ export class ProyectosService {
     await this.bloqueos.verificar(usuarioId);
     const validacion = await this.validarRepositorio({ url: alta.url, rama: alta.rama });
     const subdominio = subdominioDesdeNombre(alta.nombre);
-    if (await this.repositorio.existeSubdominio(subdominio)) throw new SubdominioEnUso(subdominio);
+    if (esSubdominioReservado(subdominio, this.reservados) || (await this.repositorio.existeSubdominio(subdominio))) throw new SubdominioEnUso(subdominio);
     if (alta.variables) validarConjuntoVariables(alta.variables);
     const proyecto = await this.repositorio.guardar({
       usuarioId,

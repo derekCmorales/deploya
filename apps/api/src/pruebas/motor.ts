@@ -30,6 +30,8 @@ import { PasoEnrutamiento } from "../modules/enrutamiento/paso-enrutamiento";
 import { OrquestacionService } from "../modules/orquestacion/orquestacion.service";
 import { PasoEjecucion } from "../modules/orquestacion/paso-ejecucion";
 import { PasoOperacion } from "../modules/orquestacion/paso-operacion";
+import { ReversionService } from "../modules/orquestacion/reversion/reversion.service";
+import { RetencionArtefactos } from "../modules/orquestacion/retencion/retencion-artefactos";
 
 /** Proyecto de ejemplo para las pruebas del motor. */
 export function proyectoDemo(cambios: Partial<ProyectoDesplegable> = {}): ProyectoDesplegable {
@@ -69,26 +71,36 @@ export function motorDePrueba() {
     new DetenerManejador(despliegues, orquestacion, enrutamientoServicio, reloj),
     new EliminarManejador(orquestacion, enrutamientoServicio),
   ]);
-  const pasos = [
-    new PasoRecepcion(clonador, despliegues, new DeteccionStackService(recetasEnOrden()), recetas),
-    new PasoConstruccion(constructorImagen, artefactos, despliegues, reloj),
-    new PasoEjecucion(orquestacion, despliegues, variables),
-    new PasoEnrutamiento(enrutamientoServicio, despliegues),
-    new PasoOperacion(orquestacion, despliegues),
-  ];
+  const recepcion = new PasoRecepcion(clonador, despliegues, new DeteccionStackService(recetasEnOrden()), recetas);
+  const construccion = new PasoConstruccion(constructorImagen, artefactos, despliegues, reloj);
+  const ejecucion = new PasoEjecucion(orquestacion, despliegues, variables, artefactos);
+  const enrutamientoPaso = new PasoEnrutamiento(enrutamientoServicio, despliegues);
+  const operacion = new PasoOperacion(orquestacion, despliegues);
+  const planes = {
+    construccion: [recepcion, construccion, ejecucion, enrutamientoPaso, operacion],
+    reversion: [ejecucion, enrutamientoPaso, operacion],
+  };
+  const retencion = new RetencionArtefactos(artefactos, despliegues, orquestacion);
   const bloqueos = new BloqueosService(cuota, despliegues, reloj);
   const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, bloqueos, reloj);
-  const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, pasos);
+  const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, planes, [retencion]);
+  const reversion = new ReversionService(proyectos, artefactos, despliegues, cola, reloj);
   proyectos.agregar(proyectoDemo());
   despliegues.registrarDueno("proyecto-1", "usuario-1");
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
     contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
-    colaOperacion, accionesProyecto, accionesContenedor, variables,
+    colaOperacion, accionesProyecto, accionesContenedor, variables, reversion, retencion, planes,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);
       await pipeline.ejecutar({ despliegueId: creado.id, plan: "construccion" }, 0);
+      return (await despliegues.porId(creado.id))!;
+    },
+    /** Pide la reversión como la API y la ejecuta como el trabajador (plan `reversion`). */
+    async revertir(artefactoId: string, proyectoId = "proyecto-1") {
+      const creado = await reversion.revertir(proyectoId, artefactoId, "usuario-1");
+      await pipeline.ejecutar({ despliegueId: creado.id, plan: "reversion" }, 0);
       return (await despliegues.porId(creado.id))!;
     },
     /** Pide la acción como la API y la ejecuta como el trabajador (cola `operacion`). */

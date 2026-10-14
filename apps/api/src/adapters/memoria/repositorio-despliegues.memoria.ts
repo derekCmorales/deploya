@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import type { Despliegue, LineaBitacora } from "../../modules/construccion/dominio/despliegue";
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
-import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
+import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, estaTerminado, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
@@ -33,8 +33,8 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
       estado: nuevo.estado,
       disparador: nuevo.disparador,
       rama: nuevo.rama,
-      commit: null,
-      artefactoId: null,
+      commit: nuevo.commit ?? null,
+      artefactoId: nuevo.artefactoId ?? null,
       contenedorId: null,
       url: null,
       cpus: null,
@@ -43,7 +43,12 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
       motivoFallo: null,
       creado: nuevo.creado,
       terminado: null,
-      etapas: ETAPAS.map((etapa) => ({ etapa, estado: "pendiente", iniciada: null, terminada: null })),
+      etapas: ETAPAS.map((etapa) => ({
+        etapa,
+        estado: nuevo.etapasOmitidas?.includes(etapa) ? "omitida" : "pendiente",
+        iniciada: null,
+        terminada: null,
+      })),
     };
     this.despliegues.set(despliegue.id, despliegue);
     this.lineas.set(despliegue.id, []);
@@ -95,6 +100,11 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
   async activoDe(proyectoId: string): Promise<Despliegue | null> {
     const id = this.activos.get(proyectoId);
     return id ? this.porId(id) : null;
+  }
+
+  async enCursoDe(proyectoId: string): Promise<Despliegue | null> {
+    const enCurso = [...this.despliegues.values()].find((d) => d.proyectoId === proyectoId && !estaTerminado(d.estado));
+    return enCurso ? structuredClone(enCurso) : null;
   }
 
   async marcarActivo(proyectoId: string, despliegueId: string): Promise<void> {

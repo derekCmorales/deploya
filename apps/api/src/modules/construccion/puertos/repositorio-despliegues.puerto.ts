@@ -7,6 +7,11 @@ export interface NuevoDespliegue {
   rama: string;
   estado: EstadoDespliegue;
   creado: Date;
+  /** Solo la reversión: el artefacto que reusa y el commit con el que se construyó. */
+  artefactoId?: string;
+  commit?: Commit;
+  /** Etapas que este despliegue no recorre (Recepción y Construcción en una reversión). */
+  etapasOmitidas?: readonly Etapa[];
 }
 
 export interface CambiosDespliegue {
@@ -37,6 +42,8 @@ export abstract class RepositorioDespliegues {
   /** El despliegue más reciente de cada proyecto pedido (para la lista de M3). */
   abstract ultimosDe(proyectoIds: string[]): Promise<Despliegue[]>;
   abstract activoDe(proyectoId: string): Promise<Despliegue | null>;
+  /** El despliegue que aún no terminó (Encolado, Construyendo, Revirtiendo, Aprovisionando o Publicando), si lo hay. */
+  abstract enCursoDe(proyectoId: string): Promise<Despliegue | null>;
   abstract marcarActivo(proyectoId: string, despliegueId: string): Promise<void>;
   /**
    * Construcciones del usuario desde `desde` (invariante I7): todos sus despliegues creados

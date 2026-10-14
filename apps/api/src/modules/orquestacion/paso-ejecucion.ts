@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { SaludNoAlcanzada } from "../construccion/dominio/errores";
+import { FalloDespliegue, SaludNoAlcanzada } from "../construccion/dominio/errores";
 import { PasoPipeline, type ContextoDespliegue } from "../construccion/pipeline/paso-pipeline";
+import { RepositorioArtefactos } from "../construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../construccion/puertos/repositorio-despliegues.puerto";
 import { PUERTO_RECETAS } from "../construccion/deteccion/deteccion.constantes";
 import { OrquestacionService } from "./orquestacion.service";
@@ -9,6 +10,7 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
 /**
  * Etapa 3 · Ejecución: contenedor con los límites del plan y las variables del proyecto
  * (M3-03), y verificación de salud. La bitácora dice cuántas variables, nunca cuáles.
+ * En una reversión (M5-04) no hubo Construcción: la imagen es la del artefacto que se reusa.
  */
 @Injectable()
 export class PasoEjecucion extends PasoPipeline {
@@ -19,12 +21,14 @@ export class PasoEjecucion extends PasoPipeline {
     private readonly orquestacion: OrquestacionService,
     private readonly despliegues: RepositorioDespliegues,
     private readonly variablesEntorno: VariablesEntornoPuerto,
+    private readonly artefactos: RepositorioArtefactos,
   ) {
     super();
   }
 
   async ejecutar(contexto: ContextoDespliegue): Promise<void> {
     const { despliegue, proyecto, bitacora } = contexto;
+    contexto.imagen ??= await this.imagenReutilizada(contexto);
     const variables = await this.variablesEntorno.deProyecto(proyecto.id);
     const { contenedor, recursos, salud } = await this.aprovisionar(contexto, variables);
     contexto.contenedor = contenedor;
@@ -37,6 +41,15 @@ export class PasoEjecucion extends PasoPipeline {
     const cantidad = Object.keys(variables).length;
     if (cantidad > 0) bitacora.escribir(this.etapa, textoVariables(cantidad));
     bitacora.escribir(this.etapa, `Verificación de salud OK · ${salud.detalle} en ${salud.milisegundos} ms`);
+  }
+
+  /** La imagen del artefacto que reusa una reversión; sin ella no hay nada que ejecutar. */
+  private async imagenReutilizada(contexto: ContextoDespliegue): Promise<string> {
+    const { despliegue, bitacora } = contexto;
+    const artefacto = despliegue.artefactoId ? await this.artefactos.porId(despliegue.artefactoId) : null;
+    if (!artefacto?.disponible) throw new FalloDespliegue(this.etapa, "La imagen de esa versión ya no está disponible");
+    bitacora.escribir(this.etapa, `Imagen ${artefacto.imagen} reutilizada · sin reconstruir`);
+    return artefacto.imagen;
   }
 
   /** Con receta, la causa típica de no pasar la salud es una app que no lee `PORT` (design de M4-03). */

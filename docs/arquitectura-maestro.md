@@ -1985,9 +1985,14 @@ classDiagram
     class RecetaEstatica
     class PipelineDespliegue {
         -despliegues RepositorioDespliegues
-        -eventos PublicadorEventos
+        -planes PlanesPipeline
+        -oyentes OyenteDespliegue
         -reloj Reloj
         +ejecutar(trabajo TrabajoDespliegue) void
+    }
+    class OyenteDespliegue {
+        <<abstract>>
+        +alTerminar(evento DespliegueTerminado) void
     }
     class PasoPipeline {
         <<abstract>>
@@ -2076,14 +2081,17 @@ classDiagram
     class DetenerManejador
     class EliminarManejador
     class ReversionService {
+        -proyectos ProyectosLecturaPuerto
         -artefactos RepositorioArtefactos
         -despliegues RepositorioDespliegues
         -cola ColaConstruccionPuerto
         +revertir(proyectoId, artefactoId, usuarioId) DespliegueCreado
+        +artefactosDe(proyectoId, usuarioId) List~VistaArtefacto~
     }
     class PasoEjecucion {
         -orquestacion OrquestacionService
         -variablesEntorno VariablesEntornoPuerto
+        -artefactos RepositorioArtefactos
     }
     class VariablesEntornoPuerto {
         <<abstract>>
@@ -2095,10 +2103,13 @@ classDiagram
     }
     class RetencionArtefactos {
         <<Observer>>
+        -artefactos RepositorioArtefactos
+        -despliegues RepositorioDespliegues
+        -orquestacion OrquestacionService
         +alTerminar(evento DespliegueTerminado) void
     }
     class PoliticaRetencion {
-        +aRetirar(artefactos, activoId) List~Artefacto~
+        +aRetirar(disponibles, artefactoActivoId, retenidos) List~Artefacto~
     }
     class LimitesContenedor {
         <<valor>>
@@ -2164,6 +2175,7 @@ classDiagram
         +lineasDesde(id, desde, limite) List~LineaBitacora~
         +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
+        +enCursoDe(proyectoId) Despliegue
         +marcarActivo(proyectoId, despliegueId) void
         +contarConstruccionesDesde(usuarioId, desde) Integer
     }
@@ -2171,6 +2183,7 @@ classDiagram
         <<abstract>>
         +registrar(artefacto) Artefacto
         +porId(id) Artefacto
+        +deProyecto(proyectoId) List~Artefacto~
         +disponiblesDe(proyectoId) List~Artefacto~
         +marcarNoDisponible(id) void
     }
@@ -2181,6 +2194,7 @@ classDiagram
         +detener(contenedorId) void
         +eliminar(contenedorId) void
         +eliminarContenedoresDe(subdominio) void
+        +eliminarImagen(imagen) void
         +eliminarImagenesDe(subdominio) void
     }
     class ColaOperacionPuerto {
@@ -2370,11 +2384,16 @@ classDiagram
     OrquestacionService --> CuotaPlanPuerto
     CuotaPlanPuerto <|-- CuotaPlanSuscripciones
     CuotaPlanSuscripciones ..> SuscripcionesService : cuotaDe
+    ReversionService --> ProyectosLecturaPuerto
     ReversionService --> RepositorioArtefactos
+    ReversionService --> RepositorioDespliegues
     ReversionService --> ColaConstruccionPuerto
     RetencionArtefactos --> PoliticaRetencion
-    RetencionArtefactos --> ContenedorPuerto
+    OyenteDespliegue <|-- RetencionArtefactos
+    RetencionArtefactos --> OrquestacionService : eliminarImagen
     RetencionArtefactos --> RepositorioArtefactos
+    RetencionArtefactos --> RepositorioDespliegues
+    PipelineDespliegue --> OyenteDespliegue : DespliegueTerminado
     EnrutamientoService --> EnrutamientoPuerto
 
     ColaConstruccionPuerto <|-- ColaBullMq

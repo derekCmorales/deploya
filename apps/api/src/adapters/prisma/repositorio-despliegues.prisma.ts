@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../compartido/prisma/prisma.service";
 import type { Despliegue, LineaBitacora } from "../../modules/construccion/dominio/despliegue";
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
-import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
+import { DISPARADOR_SIN_CONSTRUCCION, ESTADOS_TERMINALES, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
@@ -116,6 +116,15 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     return proyecto?.despliegueActivo ? despliegueDesdePrisma(proyecto.despliegueActivo) : null;
   }
 
+  async enCursoDe(proyectoId: string): Promise<Despliegue | null> {
+    const fila = await this.prisma.despliegue.findFirst({
+      where: { proyectoId, estado: { notIn: [...ESTADOS_TERMINALES] } },
+      orderBy: { numero: "desc" },
+      include: CON_ETAPAS,
+    });
+    return fila ? despliegueDesdePrisma(fila) : null;
+  }
+
   async marcarActivo(proyectoId: string, despliegueId: string): Promise<void> {
     await this.prisma.proyecto.update({ where: { id: proyectoId }, data: { despliegueActivoId: despliegueId } });
   }
@@ -137,7 +146,13 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
           disparador: nuevo.disparador,
           rama: nuevo.rama,
           creado: nuevo.creado,
-          etapas: { create: ETAPAS.map((etapa) => ({ etapa })) },
+          ...(nuevo.commit
+            ? { commitSha: nuevo.commit.sha, commitMensaje: nuevo.commit.mensaje, commitAutor: nuevo.commit.autor }
+            : {}),
+          ...(nuevo.artefactoId ? { artefactoId: nuevo.artefactoId } : {}),
+          etapas: {
+            create: ETAPAS.map((etapa) => ({ etapa, ...(nuevo.etapasOmitidas?.includes(etapa) ? { estado: "omitida" as const } : {}) })),
+          },
         },
         include: CON_ETAPAS,
       });

@@ -11,7 +11,8 @@ export type EstadoDespliegue =
   | "saludable"
   | "fallido"
   | "cancelado"
-  | "detenido";
+  | "detenido"
+  | "revirtiendo";
 
 export type EstadoEtapa = "pendiente" | "en-curso" | "completada" | "fallida" | "omitida";
 

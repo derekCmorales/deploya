@@ -17,7 +17,7 @@ import { RechazosOrquestacionFilter } from "./rechazos-orquestacion.filter";
 /**
  * M5 en el proceso API: exporta `BloqueosService` (M4 y M3 lo llaman antes de construir) y
  * `AccionesProyectoService` (M3 pide borrar los recursos al eliminar) y `ContenedoresClientePuerto`
- * (M2 y M9 detienen o reanudan los contenedores de un cliente), y sirve la reversión (M5-04); traduce sus rechazos a 409.
+ * (M2 y M9 detienen o reanudan los contenedores de un cliente), `CuotaPlanPuerto` (M7 lee el plan del resumen) y sirve la reversión (M5-04); traduce sus rechazos a 409.
  */
 @Module({
   imports: [SuscripcionesModule, IdentidadModule],
@@ -30,6 +30,6 @@ import { RechazosOrquestacionFilter } from "./rechazos-orquestacion.filter";
     { provide: ContenedoresClientePuerto, useClass: ContenedoresClienteM5 },
     { provide: APP_FILTER, useClass: RechazosOrquestacionFilter },
   ],
-  exports: [BloqueosService, AccionesProyectoService, ContenedoresClientePuerto],
+  exports: [BloqueosService, AccionesProyectoService, ContenedoresClientePuerto, CuotaPlanPuerto],
 })
 export class OrquestacionModule {}

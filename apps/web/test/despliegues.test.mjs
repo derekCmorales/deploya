@@ -88,8 +88,10 @@ test("12 y 12c · la vista ofrece Cancelar despliegue y Reintentar con los texto
   assert.match(panel, /Cancelar despliegue/);
   assert.match(panel, /Reintentar/);
   assert.match(panel, /accionesDe\(/);
-  assert.match(panel, /Reiniciar/);
-  assert.match(panel, /Detener/);
+  assert.match(panel, /AccionesContenedor/);
+  const acciones = readFileSync(join(raiz, "src/app/(projects)/projects/_componentes/acciones-contenedor.tsx"), "utf8");
+  assert.match(acciones, /Reiniciar/);
+  assert.match(acciones, /Detener/);
   assert.doesNotMatch(panel, /\bfetch\(/);
 });
 

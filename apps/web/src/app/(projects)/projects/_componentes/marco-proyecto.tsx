@@ -10,15 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProyectos } from "@/hooks/use-proyectos";
 import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
-import { shaCorto, urlProyecto, type ProyectoEnLista } from "@/lib/proyectos";
+import { urlProyecto, type ProyectoEnLista } from "@/lib/proyectos";
 
-const PESTANAS_LUEGO = ["Resumen", "Despliegues"] as const;
+import { BotonDesplegar } from "./boton-desplegar";
 
-/** Cabecera y pestañas de 13–19. Resumen, historial, variables y configuración llegan después. */
+/** Cabecera y pestañas de 13–19: Resumen, Despliegues y Variables; Configuración llega con la pantalla 19. */
 export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
   const ruta = usePathname();
   const { datos } = useProyectos({ sondear: false });
   const proyecto = datos?.proyectos.find((p) => p.id === proyectoId) ?? null;
+  const resumen = `/projects/${proyectoId}`;
+  const despliegues = `/projects/${proyectoId}/despliegues`;
   const variables = `/projects/${proyectoId}/variables`;
 
   return (
@@ -28,11 +30,12 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
       </Link>
       {proyecto ? <Identidad proyecto={proyecto} /> : <Skeleton className="h-8 w-64" />}
       <TabsNav aria-label="Secciones del proyecto">
-        {PESTANAS_LUEGO.map((nombre) => (
-          <span key={nombre} className="inline-flex h-10 cursor-not-allowed items-center px-3 text-sm text-muted-foreground" title="Llega en el Avance 3">
-            {nombre}
-          </span>
-        ))}
+        <Link href={resumen} aria-current={ruta === resumen ? "page" : undefined}>
+          Resumen
+        </Link>
+        <Link href={despliegues} aria-current={ruta === despliegues || ruta?.startsWith(`${despliegues}/`) ? "page" : undefined}>
+          Despliegues
+        </Link>
         <Link href={variables} aria-current={ruta === variables ? "page" : undefined}>
           Variables
         </Link>
@@ -64,14 +67,17 @@ function Identidad({ proyecto }: { proyecto: ProyectoEnLista }) {
           <span>Dockerfile</span>
         </p>
       </div>
-      {enLinea ? (
-        <Button asChild variant="outline" size="sm">
-          <a href={url} target="_blank" rel="noreferrer">
-            <ExternalLink />
-            Visitar
-          </a>
-        </Button>
-      ) : null}
+      <div className="flex flex-wrap items-start gap-2">
+        {enLinea ? (
+          <Button asChild variant="outline" size="sm">
+            <a href={url} target="_blank" rel="noreferrer">
+              <ExternalLink />
+              Visitar
+            </a>
+          </Button>
+        ) : null}
+        <BotonDesplegar proyectoId={proyecto.id} />
+      </div>
     </div>
   );
 }

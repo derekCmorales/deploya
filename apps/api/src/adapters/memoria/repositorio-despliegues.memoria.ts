@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import type { Despliegue, LineaBitacora } from "../../modules/construccion/dominio/despliegue";
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
+import { ESTADO_POR_FILTRO, type FiltroHistorial } from "../../modules/construccion/dominio/historial";
 import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, estaTerminado, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
 import {
   RepositorioDespliegues,
@@ -107,6 +108,15 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
   async activoDe(proyectoId: string): Promise<Despliegue | null> {
     const id = this.activos.get(proyectoId);
     return id ? this.porId(id) : null;
+  }
+
+  async historialDe(proyectoId: string, filtro: FiltroHistorial, antesDe: number | null, limite: number): Promise<Despliegue[]> {
+    const estado = ESTADO_POR_FILTRO[filtro];
+    const filas = [...this.despliegues.values()]
+      .filter((d) => d.proyectoId === proyectoId && (antesDe === null || d.numero < antesDe) && (!estado || d.estado === estado))
+      .sort((a, b) => b.numero - a.numero)
+      .slice(0, limite);
+    return structuredClone(filas);
   }
 
   async enCursoDe(proyectoId: string): Promise<Despliegue | null> {

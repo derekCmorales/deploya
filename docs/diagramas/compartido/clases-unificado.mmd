@@ -274,8 +274,27 @@ classDiagram
         +crearDespliegue(proyectoId, disparador, opciones) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
         +consultarPorNumero(proyectoId, numero, usuarioId) VistaDespliegue
+        +historial(proyectoId, usuarioId, filtro, antesDe) PaginaHistorial
+        +vistaDe(despliegue) VistaDespliegue
         +bitacoraDesde(despliegueId, usuarioId, desde) PaginaBitacora
         +ultimosDespliegues(proyectoIds) Map~ResumenDespliegue~
+    }
+    class ResumenProyectoService {
+        <<Facade de lectura>>
+        -proyectos DetalleProyectoPuerto
+        -despliegues RepositorioDespliegues
+        -artefactos RepositorioArtefactos
+        -cuota CuotaPlanPuerto
+        -construccion ConstruccionService
+        +resumen(proyectoId, usuarioId) ResumenProyecto
+    }
+    class LineaTiempoDespliegue {
+        <<Builder puro>>
+        +de(despliegue, contexto) List~HitoLineaTiempo~
+    }
+    class DetalleProyectoPuerto {
+        <<abstract>>
+        +porId(proyectoId) DetalleProyecto
     }
     class AccionesDespliegueService {
         <<Service Layer>>
@@ -501,6 +520,7 @@ classDiagram
         <<abstract>>
         +recursosDe(usuarioId) RecursosPlan
         +permisoDe(usuarioId) PermisoPlan
+        +planDe(usuarioId) PlanContratado
     }
     class ConstructorImagenPuerto {
         <<abstract>>
@@ -517,6 +537,7 @@ classDiagram
         +porId(id) Despliegue
         +porNumero(proyectoId, numero) Despliegue
         +porCommit(proyectoId, commitSha) Despliegue
+        +historialDe(proyectoId, filtro, antesDe, limite) List~Despliegue~
         +cambiarEstado(id, estado, cambios) void
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
@@ -696,6 +717,13 @@ classDiagram
     DesplieguesController ..> SesionGuard : protege
 
     ConstruccionService --> ColaConstruccionPuerto
+    ResumenProyectoService --> DetalleProyectoPuerto
+    ResumenProyectoService --> RepositorioDespliegues
+    ResumenProyectoService --> RepositorioArtefactos
+    ResumenProyectoService --> CuotaPlanPuerto : planDe
+    ResumenProyectoService --> ConstruccionService : vistaDe
+    ResumenProyectoService ..> LineaTiempoDespliegue : de
+    DetalleProyectoPuerto ..> RepositorioProyectos : mismo almacén
     AccionesDespliegueService --> ConstruccionService : crearDespliegue
     AccionesDespliegueService --> PoliticaAcciones
     AccionesDespliegueService --> CancelacionesPuerto : pedir

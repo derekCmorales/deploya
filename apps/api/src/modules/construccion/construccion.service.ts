@@ -4,16 +4,19 @@ import { BloqueosService } from "../orquestacion/bloqueos.service";
 import type { Commit, Despliegue, DespliegueCreado, ProyectoDesplegable } from "./dominio/despliegue";
 import { CommitDesconocido, DespliegueNoEncontrado, ProyectoNoEncontrado } from "./dominio/errores";
 import { DISPARADOR_SIN_CONSTRUCCION, type DisparadorDespliegue } from "./dominio/estados";
+import { PAGINA_HISTORIAL, type FiltroHistorial } from "./dominio/historial";
 import { LINEAS_POR_PAGINA } from "./dominio/motor.constantes";
 import { ColaConstruccionPuerto } from "./puertos/cola-construccion.puerto";
 import { ProyectosLecturaPuerto } from "./puertos/proyectos-lectura.puerto";
 import { RepositorioArtefactos } from "./puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "./puertos/repositorio-despliegues.puerto";
 import {
+  filaHistorial,
   paginaBitacora,
   resumenDespliegue,
   vistaDespliegue,
   type PaginaBitacora,
+  type PaginaHistorial,
   type ResumenDespliegue,
   type VistaDespliegue,
 } from "./vista-despliegue";
@@ -70,6 +73,25 @@ export class ConstruccionService {
     return this.vistaDe(despliegue);
   }
 
+  /**
+   * `GET /proyectos/:id/despliegues?filtro=&antesDe=` (pantalla 14): `PAGINA_HISTORIAL` filas por
+   * página y cursor por número, así «Cargar más» no repite filas aunque entren despliegues nuevos.
+   */
+  async historial(proyectoId: string, usuarioId: string, filtro: FiltroHistorial, antesDe: number | null): Promise<PaginaHistorial> {
+    await this.proyectoDe(proyectoId, usuarioId);
+    const [pedidos, activo, artefactos] = await Promise.all([
+      this.despliegues.historialDe(proyectoId, filtro, antesDe, PAGINA_HISTORIAL + 1),
+      this.despliegues.activoDe(proyectoId),
+      this.artefactos.deProyecto(proyectoId),
+    ]);
+    const pagina = pedidos.slice(0, PAGINA_HISTORIAL);
+    const imagenes = new Map(artefactos.map((a) => [a.id, a]));
+    return {
+      despliegues: pagina.map((d) => filaHistorial(d, activo?.id ?? null, d.artefactoId ? (imagenes.get(d.artefactoId) ?? null) : null)),
+      siguiente: pedidos.length > PAGINA_HISTORIAL ? (pagina.at(-1)?.numero ?? null) : null,
+    };
+  }
+
   async bitacoraDesde(despliegueId: string, usuarioId: string, desde: number): Promise<PaginaBitacora> {
     const despliegue = await this.despliegueDe(despliegueId, usuarioId);
     const lineas = await this.despliegues.lineasDesde(despliegue.id, desde, LINEAS_POR_PAGINA);
@@ -113,7 +135,8 @@ export class ConstruccionService {
     return previo.commit;
   }
 
-  private async vistaDe(despliegue: Despliegue): Promise<VistaDespliegue> {
+  /** El cuerpo de `GET /despliegues/:id`; M7 lo reutiliza para el resumen del proyecto. */
+  async vistaDe(despliegue: Despliegue): Promise<VistaDespliegue> {
     const artefacto = despliegue.artefactoId ? await this.artefactos.porId(despliegue.artefactoId) : null;
     const imagen = artefacto
       ? { numero: artefacto.numero, digest: artefacto.digest, tamanoBytes: artefacto.tamanoBytes, receta: artefacto.receta }

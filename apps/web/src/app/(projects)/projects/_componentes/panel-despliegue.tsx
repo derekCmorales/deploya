@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, ExternalLink, RotateCw, Square, X } from "lucide-react";
+import { Copy, ExternalLink, RotateCw, X } from "lucide-react";
 import { notFound, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -22,14 +22,13 @@ import {
   etiquetaEtapaActual,
   lineaDeError,
   numeroAnterior,
-  puedeDetener,
-  puedeReiniciar,
   rutaCancelar,
   rutaDespliegue,
   rutaReintentar,
   textoParaCopiar,
   tiempoTranscurrido,
 } from "@/lib/despliegues";
+import { AccionesContenedor } from "./acciones-contenedor";
 import { haceCuanto, recursosPlan, shaCorto, textoEtapa, type VistaDespliegue } from "@/lib/proyectos";
 
 const HTTP_NO_ENCONTRADO = 404;
@@ -248,7 +247,7 @@ function Saludable({
         ) : (
           <span />
         )}
-        <Acciones proyectoId={proyectoId} estado={despliegue.estado} alAccionar={alAccionar} />
+        <AccionesContenedor proyectoId={proyectoId} estado={despliegue.estado} alAccionar={alAccionar} />
       </div>
       <p className="text-muted-foreground">
         {digest ? `Imagen ${acortarDigest(digest)}` : "Imagen"}
@@ -258,38 +257,6 @@ function Saludable({
       </p>
       {despliegue.terminado ? <p className="text-muted-foreground">Publicado {haceCuanto(despliegue.terminado, new Date(ahora))}</p> : null}
       {aviso ? <p>{aviso}</p> : null}
-    </div>
-  );
-}
-
-function Acciones({ proyectoId, estado, alAccionar }: { proyectoId: string; estado: string; alAccionar: () => void }) {
-  const [ocupado, setOcupado] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const pedir = async (accion: "reiniciar" | "detener") => {
-    setOcupado(true);
-    setError(null);
-    try {
-      await pedirApi(`/proyectos/${proyectoId}/${accion}`, { metodo: "POST" });
-      alAccionar();
-    } catch (e) {
-      setError(e instanceof ErrorApi ? e.message : "No pudimos completar la acción.");
-    } finally {
-      setOcupado(false);
-    }
-  };
-  return (
-    <div className="flex flex-col items-end gap-2">
-      <div className="flex gap-2">
-        <Button type="button" variant="outline" size="sm" disabled={ocupado || !puedeReiniciar(estado)} onClick={() => pedir("reiniciar")}>
-          <RotateCw />
-          Reiniciar
-        </Button>
-        <Button type="button" variant="outline" size="sm" disabled={ocupado || !puedeDetener(estado)} onClick={() => pedir("detener")}>
-          <Square />
-          Detener
-        </Button>
-      </div>
-      {error ? <p className="text-xs text-bad">{error}</p> : null}
     </div>
   );
 }

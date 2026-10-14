@@ -1,4 +1,5 @@
 import type { Commit, Despliegue, LineaBitacora } from "../dominio/despliegue";
+import type { FiltroHistorial } from "../dominio/historial";
 import type { DisparadorDespliegue, EstadoDespliegue, EstadoEtapa, Etapa } from "../dominio/estados";
 
 export interface NuevoDespliegue {
@@ -44,6 +45,11 @@ export abstract class RepositorioDespliegues {
   /** El despliegue más reciente de cada proyecto pedido (para la lista de M3). */
   abstract ultimosDe(proyectoIds: string[]): Promise<Despliegue[]>;
   abstract activoDe(proyectoId: string): Promise<Despliegue | null>;
+  /**
+   * Hasta `limite` despliegues del proyecto del #n más reciente al más antiguo, con `numero < antesDe`
+   * si hay cursor. El filtro `saludables` / `fallidos` mira el estado guardado (pantalla 14).
+   */
+  abstract historialDe(proyectoId: string, filtro: FiltroHistorial, antesDe: number | null, limite: number): Promise<Despliegue[]>;
   /** El despliegue que aún no terminó (Encolado, Construyendo, Revirtiendo, Aprovisionando o Publicando), si lo hay. */
   abstract enCursoDe(proyectoId: string): Promise<Despliegue | null>;
   abstract marcarActivo(proyectoId: string, despliegueId: string): Promise<void>;

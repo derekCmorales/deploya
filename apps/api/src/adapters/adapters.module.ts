@@ -9,6 +9,7 @@ import { ProyectosLecturaPuerto } from "../modules/construccion/puertos/proyecto
 import { RecetaProyectoPuerto } from "../modules/construccion/puertos/receta-proyecto.puerto";
 import { RepositorioArtefactos } from "../modules/construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
+import { DetalleProyectoPuerto } from "../modules/observabilidad/puertos/detalle-proyecto.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
 import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
@@ -62,6 +63,7 @@ const PERSISTENCIA: Provider[] = [
   { provide: RepositorioProyectos, useClass: RepositorioProyectosPrisma },
   { provide: RepositorioVariables, useClass: RepositorioVariablesPrisma },
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
+  { provide: DetalleProyectoPuerto, useExisting: RepositorioProyectos },
   { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
 ];
 

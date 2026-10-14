@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../compartido/prisma/prisma.service";
 import type { Despliegue, LineaBitacora } from "../../modules/construccion/dominio/despliegue";
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
+import { ESTADO_POR_FILTRO, type FiltroHistorial } from "../../modules/construccion/dominio/historial";
 import { DISPARADOR_SIN_CONSTRUCCION, ESTADOS_TERMINALES, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
 import {
   RepositorioDespliegues,
@@ -123,6 +124,17 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
       select: { despliegueActivo: { include: CON_ETAPAS } },
     });
     return proyecto?.despliegueActivo ? despliegueDesdePrisma(proyecto.despliegueActivo) : null;
+  }
+
+  async historialDe(proyectoId: string, filtro: FiltroHistorial, antesDe: number | null, limite: number): Promise<Despliegue[]> {
+    const estado = ESTADO_POR_FILTRO[filtro];
+    const filas = await this.prisma.despliegue.findMany({
+      where: { proyectoId, ...(antesDe === null ? {} : { numero: { lt: antesDe } }), ...(estado ? { estado } : {}) },
+      orderBy: { numero: "desc" },
+      take: limite,
+      include: CON_ETAPAS,
+    });
+    return filas.map(despliegueDesdePrisma);
   }
 
   async enCursoDe(proyectoId: string): Promise<Despliegue | null> {

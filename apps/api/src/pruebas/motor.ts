@@ -1,4 +1,5 @@
 import { RelojFijo } from "../compartido/reloj";
+import { DetalleProyectoMemoria } from "../adapters/memoria/detalle-proyecto.memoria";
 import { ProyectosLecturaMemoria } from "../adapters/memoria/proyectos-lectura.memoria";
 import { RecetaProyectoMemoria } from "../adapters/memoria/receta-proyecto.memoria";
 import { RepositorioArtefactosMemoria } from "../adapters/memoria/repositorio-artefactos.memoria";
@@ -33,6 +34,7 @@ import { PasoEnrutamiento } from "../modules/enrutamiento/paso-enrutamiento";
 import { OrquestacionService } from "../modules/orquestacion/orquestacion.service";
 import { PasoEjecucion } from "../modules/orquestacion/paso-ejecucion";
 import { PasoOperacion } from "../modules/orquestacion/paso-operacion";
+import { ResumenProyectoService } from "../modules/observabilidad/resumen/resumen-proyecto.service";
 import { ReversionService } from "../modules/orquestacion/reversion/reversion.service";
 import { RetencionArtefactos } from "../modules/orquestacion/retencion/retencion-artefactos";
 
@@ -91,12 +93,23 @@ export function motorDePrueba() {
   const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, planes, [retencion], vigia);
   const accionesDespliegue = new AccionesDespliegueService(despliegues, proyectos, cola, cancelaciones, servicio, reloj);
   const reversion = new ReversionService(proyectos, artefactos, despliegues, cola, reloj);
+  const detalleProyectos = new DetalleProyectoMemoria();
+  const resumen = new ResumenProyectoService(detalleProyectos, despliegues, artefactos, cuota, servicio);
   proyectos.agregar(proyectoDemo());
+  detalleProyectos.agregar({
+    id: "proyecto-1",
+    usuarioId: "usuario-1",
+    nombre: "hola-deploya",
+    subdominio: "hola-deploya",
+    urlRepositorio: "https://github.com/derekCmorales/hola-deploya",
+    rama: "main",
+    puertoInterno: 8080,
+  });
   despliegues.registrarDueno("proyecto-1", "usuario-1");
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
     contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
-    colaOperacion, accionesProyecto, accionesContenedor, variables, reversion, retencion, planes, cancelaciones, vigia, accionesDespliegue,
+    colaOperacion, accionesProyecto, accionesContenedor, variables, reversion, retencion, planes, cancelaciones, vigia, accionesDespliegue, detalleProyectos, resumen,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);

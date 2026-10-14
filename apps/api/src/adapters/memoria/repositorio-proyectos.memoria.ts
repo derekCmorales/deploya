@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { Injectable } from "@nestjs/common";
 import { Reloj } from "../../compartido/reloj";
+import type { CambiosProyecto } from "../../modules/proyectos/dominio/cambios-proyecto";
+import { ProyectoNoEncontrado } from "../../modules/proyectos/dominio/errores";
 import type { Proyecto, ProyectoNuevo } from "../../modules/proyectos/dominio/proyecto";
 import { RepositorioProyectos } from "../../modules/proyectos/puertos/repositorio-proyectos.puerto";
 
@@ -32,6 +34,14 @@ export class RepositorioProyectosMemoria extends RepositorioProyectos {
 
   async existeSubdominio(subdominio: string): Promise<boolean> {
     return [...this.proyectos.values()].some((p) => p.subdominio === subdominio);
+  }
+
+  async actualizar(id: string, cambios: CambiosProyecto): Promise<Proyecto> {
+    const proyecto = this.proyectos.get(id);
+    if (!proyecto) throw new ProyectoNoEncontrado(id);
+    const actualizado: Proyecto = { ...proyecto, ...cambios };
+    this.proyectos.set(id, actualizado);
+    return actualizado;
   }
 
   async eliminar(id: string): Promise<void> {

@@ -14,7 +14,7 @@ import { urlProyecto, type ProyectoEnLista } from "@/lib/proyectos";
 
 import { BotonDesplegar } from "./boton-desplegar";
 
-/** Cabecera y pestañas de 13–19: Resumen, Despliegues y Variables; Configuración llega con la pantalla 19. */
+/** Cabecera y pestañas de 13–19: Resumen, Despliegues, Variables y Configuración. */
 export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
   const ruta = usePathname();
   const { datos } = useProyectos({ sondear: false });
@@ -22,6 +22,7 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
   const resumen = `/projects/${proyectoId}`;
   const despliegues = `/projects/${proyectoId}/despliegues`;
   const variables = `/projects/${proyectoId}/variables`;
+  const configuracion = `/projects/${proyectoId}/configuracion`;
 
   return (
     <header className="flex flex-col gap-4 border-b border-border px-8 pt-6">
@@ -39,9 +40,9 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
         <Link href={variables} aria-current={ruta === variables ? "page" : undefined}>
           Variables
         </Link>
-        <span className="inline-flex h-10 cursor-not-allowed items-center px-3 text-sm text-muted-foreground" title="Llega en el Avance 3">
+        <Link href={configuracion} aria-current={ruta === configuracion ? "page" : undefined}>
           Configuración
-        </span>
+        </Link>
       </TabsNav>
     </header>
   );

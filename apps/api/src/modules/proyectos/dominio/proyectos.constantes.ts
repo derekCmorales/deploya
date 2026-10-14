@@ -5,3 +5,5 @@ export const RAMA_POR_DEFECTO = "main";
 export const RUTA_DOCKERFILE = "Dockerfile";
 /** Una etiqueta DNS admite hasta 63 caracteres. */
 export const LONGITUD_MAX_SUBDOMINIO = 63;
+/** Largo máximo del nombre (columna `VarChar(64)`). */
+export const LONGITUD_MAX_NOMBRE = 64;

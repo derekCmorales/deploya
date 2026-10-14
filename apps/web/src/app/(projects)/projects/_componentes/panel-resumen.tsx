@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { Banner } from "@/components/ui/banner";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyField } from "@/components/ui/copy-field";
@@ -57,11 +58,15 @@ export function PanelResumen({ proyectoId }: { proyectoId: string }) {
   };
   return (
     <div className="flex flex-col gap-6 px-8 py-6">
-      {datos.activo ? (
-        <div className="flex justify-end">
-          <AccionesContenedor proyectoId={proyectoId} estado={datos.activo.estado} alAccionar={alAccionar} />
-        </div>
-      ) : null}
+      <div className="flex flex-wrap items-start justify-end gap-2">
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/projects/${proyectoId}/configuracion`}>Cambiar rama</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/projects/${proyectoId}/configuracion#zona-de-peligro`}>Eliminar proyecto</Link>
+        </Button>
+        {datos.activo ? <AccionesContenedor proyectoId={proyectoId} estado={datos.activo.estado} alAccionar={alAccionar} /> : null}
+      </div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex flex-col gap-6">
           <EstadoActual resumen={datos} actualizado={textoActualizado(actualizado, ahora)} />

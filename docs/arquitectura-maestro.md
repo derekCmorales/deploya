@@ -1897,8 +1897,18 @@ classDiagram
         +validarRepositorio(consulta) ValidacionRepositorio
         +listar(usuarioId) ListaProyectos
         +crear(usuarioId, alta) ProyectoCreado
+        +configurar(usuarioId, proyectoId, cambios) Proyecto
         +eliminar(usuarioId, proyectoId, confirmacion) void
         -bloqueos BloqueosService
+    }
+    class CambiosProyecto {
+        <<Value Object>>
+        +nombre String
+        +urlRepositorio String
+        +rama String
+        +rutaDockerfile String
+        +puertoInterno Integer
+        +de(cuerpo) CambiosProyecto
     }
     class ProveedorFuente {
         <<abstract>>
@@ -1913,6 +1923,7 @@ classDiagram
         +porId(id) Proyecto
         +deUsuario(usuarioId) List~Proyecto~
         +existeSubdominio(subdominio) Boolean
+        +actualizar(id, cambios CambiosProyecto) Proyecto
         +eliminar(id) void
     }
     class RepositorioProyectosPrisma
@@ -2384,6 +2395,7 @@ classDiagram
     PasarelaPago <|-- PasarelaSimulada
     AdministracionService --> ContenedoresClientePuerto : detenerTodos
     ProyectosService --> ProveedorFuente
+    ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos
     ProyectosService --> CuotaProyectosPuerto
     ProyectosService --> DeteccionStackService : detectar

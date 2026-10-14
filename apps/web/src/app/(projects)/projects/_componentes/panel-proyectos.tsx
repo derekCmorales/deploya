@@ -37,10 +37,6 @@ export function PanelProyectos() {
           lista={lista}
           seleccionado={seleccionado}
           onSeleccionar={(id) => router.replace(`/projects?proyecto=${id}`, { scroll: false })}
-          onEliminado={() => {
-            router.replace("/projects", { scroll: false });
-            recargar();
-          }}
         />
       ) : null}
     </main>

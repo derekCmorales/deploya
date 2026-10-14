@@ -1,8 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../compartido/prisma/prisma.service";
+import { Prisma } from "@prisma/client";
+import type { CambiosProyecto } from "../../modules/proyectos/dominio/cambios-proyecto";
+import { NombreRepetido, ProyectoNoEncontrado } from "../../modules/proyectos/dominio/errores";
 import type { Proyecto, ProyectoNuevo } from "../../modules/proyectos/dominio/proyecto";
 import { RepositorioProyectos } from "../../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { proyectoDesdePrisma } from "./traduccion-motor";
+
+const VIOLACION_UNICA = "P2002";
+const REGISTRO_INEXISTENTE = "P2025";
 
 /**
  * Proyectos de M3 en PostgreSQL. También responde al `ProyectosLecturaPuerto` del motor
@@ -30,6 +36,17 @@ export class RepositorioProyectosPrisma extends RepositorioProyectos {
 
   async existeSubdominio(subdominio: string): Promise<boolean> {
     return (await this.prisma.proyecto.count({ where: { subdominio } })) > 0;
+  }
+
+  async actualizar(id: string, cambios: CambiosProyecto): Promise<Proyecto> {
+    try {
+      return proyectoDesdePrisma(await this.prisma.proyecto.update({ where: { id }, data: cambios }));
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError)) throw error;
+      if (error.code === VIOLACION_UNICA) throw new NombreRepetido(cambios.nombre ?? "");
+      if (error.code === REGISTRO_INEXISTENTE) throw new ProyectoNoEncontrado(id);
+      throw error;
+    }
   }
 
   async eliminar(id: string): Promise<void> {

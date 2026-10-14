@@ -6,4 +6,6 @@ import type { ProyectoDesplegable } from "../dominio/despliegue";
  */
 export abstract class ProyectosLecturaPuerto {
   abstract porId(proyectoId: string): Promise<ProyectoDesplegable | null>;
+  /** Todos los proyectos del cliente (M5 los recorre al suspender o reanudar su cuenta). */
+  abstract deUsuario(usuarioId: string): Promise<ProyectoDesplegable[]>;
 }

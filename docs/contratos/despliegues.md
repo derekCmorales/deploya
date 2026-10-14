@@ -68,7 +68,9 @@ AccionesProyectoService.detenerTodosDe(usuarioId: string): Promise<{ encolados: 
 // un trabajo «detener» por proyecto con despliegue activo Saludable; los demás se omiten
 AccionesProyectoService.reanudarTodosDe(usuarioId: string): Promise<{ encolados: number }>
 // un trabajo «reiniciar» por proyecto con despliegue activo Detenido
-// M2 y M9 los ven por su puerto ContenedoresClientePuerto { detenerTodos, reanudarTodos } (adaptador en M2)
+// M2 y M9 los ven por ContenedoresClientePuerto { detenerTodos, reanudarTodos }: puerto y adaptador ContenedoresClienteM5
+// viven en orquestacion/ y OrquestacionModule exporta el token. Inyéctenlo desde un módulo que importe OrquestacionModule
+// (OrquestacionModule ya importa SuscripcionesModule: el ciclo se rompe con un módulo del ciclo que importe a ambos).
 ```
 
 ### Variables de entorno (M3, HTTP · v2.1 · A2)
@@ -217,3 +219,4 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 2.1 | 2026-10-02 | Avance 2: consulta por número, variables (HTTP y M3 → M5), `BloqueosService`; `detener` responde 202 |
 | 2.1 | 2026-10-06 | Solo agrega: `detectar` acepta `rutaDockerfile`; `ResultadoDeteccion.nombre` y `.dockerfile`; `StackNoReconocido.pista` |
 | 3 | 2026-10-11 | Avance 3, solo agrega: historial y resumen (M7-02), códigos de cancelar, reintentar y redesplegar (M4-02), `PATCH /proyectos/:id` (M3-04), consumo y actividad (M7-03), `certificado` (M6-02), `detenerTodosDe` / `reanudarTodosDe` para M2 y M9 |
+| 3.1 | 2026-10-14 | Solo aclara: `ContenedoresClientePuerto` y su adaptador `ContenedoresClienteM5` viven en M5 (`orquestacion/`) y `OrquestacionModule` exporta el token; `ProyectosLecturaPuerto.deUsuario` (interno de M4/M5) |

@@ -2044,7 +2044,18 @@ classDiagram
         -cola ColaOperacionPuerto
         +reiniciar(proyectoId, usuarioId) void
         +detener(proyectoId, usuarioId) void
+        +detenerTodosDe(usuarioId) ResultadoMasivo
+        +reanudarTodosDe(usuarioId) ResultadoMasivo
         +pedirEliminacion(proyecto) void
+    }
+    class ContenedoresClientePuerto {
+        <<abstract>>
+        +detenerTodos(usuarioId) ResultadoMasivo
+        +reanudarTodos(usuarioId) ResultadoMasivo
+    }
+    class ContenedoresClienteM5 {
+        <<Adapter>>
+        -acciones AccionesProyectoService
     }
     class AccionContenedor {
         <<Command>>
@@ -2126,6 +2137,7 @@ classDiagram
     class ProyectosLecturaPuerto {
         <<abstract>>
         +porId(proyectoId) ProyectoDesplegable
+        +deUsuario(usuarioId) ProyectoDesplegable
     }
     class CuotaPlanPuerto {
         <<abstract>>
@@ -2304,7 +2316,7 @@ classDiagram
     RepositorioPlanes <|-- RepositorioPlanesPrisma
     RepositorioSuscripciones <|-- RepositorioSuscripcionesPrisma
     PasarelaPago <|-- PasarelaSimulada
-    AdministracionService --> OrquestacionService : detenerTodosDe
+    AdministracionService --> ContenedoresClientePuerto : detenerTodos
     ProyectosService --> ProveedorFuente
     ProyectosService --> RepositorioProyectos
     ProyectosService --> CuotaProyectosPuerto
@@ -2387,6 +2399,8 @@ classDiagram
     ProyectosService --> AccionesProyectoService : pedirEliminacion
     AccionesProyectoService --> ColaOperacionPuerto
     AccionesProyectoService ..> AccionContenedor : encola
+    ContenedoresClientePuerto <|-- ContenedoresClienteM5
+    ContenedoresClienteM5 --> AccionesProyectoService : detenerTodosDe, reanudarTodosDe
     AccionesContenedorService --> ManejadorAccion
     ManejadorAccion <|-- ReiniciarManejador
     ManejadorAccion <|-- DetenerManejador

@@ -22,7 +22,7 @@ Cada ejecución mueve una suscripción como mucho un estado; si el trabajador es
 
 ### 3. Observer hacia M5
 
-`CicloSuscripcionService` no conoce Docker ni la cola: al pasar a Suspendida llama a `ContenedoresClientePuerto.detenerTodos(usuarioId)`; al reactivar, `reanudarTodos(usuarioId)`. El adaptador vive en M2 y delega en `AccionesProyectoService` (exportado por `OrquestacionModule`). M9-02 usa el mismo puerto al suspender una cuenta.
+`CicloSuscripcionService` no conoce Docker ni la cola: al pasar a Suspendida llama a `ContenedoresClientePuerto.detenerTodos(usuarioId)`; al reactivar, `reanudarTodos(usuarioId)`. El puerto y el adaptador `ContenedoresClienteM5` viven en M5 (`orquestacion/`), delegan en `AccionesProyectoService` y `OrquestacionModule` exporta el token; M2 lo inyecta desde un módulo del ciclo que importa `OrquestacionModule` (así no hay ciclo con `SuscripcionesModule`). M9-02 usa el mismo puerto al suspender una cuenta.
 
 ### 4. Tarea diaria
 

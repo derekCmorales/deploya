@@ -15,8 +15,8 @@ Requiere `feat-m5-acciones-contenedor` y `feat-m5-bloqueos-cuota` en `main` (ya 
 
 ## 3. Contenedores (Derek)
 
-- [ ] 3.1 `AccionesProyectoService.detenerTodosDe(usuarioId)` y `reanudarTodosDe(usuarioId)`; adaptador `ContenedoresClienteM5` exportado para M2 y M9
-- [ ] 3.2 Pruebas: «Suscripción suspendida» (encola un `detener` por proyecto Saludable y omite los demás), «Reanudar al renovar» (un `reiniciar` por proyecto Detenido)
+- [x] 3.1 `AccionesProyectoService.detenerTodosDe(usuarioId)` y `reanudarTodosDe(usuarioId)`; `ContenedoresClientePuerto` y su adaptador `ContenedoresClienteM5` en `orquestacion/`, exportados por `OrquestacionModule` para M2 y M9
+- [x] 3.2 Pruebas: «Suscripción suspendida» (encola un `detener` por proyecto Saludable y omite los demás), «Reanudar al renovar» (un `reiniciar` por proyecto Detenido)
 
 ## 4. Web (Javier)
 

@@ -27,5 +27,5 @@ Sin red, Docker ni archivos reales en las pruebas unitarias. Lo de infraestructu
 
 ## 5. Cierre
 
-- [ ] 5.1 `pnpm check` en verde; cobertura ≥ 80 % en `enrutamiento/`
+- [x] 5.1 `pnpm check` en verde; cobertura ≥ 80 % en `enrutamiento/`
 - [ ] 5.2 `/opsx-archive` después del merge

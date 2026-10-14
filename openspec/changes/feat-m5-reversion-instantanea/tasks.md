@@ -29,7 +29,7 @@ Requiere `feat/m4-motor-construccion` en `main`. Pruebas sin Docker, red, base n
 
 ## 6. Cierre
 
-- [ ] 6.1 `pnpm check` en verde; cobertura ≥ 80 % en `orquestacion/`
+- [x] 6.1 `pnpm check` en verde; cobertura ≥ 80 % en `orquestacion/`
 - [ ] 6.2 En compose: tres despliegues de `hola-deploya`, revertir al primero en segundos y ver la app anterior
 - [x] 6.3 `pnpm diagramas:sync` si cambió `clases-unificado.mmd`
 - [ ] 6.4 Quitar «Reversión instantánea» de *Fuera de alcance* en `openspec/specs/orquestacion/spec.md` y `motor-construccion/spec.md` al archivar; ADR 0004 a Aceptado

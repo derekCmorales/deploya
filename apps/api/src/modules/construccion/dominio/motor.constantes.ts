@@ -3,6 +3,10 @@ export const TIEMPO_MAXIMO_CONSTRUCCION_MS = 10 * 60 * 1000;
 export const TIEMPO_MAXIMO_SALUD_MS = 60 * 1000;
 export const INTERVALO_SALUD_MS = 1000;
 export const LINEAS_POR_PAGINA = 500;
+/** Cada cuánto el trabajador pregunta si pidieron cancelar el despliegue en curso (M4-02). */
+export const INTERVALO_VIGIA_MS = 1000;
+/** La señal de cancelación caduca sola: el trabajador la debe ver mucho antes. */
+export const TTL_CANCELACION_S = 600;
 export const LOTE_BITACORA_MS = 500;
 export const LOTE_BITACORA_LINEAS = 50;
 export const LARGO_MAXIMO_LINEA = 4000;

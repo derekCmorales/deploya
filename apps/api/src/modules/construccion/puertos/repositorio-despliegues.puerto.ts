@@ -35,6 +35,8 @@ export abstract class RepositorioDespliegues {
   abstract porId(id: string): Promise<Despliegue | null>;
   /** El despliegue #`numero` del proyecto (pantalla 12 abre por número). */
   abstract porNumero(proyectoId: string, numero: number): Promise<Despliegue | null>;
+  /** El primer despliegue del proyecto que clonó ese commit, si lo hay (redesplegar, M4-02). */
+  abstract porCommit(proyectoId: string, commitSha: string): Promise<Despliegue | null>;
   abstract cambiarEstado(id: string, estado: EstadoDespliegue, cambios?: CambiosDespliegue): Promise<void>;
   abstract marcarEtapa(id: string, etapa: Etapa, estado: EstadoEtapa, marca: Date): Promise<void>;
   abstract agregarLineas(id: string, lineas: LineaBitacora[]): Promise<void>;

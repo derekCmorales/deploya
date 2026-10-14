@@ -34,6 +34,8 @@ export class PasoRecepcion extends PasoPipeline {
       url: proyecto.urlRepositorio,
       rama: despliegue.rama,
       despliegueId: despliegue.id,
+      commitSha: despliegue.commit?.sha,
+      senal: contexto.senal,
     });
     contexto.directorio = clon.directorio;
     contexto.commit = clon.commit;

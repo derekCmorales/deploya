@@ -15,15 +15,19 @@ import type { Response } from "express";
 import { SesionGuard } from "../identidad/sesion.guard";
 import { UsuarioActual } from "../identidad/usuario-actual.decorator";
 import { ConstruccionService } from "./construccion.service";
-import { DespliegueNoEncontrado, ProyectoNoEncontrado, TransicionInvalida } from "./dominio/errores";
+import { DespliegueNoEncontrado, ProyectoNoEncontrado, RechazoAccionDespliegue, TransicionInvalida } from "./dominio/errores";
 import type { DespliegueCreado } from "./dominio/despliegue";
 import type { PaginaBitacora, VistaDespliegue } from "./vista-despliegue";
 
-/** Traduce los errores de dominio del motor a HTTP en el borde. */
-@Catch(DespliegueNoEncontrado, ProyectoNoEncontrado, TransicionInvalida)
+/** Traduce los errores de dominio del motor a HTTP en el borde; los rechazos de M4-02 llevan su `codigo` del contrato. */
+@Catch(DespliegueNoEncontrado, ProyectoNoEncontrado, TransicionInvalida, RechazoAccionDespliegue)
 export class ErroresMotorFilter implements ExceptionFilter {
   catch(error: Error, host: ArgumentsHost): void {
     const respuesta = host.switchToHttp().getResponse<Response>();
+    if (error instanceof RechazoAccionDespliegue) {
+      respuesta.status(409).json({ codigo: error.codigo, mensaje: error.message });
+      return;
+    }
     const estado = error instanceof TransicionInvalida ? 409 : 404;
     respuesta.status(estado).json({ codigo: error.name, mensaje: error.message });
   }

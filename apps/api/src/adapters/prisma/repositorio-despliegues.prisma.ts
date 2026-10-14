@@ -60,6 +60,15 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     return fila ? despliegueDesdePrisma(fila) : null;
   }
 
+  async porCommit(proyectoId: string, commitSha: string): Promise<Despliegue | null> {
+    const fila = await this.prisma.despliegue.findFirst({
+      where: { proyectoId, commitSha },
+      orderBy: { numero: "asc" },
+      include: CON_ETAPAS,
+    });
+    return fila ? despliegueDesdePrisma(fila) : null;
+  }
+
   async cambiarEstado(id: string, estado: EstadoDespliegue, cambios: CambiosDespliegue = {}): Promise<void> {
     try {
       await this.prisma.despliegue.update({ where: { id }, data: datosDe(estado, cambios) });

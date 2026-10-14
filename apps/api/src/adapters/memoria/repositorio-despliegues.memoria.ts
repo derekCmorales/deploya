@@ -65,6 +65,13 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return despliegue ? structuredClone(despliegue) : null;
   }
 
+  async porCommit(proyectoId: string, commitSha: string): Promise<Despliegue | null> {
+    const encontrado = [...this.despliegues.values()]
+      .filter((d) => d.proyectoId === proyectoId && d.commit?.sha === commitSha)
+      .sort((a, b) => a.numero - b.numero)[0];
+    return encontrado ? structuredClone(encontrado) : null;
+  }
+
   async cambiarEstado(id: string, estado: EstadoDespliegue, cambios: CambiosDespliegue = {}): Promise<void> {
     const despliegue = this.obtener(id);
     Object.assign(despliegue, cambios, { estado });

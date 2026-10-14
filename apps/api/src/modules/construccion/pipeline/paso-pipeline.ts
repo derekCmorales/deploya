@@ -11,6 +11,8 @@ export interface ContextoDespliegue {
   despliegue: Despliegue;
   proyecto: ProyectoDesplegable;
   bitacora: Bitacora;
+  /** Se aborta cuando el cliente cancela; los pasos largos (clonar, construir) la respetan. */
+  senal: AbortSignal;
   directorio?: string;
   commit?: Commit;
   /** Lo decide la detección de stack en Recepción; Construcción lo usa. */

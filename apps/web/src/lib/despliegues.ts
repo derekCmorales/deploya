@@ -132,3 +132,25 @@ export function puedeReiniciar(estado: string): boolean {
 export function puedeDetener(estado: string): boolean {
   return estado === "saludable";
 }
+
+/** Qué botones de acción ofrece la cabecera de 12 / 12c según el estado (M4-02). */
+export interface AccionesDespliegue {
+  cancelar: boolean;
+  reintentar: boolean;
+}
+
+const ESTADOS_CANCELABLES = ["encolado", "construyendo", "revirtiendo"];
+
+/** «Cancelar despliegue» mientras está Encolado, Construyendo o Revirtiendo; «Reintentar» solo desde Fallido. */
+export function accionesDe(estado: string): AccionesDespliegue {
+  return { cancelar: ESTADOS_CANCELABLES.includes(estado), reintentar: estado === "fallido" };
+}
+
+export function rutaCancelar(despliegueId: string): string {
+  return `/despliegues/${despliegueId}/cancelar`;
+}
+
+export function rutaReintentar(despliegueId: string): string {
+  return `/despliegues/${despliegueId}/reintentar`;
+}
+

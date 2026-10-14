@@ -9,6 +9,8 @@ import { PLANES_PIPELINE, type PlanesPipeline } from "./pipeline/paso-pipeline";
 import { PasoConstruccion } from "./pipeline/paso-construccion";
 import { PasoRecepcion } from "./pipeline/paso-recepcion";
 import { PipelineDespliegue } from "./pipeline/pipeline-despliegue";
+import { VigiaCancelacion } from "./pipeline/vigia-cancelacion";
+import { CancelacionesPuerto } from "./puertos/cancelaciones.puerto";
 import { OYENTES_DESPLIEGUE } from "./puertos/oyente-despliegue.puerto";
 import { RetencionArtefactos } from "../orquestacion/retencion/retencion-artefactos";
 
@@ -35,6 +37,7 @@ import { RetencionArtefactos } from "../orquestacion/retencion/retencion-artefac
       useFactory: (...oyentes: unknown[]) => oyentes,
       inject: [RetencionArtefactos],
     },
+    { provide: VigiaCancelacion, useFactory: (cancelaciones: CancelacionesPuerto) => new VigiaCancelacion(cancelaciones), inject: [CancelacionesPuerto] },
     PipelineDespliegue,
   ],
   exports: [PipelineDespliegue],

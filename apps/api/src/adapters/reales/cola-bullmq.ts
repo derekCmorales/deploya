@@ -35,6 +35,18 @@ export class ColaBullMq extends ColaConstruccionPuerto {
     });
   }
 
+  /** Solo se puede sacar un trabajo que espera; si el trabajador ya lo tomó, BullMQ lo rechaza y se devuelve `false`. */
+  async quitar(despliegueId: string): Promise<boolean> {
+    const trabajo = await this.cola.getJob(despliegueId);
+    if (!trabajo) return false;
+    try {
+      await trabajo.remove();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async cerrar(): Promise<void> {
     await this.cola.close();
   }

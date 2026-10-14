@@ -6,6 +6,8 @@ export interface SolicitudClon {
   rama: string;
   despliegueId: string;
   commitSha?: string;
+  /** Si se aborta, el clon se corta y se lanza `DespliegueCancelado`. */
+  senal?: AbortSignal;
 }
 
 export interface ClonListo {

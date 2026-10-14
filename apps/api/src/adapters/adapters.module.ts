@@ -1,6 +1,7 @@
 import { Global, Module, type DynamicModule, type Provider } from "@nestjs/common";
 import Docker from "dockerode";
 import { Reloj, RelojSistema } from "../compartido/reloj";
+import { CancelacionesPuerto } from "../modules/construccion/puertos/cancelaciones.puerto";
 import { ClonadorRepositorioPuerto } from "../modules/construccion/puertos/clonador-repositorio.puerto";
 import { ColaConstruccionPuerto } from "../modules/construccion/puertos/cola-construccion.puerto";
 import { ConstructorImagenPuerto } from "../modules/construccion/puertos/constructor-imagen.puerto";
@@ -21,11 +22,13 @@ import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.p
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
 import { RepositorioVariablesPrisma } from "./prisma/repositorio-variables.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
+import { CancelacionesRedis } from "./reales/cancelaciones-redis";
 import { ColaBullMq, ColaOperacionBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
 import { ContenedorDocker } from "./reales/contenedor-docker";
 import { EnrutamientoTraefikArchivo } from "./reales/enrutamiento-traefik-archivo";
 import { VerificacionHttp } from "./reales/verificacion-http";
+import { CancelacionesMemoria } from "./stubs/cancelaciones.memoria";
 import { ClonadorStub } from "./stubs/clonador.stub";
 import { ColaMemoria } from "./stubs/cola.memoria";
 import { ColaOperacionMemoria } from "./stubs/cola-operacion.memoria";
@@ -67,6 +70,7 @@ const COMUNES: Provider[] = [
   { provide: Reloj, useClass: RelojSistema },
   ...PERSISTENCIA,
   puerto(ColaConstruccionPuerto, { docker: (c) => new ColaBullMq(c.redisUrl), stub: () => new ColaMemoria() }),
+  puerto(CancelacionesPuerto, { docker: (c) => new CancelacionesRedis(c.redisUrl), stub: () => new CancelacionesMemoria() }),
   puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
 ];
 

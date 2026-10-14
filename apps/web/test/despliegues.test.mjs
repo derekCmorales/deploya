@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  accionesDe,
   aplicarBloque,
   avisoVersionAnterior,
   etiquetaEtapaActual,
@@ -13,7 +14,9 @@ import {
   marcaVisible,
   puedeDetener,
   puedeReiniciar,
+  rutaCancelar,
   rutaDespliegue,
+  rutaReintentar,
   sondearBitacora,
   textoParaCopiar,
   tiempoTranscurrido,
@@ -76,14 +79,15 @@ test("12 · la ruta y la etiqueta de etapa salen del número", () => {
   assert.equal(etiquetaEtapaActual([{ estado: "completada" }]), null);
 });
 
-test("12 · la vista no muestra Cancelar y usa la bitácora del sistema", () => {
+test("12 y 12c · la vista ofrece Cancelar despliegue y Reintentar con los textos de la ficha y usa la bitácora del sistema", () => {
   const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
   const panel = readFileSync(join(raiz, "src/app/(projects)/projects/_componentes/panel-despliegue.tsx"), "utf8");
   assert.match(panel, /Bitácora de construcción/);
   assert.match(panel, /Se actualiza cada 3 s/);
   assert.match(panel, /Copiar/);
-  assert.doesNotMatch(panel, /Cancelar despliegue/);
-  assert.doesNotMatch(panel, /Reintentar/);
+  assert.match(panel, /Cancelar despliegue/);
+  assert.match(panel, /Reintentar/);
+  assert.match(panel, /accionesDe\(/);
   assert.match(panel, /Reiniciar/);
   assert.match(panel, /Detener/);
   assert.doesNotMatch(panel, /\bfetch\(/);
@@ -98,3 +102,17 @@ test("12b · Reiniciar y Detener solo cuando el contrato lo permite", () => {
   assert.equal(puedeDetener("fallido"), false);
 });
 
+test("accionesDe: Cancelar en Encolado, Construyendo y Revirtiendo; Reintentar solo en Fallido", () => {
+  assert.deepEqual(accionesDe("encolado"), { cancelar: true, reintentar: false });
+  assert.deepEqual(accionesDe("construyendo"), { cancelar: true, reintentar: false });
+  assert.deepEqual(accionesDe("revirtiendo"), { cancelar: true, reintentar: false });
+  assert.deepEqual(accionesDe("fallido"), { cancelar: false, reintentar: true });
+  for (const estado of ["aprovisionando", "publicando", "saludable", "detenido", "cancelado"]) {
+    assert.deepEqual(accionesDe(estado), { cancelar: false, reintentar: false }, estado);
+  }
+});
+
+test("las rutas de cancelar y reintentar son las del contrato", () => {
+  assert.equal(rutaCancelar("d-1"), "/despliegues/d-1/cancelar");
+  assert.equal(rutaReintentar("d-1"), "/despliegues/d-1/reintentar");
+});

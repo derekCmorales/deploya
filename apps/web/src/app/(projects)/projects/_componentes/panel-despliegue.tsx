@@ -1,7 +1,7 @@
 "use client";
 
-import { Copy, ExternalLink, RotateCw, Square } from "lucide-react";
-import { notFound } from "next/navigation";
+import { Copy, ExternalLink, RotateCw, Square, X } from "lucide-react";
+import { notFound, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Bitacora } from "@/components/deploya/bitacora";
@@ -16,6 +16,7 @@ import { useDesplieguePorNumero } from "@/hooks/use-despliegue-por-numero";
 import { ErrorApi, pedirApi } from "@/lib/api";
 import {
   INTERVALO_RELOJ_MS,
+  accionesDe,
   avisoVersionAnterior,
   etapaVisible,
   etiquetaEtapaActual,
@@ -23,6 +24,9 @@ import {
   numeroAnterior,
   puedeDetener,
   puedeReiniciar,
+  rutaCancelar,
+  rutaDespliegue,
+  rutaReintentar,
   textoParaCopiar,
   tiempoTranscurrido,
 } from "@/lib/despliegues";
@@ -30,7 +34,7 @@ import { haceCuanto, recursosPlan, shaCorto, textoEtapa, type VistaDespliegue } 
 
 const HTTP_NO_ENCONTRADO = 404;
 
-/** Pantallas 12, 12b y 12c: riel grande y bitácora en vivo. Sin «Cancelar» (es del Avance 3). */
+/** Pantallas 12, 12b y 12c: riel grande y bitácora en vivo, con «Cancelar despliegue» y «Reintentar». */
 export function PanelDespliegue({ proyectoId, numeroTexto }: { proyectoId: string; numeroTexto: string }) {
   const numero = Number(numeroTexto);
   const [origen, setOrigen] = useState<string | null>(null);
@@ -79,7 +83,7 @@ function Vista({
 
   return (
     <div className="flex flex-col gap-6 px-8 py-6">
-      <Cabecera despliegue={despliegue} transcurrido={transcurrido} etiqueta={etiqueta} />
+      <Cabecera proyectoId={proyectoId} despliegue={despliegue} transcurrido={transcurrido} etiqueta={etiqueta} alAccionar={alAccionar} />
       <RielEtapas
         size="lg"
         etapas={despliegue.etapas.map((etapa) => etapa.estado)}
@@ -98,13 +102,17 @@ function Vista({
 }
 
 function Cabecera({
+  proyectoId,
   despliegue,
   transcurrido,
   etiqueta,
+  alAccionar,
 }: {
+  proyectoId: string;
   despliegue: VistaDespliegue;
   transcurrido: string | null;
   etiqueta: string | null;
+  alAccionar: () => void;
 }) {
   const commit = despliegue.commit;
   return (
@@ -120,11 +128,71 @@ function Cabecera({
           </p>
         ) : null}
       </div>
-      <dl className="flex gap-6 text-sm">
-        <Dato titulo={tituloTiempo(despliegue.estado)} valor={transcurrido ?? "—"} />
-        {etiqueta ? <Dato titulo="Etapa" valor={etiqueta} /> : null}
-      </dl>
+      <div className="flex flex-wrap items-start gap-6">
+        <dl className="flex gap-6 text-sm">
+          <Dato titulo={tituloTiempo(despliegue.estado)} valor={transcurrido ?? "—"} />
+          {etiqueta ? <Dato titulo="Etapa" valor={etiqueta} /> : null}
+        </dl>
+        <AccionesDeDespliegue proyectoId={proyectoId} despliegue={despliegue} alAccionar={alAccionar} />
+      </div>
     </header>
+  );
+}
+
+/** M4-02: «Cancelar despliegue» (12) y «Reintentar» (12c). Reintentar lleva al despliegue nuevo. */
+function AccionesDeDespliegue({
+  proyectoId,
+  despliegue,
+  alAccionar,
+}: {
+  proyectoId: string;
+  despliegue: VistaDespliegue;
+  alAccionar: () => void;
+}) {
+  const router = useRouter();
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const acciones = accionesDe(despliegue.estado);
+  if (!acciones.cancelar && !acciones.reintentar) return null;
+
+  const ejecutar = async (peticion: () => Promise<void>) => {
+    setOcupado(true);
+    setError(null);
+    try {
+      await peticion();
+    } catch (e) {
+      setError(e instanceof ErrorApi ? e.message : "No pudimos completar la acción.");
+    } finally {
+      setOcupado(false);
+    }
+  };
+  const cancelar = () =>
+    ejecutar(async () => {
+      await pedirApi(rutaCancelar(despliegue.id), { metodo: "POST" });
+      alAccionar();
+    });
+  const reintentar = () =>
+    ejecutar(async () => {
+      const creado = await pedirApi<{ numero: number }>(rutaReintentar(despliegue.id), { metodo: "POST" });
+      router.push(rutaDespliegue(proyectoId, creado.numero));
+    });
+
+  return (
+    <div className="flex flex-col items-end gap-2">
+      {acciones.cancelar ? (
+        <Button type="button" variant="outline" size="sm" disabled={ocupado} onClick={cancelar}>
+          <X />
+          Cancelar despliegue
+        </Button>
+      ) : null}
+      {acciones.reintentar ? (
+        <Button type="button" size="sm" disabled={ocupado} onClick={reintentar}>
+          <RotateCw />
+          Reintentar
+        </Button>
+      ) : null}
+      {error ? <p className="text-xs text-bad">{error}</p> : null}
+    </div>
   );
 }
 

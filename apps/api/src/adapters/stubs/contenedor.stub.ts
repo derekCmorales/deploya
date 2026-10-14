@@ -17,8 +17,12 @@ export class ContenedorStub extends ContenedorPuerto {
   /** Imágenes cuyo borrado falla (para probar que la retención no rompe el despliegue). */
   readonly imagenesQueFallan = new Set<string>();
 
+  /** Gancho para simular un evento externo (p. ej. una cancelación) justo cuando se crea el contenedor. */
+  alCrear: (() => Promise<void>) | null = null;
+
   async crear(espec: EspecContenedor): Promise<ContenedorCreado> {
     this.creados.push(espec);
+    await this.alCrear?.();
     return { id: `contenedor-${espec.nombre}`, host: espec.nombre };
   }
 

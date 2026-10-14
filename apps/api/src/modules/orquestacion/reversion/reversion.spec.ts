@@ -216,7 +216,7 @@ describe("Reversión sin reconstruir (M5-04)", () => {
         }
       }
       const motor = motorDePrueba();
-      const pipeline = new PipelineDespliegue(motor.despliegues, motor.proyectos, motor.reloj, motor.planes, [new OyenteRoto()]);
+      const pipeline = new PipelineDespliegue(motor.despliegues, motor.proyectos, motor.reloj, motor.planes, [new OyenteRoto()], motor.vigia);
       const creado = await motor.servicio.crearDespliegue("proyecto-1");
 
       await pipeline.ejecutar({ despliegueId: creado.id, plan: "construccion" }, 0);

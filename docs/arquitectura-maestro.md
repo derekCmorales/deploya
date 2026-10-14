@@ -1954,11 +1954,36 @@ classDiagram
         -proyectos ProyectosLecturaPuerto
         -bloqueos BloqueosService
         -reloj Reloj
-        +crearDespliegue(proyectoId, disparador) DespliegueCreado
+        +crearDespliegue(proyectoId, disparador, opciones) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
         +consultarPorNumero(proyectoId, numero, usuarioId) VistaDespliegue
         +bitacoraDesde(despliegueId, usuarioId, desde) PaginaBitacora
         +ultimosDespliegues(proyectoIds) Map~ResumenDespliegue~
+    }
+    class AccionesDespliegueService {
+        <<Service Layer>>
+        -despliegues RepositorioDespliegues
+        -proyectos ProyectosLecturaPuerto
+        -cola ColaConstruccionPuerto
+        -cancelaciones CancelacionesPuerto
+        -construccion ConstruccionService
+        -reloj Reloj
+        +cancelar(despliegueId, usuarioId) EstadoCancelado
+        +reintentar(despliegueId, usuarioId) DespliegueCreado
+        +redesplegar(proyectoId, commitSha, usuarioId) DespliegueCreado
+    }
+    class PoliticaAcciones {
+        <<tabla de estados>>
+        +permitida(accion, estado) Boolean
+        +exigirCancelable(estado) void
+        +exigirReintentable(estado) void
+    }
+    class VigiaCancelacion {
+        <<Observer>>
+        -cancelaciones CancelacionesPuerto
+        -intervaloMs Integer
+        +vigilar(despliegueId, controlador) Funcion
+        +revisar(despliegueId, controlador) void
     }
     class DeteccionStackService {
         -recetas List~RecetaStack~
@@ -2132,7 +2157,12 @@ classDiagram
     class ColaConstruccionPuerto {
         <<abstract>>
         +encolar(trabajo TrabajoDespliegue) void
-        +retirar(despliegueId) Boolean
+        +quitar(despliegueId) Boolean
+    }
+    class CancelacionesPuerto {
+        <<abstract>>
+        +pedir(despliegueId) void
+        +pedida(despliegueId) Boolean
     }
     class ClonadorRepositorioPuerto {
         <<abstract>>
@@ -2157,7 +2187,7 @@ classDiagram
     }
     class ConstructorImagenPuerto {
         <<abstract>>
-        +construir(solicitud SolicitudConstruccion, alLinea) ImagenConstruida
+        +construir(solicitud SolicitudConstruccion, alLinea, senal) ImagenConstruida
     }
     class LectorFuente {
         <<abstract>>
@@ -2169,6 +2199,7 @@ classDiagram
         +crear(nuevo NuevoDespliegue) Despliegue
         +porId(id) Despliegue
         +porNumero(proyectoId, numero) Despliegue
+        +porCommit(proyectoId, commitSha) Despliegue
         +cambiarEstado(id, estado, cambios) void
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
@@ -2348,6 +2379,13 @@ classDiagram
     DesplieguesController ..> SesionGuard : protege
 
     ConstruccionService --> ColaConstruccionPuerto
+    AccionesDespliegueService --> ConstruccionService : crearDespliegue
+    AccionesDespliegueService --> PoliticaAcciones
+    AccionesDespliegueService --> CancelacionesPuerto : pedir
+    AccionesDespliegueService --> ColaConstruccionPuerto : quitar
+    AccionesDespliegueService --> RepositorioDespliegues
+    VigiaCancelacion --> CancelacionesPuerto : pedida
+    PipelineDespliegue --> VigiaCancelacion
     ConstruccionService --> RepositorioDespliegues
     ConstruccionService --> BloqueosService : verificar
     BloqueosService --> PoliticaDespliegue

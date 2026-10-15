@@ -13,6 +13,7 @@ import {
   type Usuario,
 } from "./dominio/cuenta";
 import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
+import { NombreCuenta } from "./dominio/nombre-cuenta";
 import { PoliticaContrasena } from "./dominio/politica-contrasena";
 import { PoliticaReenvio } from "./dominio/politica-reenvio";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
@@ -70,7 +71,7 @@ export class IdentidadService {
 
     const usuario = await this.usuarios.crear({
       correo,
-      nombre: nombreDesdeCorreo(correo),
+      nombre: NombreCuenta.de(nombreDesdeCorreo(correo)).valor,
       hashContrasena: await this.hash.calcular(solicitud.contrasena),
       rol: "cliente",
       estadoCuenta: "pendiente",

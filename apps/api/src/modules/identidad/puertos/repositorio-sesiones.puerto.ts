@@ -8,4 +8,6 @@ export abstract class RepositorioSesiones {
   abstract revocar(id: string, marca: Date): Promise<void>;
   /** Cierra todas las sesiones abiertas de la cuenta (M1-05: tras restablecer la contraseña). */
   abstract revocarTodasDe(usuarioId: string, marca: Date): Promise<void>;
+  /** M1-07: al cambiar la contraseña se cierran las demás sesiones; la actual sigue viva. */
+  abstract revocarTodasMenos(usuarioId: string, sesionId: string, marca: Date): Promise<void>;
 }

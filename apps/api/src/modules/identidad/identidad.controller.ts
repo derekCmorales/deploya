@@ -18,8 +18,11 @@ import {
   CorreoYaRegistrado,
   CredencialesInvalidas,
   CuentaNoVerificada,
+  ContrasenaActualIncorrecta,
+  CuentaInexistente,
   CuentaSuspendida,
   EsperaReenvio,
+  NombreInvalido,
   TokenNoValido,
 } from "./dominio/errores";
 import { ESPERA_REENVIO_MS } from "./dominio/politica-reenvio";
@@ -56,11 +59,18 @@ export const REENVIO_ACEPTADO = {
   CuentaNoVerificada,
   CuentaSuspendida,
   EsperaReenvio,
+  NombreInvalido,
+  ContrasenaActualIncorrecta,
+  CuentaInexistente,
 )
 export class ErroresIdentidadFilter implements ExceptionFilter {
   catch(error: Error, host: ArgumentsHost): void {
     const respuesta = host.switchToHttp().getResponse<Response>();
     const cuerpo = { codigo: error.name, mensaje: error.message };
+    if (error instanceof CuentaInexistente) {
+      respuesta.status(HTTP_NO_AUTENTICADO).json({ codigo: "SinSesion", mensaje: error.message });
+      return;
+    }
     if (error instanceof CredencialesInvalidas) {
       respuesta.status(HTTP_NO_AUTENTICADO).json(cuerpo);
       return;

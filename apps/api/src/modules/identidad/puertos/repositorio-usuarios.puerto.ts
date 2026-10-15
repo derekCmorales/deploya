@@ -7,4 +7,5 @@ export abstract class RepositorioUsuarios {
   abstract crear(usuario: NuevoUsuario): Promise<Usuario>;
   abstract cambiarEstado(id: string, estado: EstadoCuenta): Promise<void>;
   abstract cambiarHash(id: string, hashContrasena: string): Promise<void>;
+  abstract cambiarNombre(id: string, nombre: string): Promise<void>;
 }

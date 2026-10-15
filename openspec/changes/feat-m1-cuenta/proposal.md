@@ -4,7 +4,7 @@ Change: `feat/m1-cuenta`. Módulo dueño: **identidad (M1)** — Eddy. Spec toca
 
 ## Why
 
-El requisito «Mi cuenta» ya está en el spec de identidad, pero no hay ruta ni pantalla: el cliente no puede corregir su nombre, cambiar su contraseña sabiendo la actual ni cerrar las sesiones que dejó abiertas. Todo lo necesario (política de contraseña, hash, `RepositorioSesiones.revocarTodas`) ya existe por M1-03 y M1-05.
+El requisito «Mi cuenta» ya está en el spec de identidad, pero no hay ruta ni pantalla: el cliente no puede corregir su nombre, cambiar su contraseña sabiendo la actual ni cerrar las sesiones que dejó abiertas. Todo lo necesario (política de contraseña, hash, `RepositorioSesiones.revocarTodasDe`) ya existe por M1-03 y M1-05.
 
 ## What Changes
 
@@ -12,8 +12,8 @@ El requisito «Mi cuenta» ya está en el spec de identidad, pero no hay ruta ni
 - `PATCH /identidad/cuenta` `{ nombre }`: recorta espacios, 1 a 64 caracteres (`NombreInvalido` → 400).
 - `POST /identidad/cuenta/contrasena` `{ actual, nueva }`: verifica la actual (`ContrasenaActualIncorrecta` → 400), aplica la política de registro (`ContrasenaDebil`), guarda el hash y **revoca las demás sesiones**; la actual sigue viva.
 - `DELETE /identidad/sesiones`: revoca **todas** las sesiones, incluida la actual, y borra la cookie (204).
-- «Último cambio» de 05b se omite: no hay columna para eso y no se agrega ninguna (sin migración).
-- Web: `/cuenta` (05) y `/cuenta/seguridad` (05b) con la navegación lateral Perfil / Seguridad; «Cuenta» del menú de usuario lleva a 05.
+- «Último cambio» de 05b se omite: no hay columna para eso y no se agrega ninguna (sin migración). `Usuario.actualizado` no sirve como sustituto: cambia con cualquier edición (por ejemplo, el nombre).
+- Web: `/cuenta` (05) y `/cuenta/seguridad` (05b) con las pestañas Perfil / Seguridad bajo el título (ficha y canvas v4.1), en un grupo `(cuenta)` con el panel y sesión obligatoria; «Cuenta» de la navegación del panel lleva a 05.
 
 ## Non-goals
 
@@ -34,5 +34,5 @@ El requisito «Mi cuenta» ya está en el spec de identidad, pero no hay ruta ni
 ## Impact
 
 - Código: `identidad/cuenta.controller.ts`, `identidad/cuenta.service.ts`, reutiliza `PoliticaContrasena`, `HashContrasena`, `RepositorioSesiones`.
-- Web: `apps/web/src/app/(auth)/cuenta/` o grupo `(cuenta)`; `lib/api-identidad.ts`.
+- Web: grupo `apps/web/src/app/(cuenta)/` (no `(auth)`, que lleva el header público sin panel); `lib/api-identidad.ts`; `nav-panel.tsx` («Cuenta» → `/cuenta`).
 - Sin cambios de tablas ni de contratos con otros módulos.

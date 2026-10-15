@@ -74,4 +74,8 @@ export class RepositorioUsuariosPrisma extends RepositorioUsuarios {
   async cambiarHash(id: string, hashContrasena: string): Promise<void> {
     await this.prisma.usuario.update({ where: { id }, data: { hashContrasena } });
   }
+
+  async cambiarNombre(id: string, nombre: string): Promise<void> {
+    await this.prisma.usuario.update({ where: { id }, data: { nombre } });
+  }
 }

@@ -9,6 +9,8 @@ import { RepositorioTokensCuentaPrisma } from "./adaptadores/repositorio-tokens-
 import { RepositorioUsuariosPrisma } from "./adaptadores/repositorio-usuarios.prisma";
 import { configuracionCookieDesde } from "./cookie-sesion";
 import { CONFIGURACION_IDENTIDAD, configuracionIdentidadDesde } from "./configuracion-identidad";
+import { CuentaController } from "./cuenta.controller";
+import { CuentaService } from "./cuenta.service";
 import { IdentidadController } from "./identidad.controller";
 import { IdentidadService } from "./identidad.service";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
@@ -31,11 +33,12 @@ import { SesionService } from "./sesion.service";
  */
 @Module({
   imports: [NotificacionesModule, SuscripcionesModule],
-  controllers: [IdentidadController, SesionController, RecuperacionController],
+  controllers: [IdentidadController, SesionController, RecuperacionController, CuentaController],
   providers: [
     IdentidadService,
     SesionService,
     RecuperacionService,
+    CuentaService,
     SesionGuard,
     RolGuard,
     { provide: CONFIGURACION_IDENTIDAD, useFactory: () => configuracionIdentidadDesde(process.env) },

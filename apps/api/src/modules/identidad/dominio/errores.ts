@@ -73,3 +73,27 @@ export class EsperaReenvio extends Error {
     this.name = "EsperaReenvio";
   }
 }
+
+/** Pantalla 05 (M1-06): el nombre queda vacío al recortarlo o pasa del máximo. */
+export class NombreInvalido extends Error {
+  constructor(readonly maximo: number) {
+    super(`El nombre debe tener entre 1 y ${maximo} caracteres`);
+    this.name = "NombreInvalido";
+  }
+}
+
+/** Pantalla 05b (M1-07): la contraseña actual no coincide; no se revoca ninguna sesión. */
+export class ContrasenaActualIncorrecta extends Error {
+  constructor() {
+    super("La contraseña actual no es correcta");
+    this.name = "ContrasenaActualIncorrecta";
+  }
+}
+
+/** La sesión era válida pero la cuenta ya no está: se trata como sesión terminada (401). */
+export class CuentaInexistente extends Error {
+  constructor(readonly usuarioId: string) {
+    super("Inicia sesión para continuar.");
+    this.name = "CuentaInexistente";
+  }
+}

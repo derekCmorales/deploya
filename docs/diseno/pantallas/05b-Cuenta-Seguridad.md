@@ -53,3 +53,7 @@ Cerrar sesión en todos los dispositivos
 Invalida todas tus sesiones, incluida esta. Tendrás que volver a iniciar sesión.
 Cerrar todas
 ```
+
+## Nota de implementación
+
+«Último cambio: 22 sep 2026» no se muestra (change `feat-m1-cuenta`, `design.md` decisión 5): no hay columna con la fecha del último cambio de contraseña y no se agregan migraciones. `Usuario.actualizado` no sirve como sustituto porque cambia con cualquier edición.

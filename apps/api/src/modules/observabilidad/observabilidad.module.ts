@@ -7,10 +7,12 @@ import { ResumenProyectoController } from "./resumen/resumen-proyecto.controller
 import { ResumenProyectoService } from "./resumen/resumen-proyecto.service";
 import { ConsumoService } from "./consumo/consumo.service";
 import { ConsumoController } from "./consumo/consumo.controller";
+import { ActividadService } from "./actividad/actividad.service";
+import { ActividadController } from "./actividad/actividad.controller";
 
 @Module({
   imports: [IdentidadModule, ConstruccionModule, OrquestacionModule],
-  controllers: [ObservabilidadController, ResumenProyectoController, ConsumoController],
-  providers: [ResumenProyectoService, ConsumoService],
+  controllers: [ObservabilidadController, ResumenProyectoController, ConsumoController, ActividadController],
+  providers: [ResumenProyectoService, ConsumoService, ActividadService],
 })
 export class ObservabilidadModule {}

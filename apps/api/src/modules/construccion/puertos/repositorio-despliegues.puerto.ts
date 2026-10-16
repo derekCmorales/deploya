@@ -58,4 +58,6 @@ export abstract class RepositorioDespliegues {
    * desde esa fecha salvo los de `reversion`, que no construyen. Terminen como terminen.
    */
   abstract contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number>;
+
+  abstract desplieguesDesde(proyectoId: string, desde: Date): Promise<{ creado: Date; estado: EstadoDespliegue }[]>;
 }

@@ -156,6 +156,14 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     });
   }
 
+  async desplieguesDesde(proyectoId: string, desde: Date): Promise<{ creado: Date; estado: EstadoDespliegue }[]> {
+  const filas = await this.prisma.despliegue.findMany({
+    where: { proyectoId, creado: { gte: desde } },
+    select: { creado: true, estado: true },
+  });
+  return filas.map((f) => ({ creado: f.creado, estado: f.estado as EstadoDespliegue }));
+}
+
   private async crearConSiguienteNumero(nuevo: NuevoDespliegue): Promise<Despliegue> {
     return this.prisma.$transaction(async (tx) => {
       const maximo = await tx.despliegue.aggregate({ where: { proyectoId: nuevo.proyectoId }, _max: { numero: true } });

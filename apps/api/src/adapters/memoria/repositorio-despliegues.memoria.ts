@@ -139,6 +139,12 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return Math.max(0, ...numeros) + 1;
   }
 
+  async desplieguesDesde(proyectoId: string, desde: Date): Promise<{ creado: Date; estado: EstadoDespliegue }[]> {
+  return [...this.despliegues.values()]
+    .filter((d) => d.proyectoId === proyectoId && d.creado >= desde)
+    .map((d) => ({ creado: d.creado, estado: d.estado }));
+}
+
   private obtener(id: string): Despliegue {
     const despliegue = this.despliegues.get(id);
     if (!despliegue) throw new DespliegueNoEncontrado(id);

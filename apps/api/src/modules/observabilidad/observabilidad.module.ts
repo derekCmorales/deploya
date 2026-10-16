@@ -5,11 +5,12 @@ import { OrquestacionModule } from "../orquestacion/orquestacion.module";
 import { ObservabilidadController } from "./observabilidad.controller";
 import { ResumenProyectoController } from "./resumen/resumen-proyecto.controller";
 import { ResumenProyectoService } from "./resumen/resumen-proyecto.service";
+import { ConsumoService } from "./consumo/consumo.service";
+import { ConsumoController } from "./consumo/consumo.controller";
 
-/** M7: modelo de lectura sobre lo que exportan M3, M4 y M5. `DetalleProyectoPuerto` lo provee `AdaptersModule`. */
 @Module({
   imports: [IdentidadModule, ConstruccionModule, OrquestacionModule],
-  controllers: [ObservabilidadController, ResumenProyectoController],
-  providers: [ResumenProyectoService],
+  controllers: [ObservabilidadController, ResumenProyectoController, ConsumoController],
+  providers: [ResumenProyectoService, ConsumoService],
 })
 export class ObservabilidadModule {}

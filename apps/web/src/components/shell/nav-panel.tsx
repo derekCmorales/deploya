@@ -14,7 +14,7 @@ export const RUTA_PLANES = "/planes";
  */
 export const NAV_PANEL: ItemNav[] = [
   { href: "/projects", texto: "Proyectos", icono: FolderGit2 },
-  { href: "/suscripcion", texto: "Suscripción", icono: CreditCard, activoEn: [RUTA_PLANES] },
+  { href: "/suscripcion", texto: "Suscripción", icono: CreditCard, activoEn: [RUTA_PLANES, "/pagos"] },
   { href: "/registro", texto: "Cuenta", icono: UserRound },
   { href: "/sistema", texto: "Sistema", icono: LayoutTemplate },
 ];

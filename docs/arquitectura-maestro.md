@@ -1855,6 +1855,38 @@ classDiagram
     class RepositorioPagos {
         <<abstract>>
         +registrar(nuevo) Pago
+        +deUsuario(usuarioId) PagoHistorial[]
+        +porId(pagoId) PagoHistorial
+    }
+    class HistorialPagosService {
+        <<Service Layer>>
+        -pagos RepositorioPagos
+        -pdf ComprobantePdfPuerto
+        +deUsuario(usuarioId) FilaPago[]
+        +comprobante(usuarioId, pagoId) Comprobante
+        +pdfDe(usuarioId, pagoId) ArchivoComprobante
+    }
+    class Comprobante {
+        <<Value Object>>
+        +numero String
+        +fecha Date
+        +concepto String
+        +vigencia Vigencia
+        +metodo String
+        +titular String
+        +total Decimal
+        +desde(pago) Comprobante$
+        +lineas() String[]
+    }
+    class ComprobantePdfPuerto {
+        <<abstract>>
+        +generar(comprobante) Buffer
+    }
+    class ComprobantePdfKit
+    class ComprobanteTextoFalso
+    class PagosController {
+        +pagos() FilaPago[]
+        +comprobante(id) StreamableFile
     }
     class RepositorioPagosPrisma
     class Espera {
@@ -2471,6 +2503,12 @@ classDiagram
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
     PlantillaCorreo <|-- PlantillaRecuperacion
+    PagosController --> HistorialPagosService
+    HistorialPagosService --> RepositorioPagos
+    HistorialPagosService --> ComprobantePdfPuerto
+    HistorialPagosService ..> Comprobante : arma
+    ComprobantePdfPuerto <|-- ComprobantePdfKit
+    ComprobantePdfPuerto <|-- ComprobanteTextoFalso
     CicloSuscripcionService --> PoliticaCiclo
     CicloSuscripcionService --> RepositorioSuscripciones
     CicloSuscripcionService --> ContenedoresClientePuerto : detenerTodos

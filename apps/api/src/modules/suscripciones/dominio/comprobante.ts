@@ -4,13 +4,15 @@ import type { Pago } from "./pago";
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const DECIMALES_MONTO = 2;
 
-export const LEYENDA_SIN_VALOR_FISCAL = "Pago simulado · sin cobro real · sin valor fiscal.";
-const METODO_PRUEBA = "Prueba";
+export const AGRADECIMIENTO = "Gracias por confiar en deploya.";
+export const CONTACTO_SOPORTE = "¿Dudas sobre este cobro? Escríbenos a soporte@deploya.app";
+const METODO_TARJETA = "Tarjeta";
 
 /** Un pago con lo que la lectura agrega: el nombre del plan y el titular de la cuenta. */
 export interface PagoHistorial extends Pago {
   planNombre: string;
   titular: string;
+  correo: string;
 }
 
 export interface Vigencia {
@@ -95,19 +97,28 @@ export function textoMonto(monto: number, moneda: string): string {
   return `${moneda} ${monto.toFixed(DECIMALES_MONTO)}`;
 }
 
+/** Una partida del comprobante: qué se pagó, por cuánto tiempo y cuánto. */
+export interface PartidaComprobante {
+  descripcion: string;
+  detalle: string;
+  vigencia: string;
+  monto: string;
+}
+
 /**
- * Value Object del comprobante de un pago aprobado: una sola fuente para el PDF y para el panel
- * «Comprobante» de 09. Se construye solo desde un pago aprobado con número.
+ * Value Object del comprobante de un pago aprobado: una sola fuente para el PDF (estructura de
+ * recibo: emisor, facturado a, partida y totales). Se construye solo desde un pago aprobado con número.
  */
 export class Comprobante {
   private constructor(
     readonly numero: string,
     readonly fecha: Date,
-    readonly concepto: string,
     readonly plan: string,
+    readonly vigenciaDias: number,
     readonly vigencia: Vigencia,
     readonly metodo: string,
     readonly titular: string,
+    readonly correo: string,
     readonly total: number,
     readonly moneda: string,
   ) {}
@@ -119,11 +130,12 @@ export class Comprobante {
     return new Comprobante(
       p.numeroComprobante,
       p.creado,
-      conceptoDe(p),
       p.planNombre,
+      p.vigenciaDias,
       vigencia,
-      `${METODO_PRUEBA} ${tarjetaOculta(p.tarjetaUltimos4)}`,
+      `${METODO_TARJETA} ${tarjetaOculta(p.tarjetaUltimos4)}`,
       p.titular,
+      p.correo,
       p.monto,
       p.moneda,
     );
@@ -133,22 +145,44 @@ export class Comprobante {
     return `${this.numero}.pdf`;
   }
 
-  /** Pares etiqueta · valor en el orden del panel de 09. */
-  filas(): [string, string][] {
-    return [
-      ["Número", this.numero],
-      ["Fecha", fechaHora(this.fecha)],
-      ["Concepto", this.concepto],
-      ["Vigencia", textoVigencia(this.vigencia)],
-      ["Método", this.metodo],
-      ["Titular", this.titular],
-      ["Subtotal", textoMonto(this.total, this.moneda)],
-      ["Total", textoMonto(this.total, this.moneda)],
-    ];
+  get concepto(): string {
+    return conceptoDe({ planNombre: this.plan, vigenciaDias: this.vigenciaDias });
   }
 
-  /** El contenido completo en texto plano (lo que el doble de pruebas devuelve como PDF). */
+  get fechaPago(): string {
+    return fechaHora(this.fecha);
+  }
+
+  get totalTexto(): string {
+    return textoMonto(this.total, this.moneda);
+  }
+
+  partida(): PartidaComprobante {
+    return {
+      descripcion: `Plan ${this.plan}`,
+      detalle: `Suscripción de ${this.vigenciaDias} días`,
+      vigencia: textoVigencia(this.vigencia),
+      monto: this.totalTexto,
+    };
+  }
+
+  /** El contenido completo en texto plano, en el orden del PDF (lo que devuelve el doble de pruebas). */
   lineas(): string[] {
-    return ["deploya · Comprobante de pago", ...this.filas().map(([etiqueta, valor]) => `${etiqueta}: ${valor}`), LEYENDA_SIN_VALOR_FISCAL];
+    const partida = this.partida();
+    return [
+      "deploya · Comprobante de pago",
+      `Número: ${this.numero}`,
+      "Estado: Aprobado",
+      `Total pagado: ${this.totalTexto}`,
+      `Fecha de pago: ${this.fechaPago}`,
+      `Facturado a: ${this.titular} · ${this.correo}`,
+      `Método de pago: ${this.metodo}`,
+      `Concepto: ${partida.descripcion} · ${partida.detalle}`,
+      `Vigencia: ${partida.vigencia}`,
+      `Subtotal: ${this.totalTexto}`,
+      `Total: ${this.totalTexto}`,
+      AGRADECIMIENTO,
+      CONTACTO_SOPORTE,
+    ];
   }
 }

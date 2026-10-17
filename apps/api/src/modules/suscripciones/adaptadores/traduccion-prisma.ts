@@ -82,11 +82,11 @@ export function pagoDesdePrisma(fila: PagoFila): Pago {
   };
 }
 
-/** Lo que el historial (M2-06) lee junto al pago: el nombre del plan y el titular de la cuenta. */
-export const INCLUIR_HISTORIAL = { plan: { select: { nombre: true } }, usuario: { select: { nombre: true } } } as const;
+/** Lo que el historial (M2-06) lee junto al pago: el nombre del plan y el titular de la cuenta con su correo. */
+export const INCLUIR_HISTORIAL = { plan: { select: { nombre: true } }, usuario: { select: { nombre: true, correo: true } } } as const;
 
-export type PagoConPlanYTitular = PagoFila & { plan: { nombre: string }; usuario: { nombre: string } };
+export type PagoConPlanYTitular = PagoFila & { plan: { nombre: string }; usuario: { nombre: string; correo: string } };
 
 export function pagoHistorialDesdePrisma(fila: PagoConPlanYTitular): PagoHistorial {
-  return { ...pagoDesdePrisma(fila), planNombre: fila.plan.nombre, titular: fila.usuario.nombre };
+  return { ...pagoDesdePrisma(fila), planNombre: fila.plan.nombre, titular: fila.usuario.nombre, correo: fila.usuario.correo };
 }

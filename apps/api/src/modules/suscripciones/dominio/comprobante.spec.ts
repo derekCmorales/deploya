@@ -7,6 +7,7 @@ const PAGO: PagoHistorial = {
   planId: "plan-pro",
   planNombre: "Pro",
   titular: "Derek Calderón",
+  correo: "derek@tiendademo.com",
   concepto: "renovacion",
   vigenciaDias: 365,
   monto: 150,
@@ -25,21 +26,30 @@ describe("M2-06 · Comprobante", () => {
     expect(textoMonto(150, "USD")).toBe("USD 150.00");
   });
 
-  it("un pago aprobado arma el comprobante con su nombre de archivo", () => {
+  it("un pago aprobado arma el comprobante como recibo, sin leyendas de demo", () => {
     const comprobante = Comprobante.desde(PAGO)!;
 
     expect(comprobante.nombreArchivo).toBe("DPY-2026-000142.pdf");
+    expect(comprobante.partida()).toEqual({
+      descripcion: "Plan Pro",
+      detalle: "Suscripción de 365 días",
+      vigencia: "05 ene → 05 ene 2027",
+      monto: "USD 150.00",
+    });
     expect(comprobante.lineas()).toEqual([
       "deploya · Comprobante de pago",
       "Número: DPY-2026-000142",
-      "Fecha: 05 ene 2026, 08:03",
-      "Concepto: Plan Pro · 365 días",
+      "Estado: Aprobado",
+      "Total pagado: USD 150.00",
+      "Fecha de pago: 05 ene 2026, 08:03",
+      "Facturado a: Derek Calderón · derek@tiendademo.com",
+      "Método de pago: Tarjeta •••• 4242",
+      "Concepto: Plan Pro · Suscripción de 365 días",
       "Vigencia: 05 ene → 05 ene 2027",
-      "Método: Prueba •••• 4242",
-      "Titular: Derek Calderón",
       "Subtotal: USD 150.00",
       "Total: USD 150.00",
-      "Pago simulado · sin cobro real · sin valor fiscal.",
+      "Gracias por confiar en deploya.",
+      "¿Dudas sobre este cobro? Escríbenos a soporte@deploya.app",
     ]);
   });
 

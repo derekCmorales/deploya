@@ -10,7 +10,7 @@ Requiere `feat-m2-contratacion-suscripcion` (archivado). Sin base ni reloj reale
 ## 2. Comprobante
 
 - [x] 2.1 `Comprobante` (VO), `ComprobantePdfPuerto`, `ComprobantePdfKit` y `ComprobanteTextoFalso`; `GET /suscripciones/pagos/:id/comprobante.pdf`
-- [x] 2.2 Pruebas: «Descargar comprobante» (número, fecha, concepto, vigencia, método, total y la leyenda «sin valor fiscal»), «Comprobante de otro cliente» → 404, pago rechazado → 404
+- [x] 2.2 Pruebas: «Descargar comprobante» (número, fecha, concepto, vigencia, método y total; sin leyendas de demo en el PDF: el aviso de cobros simulados queda en la pantalla 09), «Comprobante de otro cliente» → 404, pago rechazado → 404
 
 ## 3. Web
 

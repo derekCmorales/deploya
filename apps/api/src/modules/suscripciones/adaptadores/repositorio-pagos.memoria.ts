@@ -5,7 +5,7 @@ import { RepositorioPagos } from "../puertos/repositorio-pagos.puerto";
 
 /**
  * Doble en memoria para pruebas: mismo contrato que el adaptador Prisma. Resuelve el nombre del
- * plan con la lista que recibe y el titular con `titulares` (por usuario).
+ * plan con la lista que recibe y el titular con `titulares` (por usuario); el correo es de prueba.
  */
 export class RepositorioPagosMemoria extends RepositorioPagos {
   private readonly pagos: Pago[] = [];
@@ -48,6 +48,6 @@ export class RepositorioPagosMemoria extends RepositorioPagos {
 
   private historial(pago: Pago): PagoHistorial {
     const plan = this.planes.find((p) => p.id === pago.planId);
-    return { ...pago, planNombre: plan?.nombre ?? pago.planId, titular: this.titulares[pago.usuarioId] ?? "" };
+    return { ...pago, planNombre: plan?.nombre ?? pago.planId, titular: this.titulares[pago.usuarioId] ?? "", correo: `${pago.usuarioId}@deploya.app` };
   }
 }

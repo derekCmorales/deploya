@@ -202,15 +202,15 @@ describe("RepositorioPagosPrisma · historial (M2-06)", () => {
     numeroComprobante: "DPY-2026-000142",
     creado,
     plan: { nombre: "Starter" },
-    usuario: { nombre: "Derek Calderón" },
+    usuario: { nombre: "Derek Calderón", correo: "derek@tiendademo.com" },
   };
-  const incluir = { plan: { select: { nombre: true } }, usuario: { select: { nombre: true } } };
+  const incluir = { plan: { select: { nombre: true } }, usuario: { select: { nombre: true, correo: true } } };
 
   it("deUsuario lee del más reciente al más antiguo con el plan y el titular", async () => {
     const findMany = jest.fn().mockResolvedValue([fila]);
     const [pago] = await new RepositorioPagosPrisma(prismaDoble({ pago: { findMany } })).deUsuario("u1");
     expect(findMany).toHaveBeenCalledWith({ where: { usuarioId: "u1" }, include: incluir, orderBy: { creado: "desc" } });
-    expect(pago).toMatchObject({ monto: 5, planNombre: "Starter", titular: "Derek Calderón", numeroComprobante: "DPY-2026-000142" });
+    expect(pago).toMatchObject({ monto: 5, planNombre: "Starter", titular: "Derek Calderón", correo: "derek@tiendademo.com", numeroComprobante: "DPY-2026-000142" });
   });
 
   it("porId devuelve null si no existe", async () => {

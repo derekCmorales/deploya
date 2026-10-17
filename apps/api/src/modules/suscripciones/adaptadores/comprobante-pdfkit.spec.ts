@@ -12,6 +12,7 @@ describe("M2-06 · ComprobantePdfKit", () => {
       planId: "plan-starter",
       planNombre: "Starter",
       titular: "Derek Calderón",
+      correo: "derek@tiendademo.com",
       concepto: "contratacion",
       vigenciaDias: 30,
       monto: 5,

@@ -69,13 +69,13 @@ describe("M2-06 · HistorialPagosService", () => {
 
     expect(archivo.nombre).toBe("DPY-2026-000001.pdf");
     expect(texto).toContain("Número: DPY-2026-000001");
-    expect(texto).toContain("Fecha: 03 sep 2026, 16:10");
-    expect(texto).toContain("Concepto: Plan Starter · 30 días");
+    expect(texto).toContain("Fecha de pago: 03 sep 2026, 16:10");
+    expect(texto).toContain("Concepto: Plan Starter · Suscripción de 30 días");
     expect(texto).toContain("Vigencia: 03 sep → 03 oct 2026");
-    expect(texto).toContain("Método: Prueba •••• 4242");
-    expect(texto).toContain("Titular: Derek Calderón");
+    expect(texto).toContain("Método de pago: Tarjeta •••• 4242");
+    expect(texto).toContain("Facturado a: Derek Calderón");
     expect(texto).toContain("Total: USD 5.00");
-    expect(texto).toContain("sin valor fiscal");
+    expect(texto).not.toMatch(/simulad|valor fiscal|prueba/i);
   });
 
   it("Comprobante de otro cliente", async () => {

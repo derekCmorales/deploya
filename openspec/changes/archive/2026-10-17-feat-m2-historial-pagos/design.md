@@ -40,7 +40,7 @@ Cambios de clases: `HistorialPagosService`, `Comprobante`, `ComprobantePdfPuerto
 - **Librería de PDF:** `pdfkit` 0.17 (y `@types/pdfkit`) en `apps/api`. Helvetica estándar no trae «→»: el PDF muestra la vigencia con «–»; el panel de 09 conserva «→».
 - **Vigencia del comprobante:** desde la fecha del pago por los días del plan. `Pago` no guarda el inicio de la vigencia (datos 1.3 sin cambios), así que en una renovación anticipada el comprobante no muestra la fecha en que empieza a sumar.
 - **Titular:** el nombre de la cuenta (`Usuario.nombre`); la pasarela simulada no guarda el titular de la tarjeta.
-- **Leyenda del PDF:** «Pago simulado · sin cobro real · sin valor fiscal.» (el escenario pide literalmente «sin valor fiscal»); el panel de 09 usa el texto de la ficha.
+- **PDF con estructura de recibo (pedido de Derek):** marca, número, «Total pagado» con «Aprobado», fecha de pago, «Facturado a» (titular y correo), «Método de pago», la partida (descripción, vigencia, monto), subtotal, total y un pie con agradecimiento y soporte. Colores del tema claro del design system en RGB. Sin leyendas de demo («simulado», «sin valor fiscal», «Prueba»): es un proyecto de clase; el aviso de cobros simulados que pide el requisito queda en la pantalla 09.
 - **`GET /suscripciones/pagos`** devuelve además `plan` y `titular` por fila para el panel «Comprobante».
 - **404:** pago ajeno, inexistente o rechazado responden `pago-no-encontrado` sin llamar al puerto del PDF.
 - **Descarga:** «Descargar PDF» es un enlace directo a la API (la cookie de sesión viaja en la navegación) con `Content-Disposition: attachment`.

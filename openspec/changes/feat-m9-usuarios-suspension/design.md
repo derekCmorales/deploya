@@ -35,3 +35,12 @@ Cambios de clases: `ConsultaUsuariosPuerto`, `SuspensionService`, `UsuariosAdmin
 ## Risks / Trade-offs
 
 - **Lista grande:** paginada de 20 con índice por correo; el total se cuenta aparte.
+
+## Decisiones al aplicar (2026-10-17)
+
+- **`AccionAdministrativa.accion = "suspender-cuenta"`** (lo que dice el schema y ya lee M1), no `tipo: "suspender"`. El `motivo` de la acción guarda la clave (`terminos`); `Usuario.motivoSuspension` guarda el texto que ve el usuario en 03b. `Usuario` no tiene `estadoDesde`: la fecha sale de la última acción.
+- **`MOTIVOS_SUSPENSION`:** la ficha 25b solo muestra «Uso que incumple los términos (§7.2)»; se agregaron cuatro motivos más (abuso de recursos, contenido malicioso, pago fraudulento, a pedido del titular). La web los lee de `GET /admin/usuarios/motivos-suspension`.
+- **Transacción:** `CuentasSuspensionPrisma.suspender` hace `$transaction` con el `update` de la cuenta, el `updateMany` de `Sesion.revocadaEn` (tabla de M1, aviso a Eddy) y el `create` de la acción.
+- **HTTP:** `NoSePuedeSuspenderAdministrador` 403, `CuentaYaSuspendida` 409, `MotivoInvalido` 400, `UsuarioNoEncontrado` 404; suspender responde 204.
+- **Lista:** `{ total, pagina, porPagina, usuarios }`; cada fila suma `estadoCuenta` al contrato del proposal.
+- **Web:** «Administración» aparece en la navegación solo con rol Administrador; el stub `/admin` se borró.

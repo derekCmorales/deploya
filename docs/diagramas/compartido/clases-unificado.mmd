@@ -235,8 +235,35 @@ classDiagram
         +health() Estado
         +acceso(usuario) UsuarioSesion
     }
-    class AdministracionService {
-        +suspender(adminId, usuarioId, motivo, detalle) void
+    class UsuariosAdminController {
+        -consulta ConsultaUsuariosPuerto
+        -suspension SuspensionService
+        +buscar(consulta) PaginaUsuarios
+        +detalle(id) DetalleUsuario
+        +motivos() MotivoSuspension[]
+        +suspender(adminId, id, cuerpo) void
+    }
+    class ConsultaUsuariosPuerto {
+        <<abstract · Repository de lectura>>
+        +buscar(filtro) PaginaUsuarios
+        +detalle(usuarioId) DetalleUsuario
+    }
+    class ConsultaUsuariosPrisma
+    class SuspensionService {
+        <<Service Layer>>
+        -cuentas CuentasSuspensionPuerto
+        -contenedores ContenedoresClientePuerto
+        -reloj Reloj
+        +suspender(adminId, usuarioId, solicitud) void
+    }
+    class CuentasSuspensionPuerto {
+        <<abstract · Unit of Work>>
+        +cuenta(usuarioId) CuentaObjetivo
+        +suspender(suspension) void
+    }
+    class CuentasSuspensionPrisma
+    class MOTIVOS_SUSPENSION {
+        <<constante>>
     }
 
     %% ───────── M3 Proyectos · M7 Observabilidad (Eduardo) ─────────
@@ -776,7 +803,14 @@ classDiagram
     RepositorioPlanes <|-- RepositorioPlanesPrisma
     RepositorioSuscripciones <|-- RepositorioSuscripcionesPrisma
     PasarelaPago <|-- PasarelaSimulada
-    AdministracionService --> ContenedoresClientePuerto : detenerTodos
+    UsuariosAdminController --> ConsultaUsuariosPuerto
+    UsuariosAdminController --> SuspensionService
+    UsuariosAdminController ..> RolGuard : protege
+    ConsultaUsuariosPuerto <|-- ConsultaUsuariosPrisma
+    CuentasSuspensionPuerto <|-- CuentasSuspensionPrisma
+    SuspensionService --> CuentasSuspensionPuerto
+    SuspensionService ..> MOTIVOS_SUSPENSION
+    SuspensionService --> ContenedoresClientePuerto : detenerTodos
     ProyectosService --> ProveedorFuente
     ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos

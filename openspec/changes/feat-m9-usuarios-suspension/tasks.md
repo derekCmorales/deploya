@@ -14,12 +14,12 @@ Requiere `feat-m1-estados-roles` en `main` (ya está) y la tarea 3.1 de `feat-m2
 
 ## 3. Web
 
-- [ ] 3.1 `/admin/usuarios` (25) con búsqueda, filtro de suscripción, tabla y panel; `Dialog` 25b; borrar el stub `/admin` y actualizar `nav-panel.tsx`
-- [ ] 3.2 Pruebas `node --test`: armado de la consulta (correo, filtro, página), iniciales del panel
+- [x] 3.1 `/admin/usuarios` (25) con búsqueda, filtro de suscripción, tabla y panel; `Dialog` 25b; borrar el stub `/admin` y actualizar `nav-panel.tsx`
+- [x] 3.2 Pruebas `node --test`: armado de la consulta (correo, filtro, página), iniciales del panel
 - [ ] 3.3 Revisión contra los artboards 25 y 25b en claro y oscuro
 
 ## 4. Cierre
 
-- [ ] 4.1 `clases-unificado.mmd`; `pnpm check` en verde; cobertura ≥ 80 % en `administracion/`
+- [x] 4.1 `clases-unificado.mmd`; `pnpm check` en verde; cobertura ≥ 80 % en `administracion/`
 - [ ] 4.2 Demo: `admin@deploya.app` suspende a `demo@deploya.app` → su app deja de responder y el login muestra el motivo (03b)
 - [ ] 4.3 `/opsx-archive` después del merge

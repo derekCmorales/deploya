@@ -54,3 +54,4 @@ Cambios de clases: `PoliticaCiclo`, `CicloSuscripcionService`, `ContenedoresClie
 - **Tarea diaria:** `TareaCicloDiaria` programa la corrida en `onApplicationBootstrap` del trabajador (`CicloTrabajadorModule` en `trabajador.module.ts`); `trabajador.ts` no cambia.
 - **`GET /suscripciones/mia`** agrega `estadoDesde` (solo agrega un campo) para «Suspendida desde 29 sep 2026» de 28.
 - **Panel de 28:** `PanelSuscripcionSuspendida` en `(billing)/_componentes/`, montado en 08; la lista de proyectos (Eduardo) puede montarlo también.
+- **Revisión contra el artboard 28 (claro y oscuro):** el panel va alineado a la izquierda, sin tarjeta exterior: badge y «desde», título, «Qué pasó» y «Qué se conserva · 30 días» en dos tarjetas, «Renovar» y «Ver planes» (ghost) y la nota.

@@ -1,4 +1,4 @@
-import { CircleCheck, CirclePause, RefreshCw } from "lucide-react";
+import { Check, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 import { EstadoSuscripcion } from "@/components/deploya/estado-suscripcion";
@@ -21,46 +21,41 @@ import {
  */
 export function PanelSuscripcionSuspendida({ suscripcion, detenidos }: { suscripcion: MiSuscripcion; detenidos: number | null }) {
   return (
-    <Card className="mx-auto flex w-full max-w-[560px] flex-col gap-6 p-7" role="alert">
-      <div className="flex items-center gap-2.5">
-        <EstadoSuscripcion estado="suspendida" />
+    <section className="flex flex-col gap-4" role="alert">
+      <div className="flex items-center gap-3">
+        <EstadoSuscripcion estado="suspendida" size="lg" />
         <span className="text-[13px] text-muted-foreground">desde {fechaLarga(suscripcion.estadoDesde)}</span>
       </div>
-      <div className="flex items-center gap-3">
-        <span className="grid size-10 place-items-center rounded-lg border border-border-strong bg-sunken text-bad">
-          <CirclePause className="size-5" aria-hidden />
-        </span>
-        <h2 className="text-xl font-semibold tracking-[-0.02em]">Tu panel está en pausa</h2>
+      <h2 className="text-2xl font-semibold tracking-[-0.025em]">Tu panel está en pausa</h2>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Card className="flex flex-col gap-2 p-4">
+          <h3 className="text-[13px] text-muted-foreground">Qué pasó</h3>
+          <p className="text-sm">{textoQuePasoSuspendida(suscripcion, detenidos)}</p>
+        </Card>
+        <Card className="flex flex-col gap-2 p-4">
+          <h3 className="text-[13px] text-muted-foreground">Qué se conserva · 30 días</h3>
+          <ul className="flex flex-col gap-1.5">
+            {CONSERVADO_SUSPENDIDA.map((texto) => (
+              <li key={texto} className="flex items-center gap-2 text-sm">
+                <Check className="size-3.5 text-muted-foreground" aria-hidden />
+                {texto}
+              </li>
+            ))}
+          </ul>
+        </Card>
       </div>
-      <section className="flex flex-col gap-1.5">
-        <h3 className="text-[13px] font-medium text-muted-foreground">Qué pasó</h3>
-        <p>{textoQuePasoSuspendida(suscripcion, detenidos)}</p>
-      </section>
-      <section className="flex flex-col gap-2.5 rounded-lg border border-border bg-sunken p-4">
-        <h3 className="text-[13px] font-medium text-muted-foreground">Qué se conserva · 30 días</h3>
-        <ul className="flex flex-col gap-2">
-          {CONSERVADO_SUSPENDIDA.map((texto) => (
-            <li key={texto} className="flex items-center gap-2 text-sm">
-              <CircleCheck className="size-4 text-ok" aria-hidden />
-              {texto}
-            </li>
-          ))}
-        </ul>
-      </section>
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <Button asChild>
-            <Link href={rutaRenovar(suscripcion)}>
-              <RefreshCw />
-              Renovar
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={RUTA_PLANES}>Ver planes</Link>
-          </Button>
-        </div>
-        <p className="text-[13px] text-muted-foreground">{NOTA_RENOVAR_SUSPENDIDA}</p>
+      <div className="flex items-center gap-2">
+        <Button asChild>
+          <Link href={rutaRenovar(suscripcion)}>
+            <RefreshCw />
+            Renovar
+          </Link>
+        </Button>
+        <Button asChild variant="ghost">
+          <Link href={RUTA_PLANES}>Ver planes</Link>
+        </Button>
       </div>
-    </Card>
+      <p className="text-[13px] text-muted-foreground">{NOTA_RENOVAR_SUSPENDIDA}</p>
+    </section>
   );
 }

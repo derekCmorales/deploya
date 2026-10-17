@@ -231,7 +231,16 @@ export default function SistemaPage() {
             />
           </Sunken>
         </div>
-        <Table>
+        <Table
+          footer={
+            <>
+              <span className="grow text-xs text-muted-foreground">Se muestran los últimos 20 despliegues del proyecto.</span>
+              <Button variant="ghost" size="xs">
+                Cargar más
+              </Button>
+            </>
+          }
+        >
           <TableHeader>
             <TableRow>
               <TableHead>Versión</TableHead>

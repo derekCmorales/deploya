@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 import { useSondeo, type Sondeo } from "@/hooks/use-sondeo";
 import { pedirApi } from "@/lib/api";
+import { EVENTO_PROYECTO_ACTUALIZADO } from "@/lib/configuracion";
 import { algunoEnCurso, type ListaProyectos } from "@/lib/proyectos";
 
 const leerProyectos = () => pedirApi<ListaProyectos>("/proyectos");
@@ -15,5 +16,11 @@ const nunca = () => false;
  */
 export function useProyectos({ sondear = true }: { sondear?: boolean } = {}): Sondeo<ListaProyectos> {
   const seguir = useCallback((lista: ListaProyectos) => sondear && algunoEnCurso(lista), [sondear]);
-  return useSondeo(leerProyectos, sondear ? seguir : nunca);
+  const sondeo = useSondeo(leerProyectos, sondear ? seguir : nunca);
+  const { recargar } = sondeo;
+  useEffect(() => {
+    window.addEventListener(EVENTO_PROYECTO_ACTUALIZADO, recargar);
+    return () => window.removeEventListener(EVENTO_PROYECTO_ACTUALIZADO, recargar);
+  }, [recargar]);
+  return sondeo;
 }

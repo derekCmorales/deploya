@@ -24,10 +24,13 @@ import {
   DemasiadasVariables,
   FuenteNoDisponible,
   LimiteProyectosAlcanzado,
+  NombreRepetido,
   ProyectoNoEncontrado,
+  PuertoInvalido,
   RamaNoEncontrada,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
+  RutaInvalida,
   StackNoReconocidoEnAlta,
   SubdominioEnUso,
   UrlRepositorioInvalida,
@@ -157,6 +160,35 @@ describe("ProyectosController", () => {
     expect((await controlador.listar("usuario-1")).usados).toBe(0);
   });
 
+  it("PATCH /proyectos/:id cambia lo pedido, no despliega y responde con los campos del contrato", async () => {
+    const { controlador, repositorio, motor } = await montarApi();
+    const { proyecto } = await controlador.crear("usuario-1", { url: "https://github.com/derekCmorales/hola-deploya", nombre: "hola-deploya" });
+
+    const respuesta = await controlador.configurar("usuario-1", proyecto.id, { nombre: "Hola demo", puertoInterno: 8081, subdominio: "robado" });
+
+    expect(respuesta).toEqual({
+      id: proyecto.id,
+      nombre: "Hola demo",
+      subdominio: "hola-deploya",
+      urlRepositorio: "https://github.com/derekCmorales/hola-deploya",
+      rama: "main",
+      rutaDockerfile: "Dockerfile",
+      puertoInterno: 8081,
+    });
+    expect(await repositorio.porId(proyecto.id)).toMatchObject({ nombre: "Hola demo", subdominio: "hola-deploya" });
+    expect((await motor.ultimosDespliegues([proyecto.id]))[proyecto.id]).toMatchObject({ numero: 1 });
+  });
+
+  it("PATCH valida el cuerpo antes de llegar al servicio", async () => {
+    const { controlador, repositorio } = await montarApi();
+    const { proyecto } = await controlador.crear("usuario-1", { url: "https://github.com/derekCmorales/hola-deploya", nombre: "hola-deploya" });
+
+    expect(() => controlador.configurar("usuario-1", proyecto.id, { puertoInterno: 0 })).toThrow(PuertoInvalido);
+    expect(() => controlador.configurar("usuario-1", proyecto.id, { rutaDockerfile: "../x" })).toThrow(RutaInvalida);
+    expect(() => controlador.configurar("usuario-1", proyecto.id, {})).toThrow(DatosAltaInvalidos);
+    expect((await repositorio.porId(proyecto.id))?.puertoInterno).toBe(3000);
+  });
+
   it("DELETE sin confirmación en el cuerpo no toca el proyecto", async () => {
     const { controlador, repositorio } = await montarApi();
     const { proyecto } = await controlador.crear("usuario-1", { url: "https://github.com/derekCmorales/hola-deploya", nombre: "hola" });
@@ -186,6 +218,9 @@ describe("ProyectosController", () => {
     [new LimiteProyectosAlcanzado(1), 409, { codigo: "limite-proyectos", maximo: 1 }],
     [new ProyectoNoEncontrado("p-1"), 404, { codigo: "proyecto-no-encontrado" }],
     [new ConfirmacionNoCoincide(), 400, { codigo: "confirmacion-no-coincide" }],
+    [new NombreRepetido("Hola"), 409, { codigo: "nombre-repetido", nombre: "Hola" }],
+    [new RutaInvalida(), 400, { codigo: "ruta-invalida" }],
+    [new PuertoInvalido(), 400, { codigo: "puerto-invalido" }],
     [new ClaveInvalida(), 400, { codigo: "clave-invalida" }],
     [new ClaveReservada(), 400, { codigo: "clave-reservada" }],
     [new DemasiadasVariables(MAXIMO_VARIABLES), 400, { codigo: "demasiadas-variables" }],

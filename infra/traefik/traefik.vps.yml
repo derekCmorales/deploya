@@ -1,0 +1,37 @@
+# Configuración estática de Traefik en el VPS (ADR 0005 y 0007). La de desarrollo es traefik.yml.
+# Las rutas de cada proyecto las escribe el worker en /traefik/dinamico/<subdominio>.yml y la
+# plataforma (web y API) vive en plataforma.vps.yml, montado en ese mismo directorio.
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+providers:
+  file:
+    directory: /traefik/dinamico
+    watch: true
+
+# Un solo certificado comodín (deploya.app + *.deploya.app) por DNS-01: HTTP-01 emitiría uno por
+# proyecto y chocaría con los límites de Let's Encrypt. El correo del ACME llega por entorno
+# (TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL) y el token del proveedor DNS también:
+# nada de eso se versiona. Si el DNS no es Cloudflare, cambia `provider` y la variable del token
+# (ver docs/infra-vps.md).
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      storage: /acme/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+
+log:
+  level: INFO

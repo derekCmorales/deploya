@@ -33,5 +33,5 @@ Cada tarea de código tiene su tarea de pruebas. Sin Docker, red, base ni reloj 
 
 - [x] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync`
 - [x] 5.2 `pnpm check` en verde
-- [ ] 5.3 Aplicar el descenso al vencer: M2-05
+- [x] 5.3 Aplicar el descenso al vencer: M2-05 (hecho en feat-m2-ciclo-suscripcion: PoliticaCiclo.cambioPorSalto)
 - [x] 5.4 `/opsx-archive` después del merge

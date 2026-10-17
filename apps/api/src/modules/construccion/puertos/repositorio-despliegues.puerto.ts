@@ -1,4 +1,5 @@
 import type { Commit, Despliegue, LineaBitacora } from "../dominio/despliegue";
+import type { FiltroHistorial } from "../dominio/historial";
 import type { DisparadorDespliegue, EstadoDespliegue, EstadoEtapa, Etapa } from "../dominio/estados";
 
 export interface NuevoDespliegue {
@@ -7,6 +8,11 @@ export interface NuevoDespliegue {
   rama: string;
   estado: EstadoDespliegue;
   creado: Date;
+  /** Solo la reversión: el artefacto que reusa y el commit con el que se construyó. */
+  artefactoId?: string;
+  commit?: Commit;
+  /** Etapas que este despliegue no recorre (Recepción y Construcción en una reversión). */
+  etapasOmitidas?: readonly Etapa[];
 }
 
 export interface CambiosDespliegue {
@@ -30,6 +36,8 @@ export abstract class RepositorioDespliegues {
   abstract porId(id: string): Promise<Despliegue | null>;
   /** El despliegue #`numero` del proyecto (pantalla 12 abre por número). */
   abstract porNumero(proyectoId: string, numero: number): Promise<Despliegue | null>;
+  /** El primer despliegue del proyecto que clonó ese commit, si lo hay (redesplegar, M4-02). */
+  abstract porCommit(proyectoId: string, commitSha: string): Promise<Despliegue | null>;
   abstract cambiarEstado(id: string, estado: EstadoDespliegue, cambios?: CambiosDespliegue): Promise<void>;
   abstract marcarEtapa(id: string, etapa: Etapa, estado: EstadoEtapa, marca: Date): Promise<void>;
   abstract agregarLineas(id: string, lineas: LineaBitacora[]): Promise<void>;
@@ -37,6 +45,13 @@ export abstract class RepositorioDespliegues {
   /** El despliegue más reciente de cada proyecto pedido (para la lista de M3). */
   abstract ultimosDe(proyectoIds: string[]): Promise<Despliegue[]>;
   abstract activoDe(proyectoId: string): Promise<Despliegue | null>;
+  /**
+   * Hasta `limite` despliegues del proyecto del #n más reciente al más antiguo, con `numero < antesDe`
+   * si hay cursor. El filtro `saludables` / `fallidos` mira el estado guardado (pantalla 14).
+   */
+  abstract historialDe(proyectoId: string, filtro: FiltroHistorial, antesDe: number | null, limite: number): Promise<Despliegue[]>;
+  /** El despliegue que aún no terminó (Encolado, Construyendo, Revirtiendo, Aprovisionando o Publicando), si lo hay. */
+  abstract enCursoDe(proyectoId: string): Promise<Despliegue | null>;
   abstract marcarActivo(proyectoId: string, despliegueId: string): Promise<void>;
   /**
    * Construcciones del usuario desde `desde` (invariante I7): todos sus despliegues creados

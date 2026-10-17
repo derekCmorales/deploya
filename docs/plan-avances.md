@@ -195,7 +195,7 @@ Los changes están en `openspec/changes/` y validan con `openspec validate --all
 |---|---|---|---|
 | `feat-m1-estados-roles` | M1-04 | Eddy | Javier (usa `RolGuard` en M9) |
 | `feat-m1-recuperacion` | M1-05, M10-02 | Eddy | — |
-| `feat-m2-contratacion-suscripcion` | M2-02, M2-03, M2-04 | Javier | **Hecho**; falta archivar |
+| `feat-m2-contratacion-suscripcion` | M2-02, M2-03, M2-04 | Javier | **Hecho y archivado** (7 de octubre) |
 | `feat-m7-vista-despliegue` | M7-01 | Eduardo | Derek (consulta por número) |
 | `feat-m3-variables-cifradas` | M3-03 | Eduardo | Derek (variables al contenedor) |
 | `feat-m4-deteccion-stack` | M4-03 | Derek | Eduardo (11a, 11e) |
@@ -311,9 +311,9 @@ Están en `openspec/changes/` y validan con `openspec validate --all`. Cada due�
 | Change | Historias | Dueño | Toca a |
 |---|---|---|---|
 | `feat-m1-cuenta` | M1-06, M1-07 | Eddy | — |
-| `feat-m2-ciclo-suscripcion` | M2-05 | Javier (+ Derek, tarea 3) | Derek (`detenerTodosDe`, `reanudarTodosDe`) |
-| `feat-m2-historial-pagos` | M2-06 | Javier | — |
-| `feat-m9-usuarios-suspension` | M9-01, M9-02 | Javier | Eddy (`RolGuard`, ya en `main`), Derek (contenedores) |
+| `feat-m2-ciclo-suscripcion` | M2-05 | Javier (+ Derek, tarea 3) | Derek (`detenerTodosDe`, `reanudarTodosDe`) · **Hecho y archivado** (17 de octubre) |
+| `feat-m2-historial-pagos` | M2-06 | Javier | — · **Hecho y archivado** (17 de octubre) |
+| `feat-m9-usuarios-suspension` | M9-01, M9-02 | Javier | Eddy (`RolGuard`, ya en `main`), Derek (contenedores) · **Hecho y archivado** (17 de octubre) |
 | `feat-m5-reversion-instantanea` | M5-04 | Derek | — |
 | `feat-m4-acciones-despliegue` | M4-02 | Derek | — |
 | `feat-m7-resumen-historial` | M7-02 | Derek | Eduardo (monta `ActividadProyecto`) |
@@ -445,6 +445,35 @@ Miércoles: cada quien comprueba su parte en el VPS y se corrige. Jueves: recorr
 | `/opsx-archive` de `feat-m1-estados-roles`, `feat-m1-recuperacion`, `feat-m3-alta-proyecto`, `feat-m3-eliminar-proyecto` | **Hecho** (11 de octubre) |
 | Demo en compose y revisión visual: 8.2 motor, 5.2 detección, 6.3 acciones, 4.3 bloqueos, 5.2 vista de despliegue, 5.3 variables | Derek |
 | `/opsx-archive` de `feat-m4-motor-construccion`, `feat-m4-deteccion-stack`, `feat-m5-acciones-contenedor`, `feat-m5-bloqueos-cuota`, `feat-m7-vista-despliegue`, `feat-m3-variables-cifradas` (tras la demo) | Derek |
+
+### Estado de Derek al miércoles 14 de octubre (rama `Entrega-85%`)
+
+Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit por historia, `pnpm check` en verde, `openspec validate --all` 27 de 27). Lo que falta depende de Docker real, del VPS o de cuentas externas, y **no está marcado como hecho** en los `tasks.md`.
+
+| Paso | Historia | Estado | Qué falta |
+|---|---|---|---|
+| 0 | Cerrar el Avance 2 | **Pendiente** | Demos en compose (8.2, 5.2, 6.3, 4.3, 5.2, 5.3) y `/opsx-archive` de los seis changes: solo se marcan tras verlas funcionar |
+| 1 | VPS y dominio | **Archivos listos** | `docker-compose.vps.yml`, `traefik.vps.yml`, `plataforma.vps.yml`, `.env.vps.example`, [infra-vps.md](infra-vps.md). Falta comprar el dominio, los registros A, el VPS y el token DNS |
+| 2 | `detenerTodosDe` / `reanudarTodosDe` (Javier) | **Hecho** | `ContenedoresClientePuerto` en `orquestacion/`: M2 y M9 lo inyectan desde un módulo que importe `OrquestacionModule` (contrato 3.1) |
+| 3 | M5-04 reversión | **Hecho (API y web)** | Demo en compose con tres despliegues; ADR 0004 queda Propuesto hasta verla |
+| 4 | M4-02 cancelar, reintentar, redesplegar | **Hecho (API y web)** | Demo en compose: cancelar en Construyendo sin `docker build` colgado |
+| 5 | M7-02 pantallas 13 y 14 | **Hecho** (revisadas contra el canvas el 17 de octubre) | Montar `<ActividadProyecto />` de Eduardo cuando entre su PR (M7-03); demo en compose |
+| 6 | M3-04 pantalla 19 | **Hecho** (19 y 19b revisadas contra el canvas el 17 de octubre) | Demo: rama `sin-dockerfile` → «Stack detectado: Node.js 22» |
+| 7 | M6-02 HTTPS y ADR 0007 | **Código y script hechos** | Correr `scripts/desplegar-vps.sh` en el VPS, SMTP con Eddy, `https://hola-deploya.<dominio>` con candado |
+
+**Revisión del 17 de octubre (rama `Entrega-85%`).** 13, 14, 19 y 19b quedaron iguales a sus artboards en claro y oscuro: cabecera del proyecto con ruta en mono, metadatos con iconos, riel y «Más acciones» (`Menu` nuevo del sistema: «Cambiar rama» y «Eliminar proyecto»); en 13, «Reiniciar» y «Detener» en la cabecera y la versión activa, la imagen y la publicación como celdas al pie de «Estado actual»; en 14, «Versión activa» como `Badge` de Señal y el pie con «Cargar más» dentro del panel (`Table footer`); en 19, filas de 280px con iconos en los campos y «Zona de peligro» como en el canvas; «Cancelar despliegue» (12) en fantasma y «Reintentar» (12c) con su icono. `pnpm check` en verde. Siguen pendientes las demos en compose y el VPS (no se pueden hacer sin Docker con red ni sin el dominio).
+
+### Estado de Javier al sábado 17 de octubre (rama `Entrega-85%`)
+
+Las cuatro historias del Avance 3 (13 pts) están en la rama, con su change sincronizado a los specs y archivado. `pnpm test` en verde (API y web) y diagramas al día. Las demos se corrieron con Postgres y Redis reales (adaptadores del motor en stub) y, para el contenedor, con Docker, Traefik y BullMQ en el PR #36.
+
+| Historia | Estado | Evidencia |
+|---|---|---|
+| M2-05 ciclo §4.4 | **Hecho** | `PoliticaCiclo` en tabla; vencida → suspendida → cancelada y dos corridas el mismo día sin cambios; `POST /admin/ciclo/ejecutar` 403 a un Cliente; renovar reactiva (`ReactivacionService`); panel «Suscripción suspendida» de 28 |
+| M2-06 historial y PDF | **Hecho** | Cuenta nueva ve 09b; aprobado + rechazado en 09; PDF `DPY-AAAA-NNNNNN.pdf`; ajeno o rechazado → 404 |
+| M9-01 usuarios | **Hecho** | Búsqueda, filtro por Vencida (solo `vencida@`), detalle; Cliente → 403 |
+| M9-02 suspender | **Hecho** | Sesiones revocadas, `AccionAdministrativa`, 03b con el motivo; administrador 403, repetida 409, motivo fuera de la lista 400 |
+| Montar el consumo de M7-03 en 08 | **Hecho (contrato)** | 08 lee `GET /observabilidad/consumo` y dibuja Construcciones con porcentaje; si el endpoint aún no responde, muestra el límite del plan. Se verá el conteo real cuando el PR de M7-03 esté en la rama |
 
 ### Calendario hasta el viernes 23
 

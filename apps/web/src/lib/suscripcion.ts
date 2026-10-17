@@ -4,6 +4,7 @@
  * poder probarla con `node --test`.
  */
 import type { PlanCatalogo, Vigencia } from "./planes";
+import type { ListaProyectos } from "./proyectos";
 
 export type EstadoSuscripcion = "activa" | "por-vencer" | "vencida" | "suspendida" | "cancelada";
 export type TipoOperacion = "contratacion" | "ascenso" | "renovacion";
@@ -17,6 +18,8 @@ export interface PlanBreve {
 export interface MiSuscripcion {
   plan: PlanCatalogo;
   estado: EstadoSuscripcion;
+  /** Desde cuándo está en `estado` (M2-05). */
+  estadoDesde: string;
   vigenciaDias: number | null;
   inicio: string;
   vence: string | null;
@@ -89,6 +92,21 @@ const AVISOS_ESTADO: Partial<Record<EstadoSuscripcion, AvisoEstado>> = {
 /** Banner de 08 según el estado; `null` mientras la vigencia sigue en curso. */
 export function avisoEstado(estado: EstadoSuscripcion): AvisoEstado | null {
   return AVISOS_ESTADO[estado] ?? null;
+}
+
+/** `GET /observabilidad/consumo` (M7-03): lo que lleva el cliente en el período frente al límite de su plan. */
+export interface ConsumoPeriodo {
+  periodo: { desde: string; reinicia: string };
+  proyectos: { usados: number; limite: number };
+  construcciones: { usadas: number; limite: number };
+}
+
+const PORCIENTO_TOTAL = 100;
+
+/** «64» para 96 de 150; entero, sin pasar de 100 y 0 si el plan no tiene límite. */
+export function porcentajeConsumo(usadas: number, limite: number): number {
+  if (limite <= 0) return 0;
+  return Math.min(PORCIENTO_TOTAL, Math.round((usadas / limite) * PORCIENTO_TOTAL));
 }
 
 /** Las construcciones se cuentan por mes calendario en UTC (M5-03): el consumo se reinicia el día 1 del mes siguiente. */
@@ -197,6 +215,36 @@ export function opcionesCambio(
 function tipoCambio(esMayor: boolean, vigenciaTerminada: boolean): TipoCambio {
   if (vigenciaTerminada) return esMayor ? "ascenso" : "contratacion";
   return esMayor ? "ascenso" : "descenso";
+}
+
+// ───────── Suscripción suspendida (28, M2-05) ─────────
+
+/** Lo que el ciclo §4.4 conserva durante los 30 días en Suspendida. */
+export const CONSERVADO_SUSPENDIDA = ["Código y configuración de cada proyecto", "Variables cifradas", "Historial de despliegues"] as const;
+
+export const NOTA_RENOVAR_SUSPENDIDA = "Al renovar, volvemos a arrancar el último despliegue saludable de cada proyecto.";
+
+/** Contenedores que el ciclo detuvo: proyectos cuyo último despliegue quedó Detenido. */
+export function contenedoresDetenidos(lista: Pick<ListaProyectos, "proyectos"> | null): number | null {
+  if (!lista) return null;
+  return lista.proyectos.filter((p) => p.ultimoDespliegue?.estado === "detenido").length;
+}
+
+function textoDetenidos(detenidos: number | null): string {
+  if (detenidos === null || detenidos === 0) return "Detuvimos los contenedores de tus proyectos.";
+  if (detenidos === 1) return "Detuvimos el contenedor de tu proyecto.";
+  return `Detuvimos los ${detenidos} contenedores.`;
+}
+
+/** «Tu plan Starter venció el 24 sep y terminó el período de gracia. Detuvimos los 3 contenedores.» */
+export function textoQuePasoSuspendida(s: Pick<MiSuscripcion, "plan" | "vence">, detenidos: number | null): string {
+  const vencio = s.vence ? ` venció el ${fechaCorta(s.vence)}` : " venció";
+  return `Tu plan ${s.plan.nombre}${vencio} y terminó el período de gracia. ${textoDetenidos(detenidos)}`;
+}
+
+/** «Renovar» lleva a 07 con el plan y la vigencia que tenía. */
+export function rutaRenovar(s: Pick<MiSuscripcion, "plan" | "vigenciaDias">): string {
+  return rutaContratar(s.plan.codigo, vigenciaDeParametro(String(s.vigenciaDias)));
 }
 
 // ───────── Tarjeta (07) ─────────

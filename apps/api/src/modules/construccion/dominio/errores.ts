@@ -106,3 +106,46 @@ export class DeteccionFallida extends FalloDespliegue {
 function capitalizar(texto: string): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
+
+/** M4-02: un rechazo de una acción sobre un despliegue; sale como 409 `{ codigo, mensaje }`. */
+export abstract class RechazoAccionDespliegue extends Error {
+  abstract readonly codigo: string;
+}
+
+export class YaNoSePuedeCancelar extends RechazoAccionDespliegue {
+  readonly codigo = "ya-no-se-puede-cancelar";
+
+  constructor(readonly estado: EstadoDespliegue) {
+    super(`No se puede cancelar un despliegue en estado ${estado}`);
+    this.name = "YaNoSePuedeCancelar";
+  }
+}
+
+export class SoloSeReintentaUnFallido extends RechazoAccionDespliegue {
+  readonly codigo = "solo-se-reintenta-un-fallido";
+
+  constructor(readonly estado: EstadoDespliegue) {
+    super(`Solo se reintenta un despliegue Fallido; este está ${estado}`);
+    this.name = "SoloSeReintentaUnFallido";
+  }
+}
+
+export class CommitDesconocido extends RechazoAccionDespliegue {
+  readonly codigo = "commit-desconocido";
+
+  constructor(readonly commitSha: string) {
+    super("Ese commit nunca se desplegó en este proyecto");
+    this.name = "CommitDesconocido";
+  }
+}
+
+/**
+ * Lo lanzan los pasos cuando la señal de cancelación aborta su trabajo. No es un fallo de
+ * etapa: el pipeline deja el despliegue Cancelado (no Fallido).
+ */
+export class DespliegueCancelado extends Error {
+  constructor() {
+    super("Cancelado por el usuario");
+    this.name = "DespliegueCancelado";
+  }
+}

@@ -7,6 +7,7 @@ import { EliminarManejador } from "./acciones/eliminar.manejador";
 import { MANEJADORES_ACCION } from "./acciones/manejador-accion";
 import { ReiniciarManejador } from "./acciones/reiniciar.manejador";
 import { CuotaPlanSuscripciones } from "./adaptadores/cuota-plan.suscripciones";
+import { RetencionArtefactos } from "./retencion/retencion-artefactos";
 import { OrquestacionService } from "./orquestacion.service";
 import { PasoEjecucion } from "./paso-ejecucion";
 import { PasoOperacion } from "./paso-operacion";
@@ -17,7 +18,7 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
 
 /**
  * Lo que M5 aporta al proceso trabajador: los pasos del pipeline (límites del plan de M2) y
- * el consumidor de la cola `operacion` con un manejador por acción.
+ * el consumidor de la cola `operacion` con un manejador por acción y la retención de artefactos.
  */
 @Module({
   imports: [SuscripcionesModule, EnrutamientoTrabajadorModule, VariablesModule],
@@ -25,6 +26,7 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
     OrquestacionService,
     PasoEjecucion,
     PasoOperacion,
+    RetencionArtefactos,
     { provide: CuotaPlanPuerto, useClass: CuotaPlanSuscripciones },
     { provide: VariablesEntornoPuerto, useClass: VariablesEntornoProyecto },
     ReiniciarManejador,
@@ -37,6 +39,6 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
     },
     AccionesContenedorService,
   ],
-  exports: [OrquestacionService, PasoEjecucion, PasoOperacion, AccionesContenedorService],
+  exports: [OrquestacionService, PasoEjecucion, PasoOperacion, RetencionArtefactos, AccionesContenedorService],
 })
 export class OrquestacionTrabajadorModule {}

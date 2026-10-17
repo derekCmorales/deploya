@@ -5,12 +5,19 @@ import { OrquestacionTrabajadorModule } from "../orquestacion/orquestacion-traba
 import { PasoEjecucion } from "../orquestacion/paso-ejecucion";
 import { PasoOperacion } from "../orquestacion/paso-operacion";
 import { PROVEEDORES_DETECCION } from "./deteccion/deteccion-stack.service";
-import { PASOS_CONSTRUCCION } from "./pipeline/paso-pipeline";
+import { PLANES_PIPELINE, type PlanesPipeline } from "./pipeline/paso-pipeline";
 import { PasoConstruccion } from "./pipeline/paso-construccion";
 import { PasoRecepcion } from "./pipeline/paso-recepcion";
 import { PipelineDespliegue } from "./pipeline/pipeline-despliegue";
+import { VigiaCancelacion } from "./pipeline/vigia-cancelacion";
+import { CancelacionesPuerto } from "./puertos/cancelaciones.puerto";
+import { OYENTES_DESPLIEGUE } from "./puertos/oyente-despliegue.puerto";
+import { RetencionArtefactos } from "../orquestacion/retencion/retencion-artefactos";
 
-/** Arma el plan `construccion`: Recepción → Construcción → Ejecución → Enrutamiento → Operación. */
+/**
+ * Arma los planes del pipeline: `construccion` (Recepción → Construcción → Ejecución → Enrutamiento → Operación)
+ * y `reversion` (los tres últimos pasos, sobre la imagen de un artefacto).
+ */
 @Module({
   imports: [OrquestacionTrabajadorModule, EnrutamientoTrabajadorModule],
   providers: [
@@ -18,10 +25,19 @@ import { PipelineDespliegue } from "./pipeline/pipeline-despliegue";
     PasoRecepcion,
     PasoConstruccion,
     {
-      provide: PASOS_CONSTRUCCION,
-      useFactory: (...pasos: unknown[]) => pasos,
+      provide: PLANES_PIPELINE,
+      useFactory: (recepcion: PasoRecepcion, construccion: PasoConstruccion, ejecucion: PasoEjecucion, enrutamiento: PasoEnrutamiento, operacion: PasoOperacion): PlanesPipeline => ({
+        construccion: [recepcion, construccion, ejecucion, enrutamiento, operacion],
+        reversion: [ejecucion, enrutamiento, operacion],
+      }),
       inject: [PasoRecepcion, PasoConstruccion, PasoEjecucion, PasoEnrutamiento, PasoOperacion],
     },
+    {
+      provide: OYENTES_DESPLIEGUE,
+      useFactory: (...oyentes: unknown[]) => oyentes,
+      inject: [RetencionArtefactos],
+    },
+    { provide: VigiaCancelacion, useFactory: (cancelaciones: CancelacionesPuerto) => new VigiaCancelacion(cancelaciones), inject: [CancelacionesPuerto] },
     PipelineDespliegue,
   ],
   exports: [PipelineDespliegue],

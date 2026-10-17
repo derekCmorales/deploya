@@ -127,6 +127,17 @@ describe("RepositorioSuscripcionesPrisma · cambios", () => {
     expect(suscripcion.planSiguiente).toMatchObject({ codigo: "sandbox" });
   });
 
+  it("candidatasCiclo lee las que tienen vigencia y no están Canceladas, con su estadoDesde", async () => {
+    const findMany = jest.fn().mockResolvedValue([fila]);
+    const [candidata] = await new RepositorioSuscripcionesPrisma(prismaDoble({ suscripcion: { findMany } })).candidatasCiclo();
+    expect(findMany).toHaveBeenCalledWith({
+      where: { vence: { not: null }, estado: { not: "cancelada" } },
+      include: { plan: true, planSiguiente: true },
+      orderBy: { vence: "asc" },
+    });
+    expect(candidata).toMatchObject({ estado: "activa", estadoDesde: ahora });
+  });
+
   it("programarDescenso solo toca planSiguienteId", async () => {
     const update = jest.fn().mockResolvedValue(fila);
     await new RepositorioSuscripcionesPrisma(prismaDoble({ suscripcion: { update } })).programarDescenso("s1", "plan-sandbox");
@@ -171,5 +182,42 @@ describe("RepositorioPagosPrisma", () => {
     const pago = await new RepositorioPagosPrisma(transaccional(count, create)).registrar({ ...nuevo, estado: "rechazado", motivoRechazo: "x" });
     expect(count).not.toHaveBeenCalled();
     expect(pago.numeroComprobante).toBeNull();
+  });
+});
+
+describe("RepositorioPagosPrisma · historial (M2-06)", () => {
+  const creado = new Date("2026-09-03T16:10:00.000Z");
+  const fila = {
+    id: "pg1",
+    usuarioId: "u1",
+    suscripcionId: "s1",
+    planId: STARTER.id,
+    concepto: "contratacion",
+    vigenciaDias: 30,
+    monto: new Prisma.Decimal("5.00"),
+    moneda: "USD",
+    estado: "aprobado",
+    motivoRechazo: null,
+    tarjetaUltimos4: "4242",
+    numeroComprobante: "DPY-2026-000142",
+    creado,
+    plan: { nombre: "Starter" },
+    usuario: { nombre: "Derek Calderón", correo: "derek@tiendademo.com" },
+  };
+  const incluir = { plan: { select: { nombre: true } }, usuario: { select: { nombre: true, correo: true } } };
+
+  it("deUsuario lee del más reciente al más antiguo con el plan y el titular", async () => {
+    const findMany = jest.fn().mockResolvedValue([fila]);
+    const [pago] = await new RepositorioPagosPrisma(prismaDoble({ pago: { findMany } })).deUsuario("u1");
+    expect(findMany).toHaveBeenCalledWith({ where: { usuarioId: "u1" }, include: incluir, orderBy: { creado: "desc" } });
+    expect(pago).toMatchObject({ monto: 5, planNombre: "Starter", titular: "Derek Calderón", correo: "derek@tiendademo.com", numeroComprobante: "DPY-2026-000142" });
+  });
+
+  it("porId devuelve null si no existe", async () => {
+    const findUnique = jest.fn().mockResolvedValueOnce(fila).mockResolvedValueOnce(null);
+    const repositorio = new RepositorioPagosPrisma(prismaDoble({ pago: { findUnique } }));
+    await expect(repositorio.porId("pg1")).resolves.toMatchObject({ id: "pg1", planNombre: "Starter" });
+    await expect(repositorio.porId("pg-x")).resolves.toBeNull();
+    expect(findUnique).toHaveBeenCalledWith({ where: { id: "pg1" }, include: incluir });
   });
 });

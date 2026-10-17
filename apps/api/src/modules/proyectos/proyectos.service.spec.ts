@@ -14,13 +14,16 @@ import {
   ClaveInvalida,
   ConfirmacionNoCoincide,
   LimiteProyectosAlcanzado,
+  NombreRepetido,
   ProyectoNoEncontrado,
+  RamaNoEncontrada,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
   StackNoReconocidoEnAlta,
   SubdominioEnUso,
 } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, ValidacionRepositorio } from "./dominio/proyecto";
+import { SUBDOMINIOS_DE_PLATAFORMA } from "./dominio/subdominio";
 import { ProyectosService } from "./proyectos.service";
 import { CuotaProyectosPuerto, type CuotaProyectos } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
@@ -141,6 +144,26 @@ describe("ProyectosService", () => {
   });
 
   describe("crear", () => {
+    it("En el VPS un nombre que la plataforma usa (api, www…) se rechaza como subdominio en uso", async () => {
+      const { servicio: base, repositorio, fuente, cuota, construccion, acciones, variables, bloqueos } = montar();
+      const servicio = new ProyectosService(
+        fuente,
+        repositorio,
+        cuota,
+        construccion as unknown as ConstruccionService,
+        acciones as unknown as AccionesProyectoService,
+        variables,
+        new DeteccionStackService(recetasEnOrden()),
+        bloqueos as unknown as BloqueosService,
+        SUBDOMINIOS_DE_PLATAFORMA,
+      );
+
+      await expect(servicio.crear("usuario-1", alta({ nombre: "API" }))).rejects.toThrow(SubdominioEnUso);
+
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
+      await expect(base.crear("usuario-1", alta({ nombre: "API" }))).resolves.toMatchObject({ proyecto: { subdominio: "api" } });
+    });
+
     it("Desplegar: guarda el proyecto y pide el despliegue #1 encolado con disparador «alta»", async () => {
       const { servicio, repositorio, construccion } = montar();
       const { proyecto, despliegue } = await servicio.crear("usuario-1", alta());
@@ -350,6 +373,93 @@ describe("ProyectosService", () => {
       await expect(servicio.eliminar("usuario-1", "no-existe", "Hola Deploya")).rejects.toThrow(ProyectoNoEncontrado);
 
       expect(await repositorio.porId(proyecto.id)).not.toBeNull();
+    });
+  });
+
+  describe("configurar", () => {
+    async function conProyecto() {
+      const contexto = montar();
+      const { proyecto } = await contexto.servicio.crear("usuario-1", alta());
+      contexto.construccion.crearDespliegue.mockClear();
+      contexto.fuente.consultas.length = 0;
+      return { ...contexto, proyecto };
+    }
+
+    it("Renombrar no cambia el subdominio", async () => {
+      const { servicio, repositorio, proyecto } = await conProyecto();
+
+      const actualizado = await servicio.configurar("usuario-1", proyecto.id, { nombre: "Hola demo" });
+
+      expect(actualizado).toMatchObject({ nombre: "Hola demo", subdominio: "hola-deploya" });
+      expect(await repositorio.porId(proyecto.id)).toMatchObject({ nombre: "Hola demo", subdominio: "hola-deploya" });
+    });
+
+    it("Cambiar la rama aplica en el próximo despliegue", async () => {
+      const { servicio, fuente, repositorio, construccion, proyecto } = await conProyecto();
+
+      await servicio.configurar("usuario-1", proyecto.id, { rama: "sin-dockerfile" });
+
+      expect(await repositorio.porId(proyecto.id)).toMatchObject({ rama: "sin-dockerfile", urlRepositorio: URL });
+      expect(fuente.consultas).toEqual([{ url: URL, rama: "sin-dockerfile" }]);
+      expect(construccion.crearDespliegue).not.toHaveBeenCalled();
+    });
+
+    it("Rama inexistente", async () => {
+      const { servicio, fuente, repositorio, proyecto } = await conProyecto();
+      fuente.error = new RamaNoEncontrada("dev");
+
+      await expect(servicio.configurar("usuario-1", proyecto.id, { rama: "dev", nombre: "Otro nombre" })).rejects.toThrow(RamaNoEncontrada);
+
+      expect(await repositorio.porId(proyecto.id)).toMatchObject({ rama: "main", nombre: "Hola Deploya" });
+    });
+
+    it("Repositorio inaccesible: valida el repositorio nuevo con la rama vigente y guarda la URL normalizada", async () => {
+      const { servicio, fuente, repositorio, proyecto } = await conProyecto();
+
+      await servicio.configurar("usuario-1", proyecto.id, { urlRepositorio: "https://github.com/derekCmorales/otro" });
+
+      expect(fuente.consultas).toEqual([{ url: "https://github.com/derekCmorales/otro", rama: "main" }]);
+      expect((await repositorio.porId(proyecto.id))?.urlRepositorio).toBe(URL);
+      fuente.error = new RepositorioNoAccesible(404);
+      await expect(servicio.configurar("usuario-1", proyecto.id, { urlRepositorio: "https://github.com/derekCmorales/privado" })).rejects.toThrow(
+        RepositorioNoAccesible,
+      );
+    });
+
+    it("Nombre repetido", async () => {
+      const { servicio, repositorio, cuota, proyecto } = await conProyecto();
+      cuota.cuota = { ...CUOTA_SANDBOX, maxProyectos: 5 };
+      await servicio.crear("usuario-1", alta({ nombre: "Segundo" }));
+
+      await expect(servicio.configurar("usuario-1", proyecto.id, { nombre: "segundo" })).rejects.toThrow(NombreRepetido);
+
+      expect((await repositorio.porId(proyecto.id))?.nombre).toBe("Hola Deploya");
+    });
+
+    it("conservar el mismo nombre no es un nombre repetido y el de otro cliente no cuenta", async () => {
+      const { servicio, proyecto } = await conProyecto();
+      await servicio.crear("usuario-2", alta({ nombre: "Compartido" }));
+
+      await expect(servicio.configurar("usuario-1", proyecto.id, { nombre: "Hola Deploya", puertoInterno: 3001 })).resolves.toMatchObject({ puertoInterno: 3001 });
+      await expect(servicio.configurar("usuario-1", proyecto.id, { nombre: "Compartido" })).resolves.toMatchObject({ nombre: "Compartido" });
+    });
+
+    it("ruta y puerto se guardan sin consultar el repositorio", async () => {
+      const { servicio, fuente, proyecto } = await conProyecto();
+
+      const actualizado = await servicio.configurar("usuario-1", proyecto.id, { rutaDockerfile: "docker/Dockerfile", puertoInterno: 9000 });
+
+      expect(actualizado).toMatchObject({ rutaDockerfile: "docker/Dockerfile", puertoInterno: 9000 });
+      expect(fuente.consultas).toEqual([]);
+    });
+
+    it("Proyecto ajeno o inexistente: se trata como no encontrado y no cambia nada", async () => {
+      const { servicio, repositorio, proyecto } = await conProyecto();
+
+      await expect(servicio.configurar("usuario-2", proyecto.id, { nombre: "Robado" })).rejects.toThrow(ProyectoNoEncontrado);
+      await expect(servicio.configurar("usuario-1", "no-existe", { nombre: "Nada" })).rejects.toThrow(ProyectoNoEncontrado);
+
+      expect((await repositorio.porId(proyecto.id))?.nombre).toBe("Hola Deploya");
     });
   });
 

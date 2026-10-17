@@ -349,7 +349,7 @@ flowchart LR
             WK["worker<br/>Dockerfile.api · node dist/trabajador.js<br/>git + docker.sock"]
             WEB["web<br/>Dockerfile.web<br/>:3000"]
             MP["mailpit<br/>:1025 SMTP · :8025 UI"]
-            TR["traefik:v3<br/>:80 (:443 en el VPS)"]
+            TR["traefik:v3<br/>:80 (:443 y redirección 80→443 en el VPS)"]
         end
 
         subgraph RED_P1["red deploya-p-hola-deploya"]
@@ -362,6 +362,13 @@ flowchart LR
 
         SOCK["/var/run/docker.sock"]
         VOL["volumen traefik_dinamico<br/>/traefik/dinamico/*.yml"]
+        ACME[("volumen traefik_acme<br/>/acme/acme.json · solo VPS")]
+    end
+
+    subgraph EXTERNOS["Solo en el VPS (docker-compose.vps.yml)"]
+        LE["Let's Encrypt<br/>certificado comodín *.deploya.app"]
+        DNS["Proveedor DNS<br/>registros A · desafío DNS-01<br/>token solo de la zona"]
+        SMTP["Proveedor SMTP<br/>Resend o Brevo · SPF y DKIM"]
     end
 
     NAV["Navegador"]
@@ -369,7 +376,13 @@ flowchart LR
     NAV -->|"localhost:3000"| WEB
     NAV -->|"localhost:3001"| API
     NAV -->|"hola-deploya.localhost"| TR
-    NAV -->|"localhost:8025"| MP
+    NAV -->|"localhost:8025 (sin Mailpit en el VPS)"| MP
+    NAV -->|"https://deploya.app · https://api.deploya.app · https://hola-deploya.deploya.app"| TR
+    TR -->|"emite y renueva por DNS-01"| LE
+    LE -->|"verifica el TXT"| DNS
+    TR -->|"escribe"| ACME
+    API -->|"lee solo el vencimiento"| ACME
+    API -->|"SMTP del proveedor"| SMTP
     API --> PG
     API --> RD
     API -->|SMTP| MP
@@ -386,10 +399,10 @@ flowchart LR
     classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef cliente fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
     classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
-    class PG,RD,VOL data
+    class PG,RD,VOL,ACME data
     class API,WK,WEB,MP,TR app
     class C1,C2 cliente
-    class SOCK,NAV ext
+    class SOCK,NAV,LE,DNS,SMTP ext
 ```
 
 ---
@@ -1833,6 +1846,7 @@ classDiagram
         +validarDescenso(actual, destino, ahora) void
     }
     class CobroController {
+        -reactivacion ReactivacionService
         +mia() VistaSuscripcion
         +cotizacion(consulta) Cotizacion
         +contratar(cuerpo) ResultadoContratacion
@@ -1841,6 +1855,38 @@ classDiagram
     class RepositorioPagos {
         <<abstract>>
         +registrar(nuevo) Pago
+        +deUsuario(usuarioId) PagoHistorial[]
+        +porId(pagoId) PagoHistorial
+    }
+    class HistorialPagosService {
+        <<Service Layer>>
+        -pagos RepositorioPagos
+        -pdf ComprobantePdfPuerto
+        +deUsuario(usuarioId) FilaPago[]
+        +comprobante(usuarioId, pagoId) Comprobante
+        +pdfDe(usuarioId, pagoId) ArchivoComprobante
+    }
+    class Comprobante {
+        <<Value Object>>
+        +numero String
+        +fecha Date
+        +concepto String
+        +vigencia Vigencia
+        +metodo String
+        +titular String
+        +total Decimal
+        +desde(pago) Comprobante$
+        +lineas() String[]
+    }
+    class ComprobantePdfPuerto {
+        <<abstract>>
+        +generar(comprobante) Buffer
+    }
+    class ComprobantePdfKit
+    class ComprobanteTextoFalso
+    class PagosController {
+        +pagos() FilaPago[]
+        +comprobante(id) StreamableFile
     }
     class RepositorioPagosPrisma
     class Espera {
@@ -1866,14 +1912,47 @@ classDiagram
     class RepositorioSuscripciones {
         <<abstract>>
         +deUsuario(usuarioId) Suscripcion
+        +candidatasCiclo() Suscripcion[]
         +crearSiNoExiste(nueva) void
         +actualizar(suscripcionId, cambio) Suscripcion
         +programarDescenso(suscripcionId, planSiguienteId) Suscripcion
     }
     class RepositorioPlanesPrisma
     class RepositorioSuscripcionesPrisma
-    class PoliticaCicloSuscripcion {
-        +avanzar(suscripcion, ahora) EstadoSuscripcion
+    class PoliticaCiclo {
+        <<State · tabla de transiciones pura>>
+        +DIAS_POR_VENCER = 7
+        +DIAS_GRACIA = 5
+        +DIAS_HASTA_CANCELAR = 30
+        +siguiente(suscripcion, ahora) SaltoCiclo
+        +cambioPorSalto(suscripcion, salto, ahora) CambioSuscripcion
+    }
+    class CicloSuscripcionService {
+        -suscripciones RepositorioSuscripciones
+        -contenedores ContenedoresClientePuerto
+        -reloj Reloj
+        +ejecutar() ResultadoCiclo
+    }
+    class ReactivacionService {
+        <<Decorator>>
+        -contratacion ContratacionService
+        -contenedores ContenedoresClientePuerto
+        +contratar(usuarioId, solicitud) ResultadoContratacion
+    }
+    class CicloController {
+        +ejecutar() ResultadoCiclo
+    }
+    class ColaCicloPuerto {
+        <<abstract>>
+        +iniciar(manejador) void
+        +cerrar() void
+    }
+    class ColaCicloBullMq
+    class ColaCicloMemoria
+    class TareaCicloDiaria {
+        -cola ColaCicloPuerto
+        -ciclo CicloSuscripcionService
+        +onApplicationBootstrap() void
     }
     class PasarelaPago {
         <<abstract>>
@@ -1884,8 +1963,35 @@ classDiagram
         +health() Estado
         +acceso(usuario) UsuarioSesion
     }
-    class AdministracionService {
-        +suspender(adminId, usuarioId, motivo, detalle) void
+    class UsuariosAdminController {
+        -consulta ConsultaUsuariosPuerto
+        -suspension SuspensionService
+        +buscar(consulta) PaginaUsuarios
+        +detalle(id) DetalleUsuario
+        +motivos() MotivoSuspension[]
+        +suspender(adminId, id, cuerpo) void
+    }
+    class ConsultaUsuariosPuerto {
+        <<abstract · Repository de lectura>>
+        +buscar(filtro) PaginaUsuarios
+        +detalle(usuarioId) DetalleUsuario
+    }
+    class ConsultaUsuariosPrisma
+    class SuspensionService {
+        <<Service Layer>>
+        -cuentas CuentasSuspensionPuerto
+        -contenedores ContenedoresClientePuerto
+        -reloj Reloj
+        +suspender(adminId, usuarioId, solicitud) void
+    }
+    class CuentasSuspensionPuerto {
+        <<abstract · Unit of Work>>
+        +cuenta(usuarioId) CuentaObjetivo
+        +suspender(suspension) void
+    }
+    class CuentasSuspensionPrisma
+    class MOTIVOS_SUSPENSION {
+        <<constante>>
     }
 
     %% ───────── M3 Proyectos · M7 Observabilidad (Eduardo) ─────────
@@ -1897,8 +2003,18 @@ classDiagram
         +validarRepositorio(consulta) ValidacionRepositorio
         +listar(usuarioId) ListaProyectos
         +crear(usuarioId, alta) ProyectoCreado
+        +configurar(usuarioId, proyectoId, cambios) Proyecto
         +eliminar(usuarioId, proyectoId, confirmacion) void
         -bloqueos BloqueosService
+    }
+    class CambiosProyecto {
+        <<Value Object>>
+        +nombre String
+        +urlRepositorio String
+        +rama String
+        +rutaDockerfile String
+        +puertoInterno Integer
+        +de(cuerpo) CambiosProyecto
     }
     class ProveedorFuente {
         <<abstract>>
@@ -1913,6 +2029,7 @@ classDiagram
         +porId(id) Proyecto
         +deUsuario(usuarioId) List~Proyecto~
         +existeSubdominio(subdominio) Boolean
+        +actualizar(id, cambios CambiosProyecto) Proyecto
         +eliminar(id) void
     }
     class RepositorioProyectosPrisma
@@ -1954,11 +2071,55 @@ classDiagram
         -proyectos ProyectosLecturaPuerto
         -bloqueos BloqueosService
         -reloj Reloj
-        +crearDespliegue(proyectoId, disparador) DespliegueCreado
+        +crearDespliegue(proyectoId, disparador, opciones) DespliegueCreado
         +consultar(despliegueId, usuarioId) VistaDespliegue
         +consultarPorNumero(proyectoId, numero, usuarioId) VistaDespliegue
+        +historial(proyectoId, usuarioId, filtro, antesDe) PaginaHistorial
+        +vistaDe(despliegue) VistaDespliegue
         +bitacoraDesde(despliegueId, usuarioId, desde) PaginaBitacora
         +ultimosDespliegues(proyectoIds) Map~ResumenDespliegue~
+    }
+    class ResumenProyectoService {
+        <<Facade de lectura>>
+        -proyectos DetalleProyectoPuerto
+        -despliegues RepositorioDespliegues
+        -artefactos RepositorioArtefactos
+        -cuota CuotaPlanPuerto
+        -construccion ConstruccionService
+        +resumen(proyectoId, usuarioId) ResumenProyecto
+    }
+    class LineaTiempoDespliegue {
+        <<Builder puro>>
+        +de(despliegue, contexto) List~HitoLineaTiempo~
+    }
+    class DetalleProyectoPuerto {
+        <<abstract>>
+        +porId(proyectoId) DetalleProyecto
+    }
+    class AccionesDespliegueService {
+        <<Service Layer>>
+        -despliegues RepositorioDespliegues
+        -proyectos ProyectosLecturaPuerto
+        -cola ColaConstruccionPuerto
+        -cancelaciones CancelacionesPuerto
+        -construccion ConstruccionService
+        -reloj Reloj
+        +cancelar(despliegueId, usuarioId) EstadoCancelado
+        +reintentar(despliegueId, usuarioId) DespliegueCreado
+        +redesplegar(proyectoId, commitSha, usuarioId) DespliegueCreado
+    }
+    class PoliticaAcciones {
+        <<tabla de estados>>
+        +permitida(accion, estado) Boolean
+        +exigirCancelable(estado) void
+        +exigirReintentable(estado) void
+    }
+    class VigiaCancelacion {
+        <<Observer>>
+        -cancelaciones CancelacionesPuerto
+        -intervaloMs Integer
+        +vigilar(despliegueId, controlador) Funcion
+        +revisar(despliegueId, controlador) void
     }
     class DeteccionStackService {
         -recetas List~RecetaStack~
@@ -1985,9 +2146,14 @@ classDiagram
     class RecetaEstatica
     class PipelineDespliegue {
         -despliegues RepositorioDespliegues
-        -eventos PublicadorEventos
+        -planes PlanesPipeline
+        -oyentes OyenteDespliegue
         -reloj Reloj
         +ejecutar(trabajo TrabajoDespliegue) void
+    }
+    class OyenteDespliegue {
+        <<abstract>>
+        +alTerminar(evento DespliegueTerminado) void
     }
     class PasoPipeline {
         <<abstract>>
@@ -2044,7 +2210,18 @@ classDiagram
         -cola ColaOperacionPuerto
         +reiniciar(proyectoId, usuarioId) void
         +detener(proyectoId, usuarioId) void
+        +detenerTodosDe(usuarioId) ResultadoMasivo
+        +reanudarTodosDe(usuarioId) ResultadoMasivo
         +pedirEliminacion(proyecto) void
+    }
+    class ContenedoresClientePuerto {
+        <<abstract>>
+        +detenerTodos(usuarioId) ResultadoMasivo
+        +reanudarTodos(usuarioId) ResultadoMasivo
+    }
+    class ContenedoresClienteM5 {
+        <<Adapter>>
+        -acciones AccionesProyectoService
     }
     class AccionContenedor {
         <<Command>>
@@ -2065,14 +2242,17 @@ classDiagram
     class DetenerManejador
     class EliminarManejador
     class ReversionService {
+        -proyectos ProyectosLecturaPuerto
         -artefactos RepositorioArtefactos
         -despliegues RepositorioDespliegues
         -cola ColaConstruccionPuerto
         +revertir(proyectoId, artefactoId, usuarioId) DespliegueCreado
+        +artefactosDe(proyectoId, usuarioId) List~VistaArtefacto~
     }
     class PasoEjecucion {
         -orquestacion OrquestacionService
         -variablesEntorno VariablesEntornoPuerto
+        -artefactos RepositorioArtefactos
     }
     class VariablesEntornoPuerto {
         <<abstract>>
@@ -2084,10 +2264,13 @@ classDiagram
     }
     class RetencionArtefactos {
         <<Observer>>
+        -artefactos RepositorioArtefactos
+        -despliegues RepositorioDespliegues
+        -orquestacion OrquestacionService
         +alTerminar(evento DespliegueTerminado) void
     }
     class PoliticaRetencion {
-        +aRetirar(artefactos, activoId) List~Artefacto~
+        +aRetirar(disponibles, artefactoActivoId, retenidos) List~Artefacto~
     }
     class LimitesContenedor {
         <<valor>>
@@ -2110,7 +2293,12 @@ classDiagram
     class ColaConstruccionPuerto {
         <<abstract>>
         +encolar(trabajo TrabajoDespliegue) void
-        +retirar(despliegueId) Boolean
+        +quitar(despliegueId) Boolean
+    }
+    class CancelacionesPuerto {
+        <<abstract>>
+        +pedir(despliegueId) void
+        +pedida(despliegueId) Boolean
     }
     class ClonadorRepositorioPuerto {
         <<abstract>>
@@ -2126,15 +2314,17 @@ classDiagram
     class ProyectosLecturaPuerto {
         <<abstract>>
         +porId(proyectoId) ProyectoDesplegable
+        +deUsuario(usuarioId) ProyectoDesplegable
     }
     class CuotaPlanPuerto {
         <<abstract>>
         +recursosDe(usuarioId) RecursosPlan
         +permisoDe(usuarioId) PermisoPlan
+        +planDe(usuarioId) PlanContratado
     }
     class ConstructorImagenPuerto {
         <<abstract>>
-        +construir(solicitud SolicitudConstruccion, alLinea) ImagenConstruida
+        +construir(solicitud SolicitudConstruccion, alLinea, senal) ImagenConstruida
     }
     class LectorFuente {
         <<abstract>>
@@ -2146,12 +2336,15 @@ classDiagram
         +crear(nuevo NuevoDespliegue) Despliegue
         +porId(id) Despliegue
         +porNumero(proyectoId, numero) Despliegue
+        +porCommit(proyectoId, commitSha) Despliegue
+        +historialDe(proyectoId, filtro, antesDe, limite) List~Despliegue~
         +cambiarEstado(id, estado, cambios) void
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
         +lineasDesde(id, desde, limite) List~LineaBitacora~
         +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
+        +enCursoDe(proyectoId) Despliegue
         +marcarActivo(proyectoId, despliegueId) void
         +contarConstruccionesDesde(usuarioId, desde) Integer
     }
@@ -2159,6 +2352,7 @@ classDiagram
         <<abstract>>
         +registrar(artefacto) Artefacto
         +porId(id) Artefacto
+        +deProyecto(proyectoId) List~Artefacto~
         +disponiblesDe(proyectoId) List~Artefacto~
         +marcarNoDisponible(id) void
     }
@@ -2169,6 +2363,7 @@ classDiagram
         +detener(contenedorId) void
         +eliminar(contenedorId) void
         +eliminarContenedoresDe(subdominio) void
+        +eliminarImagen(imagen) void
         +eliminarImagenesDe(subdominio) void
     }
     class ColaOperacionPuerto {
@@ -2184,6 +2379,17 @@ classDiagram
         +publicar(ruta RutaPublica) UrlPublicada
         +retirar(subdominio) void
     }
+    class ConfiguracionEnrutamiento {
+        <<Objeto de configuración>>
+        +dominioBase String
+        +esquema String
+        +certResolver String
+        +configuracionEnrutamientoDesde(entorno) ConfiguracionEnrutamiento
+    }
+    class CertificadoPuerto {
+        <<abstract>>
+        +venceEl(host) Date
+    }
 
     %% ───────── Adaptadores (y stubs con la misma firma) ─────────
     class ColaBullMq
@@ -2196,7 +2402,17 @@ classDiagram
     class ColaOperacionBullMq
     class VariablesEntornoPendientes
     class VerificacionHttp
-    class EnrutamientoTraefikArchivo
+    class EnrutamientoTraefikArchivo {
+        -opciones ConfiguracionEnrutamiento
+        +configuracionRuta(ruta, configuracion) String
+    }
+    class CertificadoAcmeArchivo {
+        <<Adapter>>
+        -ruta String
+    }
+    class CertificadoAusente {
+        <<Null Object>>
+    }
 
     %% ───────── Entidades y enumeraciones ─────────
     class Despliegue {
@@ -2287,7 +2503,24 @@ classDiagram
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
     PlantillaCorreo <|-- PlantillaRecuperacion
-    SuscripcionesService --> PoliticaCicloSuscripcion
+    PagosController --> HistorialPagosService
+    HistorialPagosService --> RepositorioPagos
+    HistorialPagosService --> ComprobantePdfPuerto
+    HistorialPagosService ..> Comprobante : arma
+    ComprobantePdfPuerto <|-- ComprobantePdfKit
+    ComprobantePdfPuerto <|-- ComprobanteTextoFalso
+    CicloSuscripcionService --> PoliticaCiclo
+    CicloSuscripcionService --> RepositorioSuscripciones
+    CicloSuscripcionService --> ContenedoresClientePuerto : detenerTodos
+    ReactivacionService --> ContratacionService : decora contratar
+    ReactivacionService --> ContenedoresClientePuerto : reanudarTodos
+    CobroController --> ReactivacionService
+    CicloController --> CicloSuscripcionService
+    CicloController ..> RolGuard : protege
+    ColaCicloPuerto <|-- ColaCicloBullMq
+    ColaCicloPuerto <|-- ColaCicloMemoria
+    TareaCicloDiaria --> ColaCicloPuerto
+    TareaCicloDiaria --> CicloSuscripcionService
     ContratacionService --> PasarelaPago
     ContratacionService --> RepositorioPagos
     ContratacionService --> RepositorioPlanes
@@ -2304,8 +2537,16 @@ classDiagram
     RepositorioPlanes <|-- RepositorioPlanesPrisma
     RepositorioSuscripciones <|-- RepositorioSuscripcionesPrisma
     PasarelaPago <|-- PasarelaSimulada
-    AdministracionService --> OrquestacionService : detenerTodosDe
+    UsuariosAdminController --> ConsultaUsuariosPuerto
+    UsuariosAdminController --> SuspensionService
+    UsuariosAdminController ..> RolGuard : protege
+    ConsultaUsuariosPuerto <|-- ConsultaUsuariosPrisma
+    CuentasSuspensionPuerto <|-- CuentasSuspensionPrisma
+    SuspensionService --> CuentasSuspensionPuerto
+    SuspensionService ..> MOTIVOS_SUSPENSION
+    SuspensionService --> ContenedoresClientePuerto : detenerTodos
     ProyectosService --> ProveedorFuente
+    ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos
     ProyectosService --> CuotaProyectosPuerto
     ProyectosService --> DeteccionStackService : detectar
@@ -2322,6 +2563,20 @@ classDiagram
     DesplieguesController ..> SesionGuard : protege
 
     ConstruccionService --> ColaConstruccionPuerto
+    ResumenProyectoService --> DetalleProyectoPuerto
+    ResumenProyectoService --> RepositorioDespliegues
+    ResumenProyectoService --> RepositorioArtefactos
+    ResumenProyectoService --> CuotaPlanPuerto : planDe
+    ResumenProyectoService --> ConstruccionService : vistaDe
+    ResumenProyectoService ..> LineaTiempoDespliegue : de
+    DetalleProyectoPuerto ..> RepositorioProyectos : mismo almacén
+    AccionesDespliegueService --> ConstruccionService : crearDespliegue
+    AccionesDespliegueService --> PoliticaAcciones
+    AccionesDespliegueService --> CancelacionesPuerto : pedir
+    AccionesDespliegueService --> ColaConstruccionPuerto : quitar
+    AccionesDespliegueService --> RepositorioDespliegues
+    VigiaCancelacion --> CancelacionesPuerto : pedida
+    PipelineDespliegue --> VigiaCancelacion
     ConstruccionService --> RepositorioDespliegues
     ConstruccionService --> BloqueosService : verificar
     BloqueosService --> PoliticaDespliegue
@@ -2358,11 +2613,16 @@ classDiagram
     OrquestacionService --> CuotaPlanPuerto
     CuotaPlanPuerto <|-- CuotaPlanSuscripciones
     CuotaPlanSuscripciones ..> SuscripcionesService : cuotaDe
+    ReversionService --> ProyectosLecturaPuerto
     ReversionService --> RepositorioArtefactos
+    ReversionService --> RepositorioDespliegues
     ReversionService --> ColaConstruccionPuerto
     RetencionArtefactos --> PoliticaRetencion
-    RetencionArtefactos --> ContenedorPuerto
+    OyenteDespliegue <|-- RetencionArtefactos
+    RetencionArtefactos --> OrquestacionService : eliminarImagen
     RetencionArtefactos --> RepositorioArtefactos
+    RetencionArtefactos --> RepositorioDespliegues
+    PipelineDespliegue --> OyenteDespliegue : DespliegueTerminado
     EnrutamientoService --> EnrutamientoPuerto
 
     ColaConstruccionPuerto <|-- ColaBullMq
@@ -2387,6 +2647,8 @@ classDiagram
     ProyectosService --> AccionesProyectoService : pedirEliminacion
     AccionesProyectoService --> ColaOperacionPuerto
     AccionesProyectoService ..> AccionContenedor : encola
+    ContenedoresClientePuerto <|-- ContenedoresClienteM5
+    ContenedoresClienteM5 --> AccionesProyectoService : detenerTodosDe, reanudarTodosDe
     AccionesContenedorService --> ManejadorAccion
     ManejadorAccion <|-- ReiniciarManejador
     ManejadorAccion <|-- DetenerManejador
@@ -2399,6 +2661,10 @@ classDiagram
     EliminarManejador --> EnrutamientoService
     VerificacionEntornoPuerto <|-- VerificacionHttp
     EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo
+    EnrutamientoTraefikArchivo --> ConfiguracionEnrutamiento
+    CertificadoPuerto <|-- CertificadoAcmeArchivo
+    CertificadoPuerto <|-- CertificadoAusente
+    ConstruccionService --> CertificadoPuerto : venceEl
 
     Despliegue --> EstadoDespliegue
     Despliegue "*" --> "0..1" Artefacto
@@ -2419,22 +2685,23 @@ No copiar estos cinco estados al despliegue.
 <!-- diagrama: docs/diagramas/m1-m10/m2-estados-suscripcion.mmd -->
 ```mermaid
 stateDiagram-v2
-    [*] --> Activa : contratacion con pago aprobado
+    [*] --> Activa : contratacion con pago aprobado<br/>(Sandbox: Activa sin vencimiento)
 
-    Activa --> PorVencer : faltan 7 dias o menos<br/>para el vencimiento
-    PorVencer --> Activa : renovacion exitosa<br/>(manual o automatica)
-    PorVencer --> Vencida : se cumple la fecha<br/>de vencimiento sin renovar
+    Activa --> PorVencer : faltan 7 dias o menos<br/>(DIAS_POR_VENCER)
+    Activa --> Vencida : se cumple la fecha de vigencia<br/>(un solo salto por corrida)
+    PorVencer --> Activa : renovacion manual aprobada
+    PorVencer --> Vencida : se cumple la fecha<br/>de vigencia sin renovar
 
-    Vencida --> Activa : renovacion exitosa dentro<br/>del periodo de gracia (5 dias)
-    Vencida --> Suspendida : termina el periodo de<br/>gracia sin renovacion
+    Activa --> Activa : descenso programado a Sandbox<br/>al vencer (sin cobro)
+    PorVencer --> Vencida : descenso programado a un plan<br/>de pago al vencer (sin cobro)
 
-    Suspendida --> Activa : renovacion exitosa durante<br/>la suspension (*)
-    Suspendida --> Cancelada : 30 dias en Suspendida<br/>sin renovar, o cancelacion<br/>solicitada por el cliente
+    Vencida --> Activa : renovacion aprobada<br/>durante la gracia
+    Vencida --> Suspendida : 5 dias en Vencida<br/>(DIAS_GRACIA)
 
-    Activa --> Cancelada : cancelacion solicitada<br/>por el cliente
-    PorVencer --> Cancelada : cancelacion solicitada<br/>por el cliente
+    Suspendida --> Activa : renovacion aprobada<br/>(M5 reanuda los contenedores)
+    Suspendida --> Cancelada : 30 dias en Suspendida<br/>(DIAS_HASTA_CANCELAR)
 
-    Cancelada --> [*] : recursos liberados<br/>(tras ventana de exportacion)
+    Cancelada --> Activa : contratacion aprobada<br/>(M5 reanuda los contenedores)
 
     note right of Activa
         Todos los entornos operan
@@ -2445,12 +2712,17 @@ stateDiagram-v2
         nuevos despliegues bloqueados
     end note
     note right of Suspendida
-        Contenedores detenidos;
+        Contenedores detenidos (M5);
         datos y configuracion conservados
     end note
     note right of Cancelada
-        Recursos liberados;
-        cliente puede exportar datos antes
+        Datos conservados;
+        solo cambia el estado
+    end note
+    note left of PorVencer
+        Tarea diaria 00:05 UTC (BullMQ)
+        o POST /admin/ciclo/ejecutar;
+        idempotente el mismo dia
     end note
 ```
 

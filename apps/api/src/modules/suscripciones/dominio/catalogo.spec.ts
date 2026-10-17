@@ -25,6 +25,7 @@ describe("cuotaDeSuscripcion", () => {
       usuarioId: "u1",
       plan: pro,
       estado: "por-vencer",
+      estadoDesde: new Date("2026-10-23T00:00:00.000Z"),
       vigenciaDias: 30,
       inicio: new Date("2026-09-30T00:00:00.000Z"),
       vence,

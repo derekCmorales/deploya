@@ -21,7 +21,7 @@ async function main(): Promise<void> {
       reloj,
     });
     console.log(
-      "Seed listo: 4 planes, administrador y cliente@ con Sandbox; vencida@ y suspendida@ en Starter (Vencida y Suspendida)",
+      "Seed listo: 4 planes, administrador, cliente@ y demo@ con Sandbox; vencida@ y suspendida@ en Starter (Vencida y Suspendida)",
     );
   } finally {
     await prisma.$disconnect();

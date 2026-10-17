@@ -24,7 +24,10 @@ describe("AdaptersModule", () => {
 
   it("la configuración trae valores por defecto de desarrollo", () => {
     expect(configuracionDesde({})).toEqual(expect.objectContaining({
-      modo: "stub", dominioApps: "localhost", esquemaApps: "http", trabajadorConcurrencia: 1,
+      modo: "stub",
+      enrutamiento: { dominioBase: "localhost", esquema: "http", certResolver: null },
+      acmeArchivo: "/acme/acme.json",
+      trabajadorConcurrencia: 1,
     }));
   });
 });

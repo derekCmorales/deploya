@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CuotaPlanPuerto, type PermisoPlan, type RecursosPlan } from "../../modules/orquestacion/puertos/cuota-plan.puerto";
+import { CuotaPlanPuerto, type PermisoPlan, type PlanContratado, type RecursosPlan } from "../../modules/orquestacion/puertos/cuota-plan.puerto";
 
 /**
  * Hasta que M2 exporte `cuotaDe` (DB-01), todos quedan en los recursos de Sandbox
@@ -12,6 +12,7 @@ export const RECURSOS_SANDBOX: RecursosPlan = { plan: "sandbox", cpus: 0.25, mem
 export class CuotaPlanStub extends CuotaPlanPuerto {
   recursos: RecursosPlan = RECURSOS_SANDBOX;
   permiso: PermisoPlan = { estado: "activa", construccionesMes: CONSTRUCCIONES_SANDBOX };
+  plan: PlanContratado = { codigo: "sandbox", nombre: "Sandbox" };
   readonly consultados: string[] = [];
 
   async recursosDe(usuarioId: string): Promise<RecursosPlan> {
@@ -21,5 +22,9 @@ export class CuotaPlanStub extends CuotaPlanPuerto {
 
   async permisoDe(): Promise<PermisoPlan> {
     return this.permiso;
+  }
+
+  async planDe(): Promise<PlanContratado> {
+    return this.plan;
   }
 }

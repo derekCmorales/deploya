@@ -1,3 +1,4 @@
+import type { CambiosProyecto } from "../dominio/cambios-proyecto";
 import type { Proyecto, ProyectoNuevo } from "../dominio/proyecto";
 
 /**
@@ -10,6 +11,8 @@ export abstract class RepositorioProyectos {
   abstract porId(id: string): Promise<Proyecto | null>;
   abstract deUsuario(usuarioId: string): Promise<Proyecto[]>;
   abstract existeSubdominio(subdominio: string): Promise<boolean>;
+  /** Aplica solo los campos de `CambiosProyecto` (sin subdominio) y devuelve el proyecto actualizado. */
+  abstract actualizar(id: string, cambios: CambiosProyecto): Promise<Proyecto>;
   /** Borra el proyecto; sus despliegues, artefactos y variables caen en cascada. */
   abstract eliminar(id: string): Promise<void>;
 }

@@ -1,13 +1,21 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import { ConstruccionService } from "../construccion/construccion.service";
 import { StackNoReconocido } from "../construccion/dominio/errores";
 import { DeteccionStackService, type ResultadoDeteccion } from "../construccion/deteccion/deteccion-stack.service";
 import { AccionesProyectoService } from "../orquestacion/acciones/acciones-proyecto.service";
 import { BloqueosService } from "../orquestacion/bloqueos.service";
-import { ConfirmacionNoCoincide, LimiteProyectosAlcanzado, ProyectoNoEncontrado, StackNoReconocidoEnAlta, SubdominioEnUso } from "./dominio/errores";
+import type { CambiosProyecto } from "./dominio/cambios-proyecto";
+import {
+  ConfirmacionNoCoincide,
+  LimiteProyectosAlcanzado,
+  NombreRepetido,
+  ProyectoNoEncontrado,
+  StackNoReconocidoEnAlta,
+  SubdominioEnUso,
+} from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
-import { subdominioDesdeNombre } from "./dominio/subdominio";
+import { esSubdominioReservado, SUBDOMINIOS_RESERVADOS, subdominioDesdeNombre } from "./dominio/subdominio";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
@@ -27,6 +35,14 @@ export interface ListaProyectos {
   usados: number;
   maximo: number;
   plan: { nombre: string; cpus: number; memoriaMb: number };
+}
+
+/** Cuerpo de `PATCH /proyectos/:id` (contrato v3). */
+export type VistaConfiguracion = Pick<Proyecto, "id" | "nombre" | "subdominio" | "urlRepositorio" | "rama" | "rutaDockerfile" | "puertoInterno">;
+
+export function vistaConfiguracion(proyecto: Proyecto): VistaConfiguracion {
+  const { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno } = proyecto;
+  return { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno };
 }
 
 export interface ProyectoCreado {
@@ -56,6 +72,7 @@ export class ProyectosService {
     private readonly variables: VariablesProyectoService,
     private readonly deteccion: DeteccionStackService,
     private readonly bloqueos: BloqueosService,
+    @Optional() @Inject(SUBDOMINIOS_RESERVADOS) private readonly reservados: readonly string[] = [],
   ) {}
 
   async validarRepositorio(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
@@ -80,7 +97,7 @@ export class ProyectosService {
     await this.bloqueos.verificar(usuarioId);
     const validacion = await this.validarRepositorio({ url: alta.url, rama: alta.rama });
     const subdominio = subdominioDesdeNombre(alta.nombre);
-    if (await this.repositorio.existeSubdominio(subdominio)) throw new SubdominioEnUso(subdominio);
+    if (esSubdominioReservado(subdominio, this.reservados) || (await this.repositorio.existeSubdominio(subdominio))) throw new SubdominioEnUso(subdominio);
     if (alta.variables) validarConjuntoVariables(alta.variables);
     const proyecto = await this.repositorio.guardar({
       usuarioId,
@@ -94,6 +111,25 @@ export class ProyectosService {
     if (alta.variables?.length) await this.variables.reemplazar(usuarioId, proyecto.id, alta.variables);
     const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");
     return { proyecto, despliegue };
+  }
+
+  /**
+   * `PATCH /proyectos/:id` (19). Un proyecto ajeno se trata como inexistente. Si cambia el
+   * repositorio o la rama se valida con `ProveedorFuente` como en el alta. No despliega: los
+   * cambios aplican en el próximo despliegue, porque el pipeline lee el proyecto cada vez.
+   */
+  async configurar(usuarioId: string, proyectoId: string, cambios: CambiosProyecto): Promise<Proyecto> {
+    const proyecto = await this.repositorio.porId(proyectoId);
+    if (!proyecto || proyecto.usuarioId !== usuarioId) throw new ProyectoNoEncontrado(proyectoId);
+    if (cambios.nombre !== undefined) await this.exigirNombreLibre(proyecto, cambios.nombre);
+    if (cambios.urlRepositorio !== undefined || cambios.rama !== undefined) {
+      const validacion = await this.validarRepositorio({
+        url: cambios.urlRepositorio ?? proyecto.urlRepositorio,
+        rama: cambios.rama ?? proyecto.rama,
+      });
+      if (cambios.urlRepositorio !== undefined) return this.repositorio.actualizar(proyecto.id, { ...cambios, urlRepositorio: validacion.urlNormalizada });
+    }
+    return this.repositorio.actualizar(proyecto.id, cambios);
   }
 
   /** 17: guarda el conjunto y, si se pide, encola un despliegue con disparador `variables`. */
@@ -123,6 +159,11 @@ export class ProyectosService {
     if (confirmacion !== proyecto.nombre) throw new ConfirmacionNoCoincide();
     await this.acciones.pedirEliminacion(proyecto);
     await this.repositorio.eliminar(proyecto.id);
+  }
+
+  private async exigirNombreLibre(proyecto: Proyecto, nombre: string): Promise<void> {
+    const otros = (await this.repositorio.deUsuario(proyecto.usuarioId)).filter((p) => p.id !== proyecto.id);
+    if (otros.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase())) throw new NombreRepetido(nombre);
   }
 
   private async detectarOFallar(consulta: ConsultaRepositorio): Promise<ResultadoDeteccion> {

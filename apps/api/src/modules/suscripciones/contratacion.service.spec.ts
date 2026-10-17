@@ -140,6 +140,7 @@ describe("ContratacionService", () => {
       await expect(servicio.miSuscripcion("u1")).resolves.toEqual({
         plan: expect.objectContaining({ codigo: "starter", nombre: "Starter", maxProyectos: 3, construccionesMes: 150 }),
         estado: "activa",
+        estadoDesde: new Date("2026-09-03T12:00:00.000Z"),
         vigenciaDias: 30,
         inicio: new Date("2026-09-03T12:00:00.000Z"),
         vence: new Date("2026-10-03T12:00:00.000Z"),

@@ -6,6 +6,8 @@ import type { EstadoSuscripcionValor, Suscripcion } from "./suscripcion";
 export interface VistaSuscripcion {
   plan: PlanCatalogo;
   estado: EstadoSuscripcionValor;
+  /** Desde cuándo está en `estado` («Suspendida desde 29 sep 2026», pantalla 28). */
+  estadoDesde: Date;
   vigenciaDias: number | null;
   inicio: Date;
   vence: Date | null;
@@ -33,6 +35,7 @@ export function vistaSuscripcion(suscripcion: Suscripcion, ahora: Date): VistaSu
   return {
     plan,
     estado: suscripcion.estado,
+    estadoDesde: suscripcion.estadoDesde,
     vigenciaDias: suscripcion.vigenciaDias,
     inicio: suscripcion.inicio,
     vence: suscripcion.vence,

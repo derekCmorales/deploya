@@ -132,3 +132,32 @@ export function puedeReiniciar(estado: string): boolean {
 export function puedeDetener(estado: string): boolean {
   return estado === "saludable";
 }
+
+/** Qué botones de acción ofrece la cabecera de 12 / 12c según el estado (M4-02). */
+export interface AccionesDespliegue {
+  cancelar: boolean;
+  reintentar: boolean;
+}
+
+const ESTADOS_CANCELABLES = ["encolado", "construyendo", "revirtiendo"];
+
+/** «Cancelar despliegue» mientras está Encolado, Construyendo o Revirtiendo; «Reintentar» solo desde Fallido. */
+export function accionesDe(estado: string): AccionesDespliegue {
+  return { cancelar: ESTADOS_CANCELABLES.includes(estado), reintentar: estado === "fallido" };
+}
+
+export function rutaCancelar(despliegueId: string): string {
+  return `/despliegues/${despliegueId}/cancelar`;
+}
+
+export function rutaReintentar(despliegueId: string): string {
+  return `/despliegues/${despliegueId}/reintentar`;
+}
+
+/** 12b: «Certificado hasta 12 ene 2027»; sin certificado (desarrollo) no hay nada que decir. */
+export function textoCertificado(certificado: { vence: string } | null | undefined, fecha: (iso: string) => string | null): string | null {
+  if (!certificado) return null;
+  const texto = fecha(certificado.vence);
+  return texto ? `Certificado hasta ${texto}` : null;
+}
+

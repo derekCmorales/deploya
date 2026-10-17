@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UseFilters, UseGuards } from "@nestjs/common";
 import { SesionGuard } from "../identidad/sesion.guard";
 import { UsuarioActual } from "../identidad/usuario-actual.decorator";
+import { ReactivacionService } from "./ciclo/reactivacion.service";
 import { ContratacionService, type ResultadoContratacion } from "./contratacion.service";
 import type { Cotizacion, VistaSuscripcion } from "./dominio/mi-suscripcion";
 import { validarSolicitudContratacion, validarSolicitudCotizacion, validarSolicitudDescenso } from "./dominio/tarjeta";
@@ -15,7 +16,10 @@ import { ErroresSuscripcionesFilter } from "./errores-suscripciones.filter";
 @UseGuards(SesionGuard)
 @UseFilters(ErroresSuscripcionesFilter)
 export class CobroController {
-  constructor(private readonly contratacion: ContratacionService) {}
+  constructor(
+    private readonly contratacion: ContratacionService,
+    private readonly reactivacion: ReactivacionService,
+  ) {}
 
   @Get("mia")
   mia(@UsuarioActual("id") usuarioId: string): Promise<VistaSuscripcion> {
@@ -30,7 +34,7 @@ export class CobroController {
   @Post("contratar")
   @HttpCode(HttpStatus.OK)
   contratar(@UsuarioActual("id") usuarioId: string, @Body() cuerpo: unknown): Promise<ResultadoContratacion> {
-    return this.contratacion.contratar(usuarioId, validarSolicitudContratacion(cuerpo));
+    return this.reactivacion.contratar(usuarioId, validarSolicitudContratacion(cuerpo));
   }
 
   @Post("descenso")

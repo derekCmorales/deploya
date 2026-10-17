@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { SuscripcionesService } from "../../suscripciones/suscripciones.service";
-import { CuotaPlanPuerto, type PermisoPlan, type RecursosPlan } from "../puertos/cuota-plan.puerto";
+import { CuotaPlanPuerto, type PermisoPlan, type PlanContratado, type RecursosPlan } from "../puertos/cuota-plan.puerto";
 
 /**
  * Adapter sobre `cuotaDe` de M2: el contenedor corre con los `--cpus` y `--memory` del plan
@@ -20,5 +20,10 @@ export class CuotaPlanSuscripciones extends CuotaPlanPuerto {
   async permisoDe(usuarioId: string): Promise<PermisoPlan> {
     const cuota = await this.suscripciones.cuotaDe(usuarioId);
     return { estado: cuota.estado, construccionesMes: cuota.construccionesMes };
+  }
+
+  async planDe(usuarioId: string): Promise<PlanContratado> {
+    const { plan } = await this.suscripciones.cuotaDe(usuarioId);
+    return { codigo: plan.codigo, nombre: plan.nombre };
   }
 }

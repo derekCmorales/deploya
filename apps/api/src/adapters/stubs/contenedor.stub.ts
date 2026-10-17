@@ -13,9 +13,16 @@ export class ContenedorStub extends ContenedorPuerto {
   readonly eliminados: string[] = [];
   readonly proyectosLimpiados: string[] = [];
   readonly imagenesBorradas: string[] = [];
+  readonly imagenesRetiradas: string[] = [];
+  /** Imágenes cuyo borrado falla (para probar que la retención no rompe el despliegue). */
+  readonly imagenesQueFallan = new Set<string>();
+
+  /** Gancho para simular un evento externo (p. ej. una cancelación) justo cuando se crea el contenedor. */
+  alCrear: (() => Promise<void>) | null = null;
 
   async crear(espec: EspecContenedor): Promise<ContenedorCreado> {
     this.creados.push(espec);
+    await this.alCrear?.();
     return { id: `contenedor-${espec.nombre}`, host: espec.nombre };
   }
 
@@ -33,6 +40,11 @@ export class ContenedorStub extends ContenedorPuerto {
 
   async eliminarContenedoresDe(subdominio: string): Promise<void> {
     this.proyectosLimpiados.push(subdominio);
+  }
+
+  async eliminarImagen(imagen: string): Promise<void> {
+    if (this.imagenesQueFallan.has(imagen)) throw new Error(`No se pudo borrar ${imagen}`);
+    this.imagenesRetiradas.push(imagen);
   }
 
   async eliminarImagenesDe(subdominio: string): Promise<void> {

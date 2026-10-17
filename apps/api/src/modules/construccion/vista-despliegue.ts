@@ -1,4 +1,4 @@
-import type { Despliegue, EtapaRegistrada, LineaBitacora } from "./dominio/despliegue";
+import type { Artefacto, Despliegue, EtapaRegistrada, LineaBitacora } from "./dominio/despliegue";
 import { estaTerminado, type EstadoDespliegue, type EstadoEtapa, type Etapa, type NivelBitacora } from "./dominio/estados";
 
 /** Forma de `GET /despliegues/:id` (docs/contratos/despliegues.md, v1 + campos v2). */
@@ -17,6 +17,8 @@ export interface VistaDespliegue {
   creado: string;
   terminado: string | null;
   etapas: { nombre: Etapa; estado: EstadoEtapa; duracionMs: number | null }[];
+  /** Vencimiento del certificado TLS (12b); `null` en desarrollo, sin TLS. */
+  certificado: { vence: string } | null;
 }
 
 /** `ultimoDespliegue` de cada proyecto en `GET /proyectos` (contrato de despliegues). */
@@ -41,7 +43,7 @@ export interface PaginaBitacora {
   terminado: boolean;
 }
 
-export function vistaDespliegue(despliegue: Despliegue, imagen: ImagenDeVista | null): VistaDespliegue {
+export function vistaDespliegue(despliegue: Despliegue, imagen: ImagenDeVista | null, vence: Date | null = null): VistaDespliegue {
   return {
     id: despliegue.id,
     numero: despliegue.numero,
@@ -57,6 +59,7 @@ export function vistaDespliegue(despliegue: Despliegue, imagen: ImagenDeVista | 
     creado: despliegue.creado.toISOString(),
     terminado: despliegue.terminado?.toISOString() ?? null,
     etapas: despliegue.etapas.map(vistaEtapa),
+    certificado: vence ? { vence: vence.toISOString() } : null,
   };
 }
 
@@ -87,4 +90,39 @@ function recursosDe(despliegue: Despliegue): VistaDespliegue["recursos"] {
 function vistaEtapa(etapa: EtapaRegistrada): VistaDespliegue["etapas"][number] {
   const duracionMs = etapa.iniciada && etapa.terminada ? etapa.terminada.getTime() - etapa.iniciada.getTime() : null;
   return { nombre: etapa.etapa, estado: etapa.estado, duracionMs };
+}
+
+/** Una fila de la tabla de la pantalla 14 (contrato v3). */
+export interface FilaHistorial {
+  id: string;
+  numero: number;
+  estado: EstadoDespliegue;
+  disparador: string;
+  commit: { sha: string; mensaje: string; rama: string } | null;
+  creado: string;
+  duracionMs: number | null;
+  imagen: { digest: string; disponible: boolean } | null;
+  artefactoId: string | null;
+  activo: boolean;
+}
+
+export interface PaginaHistorial {
+  despliegues: FilaHistorial[];
+  /** `antesDe` de la página siguiente; `null` si no hay más. */
+  siguiente: number | null;
+}
+
+export function filaHistorial(despliegue: Despliegue, activoId: string | null, artefacto: Artefacto | null): FilaHistorial {
+  return {
+    id: despliegue.id,
+    numero: despliegue.numero,
+    estado: despliegue.estado,
+    disparador: despliegue.disparador,
+    commit: despliegue.commit ? { sha: despliegue.commit.sha, mensaje: despliegue.commit.mensaje, rama: despliegue.rama } : null,
+    creado: despliegue.creado.toISOString(),
+    duracionMs: despliegue.terminado ? despliegue.terminado.getTime() - despliegue.creado.getTime() : null,
+    imagen: artefacto ? { digest: artefacto.digest, disponible: artefacto.disponible } : null,
+    artefactoId: despliegue.artefactoId,
+    activo: despliegue.id === activoId,
+  };
 }

@@ -1,6 +1,6 @@
 /**
  * Vocabularios cerrados. Estados de despliegue ≠ estados de suscripción (§4.4).
- * Revirtiendo queda fuera del núcleo v4.1 (docs/alcance.md).
+ * Revirtiendo es la reversión sin reconstruir (M5-04): mismo tono que Construyendo.
  */
 export const ESTADOS_DESPLIEGUE = [
   "encolado",
@@ -11,6 +11,7 @@ export const ESTADOS_DESPLIEGUE = [
   "fallido",
   "cancelado",
   "detenido",
+  "revirtiendo",
 ] as const;
 export type EstadoDespliegueValor = (typeof ESTADOS_DESPLIEGUE)[number];
 

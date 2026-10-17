@@ -8,7 +8,10 @@ import { planesDePrueba } from "./adaptadores/planes.fixture";
 import { RepositorioPagosMemoria } from "./adaptadores/repositorio-pagos.memoria";
 import { RepositorioPlanesMemoria } from "./adaptadores/repositorio-planes.memoria";
 import { RepositorioSuscripcionesMemoria } from "./adaptadores/repositorio-suscripciones.memoria";
+import { ContenedoresClienteFalso } from "./ciclo/contenedores-cliente.falso";
+import { ReactivacionService } from "./ciclo/reactivacion.service";
 import { CobroController } from "./cobro.controller";
+import { ContenedoresClientePuerto } from "../orquestacion/puertos/contenedores-cliente.puerto";
 import { ContratacionService } from "./contratacion.service";
 import {
   CambioEsDescenso,
@@ -37,6 +40,8 @@ async function controlador(): Promise<CobroController> {
     controllers: [CobroController],
     providers: [
       ContratacionService,
+      ReactivacionService,
+      { provide: ContenedoresClientePuerto, useValue: new ContenedoresClienteFalso() },
       { provide: RepositorioPlanes, useValue: new RepositorioPlanesMemoria(planes) },
       { provide: RepositorioSuscripciones, useValue: suscripciones },
       { provide: RepositorioPagos, useValue: new RepositorioPagosMemoria() },

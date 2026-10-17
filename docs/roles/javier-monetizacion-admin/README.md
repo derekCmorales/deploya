@@ -52,7 +52,7 @@ Activa → Por vencer (≤ 7 días) → Vencida (gracia 5 días; entornos en lí
 
 Detalle del Avance 1 y lo que presentas: [plan-avances.md § Javier](../../plan-avances.md#javier--monetización-5-pts).
 
-**Avance 2 (50 %):** [plan-avances.md § Javier (A2)](../../plan-avances.md#javier--monetización-11-pts-ya-en-main) · changes `feat-m2-contratacion-suscripcion` (hecho: falta archivar) y el seed de demo de `feat-m5-bloqueos-cuota` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#javier). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
+**Avance 2 (50 %):** [plan-avances.md § Javier (A2)](../../plan-avances.md#javier--monetización-11-pts-ya-en-main) · changes `feat-m2-contratacion-suscripcion` (hecho y archivado) y el seed de demo de `feat-m5-bloqueos-cuota` · prompt para tu agente: [handoff/prompt-avance-2.md](../../handoff/prompt-avance-2.md#javier). Pruebas mínimas: [ingenieria.md §5.4](../../ingenieria.md#54-pruebas-mínimas-del-avance-2).
 
 **Avance 3 (85 %):** [plan-avances.md § Avance 3](../../plan-avances.md#avance-3--85--entrega-viernes-23-de-octubre-en-la-noche) · prompt para tu agente: [handoff/prompt-avance-3.md](../../handoff/prompt-avance-3.md#javier) · pruebas mínimas: [ingenieria.md §5.5](../../ingenieria.md#55-pruebas-mínimas-del-avance-3).
 

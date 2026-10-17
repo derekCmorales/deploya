@@ -1,6 +1,6 @@
 import type { ContenedorCreado } from "../../orquestacion/puertos/contenedor.puerto";
 import type { Commit, Despliegue, ProyectoDesplegable } from "../dominio/despliegue";
-import type { EstadoDespliegue, Etapa, NivelBitacora, RecetaConstruccion } from "../dominio/estados";
+import type { EstadoDespliegue, Etapa, NivelBitacora, PlanPipeline, RecetaConstruccion } from "../dominio/estados";
 
 export interface Bitacora {
   escribir(etapa: Etapa, texto: string, nivel?: NivelBitacora): void;
@@ -11,6 +11,8 @@ export interface ContextoDespliegue {
   despliegue: Despliegue;
   proyecto: ProyectoDesplegable;
   bitacora: Bitacora;
+  /** Se aborta cuando el cliente cancela; los pasos largos (clonar, construir) la respetan. */
+  senal: AbortSignal;
   directorio?: string;
   commit?: Commit;
   /** Lo decide la detección de stack en Recepción; Construcción lo usa. */
@@ -41,5 +43,8 @@ export abstract class PasoPipeline {
   }
 }
 
-/** Token de Nest con la lista ordenada de pasos del plan `construccion`. */
-export const PASOS_CONSTRUCCION = Symbol("PASOS_CONSTRUCCION");
+/** Cada plan es una lista ordenada de pasos (Strategy): un plan nuevo no toca los pasos ni el pipeline. */
+export type PlanesPipeline = Readonly<Record<PlanPipeline, readonly PasoPipeline[]>>;
+
+/** Token de Nest con los planes del trabajador: `construccion` y `reversion`. */
+export const PLANES_PIPELINE = Symbol("PLANES_PIPELINE");

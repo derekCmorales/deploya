@@ -34,8 +34,8 @@ describe("sembrar", () => {
     await correr();
     expect(foto()).toEqual(primera);
     expect(primera.planes).toHaveLength(4);
-    expect(primera.usuarios).toHaveLength(4);
-    expect(primera.suscripciones).toHaveLength(4);
+    expect(primera.usuarios).toHaveLength(5);
+    expect(primera.suscripciones).toHaveLength(5);
   });
 
   it("el administrador y el cliente quedan con Sandbox Activa y contraseña con hash", async () => {
@@ -45,7 +45,7 @@ describe("sembrar", () => {
       expect(destino.usuarios.find((u) => u.correo === correo)?.hashContrasena).not.toBe(ENTORNO.ADMIN_CLAVE);
       await expect(servicio.cuotaDe(idDe(correo))).resolves.toMatchObject({ plan: { codigo: "sandbox" }, estado: "activa", vence: null });
     }
-    expect(destino.usuarios.map((u) => u.rol)).toEqual(["administrador", "cliente", "cliente", "cliente"]);
+    expect(destino.usuarios.map((u) => u.rol)).toEqual(["administrador", "cliente", "cliente", "cliente", "cliente"]);
   });
 
   it("vencida@ queda en Starter con la suscripción Vencida", async () => {
@@ -94,7 +94,17 @@ describe("sembrar", () => {
 
     await correr({ ADMIN_CLAVE: "Clave-Admin-1", CLIENTE_CLAVE: "Clave-Cliente-1" });
 
-    expect(hashear.mock.calls.map(([clave]) => clave)).toEqual(["Clave-Admin-1", "Clave-Cliente-1", "Clave-Cliente-1", "Clave-Cliente-1"]);
+    expect(hashear.mock.calls.map(([clave]) => clave)).toEqual(["Clave-Admin-1", "Clave-Cliente-1", "Clave-Cliente-1", "Clave-Cliente-1", "Clave-Cliente-1"]);
+  });
+
+  it("demo@ (M9-02) queda Activa en Sandbox y dos corridas no la duplican", async () => {
+    const { destino, servicio, correr, idDe } = armar();
+
+    await correr();
+    await correr();
+
+    expect(destino.usuarios.filter((u) => u.correo === "demo@deploya.app")).toHaveLength(1);
+    await expect(servicio.cuotaDe(idDe("demo@deploya.app"))).resolves.toMatchObject({ plan: { codigo: "sandbox" }, estado: "activa" });
   });
 
   it("una suscripción que ya no es la Sandbox inicial no se reescribe", async () => {

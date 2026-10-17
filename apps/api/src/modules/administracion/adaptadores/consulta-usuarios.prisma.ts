@@ -52,6 +52,7 @@ function detalleDesdePrisma(fila: DetallePrisma): DetalleUsuario {
     ...filaDesdePrisma(fila),
     ultimoAcceso: fila.sesiones[0]?.ultimaActividad ?? null,
     vence: fila.suscripcion?.vence ?? null,
+    suscripcionDesde: fila.suscripcion?.estadoDesde ?? null,
     suspension:
       fila.estadoCuenta === "suspendida"
         ? { desde: fila.accionesRecibidas[0]?.creado ?? null, motivo: fila.motivoSuspension, contenedoresDetenidos: contenedoresDetenidos(proyectos) }

@@ -44,3 +44,4 @@ Cambios de clases: `HistorialPagosService`, `Comprobante`, `ComprobantePdfPuerto
 - **`GET /suscripciones/pagos`** devuelve además `plan` y `titular` por fila para el panel «Comprobante».
 - **404:** pago ajeno, inexistente o rechazado responden `pago-no-encontrado` sin llamar al puerto del PDF.
 - **Descarga:** «Descargar PDF» es un enlace directo a la API (la cookie de sesión viaja en la navegación) con `Content-Disposition: attachment`.
+- **Revisión contra los artboards 09 y 09b (claro y oscuro):** el comprobante va en un panel lateral de alto completo con encabezado (descargar y cerrar) y el recibo en un recuadro punteado; 09b sobre `sunken` con «Ver planes» primario. Diferencia que queda: el artboard pone «Ver comprobante» y número también en el pago rechazado; aquí solo los aprobados tienen comprobante (spec).

@@ -16,7 +16,7 @@ const fila = {
   estadoCuenta: "suspendida",
   motivoSuspension: "Uso que incumple los términos de servicio (§7.2).",
   creado: CREADO,
-  suscripcion: { estado: "por_vencer", vence: new Date("2026-10-21T15:00:00.000Z"), plan: { nombre: "Pro" } },
+  suscripcion: { estado: "por_vencer", estadoDesde: new Date("2026-10-14T15:00:00.000Z"), vence: new Date("2026-10-21T15:00:00.000Z"), plan: { nombre: "Pro" } },
   proyectos: [
     { id: "p1", nombre: "menu-aurora", subdominio: "menu-aurora", despliegueActivo: { estado: "detenido" } },
     { id: "p2", nombre: "landing", subdominio: "landing", despliegueActivo: null },
@@ -73,6 +73,7 @@ describe("ConsultaUsuariosPrisma", () => {
     expect(findUnique).toHaveBeenCalledTimes(1);
     expect(detalle).toMatchObject({
       ultimoAcceso: new Date("2026-10-11T09:30:00.000Z"),
+      suscripcionDesde: new Date("2026-10-14T15:00:00.000Z"),
       suspension: { desde: new Date("2026-09-21T10:00:00.000Z"), motivo: fila.motivoSuspension, contenedoresDetenidos: 1 },
       proyectos: [{ nombre: "menu-aurora", despliegue: "detenido" }, { nombre: "landing", despliegue: null }],
       pagos: [{ plan: "Pro", monto: 15, estado: "aprobado" }],
@@ -85,7 +86,7 @@ describe("ConsultaUsuariosPrisma", () => {
 
     const detalle = await new ConsultaUsuariosPrisma(prismaDoble({ usuario: { findUnique } })).detalle("u-maria");
 
-    expect(detalle).toMatchObject({ plan: null, suscripcion: null, vence: null, ultimoAcceso: null, suspension: null });
+    expect(detalle).toMatchObject({ plan: null, suscripcion: null, vence: null, suscripcionDesde: null, ultimoAcceso: null, suspension: null });
   });
 });
 

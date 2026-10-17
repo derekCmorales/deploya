@@ -62,7 +62,9 @@ test("09b · subtítulo de una cuenta nueva y textos de la ficha", () => {
 
 test("09 · el PDF se descarga desde la API con la ruta del pago", () => {
   assert.equal(rutaComprobantePdf("3f1c-2b9e"), "/suscripciones/pagos/3f1c-2b9e/comprobante.pdf");
-  assert.match(leer("src/app/(billing)/pagos/_componentes/panel-comprobante.tsx"), /href=\{`\$\{URL_API\}\$\{rutaComprobantePdf\(pago\.id\)\}`\} download/);
+  const panel = leer("src/app/(billing)/pagos/_componentes/panel-comprobante.tsx");
+  assert.match(panel, /const pdf = `\$\{URL_API\}\$\{rutaComprobantePdf\(pago\.id\)\}`;/);
+  assert.match(panel, /<a href=\{pdf\} download>/);
 });
 
 test("09 · la pestaña Historial de pagos ya enlaza a /pagos y 09b ofrece «Ver planes»", () => {

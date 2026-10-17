@@ -49,6 +49,7 @@ export interface PagoAdmin {
 export interface DetalleUsuario extends FilaUsuario {
   ultimoAcceso: string | null;
   vence: string | null;
+  suscripcionDesde: string | null;
   suspension: { desde: string | null; motivo: string | null; contenedoresDetenidos: number } | null;
   proyectos: ProyectoAdmin[];
   pagos: PagoAdmin[];
@@ -153,8 +154,23 @@ export function textoAlta(d: Pick<DetalleUsuario, "creado" | "ultimoAcceso">, ah
 
 /** «desde 21 sep · 3 contenedores detenidos». */
 export function textoSuspension(s: NonNullable<DetalleUsuario["suspension"]>): string {
-  const contenedores = s.contenedoresDetenidos === 1 ? "1 contenedor detenido" : `${s.contenedoresDetenidos} contenedores detenidos`;
+  const contenedores = textoContenedores(s.contenedoresDetenidos);
   return s.desde ? `desde ${diaMes(s.desde)} · ${contenedores}` : contenedores;
+}
+
+const SUSCRIPCION_SIN_VIGENCIA: readonly EstadoSuscripcion[] = ["vencida", "suspendida", "cancelada"];
+
+function textoContenedores(n: number): string {
+  return n === 1 ? "1 contenedor detenido" : `${n} contenedores detenidos`;
+}
+
+/** Junto al estado de la suscripción: «desde 21 sep · 3 contenedores detenidos» o «vence 03 nov 2026». */
+export function textoSuscripcionAdmin(d: Pick<DetalleUsuario, "suscripcion" | "suscripcionDesde" | "vence" | "proyectos">): string {
+  if (d.suscripcion && SUSCRIPCION_SIN_VIGENCIA.includes(d.suscripcion) && d.suscripcionDesde) {
+    const detenidos = d.proyectos.filter((p) => p.despliegue === "detenido").length;
+    return detenidos > 0 ? `desde ${diaMes(d.suscripcionDesde)} · ${textoContenedores(detenidos)}` : `desde ${diaMes(d.suscripcionDesde)}`;
+  }
+  return d.vence ? `vence ${fechaAdmin(d.vence)}` : "sin vencimiento";
 }
 
 /** «Plan Pro · 30 días». */

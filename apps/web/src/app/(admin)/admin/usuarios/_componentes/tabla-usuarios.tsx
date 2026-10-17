@@ -1,11 +1,14 @@
 import { EstadoSuscripcion } from "@/components/deploya/estado-suscripcion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { fechaAdmin, textoRol, type FilaUsuario } from "@/lib/admin-usuarios";
 
 const FILAS_CARGANDO = 6;
 
-/** Tabla de 25. `usuarios = null` mientras carga. La fila seleccionada lleva `data-activa`. */
+/**
+ * Tabla de 25 dentro del panel de la lista (sin borde propio). `usuarios = null` mientras carga.
+ * La fila seleccionada lleva fondo `muted` y la barra de 2px en `foreground` (patrón D).
+ */
 export function TablaUsuarios({
   usuarios,
   seleccion,
@@ -16,14 +19,14 @@ export function TablaUsuarios({
   alSeleccionar: (id: string) => void;
 }) {
   return (
-    <Table>
+    <table className="w-full border-collapse text-sm">
       <TableHeader>
         <TableRow>
-          <TableHead>Correo</TableHead>
-          <TableHead>Rol</TableHead>
-          <TableHead>Plan</TableHead>
-          <TableHead>Suscripción</TableHead>
-          <TableHead>Alta</TableHead>
+          <TableHead className="border-t">Correo</TableHead>
+          <TableHead className="border-t">Rol</TableHead>
+          <TableHead className="border-t">Plan</TableHead>
+          <TableHead className="border-t">Suscripción</TableHead>
+          <TableHead className="border-t">Alta</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -48,7 +51,7 @@ export function TablaUsuarios({
               data-activa={u.id === seleccion}
               aria-selected={u.id === seleccion}
               tabIndex={0}
-              className="cursor-pointer hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+              className="cursor-pointer last:border-b hover:bg-muted focus-visible:bg-muted focus-visible:outline-none data-[activa=true]:bg-muted data-[activa=true]:shadow-[inset_2px_0_0_var(--foreground)]"
               onClick={() => alSeleccionar(u.id)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -57,15 +60,15 @@ export function TablaUsuarios({
                 }
               }}
             >
-              <TableCell className="font-mono text-[13px]">{u.correo}</TableCell>
-              <TableCell className="text-muted-foreground">{textoRol(u.rol)}</TableCell>
-              <TableCell>{u.plan ?? "—"}</TableCell>
+              <TableCell>{u.correo}</TableCell>
+              <TableCell className="text-[13px] text-muted-foreground">{textoRol(u.rol)}</TableCell>
+              <TableCell className="text-[13px]">{u.plan ?? "—"}</TableCell>
               <TableCell>{u.suscripcion ? <EstadoSuscripcion estado={u.suscripcion} /> : <span className="text-faint">—</span>}</TableCell>
-              <TableCell className="whitespace-nowrap text-muted-foreground tabular-nums">{fechaAdmin(u.creado)}</TableCell>
+              <TableCell className="whitespace-nowrap text-[13px] text-muted-foreground tabular-nums">{fechaAdmin(u.creado)}</TableCell>
             </TableRow>
           ))
         )}
       </TableBody>
-    </Table>
+    </table>
   );
 }

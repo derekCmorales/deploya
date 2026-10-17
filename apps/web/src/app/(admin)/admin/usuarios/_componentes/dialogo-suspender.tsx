@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { useState } from "react";
 
 import { Banner } from "@/components/ui/banner";
@@ -53,7 +53,12 @@ export function DialogoSuspender({
     <Dialog
       open={abierto}
       onOpenChange={alCambiar}
-      title="Suspender cuenta"
+      title={
+        <span className="flex items-center gap-2">
+          <ShieldAlert className="size-5 text-bad" aria-hidden />
+          Suspender cuenta
+        </span>
+      }
       description={
         <>
           <span className="font-medium text-foreground">{usuario.correo}</span> no podrá iniciar sesión. Sus contenedores se detienen; el
@@ -62,17 +67,17 @@ export function DialogoSuspender({
       }
       footer={
         <>
-          <Button variant="outline" onClick={() => alCambiar(false)} disabled={enviando}>
+          <Button variant="ghost" onClick={() => alCambiar(false)} disabled={enviando}>
             Cancelar
           </Button>
           <Button variant="destructive" onClick={() => void confirmar()} disabled={!cuerpo || enviando}>
-            <Ban />
+            <ShieldAlert />
             Suspender cuenta
           </Button>
         </>
       }
     >
-      <Field id="motivo-suspension" label="Motivo" hint="Se muestra al usuario cuando intenta iniciar sesión.">
+      <Field id="motivo-suspension" label="Motivo">
         <select
           id="motivo-suspension"
           aria-describedby="motivo-suspension-msg"
@@ -90,7 +95,7 @@ export function DialogoSuspender({
           ))}
         </select>
       </Field>
-      <Field id="detalle-suspension" label="Detalle para el registro" hint={`Hasta ${DETALLE_MAXIMO} caracteres. Solo lo ve administración.`}>
+      <Field id="detalle-suspension" label="Detalle para el registro" hint="Se muestra al usuario cuando intenta iniciar sesión.">
         <textarea
           id="detalle-suspension"
           aria-describedby="detalle-suspension-msg"

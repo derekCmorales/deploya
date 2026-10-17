@@ -16,7 +16,7 @@ Requiere `feat-m2-contratacion-suscripcion` (archivado). Sin base ni reloj reale
 
 - [x] 3.1 `/pagos` (09) con tabla, panel «Comprobante» y «Descargar PDF»; 09b vacío con «Ver planes»
 - [x] 3.2 Pruebas `node --test`: formato de monto y fecha, fila seleccionada por defecto (el pago más reciente aprobado)
-- [ ] 3.3 Revisión contra los artboards 09 y 09b en claro y oscuro
+- [x] 3.3 Revisión contra los artboards 09 y 09b en claro y oscuro
 
 ## 4. Cierre
 

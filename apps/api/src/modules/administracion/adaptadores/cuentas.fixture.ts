@@ -13,6 +13,7 @@ export function cuentaDePrueba(cambios: Partial<DetalleUsuario> = {}): DetalleUs
     creado: new Date("2026-06-14T15:00:00.000Z"),
     ultimoAcceso: new Date("2026-10-11T09:30:00.000Z"),
     vence: new Date("2026-11-14T15:00:00.000Z"),
+    suscripcionDesde: new Date("2026-10-14T15:00:00.000Z"),
     suspension: null,
     proyectos: [],
     pagos: [],

@@ -17,6 +17,7 @@ import {
   sePuedeSuspender,
   textoAlta,
   textoSuspension,
+  textoSuscripcionAdmin,
   textoTotal,
   totalPaginas,
 } from "../src/lib/admin-usuarios.ts";
@@ -100,4 +101,16 @@ test("25 · la navegación muestra Administración solo al rol administrador y e
   assert.match(nav, /href: "\/admin\/usuarios", texto: "Administración"/);
   assert.match(nav, /usuario\?\.rol === "administrador" \? \[\.\.\.NAV_PANEL, NAV_ADMINISTRACION\] : NAV_PANEL/);
   assert.throws(() => leer("src/app/(admin)/admin/page.tsx"));
+});
+
+test("25 · texto de la suscripción en el panel", () => {
+  const proyectos = [{ despliegue: "detenido" }, { despliegue: "detenido" }, { despliegue: "fallido" }];
+
+  assert.equal(
+    textoSuscripcionAdmin({ suscripcion: "suspendida", suscripcionDesde: "2026-09-21T00:05:00.000Z", vence: "2026-09-11T00:00:00.000Z", proyectos }),
+    "desde 21 sep · 2 contenedores detenidos",
+  );
+  assert.equal(textoSuscripcionAdmin({ suscripcion: "vencida", suscripcionDesde: "2026-10-15T00:05:00.000Z", vence: null, proyectos: [] }), "desde 15 oct");
+  assert.equal(textoSuscripcionAdmin({ suscripcion: "activa", suscripcionDesde: null, vence: "2026-11-03T10:00:00.000Z", proyectos }), "vence 03 nov 2026");
+  assert.equal(textoSuscripcionAdmin({ suscripcion: "activa", suscripcionDesde: null, vence: null, proyectos: [] }), "sin vencimiento");
 });

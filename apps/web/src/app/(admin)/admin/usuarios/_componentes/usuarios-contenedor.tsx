@@ -40,43 +40,12 @@ export function UsuariosContenedor() {
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-[1240px] flex-col gap-6 px-8 pt-7 pb-8">
-      <header className="flex flex-col gap-1.5">
-        <p className="text-[13px] font-medium text-muted-foreground">Administración</p>
+    <main className="flex w-full flex-col gap-6 px-8 pt-7 pb-8">
+      <header className="flex flex-col gap-1">
+        <p className="text-[13px] text-muted-foreground">Administración</p>
         <h1 className="text-[28px] leading-9 font-semibold tracking-[-0.03em]">Usuarios</h1>
         <p className="text-muted-foreground">Clientes y administradores de deploya</p>
       </header>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-full max-w-[320px]">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-faint" aria-hidden />
-          <Input
-            type="search"
-            aria-label="Buscar por correo"
-            placeholder="Buscar por correo"
-            className="pl-8"
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-          />
-        </div>
-        <label className="flex h-9 items-center gap-1.5 rounded-md border border-input bg-sunken pl-2.5 text-sm text-muted-foreground focus-within:border-signal focus-within:ring-[3px] focus-within:ring-signal-soft">
-          Suscripción:
-          <select
-            className="h-full cursor-pointer appearance-none bg-transparent pr-2.5 font-medium text-foreground focus:outline-none"
-            value={filtro.suscripcion}
-            onChange={(e) => setFiltro((f) => ({ ...f, suscripcion: e.target.value as FiltroSuscripcion, pagina: 1 }))}
-          >
-            {OPCIONES_SUSCRIPCION.map((o) => (
-              <option key={o.valor} value={o.valor}>
-                {o.texto}
-              </option>
-            ))}
-          </select>
-        </label>
-        {lista.datos ? (
-          <span className="ml-auto font-mono text-[13px] text-muted-foreground tabular-nums">{textoTotal(lista.datos.total)}</span>
-        ) : null}
-      </div>
 
       {lista.error ? (
         <Banner
@@ -93,11 +62,39 @@ export function UsuariosContenedor() {
         </Banner>
       ) : null}
 
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_420px]">
-        <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 overflow-hidden rounded-xl border border-border bg-card lg:grid-cols-[1fr_minmax(420px,655px)]">
+        <div className="flex min-w-0 flex-col">
+          <div className="flex flex-wrap items-center gap-2 p-4">
+            <div className="relative w-full max-w-[260px]">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-faint" aria-hidden />
+              <Input
+                type="search"
+                aria-label="Buscar por correo"
+                placeholder="Buscar por correo"
+                className="pl-8"
+                value={texto}
+                onChange={(e) => setTexto(e.target.value)}
+              />
+            </div>
+            <label className="flex h-9 items-center gap-1 rounded-md border border-border-strong bg-card pl-2.5 text-sm focus-within:border-signal focus-within:ring-[3px] focus-within:ring-signal-soft">
+              Suscripción:
+              <select
+                className="h-full cursor-pointer bg-transparent pr-2 font-medium text-foreground focus:outline-none"
+                value={filtro.suscripcion}
+                onChange={(e) => setFiltro((f) => ({ ...f, suscripcion: e.target.value as FiltroSuscripcion, pagina: 1 }))}
+              >
+                {OPCIONES_SUSCRIPCION.map((o) => (
+                  <option key={o.valor} value={o.valor}>
+                    {o.texto}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {lista.datos ? <span className="ml-auto text-[13px] text-muted-foreground tabular-nums">{textoTotal(lista.datos.total)}</span> : null}
+          </div>
           <TablaUsuarios usuarios={lista.datos ? usuarios : null} seleccion={seleccion} alSeleccionar={setSeleccion} />
           {lista.datos && paginas > 1 ? (
-            <div className="flex items-center justify-end gap-2 text-[13px] text-muted-foreground">
+            <div className="flex items-center justify-end gap-2 p-3 text-[13px] text-muted-foreground">
               <span className="tabular-nums">
                 Página {filtro.pagina} de {paginas}
               </span>
@@ -122,7 +119,9 @@ export function UsuariosContenedor() {
             </div>
           ) : null}
         </div>
-        <PanelDetalleUsuario detalle={detalle} ahora={ahora} alSuspender={alSuspender} />
+        <div className="min-w-0 border-t border-border lg:border-t-0 lg:border-l">
+          <PanelDetalleUsuario detalle={detalle} ahora={ahora} alSuspender={alSuspender} />
+        </div>
       </div>
     </main>
   );

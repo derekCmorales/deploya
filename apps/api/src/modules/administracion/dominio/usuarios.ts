@@ -52,6 +52,8 @@ export interface PagoAdmin {
 export interface DetalleUsuario extends FilaUsuario {
   ultimoAcceso: Date | null;
   vence: Date | null;
+  /** Desde cuándo la suscripción está en su estado («Suspendida desde 21 sep»). */
+  suscripcionDesde: Date | null;
   suspension: { desde: Date | null; motivo: string | null; contenedoresDetenidos: number } | null;
   proyectos: ProyectoAdmin[];
   pagos: PagoAdmin[];

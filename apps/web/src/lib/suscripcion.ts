@@ -94,6 +94,21 @@ export function avisoEstado(estado: EstadoSuscripcion): AvisoEstado | null {
   return AVISOS_ESTADO[estado] ?? null;
 }
 
+/** `GET /observabilidad/consumo` (M7-03): lo que lleva el cliente en el período frente al límite de su plan. */
+export interface ConsumoPeriodo {
+  periodo: { desde: string; reinicia: string };
+  proyectos: { usados: number; limite: number };
+  construcciones: { usadas: number; limite: number };
+}
+
+const PORCIENTO_TOTAL = 100;
+
+/** «64» para 96 de 150; entero, sin pasar de 100 y 0 si el plan no tiene límite. */
+export function porcentajeConsumo(usadas: number, limite: number): number {
+  if (limite <= 0) return 0;
+  return Math.min(PORCIENTO_TOTAL, Math.round((usadas / limite) * PORCIENTO_TOTAL));
+}
+
 /** Las construcciones se cuentan por mes calendario en UTC (M5-03): el consumo se reinicia el día 1 del mes siguiente. */
 export function reinicioConsumo(ahora: Date): string {
   return new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth() + 1, 1)).toISOString();

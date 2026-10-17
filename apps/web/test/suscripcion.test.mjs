@@ -19,6 +19,7 @@ import {
   opcionesCambio,
   progresoVigencia,
   rangoVigencia,
+  porcentajeConsumo,
   reinicioConsumo,
   rutaContratar,
   sinVigencia,
@@ -270,4 +271,11 @@ test("28 suspendida: «Renovar» lleva a 07 con el plan y la vigencia que tenía
 test("28 suspendida: textos de la ficha", () => {
   assert.deepEqual([...CONSERVADO_SUSPENDIDA], ["Código y configuración de cada proyecto", "Variables cifradas", "Historial de despliegues"]);
   assert.equal(NOTA_RENOVAR_SUSPENDIDA, "Al renovar, volvemos a arrancar el último despliegue saludable de cada proyecto.");
+});
+
+test("porcentajeConsumo redondea, no pasa de 100 y tolera un plan sin límite", () => {
+  assert.equal(porcentajeConsumo(96, 150), 64);
+  assert.equal(porcentajeConsumo(0, 30), 0);
+  assert.equal(porcentajeConsumo(40, 30), 100);
+  assert.equal(porcentajeConsumo(5, 0), 0);
 });

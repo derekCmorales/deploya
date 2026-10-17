@@ -21,5 +21,5 @@ Requiere `feat-m1-estados-roles` en `main` (ya está) y la tarea 3.1 de `feat-m2
 ## 4. Cierre
 
 - [x] 4.1 `clases-unificado.mmd`; `pnpm check` en verde; cobertura ≥ 80 % en `administracion/`
-- [ ] 4.2 Demo: `admin@deploya.app` suspende a `demo@deploya.app` → su app deja de responder y el login muestra el motivo (03b)
-- [ ] 4.3 `/opsx-archive` después del merge
+- [x] 4.2 Demo: `admin@deploya.app` suspende a `demo@deploya.app` → su app deja de responder y el login muestra el motivo (03b)
+- [x] 4.3 `/opsx-archive` después del merge

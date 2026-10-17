@@ -21,7 +21,7 @@ Requiere `feat-m5-acciones-contenedor` y `feat-m5-bloqueos-cuota` en `main` (ya 
 ## 4. Web (Javier)
 
 - [x] 4.1 «Suscripción suspendida · panel bloqueado» de 28 cuando `/suscripciones/mia` dice `suspendida`; «Renovar» lleva a 07
-- [ ] 4.2 Revisión contra el artboard 28 en claro y oscuro
+- [x] 4.2 Revisión contra el artboard 28 en claro y oscuro
 
 ## 5. Cierre
 

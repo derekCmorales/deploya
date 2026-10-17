@@ -4,13 +4,13 @@ Requiere `feat-m2-contratacion-suscripcion` (archivado). Sin base ni reloj reale
 
 ## 1. Lectura
 
-- [ ] 1.1 `RepositorioPagos.deUsuario` (Prisma y memoria), `HistorialPagosService.deUsuario`, `GET /suscripciones/pagos`
-- [ ] 1.2 Pruebas: «Ver historial» (orden y concepto), «Sin pagos» (lista vacía), sin sesión → 401
+- [x] 1.1 `RepositorioPagos.deUsuario` (Prisma y memoria), `HistorialPagosService.deUsuario`, `GET /suscripciones/pagos`
+- [x] 1.2 Pruebas: «Ver historial» (orden y concepto), «Sin pagos» (lista vacía), sin sesión → 401
 
 ## 2. Comprobante
 
-- [ ] 2.1 `Comprobante` (VO), `ComprobantePdfPuerto`, `ComprobantePdfKit` y `ComprobanteTextoFalso`; `GET /suscripciones/pagos/:id/comprobante.pdf`
-- [ ] 2.2 Pruebas: «Descargar comprobante» (número, fecha, concepto, vigencia, método, total y la leyenda «sin valor fiscal»), «Comprobante de otro cliente» → 404, pago rechazado → 404
+- [x] 2.1 `Comprobante` (VO), `ComprobantePdfPuerto`, `ComprobantePdfKit` y `ComprobanteTextoFalso`; `GET /suscripciones/pagos/:id/comprobante.pdf`
+- [x] 2.2 Pruebas: «Descargar comprobante» (número, fecha, concepto, vigencia, método, total y la leyenda «sin valor fiscal»), «Comprobante de otro cliente» → 404, pago rechazado → 404
 
 ## 3. Web
 

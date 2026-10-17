@@ -15,7 +15,8 @@ import { SuscripcionesService } from "./suscripciones.service";
 
 /**
  * `ContratacionService` se exporta para `CobroModule` (las rutas con sesión de M2) y
- * `RepositorioSuscripciones` para el ciclo §4.4 (`CicloModule` y `CicloTrabajadorModule`).
+ * `RepositorioSuscripciones` para el ciclo §4.4 (`CicloModule` y `CicloTrabajadorModule`);
+ * `RepositorioPagos` para el historial de pagos de `CobroModule` (M2-06).
  */
 @Module({
   controllers: [SuscripcionesController],
@@ -28,6 +29,6 @@ import { SuscripcionesService } from "./suscripciones.service";
     { provide: PasarelaPago, useClass: PasarelaSimulada },
     { provide: Espera, useClass: EsperaTemporizador },
   ],
-  exports: [SuscripcionesService, ContratacionService, RepositorioSuscripciones],
+  exports: [SuscripcionesService, ContratacionService, RepositorioSuscripciones, RepositorioPagos],
 })
 export class SuscripcionesModule {}

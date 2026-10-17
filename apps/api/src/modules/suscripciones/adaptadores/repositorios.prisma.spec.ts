@@ -184,3 +184,40 @@ describe("RepositorioPagosPrisma", () => {
     expect(pago.numeroComprobante).toBeNull();
   });
 });
+
+describe("RepositorioPagosPrisma · historial (M2-06)", () => {
+  const creado = new Date("2026-09-03T16:10:00.000Z");
+  const fila = {
+    id: "pg1",
+    usuarioId: "u1",
+    suscripcionId: "s1",
+    planId: STARTER.id,
+    concepto: "contratacion",
+    vigenciaDias: 30,
+    monto: new Prisma.Decimal("5.00"),
+    moneda: "USD",
+    estado: "aprobado",
+    motivoRechazo: null,
+    tarjetaUltimos4: "4242",
+    numeroComprobante: "DPY-2026-000142",
+    creado,
+    plan: { nombre: "Starter" },
+    usuario: { nombre: "Derek Calderón" },
+  };
+  const incluir = { plan: { select: { nombre: true } }, usuario: { select: { nombre: true } } };
+
+  it("deUsuario lee del más reciente al más antiguo con el plan y el titular", async () => {
+    const findMany = jest.fn().mockResolvedValue([fila]);
+    const [pago] = await new RepositorioPagosPrisma(prismaDoble({ pago: { findMany } })).deUsuario("u1");
+    expect(findMany).toHaveBeenCalledWith({ where: { usuarioId: "u1" }, include: incluir, orderBy: { creado: "desc" } });
+    expect(pago).toMatchObject({ monto: 5, planNombre: "Starter", titular: "Derek Calderón", numeroComprobante: "DPY-2026-000142" });
+  });
+
+  it("porId devuelve null si no existe", async () => {
+    const findUnique = jest.fn().mockResolvedValueOnce(fila).mockResolvedValueOnce(null);
+    const repositorio = new RepositorioPagosPrisma(prismaDoble({ pago: { findUnique } }));
+    await expect(repositorio.porId("pg1")).resolves.toMatchObject({ id: "pg1", planNombre: "Starter" });
+    await expect(repositorio.porId("pg-x")).resolves.toBeNull();
+    expect(findUnique).toHaveBeenCalledWith({ where: { id: "pg1" }, include: incluir });
+  });
+});

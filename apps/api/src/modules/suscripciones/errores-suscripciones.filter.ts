@@ -7,6 +7,7 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   "datos-invalidos": HttpStatus.BAD_REQUEST,
   "sin-suscripcion": HttpStatus.NOT_FOUND,
   "plan-no-encontrado": HttpStatus.NOT_FOUND,
+  "pago-no-encontrado": HttpStatus.NOT_FOUND,
   "vigencia-no-disponible": HttpStatus.UNPROCESSABLE_ENTITY,
   "plan-sin-cobro": HttpStatus.CONFLICT,
   "es-descenso": HttpStatus.CONFLICT,

@@ -16,16 +16,17 @@ import tempfile
 from pathlib import Path
 
 AQUI = Path(__file__).parent
-RITMO = 1.06            # un poco más ágil, sin cambiar el tono
+RITMO = 1.0             # sin estirar la voz: cualquier cambio de ritmo resta calidad
 ENTRADA = 0.7           # silencio antes de la voz de cada escena
 SALIDA = 1.2            # respiro al terminar cada escena
 ESPECIAL = {            # (entrada, salida) de escenas con más imagen que voz
     "s00-intro": (5.5, 1.6),
     "s02-publicar": (0.7, 3.0),
+    "s04-stack": (0.7, 2.0),
     "s10-cierre": (0.7, 4.5),
 }
 CAPITULOS = {
-    "s01-numeros": "Dónde estamos",
+    "s01-numeros": "Cómo vamos",
     "s02-publicar": "Publicar en vivo",
     "s03-cifrado": "Variables cifradas",
     "s04-stack": "Detección de stack",
@@ -36,6 +37,7 @@ CAPITULOS = {
     "s09-capo": "Bajo el capó",
 }
 TASA = 44100
+CARACTERES_POR_SEGUNDO = 16  # ritmo medido de la voz de Valeria
 
 
 def limpiar(texto):
@@ -189,18 +191,25 @@ def main():
     piezas, escenas, t = [], [], 0.0
     for e in guion:
         crudo = origen / f"{e['id']}.mp3"
-        ajustado = tmp / f"{e['id']}.wav"
-        ffmpeg("-i", str(crudo), "-af", f"atempo={RITMO}", "-ar", str(TASA), "-ac", "1", str(ajustado))
-        voz = duracion(ajustado)
         ent, sal = ESPECIAL.get(e["id"], (ENTRADA, SALIDA))
         texto = limpiar(e["texto"])
-        frases = alinear(texto, voz, silencios(ajustado))
+        if crudo.exists():
+            ajustado = tmp / f"{e['id']}.wav"
+            ritmo = ["-af", f"atempo={RITMO}"] if RITMO != 1.0 else []
+            ffmpeg("-i", str(crudo), *ritmo, "-ar", str(TASA), "-ac", "1", "-c:a", "pcm_s16le", str(ajustado))
+            voz = duracion(ajustado)
+            frases = alinear(texto, voz, silencios(ajustado))
+            piezas += [("silencio", ent), ("voz", ajustado), ("silencio", sal)]
+        else:
+            # Sin locución todavía: la escena corre con su texto en pantalla y el tiempo estimado
+            voz, frases = len(texto) / CARACTERES_POR_SEGUNDO, []
+            piezas += [("silencio", ent + voz + sal)]
+            print(f"  aviso: falta {crudo.name}; {e['id']} queda sin voz")
         escenas.append({
             "id": e["id"], "capitulo": CAPITULOS.get(e["id"]), "start": round(t, 3), "lead": ent,
             "voz": round(voz, 3), "dur": round(ent + voz + sal, 3), "texto": e["texto"],
-            "frases": frases, "subs": subtitulos(texto, frases),
+            "sinVoz": not crudo.exists(), "frases": frases, "subs": subtitulos(texto, frases),
         })
-        piezas += [("silencio", ent), ("voz", ajustado), ("silencio", sal)]
         t += ent + voz + sal
     # Pista única: voz + fondo ambiental (se agacha bajo la voz) + golpe del logo
     total = round(t, 3)
@@ -217,7 +226,7 @@ def main():
     fondo, golpe = origen / "sfx-fondo.mp3", origen / "sfx-sting6.mp3"
     if fondo.exists():
         entradas += ["-stream_loop", "-1", "-i", str(fondo)]
-        grafo += (f"[{n}:a]aformat=sample_rates={TASA}:channel_layouts=stereo,atrim=0:{total},volume=0.26,"
+        grafo += (f"[{n}:a]aformat=sample_rates={TASA}:channel_layouts=stereo,atrim=0:{total},volume=0.08,"
                   f"afade=t=in:d=3,afade=t=out:st={total - 5}:d=5[f0];"
                   "[f0][guia]sidechaincompress=threshold=0.015:ratio=5:attack=60:release=700[fondo];")
         mezcla += "[fondo]"; k += 1; n += 1
@@ -225,10 +234,17 @@ def main():
         grafo += "[guia]anullsink;"
     if golpe.exists():
         entradas += ["-i", str(golpe)]
-        grafo += f"[{n}:a]aformat=sample_rates={TASA}:channel_layouts=stereo,adelay=1300|1300,volume=0.45[golpe];"
+        grafo += f"[{n}:a]aformat=sample_rates={TASA}:channel_layouts=stereo,adelay=1300|1300,volume=0.35[golpe];"
         mezcla += "[golpe]"; k += 1; n += 1
-    grafo += f"{mezcla}amix=inputs={k}:normalize=0:duration=first,loudnorm=I=-16:TP=-1.5:LRA=11[out]"
-    ffmpeg(*entradas, "-filter_complex", grafo, "-map", "[out]", "-ar", str(TASA), "-ac", "2", "-b:a", "160k", str(AQUI / "voz.mp3"))
+    grafo += f"{mezcla}amix=inputs={k}:normalize=0:duration=first[out]"
+    mezcla_wav = tmp / "mezcla.wav"
+    ffmpeg(*entradas, "-filter_complex", grafo, "-map", "[out]", "-ar", str(TASA), "-ac", "2", "-c:a", "pcm_s24le", str(mezcla_wav))
+    # Volumen: una ganancia fija hasta -16 LUFS (sin compresión dinámica) y un limitador suave
+    medida = ffmpeg("-i", str(mezcla_wav), "-af", "loudnorm=I=-16:TP=-1.5:print_format=json", "-f", "null", "-").stderr
+    entrada_i = float(re.findall(r'"input_i" : "(-?[\d.]+)"', medida)[-1])
+    ganancia = -16 - entrada_i
+    ffmpeg("-i", str(mezcla_wav), "-af", f"volume={ganancia:.2f}dB,alimiter=limit=0.89:attack=5:release=60",
+           "-ar", str(TASA), "-c:a", "libmp3lame", "-b:a", "192k", str(AQUI / "voz.mp3"))
     total = round(t, 3)
     (AQUI / "timeline.js").write_text(
         "/* Generado por construir.py: no editar a mano. */\nwindow.TIMELINE = "

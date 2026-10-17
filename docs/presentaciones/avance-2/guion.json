@@ -1,13 +1,46 @@
 [
- {"id":"s00-intro","texto":"[warmly] Imagina esto… Tienes tu proyecto en GitHub. Le das un clic… y unos minutos después ya está en internet, con su propia dirección. Sin pelearte con servidores. Sin configurar nada. [short pause] Esto es Deploya. [excited] Y hoy te enseñamos todo lo que estrenamos en este segundo avance."},
- {"id":"s01-numeros","texto":"Empecemos por los números. La meta de este avance era llegar a la mitad del sistema… y llegamos al 57 %. Son doce funciones nuevas, todas terminadas, revisadas por el equipo y con sus pruebas: 625 pruebas automáticas, todas en verde. [warmly] Pero esto se entiende mejor en vivo. Así que, vamos a verlo."},
- {"id":"s02-publicar","texto":"Este es el momento favorito de cualquiera: publicar. Pegas la dirección de tu repositorio, Deploya completa el resto, y si tu app necesita un dato, como un saludo o una clave, lo agregas aquí, en variables. [short pause] Le das a Desplegar… y ahora lo ves todo. Arriba, las cinco etapas: recepción, construcción, ejecución, enrutamiento y operación. Abajo, la bitácora, línea por línea, como cuando rastreas un paquete. La pantalla pregunta cada tres segundos si hay algo nuevo, y cuando termina, deja de preguntar. [excited] Saludable. Tu app ya tiene dirección. Le das a Visitar… y ahí está."},
- {"id":"s03-cifrado","texto":"Y ese saludo que escribiste no se guarda tal cual. Se cifra antes de llegar a la base de datos: si alguien la abriera, solo vería un texto sin sentido. Es como una caja fuerte. La llave solo la tiene el trabajador, y la usa justo cuando enciende tu app. Ni siquiera la bitácora muestra el valor."},
- {"id":"s04-stack","texto":"Ahora, algo que nos pidieron en la primera entrega. Antes, si tu proyecto no traía un Dockerfile, que son las instrucciones para armarlo, Deploya lo rechazaba. [warmly] Ya no. Ahora mira tus archivos y reconoce en qué está hecho: Node, Python, Go, o una página estática. Como un buen mecánico, que ve el carro y ya sabe qué manual usar. ¿Y si traes tu propio Dockerfile? Ese siempre manda."},
- {"id":"s05-sin-corte","texto":"¿Y si quieres cambiar algo? Editas el saludo, le das a Guardar y desplegar… y aquí viene lo bonito. La versión uno sigue atendiendo a tus visitantes mientras preparamos la dos. Revisamos que responda bien, y solo entonces pasamos el tráfico, en un instante. Si la nueva falla, la anterior nunca dejó de atender. Cero caídas. Y si lo necesitas, ahora también puedes reiniciar o detener tu app con un botón."},
- {"id":"s06-cobro","texto":"Claro, todo esto vive dentro de un plan. Eliges el tuyo, pagas, y listo. Por ahora con una pasarela simulada, así que no se mueve dinero real: hay una tarjeta que se aprueba, otra que se rechaza con su motivo, y otra que tarda unos segundos. Subir de plan se cobra hoy; bajar, se programa para cuando vence. Y en Mi suscripción ves tu vigencia y cuánto llevas usado."},
- {"id":"s07-bloqueos","texto":"Y el plan se hace respetar. Antes de cada despliegue, Deploya revisa dos cosas: que tu suscripción esté al día, y que te queden construcciones en el mes. Si algo falta, te avisa al instante y te ofrece renovar o cambiar de plan. Sin sorpresas a mitad de camino."},
- {"id":"s08-cuentas","texto":"Y como tu cuenta es la llave de todo, la cuidamos. Si olvidas tu contraseña, te llega un enlace que dura media hora y sirve una sola vez. La respuesta es siempre la misma, exista o no la cuenta, para que nadie pueda adivinar quién está registrado. Y al cambiarla, se cierran tus sesiones en todos lados. Ah, y si un cliente intenta entrar a administración… simplemente, no puede."},
- {"id":"s09-capo","texto":"Ahora, un vistazo bajo el capó. La web habla con una API que solo anota tu pedido y responde al instante. Un trabajador aparte hace lo pesado: construir, encender y darle dirección a tu app. Cada pieza depende de acuerdos, no de marcas; por eso podemos cambiar Redis por una lista en las pruebas, o la pasarela simulada por una real, sin tocar el resto. Y cada problema tiene su patrón: Strategy para las recetas, Observer para la bitácora, Adapter para el pago, y Command para la fila."},
- {"id":"s10-cierre","texto":"¿Qué sigue? Para el 85 %: cada proyecto en su dirección segura de deploya.app, volver a una versión anterior en segundos, y una suscripción que se renueva y se suspende sola. [warmly] Esto fue Deploya, de Eddy, Javier, Eduardo y Derek. Gracias por acompañarnos."}
+ {
+  "id": "s00-intro",
+  "texto": "[warmly] Imagina esto… Tienes tu proyecto en GitHub. Le das un clic… y unos minutos después ya está en internet, con su propia dirección. Sin pelearte con servidores. Sin configurar nada. [short pause] Esto es Deploya. [excited] Y hoy te enseñamos todo lo que estrenamos en este segundo avance."
+ },
+ {
+  "id": "s01-numeros",
+  "texto": "Empecemos por cómo vamos. En la primera entrega llegamos al 32 %. La meta de este avance era la mitad del sistema… y llegamos al 57 %. Casi el doble. Son doce funciones nuevas, todas revisadas y con sus pruebas: 625 pruebas automáticas, en verde. [warmly] Y esto es lo nuevo: detección de stack, la vista en vivo, variables cifradas, actualizar sin corte, planes y cobro, y tu cuenta más segura. Vamos a verlo."
+ },
+ {
+  "id": "s04-stack",
+  "texto": "Y empezamos por lo más importante de este sprint, porque fue justo lo que nos pidieron en la primera entrega: la detección de stack. [short pause] Antes, Deploya solo aceptaba proyectos con un Dockerfile, que es la receta para armar la app. Si no lo traías, te rechazaba. [warmly] Ahora ya no hace falta. Deploya lee tus archivos y reconoce en qué está hecho tu proyecto. Si ve un package.json, es Node. Si ve un requirements.txt, es Python. Un go.mod, es Go. Y si solo hay un index.html, es una página estática. Con eso escoge una receta, escribe el Dockerfile por ti y arma tu app, sin permisos de administrador. Y en la bitácora te lo dice clarito: stack detectado, Node.js 22. ¿Y si sí traes tu propio Dockerfile? Ese siempre manda."
+ },
+ {
+  "id": "s02-publicar",
+  "texto": "Ahora sí: publicar. Pegas la dirección de tu repositorio, Deploya completa el resto, y si tu app necesita un dato, como un saludo, lo agregas aquí, en variables. [short pause] Le das a Desplegar… y lo ves todo en vivo. Arriba, las cinco etapas: recepción, construcción, ejecución, enrutamiento y operación. Abajo, la bitácora, línea por línea, como cuando rastreas un paquete. La pantalla pregunta cada tres segundos si hay algo nuevo, y cuando termina, deja de preguntar. [excited] Saludable. Le das a Visitar… y ahí está."
+ },
+ {
+  "id": "s03-cifrado",
+  "texto": "Y ese saludo que escribiste no se guarda tal cual. Se cifra antes de llegar a la base de datos: si alguien la abriera, solo vería un texto sin sentido. Es como una caja fuerte. La llave solo la tiene el trabajador, y la usa justo cuando enciende tu app. Ni siquiera la bitácora muestra el valor."
+ },
+ {
+  "id": "s05-sin-corte",
+  "texto": "¿Y si quieres cambiar algo? Editas el saludo, le das a Guardar y desplegar… y aquí viene lo bonito. La versión uno sigue atendiendo a tus visitantes mientras preparamos la dos. Revisamos que responda bien, y solo entonces pasamos el tráfico, en un instante. Si la nueva falla, la anterior nunca dejó de atender. Cero caídas. Y si lo necesitas, ahora también puedes reiniciar o detener tu app con un botón."
+ },
+ {
+  "id": "s06-cobro",
+  "texto": "Claro, todo esto vive dentro de un plan. Eliges el tuyo, pagas, y listo. Por ahora con una pasarela simulada, sin dinero real: hay una tarjeta que se aprueba, otra que se rechaza con su motivo, y otra que tarda unos segundos. Subir de plan se cobra hoy; bajar, se programa para cuando vence. Y en Mi suscripción ves tu vigencia y tu consumo."
+ },
+ {
+  "id": "s07-bloqueos",
+  "texto": "Y el plan se hace respetar. Antes de cada despliegue, Deploya revisa dos cosas: que tu suscripción esté al día, y que te queden construcciones en el mes. Si algo falta, te avisa al instante y te ofrece renovar o cambiar de plan. Sin sorpresas a mitad de camino."
+ },
+ {
+  "id": "s08-cuentas",
+  "texto": "Y como tu cuenta es la llave de todo, la cuidamos. Si olvidas tu contraseña, te llega un enlace que dura media hora y sirve una sola vez. La respuesta es siempre la misma, exista o no la cuenta, para que nadie pueda adivinar quién está registrado. Y al cambiarla, se cierran tus sesiones en todos lados. Ah, y si un cliente intenta entrar a administración… simplemente, no puede."
+ },
+ {
+  "id": "s09-capo",
+  "texto": "Ahora, un vistazo bajo el capó. La web habla con una API que solo anota tu pedido y responde al instante. Un trabajador aparte hace lo pesado: construir, encender y darle dirección a tu app. Cada pieza depende de acuerdos, no de marcas: por eso en las pruebas cambiamos Redis por una lista, y mañana la pasarela simulada por una real, sin tocar el resto. Y cada problema tiene su patrón: Strategy para las recetas, Observer para la bitácora, Adapter para el pago, y Command para la fila."
+ },
+ {
+  "id": "s10-cierre",
+  "texto": "¿Qué sigue? Para el 85 %: cada proyecto en su dirección segura de deploya.app, volver a una versión anterior en segundos, y una suscripción que se renueva y se suspende sola. [warmly] Esto fue Deploya, de Eddy, Javier, Eduardo y Derek. Gracias por acompañarnos."
+ }
 ]

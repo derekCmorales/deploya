@@ -198,45 +198,49 @@ body.render #ui,body.render #start{display:none!important}
     </div>
   </section>
 
-  <!-- ═════════ 01 · NÚMEROS ═════════ -->
+  <!-- ═════════ 01 · CÓMO VAMOS ═════════ -->
   <section class="scene" id="s01-numeros">
     <div class="title-blk">
-      <p class="eyebrow" style="margin:0" data-fx="up" data-at="0.2">Dónde estamos</p>
-      <h1 class="h1" data-fx="up" data-at="@La meta">La meta era llegar al 50 %.</h1>
-      <h1 class="h1 sig" data-fx="up" data-at="@y llegamos">Llegamos al 57 %.</h1>
+      <p class="eyebrow" style="margin:0" data-fx="up" data-at="0.2">Cómo vamos</p>
+      <h1 class="h1" data-fx="up" data-at="@En la primera entrega">Primera entrega: 32 %.</h1>
+      <h1 class="h1 sig" data-fx="up" data-at="@y llegamos">Hoy: 57 %. Casi el doble.</h1>
     </div>
-    <div class="abs" style="left:120px;right:120px;top:470px">
+    <div class="abs" style="left:120px;right:120px;top:440px">
       <div class="row" style="justify-content:space-between;margin-bottom:16px">
-        <span class="muted" style="font-size:20px" data-fx="in" data-at="@La meta">83 de 145 puntos del sistema</span>
+        <span class="muted" style="font-size:20px" data-fx="in" data-at="@En la primera entrega">83 de 145 puntos del sistema</span>
         <span id="pctN" style="font-size:80px;font-weight:600;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums">0 %</span>
       </div>
-      <div style="position:relative;height:30px;border-radius:6px;background:var(--line);overflow:visible" data-fx="in" data-at="@La meta">
+      <div style="position:relative;height:30px;border-radius:6px;background:var(--line);overflow:visible" data-fx="in" data-at="@En la primera entrega">
         <div id="barA1" style="position:absolute;left:0;top:0;bottom:0;border-radius:6px 0 0 6px;background:var(--fg-3);width:0"></div>
         <div id="barA2" style="position:absolute;top:0;bottom:0;background:var(--signal);width:0"></div>
-        <div style="position:absolute;left:50%;top:-14px;bottom:-14px;border-left:2px dashed var(--fg-2)"></div>
-        <span class="mono muted" style="position:absolute;left:50%;top:44px;transform:translateX(-50%);font-size:17px;white-space:nowrap">meta · 50 %</span>
-      </div>
-      <div class="row mono faint" style="gap:28px;margin-top:22px;font-size:16px" data-fx="in" data-at="@y llegamos">
-        <span class="row" style="gap:8px"><i style="width:14px;height:14px;border-radius:3px;background:var(--fg-3);display:block"></i>Avance 1 · 46 pts</span>
-        <span class="row sig" style="gap:8px"><i style="width:14px;height:14px;border-radius:3px;background:var(--signal);display:block"></i>Avance 2 · 37 pts</span>
+        <div style="position:absolute;left:31.7%;top:-14px;bottom:-14px;border-left:2px dashed var(--fg-3)" data-fx="in" data-at="@llegamos al 32"></div>
+        <span class="mono muted" style="position:absolute;left:31.7%;top:44px;transform:translateX(-50%);font-size:17px;white-space:nowrap" data-fx="in" data-at="@llegamos al 32">avance 1 · 32 %</span>
+        <div style="position:absolute;left:50%;top:-14px;bottom:-14px;border-left:2px dashed var(--fg-2)" data-fx="in" data-at="@La meta"></div>
+        <span class="mono muted" style="position:absolute;left:50%;top:44px;transform:translateX(-50%);font-size:17px;white-space:nowrap" data-fx="in" data-at="@La meta">meta · 50 %</span>
       </div>
     </div>
-    <div class="abs row" style="left:120px;right:120px;top:700px;gap:24px;align-items:stretch">
-      <div class="card col" style="flex:1;padding:28px 30px;gap:6px" data-fx="up" data-at="@Son doce">
-        <span class="lbl">Funciones nuevas</span><span class="mono" data-count="12" data-cat="@Son doce" style="font-size:80px;font-weight:600;letter-spacing:-.05em;line-height:1.05">0</span><span class="muted" style="font-size:20px">terminadas y revisadas</span>
+    <div class="abs row" style="left:120px;top:640px;width:780px;gap:20px;align-items:stretch">
+      <div class="card col" style="flex:1;padding:26px 28px;gap:6px" data-fx="up" data-at="@Son doce">
+        <span class="lbl">Funciones nuevas</span><span class="mono" data-count="12" data-cat="@Son doce" style="font-size:80px;font-weight:600;letter-spacing:-.05em;line-height:1.05">0</span><span class="muted" style="font-size:19px">revisadas y con pruebas</span>
       </div>
-      <div class="card col" style="flex:1;padding:28px 30px;gap:6px" data-fx="up" data-at="@revisadas por el equipo">
-        <span class="lbl">Personas</span><span class="mono" style="font-size:80px;font-weight:600;letter-spacing:-.05em;line-height:1.05">4</span><span class="muted" style="font-size:20px">Eddy · Javier · Eduardo · Derek</span>
-      </div>
-      <div class="sigcard col" style="flex:1.3;padding:28px 30px;gap:6px" data-fx="up" data-at="@625">
-        <span class="lbl">Pruebas automáticas</span>
-        <div class="row" style="gap:18px"><span class="mono" data-count="625" data-cat="@625" data-cdu="1.6" style="font-size:80px;font-weight:600;letter-spacing:-.05em;line-height:1.05">0</span>
-        <span class="bdg bdg-ok" data-fx="pop" data-at="@todas en verde"><i class="ic" data-i="check" data-s="15"></i>todas en verde</span></div>
-        <span class="muted mono" style="font-size:18px">517 servidor · 108 web · una por escenario</span>
+      <div class="sigcard col" style="flex:1.15;padding:26px 28px;gap:6px" data-fx="up" data-at="@625">
+        <span class="lbl">Pruebas automáticas</span><span class="mono" data-count="625" data-cat="@625" data-cdu="1.6" style="font-size:80px;font-weight:600;letter-spacing:-.05em;line-height:1.05">0</span>
+        <span class="row" style="gap:10px"><span class="bdg bdg-ok" data-fx="pop" data-at="@en verde"><i data-i="check" data-s="15"></i>en verde</span><span class="muted mono" style="font-size:16px">517 servidor · 108 web</span></span>
       </div>
     </div>
-    <div class="abs" style="inset:0;background:var(--bg)" data-fx="in" data-at="@Pero esto" data-du="0.7"></div>
-    <div class="abs c row" style="gap:22px" data-fx="blur" data-at="@Pero esto+0.3">
+    <div class="abs card col" style="left:960px;right:120px;top:640px;overflow:hidden" data-fx="up" data-at="@Y esto es lo nuevo">
+      <div class="row" style="padding:16px 22px;border-bottom:1px solid var(--line);gap:10px"><span style="font-size:21px;font-weight:600">Lo nuevo de este sprint</span><span class="bdg bdg-sig" style="margin-left:auto">Avance 2</span></div>
+      <div class="col" style="padding:6px 0">
+        <div class="row nuevo" style="gap:16px;padding:6px 22px;font-size:20px" data-fx="left" data-at="@detección de stack"><span class="mono sig" style="font-size:16px;width:28px">02</span><span style="font-weight:600">Detección de stack</span><span class="bdg bdg-sig" style="margin-left:auto">lo más importante</span></div>
+        <div class="row nuevo" style="gap:16px;padding:6px 22px;font-size:20px" data-fx="left" data-at="@la vista en vivo"><span class="mono faint" style="font-size:16px;width:28px">03</span><span>Vista de despliegue en vivo</span></div>
+        <div class="row nuevo" style="gap:16px;padding:6px 22px;font-size:20px" data-fx="left" data-at="@variables cifradas"><span class="mono faint" style="font-size:16px;width:28px">04</span><span>Variables cifradas</span></div>
+        <div class="row nuevo" style="gap:16px;padding:6px 22px;font-size:20px" data-fx="left" data-at="@actualizar sin corte"><span class="mono faint" style="font-size:16px;width:28px">05</span><span>Actualizar sin corte</span></div>
+        <div class="row nuevo" style="gap:16px;padding:6px 22px;font-size:20px" data-fx="left" data-at="@planes y cobro"><span class="mono faint" style="font-size:16px;width:28px">06</span><span>Planes, cobro y bloqueos</span></div>
+        <div class="row nuevo" style="gap:16px;padding:6px 22px;font-size:20px" data-fx="left" data-at="@tu cuenta más segura"><span class="mono faint" style="font-size:16px;width:28px">08</span><span>Recuperar contraseña y roles</span></div>
+      </div>
+    </div>
+    <div class="abs" style="inset:0;background:var(--bg)" data-fx="in" data-at="@Vamos a verlo" data-du="0.7"></div>
+    <div class="abs c row" style="gap:22px" data-fx="blur" data-at="@Vamos a verlo+0.3">
       <span class="live" data-pulse="1" style="width:22px;height:22px"></span><span class="h1" style="font-size:88px">Veámoslo en vivo.</span>
     </div>
   </section>
@@ -316,7 +320,7 @@ body.render #ui,body.render #start{display:none!important}
             </div>
             <div class="log" style="flex:1;padding:10px 0" id="log02"></div>
           </div>
-          <div class="ban ban-ok row" style="gap:12px;align-items:center;padding:12px 16px" data-fx="up" data-at="@Tu app ya tiene">
+          <div class="ban ban-ok row" style="gap:12px;align-items:center;padding:12px 16px" data-fx="up" data-at="@Saludable+0.8">
             <i class="ic okc" data-i="globe" data-s="20"></i><span style="font-size:16px;font-weight:600">hola-deploya está en línea</span><span class="mono muted" style="font-size:15px">http://hola-deploya.localhost</span>
             <span class="btn btn-pri" id="btnVis" style="height:34px;font-size:14px;margin-left:auto"><i class="ic" data-i="external" data-s="14"></i>Visitar</span>
           </div>
@@ -374,36 +378,39 @@ body.render #ui,body.render #start{display:none!important}
   <!-- ═════════ 04 · DETECCIÓN DE STACK ═════════ -->
   <section class="scene" id="s04-stack">
     <div class="title-blk">
-      <p class="eyebrow" style="margin:0" data-fx="up" data-at="0.2">Detección de stack · Derek · lo pidió el curso</p>
+      <div class="row" style="gap:14px" data-fx="up" data-at="0.2"><p class="eyebrow" style="margin:0">Detección de stack · Derek</p><span class="bdg bdg-sig" style="height:32px;font-size:18px">Lo más importante del sprint · lo pidió el curso</span></div>
       <h1 class="h1" data-fx="up" data-at="0.35">Sin Dockerfile, también.</h1>
     </div>
-    <div class="abs card col" style="left:120px;top:330px;width:700px;overflow:hidden" data-fx="up" data-at="0.6">
-      <div class="row" style="gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)"><i class="ic" data-i="github" data-s="22"></i><span style="font-size:22px;font-weight:600">hola-deploya</span><span class="bdg bdg-out" style="margin-left:auto"><i class="ic" data-i="branch" data-s="14"></i>sin-dockerfile</span></div>
-      <div class="col mono" style="font-size:20px;padding:10px 0">
-        <span class="row" style="gap:12px;padding:9px 22px" id="fDock" data-fx="in" data-at="@Ese siempre manda-0.4"><i class="ic okc" data-i="file" data-s="20"></i><span class="okc">Dockerfile</span><span class="bdg bdg-ok" style="margin-left:auto;font-family:var(--sans)">el tuyo manda</span></span>
-        <span class="row" style="gap:12px;padding:9px 22px" id="fPkg"><i class="ic" data-i="file" data-s="20"></i>package.json</span>
-        <span class="row" style="gap:12px;padding:9px 22px"><i class="ic" data-i="file" data-s="20"></i>server.js</span>
-        <span class="row" style="gap:12px;padding:9px 22px"><i class="ic" data-i="file" data-s="20"></i>package-lock.json</span>
-        <span class="row" style="gap:12px;padding:9px 22px"><i class="ic" data-i="file" data-s="20"></i>README.md</span>
-        <span class="row faint" style="gap:12px;padding:9px 22px" data-fx="in" data-at="@no traía" data-out="@Ese siempre manda-0.5"><i class="ic" data-i="x" data-s="20"></i><span class="strike" data-strike="@no traía+0.3">Dockerfile</span><span style="margin-left:auto;font-family:var(--sans);font-size:17px">no está</span></span>
+    <div class="abs card col" style="left:120px;top:320px;width:700px;overflow:hidden" data-fx="up" data-at="0.6">
+      <div class="row" style="gap:12px;padding:16px 22px;border-bottom:1px solid var(--line)"><i data-i="github" data-s="22"></i><span style="font-size:22px;font-weight:600">hola-deploya</span><span class="bdg bdg-out" style="margin-left:auto"><i data-i="branch" data-s="14"></i>sin-dockerfile</span></div>
+      <div class="col mono" style="font-size:20px;padding:8px 0">
+        <span class="row" style="gap:12px;padding:8px 22px" id="fPkg"><i data-i="file" data-s="20"></i>package.json</span>
+        <span class="row" style="gap:12px;padding:8px 22px"><i data-i="file" data-s="20"></i>server.js</span>
+        <span class="row" style="gap:12px;padding:8px 22px"><i data-i="file" data-s="20"></i>README.md</span>
+        <span style="position:relative;display:block">
+          <span class="row faint" style="gap:12px;padding:8px 22px" data-fx="in" data-at="@Antes" data-out="@Ese siempre manda-0.5"><i data-i="x" data-s="20"></i><span class="strike" data-strike="@Si no lo traías">Dockerfile</span><span style="margin-left:auto;font-family:var(--sans);font-size:17px">no está</span></span>
+          <span class="row" style="gap:12px;padding:8px 22px;position:absolute;left:0;right:0;top:0" id="fDock" data-fx="in" data-at="@Ese siempre manda-0.3"><i class="okc" data-i="file" data-s="20"></i><span class="okc">Dockerfile</span><span class="bdg bdg-ok" style="margin-left:auto;font-family:var(--sans)">el tuyo manda</span></span>
+        </span>
       </div>
-      <div class="ban ban-bad" style="margin:0 18px 18px;font-size:19px" data-fx="up" data-at="@lo rechazaba" data-out="@Ya no"><i class="ic badc" data-i="x" data-s="20"></i><span><b>Antes:</b> «Falta el Dockerfile» · rechazado</span></div>
     </div>
-    <div class="abs ban ban-ok" style="left:138px;top:812px;width:664px;font-size:19px" data-fx="up" data-at="@Ya no+0.1"><i class="ic okc" data-i="check" data-s="20"></i><span><b>Ahora:</b> Deploya reconoce el stack y lo arma</span></div>
-    <div class="abs col" style="left:880px;right:120px;top:330px;gap:12px" id="chk04">
-      <div class="card row q" style="gap:16px;padding:16px 22px" data-fx="left" data-at="@mira tus archivos"><span class="mono faint">1</span><span style="font-size:21px;flex:1">¿Trae su propio Dockerfile?</span><span class="ans mono" style="font-size:19px"></span></div>
-      <div class="card row q" style="gap:16px;padding:16px 22px" data-fx="left" data-at="@mira tus archivos+0.12"><span class="mono faint">2</span><span style="font-size:21px;flex:1">¿Node.js? <span class="mono faint" style="font-size:17px">package.json</span></span><span class="ans mono" style="font-size:19px"></span></div>
-      <div class="card row q" style="gap:16px;padding:16px 22px" data-fx="left" data-at="@mira tus archivos+0.24"><span class="mono faint">3</span><span style="font-size:21px;flex:1">¿Python? <span class="mono faint" style="font-size:17px">requirements.txt</span></span><span class="ans mono" style="font-size:19px"></span></div>
-      <div class="card row q" style="gap:16px;padding:16px 22px" data-fx="left" data-at="@mira tus archivos+0.36"><span class="mono faint">4</span><span style="font-size:21px;flex:1">¿Go? <span class="mono faint" style="font-size:17px">go.mod</span></span><span class="ans mono" style="font-size:19px"></span></div>
-      <div class="card row q" style="gap:16px;padding:16px 22px" data-fx="left" data-at="@mira tus archivos+0.48"><span class="mono faint">5</span><span style="font-size:21px;flex:1">¿Sitio estático? <span class="mono faint" style="font-size:17px">index.html</span></span><span class="ans mono" style="font-size:19px"></span></div>
+    <div class="abs ban ban-bad" style="left:120px;top:590px;width:700px;font-size:20px;align-items:center" data-fx="up" data-at="@te rechazaba" data-out="@Ahora ya no"><i class="badc" data-i="x" data-s="22"></i><span><b>Antes:</b> «Falta el Dockerfile» · rechazado</span></div>
+    <div class="abs ban ban-ok" style="left:120px;top:590px;width:700px;font-size:20px;align-items:center" data-fx="up" data-at="@Ahora ya no+0.2"><i class="okc" data-i="check" data-s="22"></i><span><b>Ahora:</b> Deploya reconoce el stack y arma tu app</span></div>
+    <div class="abs card col" style="left:120px;top:676px;width:700px;overflow:hidden" data-fx="up" data-at="@escribe el Dockerfile-0.4">
+      <div class="row" style="gap:10px;padding:12px 22px;border-bottom:1px solid var(--line)"><i class="sig" data-i="file" data-s="18"></i><span style="font-size:18px;font-weight:600">Dockerfile</span><span class="muted" style="font-size:16px">escrito por la receta Node.js 22</span></div>
+      <div class="log mono" id="df04" style="font-size:18px;line-height:34px;padding:8px 0"><div class="row df" style="gap:14px;padding:0 22px;height:34px"><span class="faint" style="width:18px;text-align:right">1</span><span data-type='FROM node:22-alpine' data-tat="@escribe el Dockerfile+0.00" data-tdu="0.35"></span></div><div class="row df" style="gap:14px;padding:0 22px;height:34px"><span class="faint" style="width:18px;text-align:right">2</span><span data-type='WORKDIR /app' data-tat="@escribe el Dockerfile+0.32" data-tdu="0.35"></span></div><div class="row df" style="gap:14px;padding:0 22px;height:34px"><span class="faint" style="width:18px;text-align:right">3</span><span data-type='COPY . .' data-tat="@escribe el Dockerfile+0.64" data-tdu="0.35"></span></div><div class="row df" style="gap:14px;padding:0 22px;height:34px"><span class="faint" style="width:18px;text-align:right">4</span><span data-type='RUN npm ci --omit=dev' data-tat="@escribe el Dockerfile+0.96" data-tdu="0.35"></span></div><div class="row df" style="gap:14px;padding:0 22px;height:34px"><span class="faint" style="width:18px;text-align:right">5</span><span data-type='USER node' data-tat="@escribe el Dockerfile+1.28" data-tdu="0.35"></span><span class="tag" style="margin-left:auto;font-size:14px;padding:3px 9px" data-fx="pop" data-at="@sin permisos">sin root</span></div><div class="row df" style="gap:14px;padding:0 22px;height:34px"><span class="faint" style="width:18px;text-align:right">6</span><span data-type='CMD [&quot;node&quot;, &quot;server.js&quot;]' data-tat="@escribe el Dockerfile+1.60" data-tdu="0.35"></span></div></div>
     </div>
-    <div class="abs row" style="left:880px;top:700px;gap:12px" data-fx="up" data-at="@Node, Python">
-      <span class="chip rc" style="font-size:20px">Node.js 22</span><span class="chip rc" style="font-size:20px">Python 3.12</span><span class="chip rc" style="font-size:20px">Go 1.23</span><span class="chip rc" style="font-size:20px">Estático</span>
+    <p class="abs lbl" style="left:880px;top:316px;margin:0;font-size:20px" data-fx="in" data-at="@lee tus archivos">Deploya lee tus archivos y escoge una receta</p>
+    <div class="abs col" style="left:880px;right:120px;top:356px;gap:12px" id="map04">
+      <div class="card row mp" style="gap:18px;padding:14px 22px" data-fx="left" data-at="@Si ve un package.json"><span class="tag" style="color:var(--fg);font-size:19px">package.json</span><i class="faint" data-i="arrow" data-s="22"></i><span style="font-size:24px;font-weight:600">Node.js 22</span><span class="bdg bdg-ok det" style="margin-left:auto;opacity:0"><i data-i="check" data-s="14"></i>en tu repo</span></div>
+      <div class="card row mp" style="gap:18px;padding:14px 22px" data-fx="left" data-at="@Si ve un requirements.txt"><span class="tag" style="color:var(--fg);font-size:19px">requirements.txt</span><i class="faint" data-i="arrow" data-s="22"></i><span style="font-size:24px;font-weight:600">Python 3.12</span></div>
+      <div class="card row mp" style="gap:18px;padding:14px 22px" data-fx="left" data-at="@Un go.mod"><span class="tag" style="color:var(--fg);font-size:19px">go.mod</span><i class="faint" data-i="arrow" data-s="22"></i><span style="font-size:24px;font-weight:600">Go 1.23</span></div>
+      <div class="card row mp" style="gap:18px;padding:14px 22px" data-fx="left" data-at="@Y si solo hay"><span class="tag" style="color:var(--fg);font-size:19px">index.html</span><i class="faint" data-i="arrow" data-s="22"></i><span style="font-size:24px;font-weight:600">Sitio estático</span></div>
     </div>
-    <div class="abs card" style="left:880px;right:120px;top:800px;overflow:hidden" data-fx="up" data-at="@Como un buen">
-      <div class="log" style="padding:12px 0;font-size:18px;line-height:36px;border-radius:12px"><div class="ll" style="grid-template-columns:30px 130px 1fr"><span class="n">2</span><span class="s">recepción</span><span data-type="Stack detectado: Node.js 22 · receta Deploya" data-tat="@Como un buen+0.3" data-tdu="1.4"></span></div></div>
+    <div class="abs card" style="left:880px;right:120px;top:736px;overflow:hidden" data-fx="up" data-at="@te lo dice clarito-0.3">
+      <div class="log" style="padding:10px 0;font-size:19px;line-height:38px;border-radius:12px"><div class="ll" style="grid-template-columns:30px 130px 1fr"><span class="n">2</span><span class="s">recepción</span><span data-type="Stack detectado: Node.js 22 · receta Deploya" data-tat="@te lo dice clarito" data-tdu="1.3"></span></div></div>
     </div>
-    <div class="abs tag" style="left:880px;top:900px;font-size:17px" data-fx="up" data-at="@qué manual"><i class="ic sig" data-i="puzzle" data-s="16"></i>Strategy · cada receta es un manual; gana la primera que reconoce</div>
+    <div class="abs ban ban-sig" style="left:880px;right:120px;top:830px;font-size:20px;align-items:center" data-fx="up" data-at="@Ese siempre manda-0.2"><i class="sig" data-i="shield" data-s="22"></i><span>¿Traes tu propio Dockerfile? <b>Se usa el tuyo, siempre.</b></span></div>
+    <div class="abs tag" style="left:880px;top:922px;font-size:17px" data-fx="up" data-at="@Ese siempre manda+0.6"><i class="sig" data-i="puzzle" data-s="16"></i>Strategy · una receta por stack; gana la primera que reconoce</div>
   </section>
 
   <!-- ═════════ 05 · ACTUALIZAR SIN CORTE ═════════ -->
@@ -480,9 +487,9 @@ body.render #ui,body.render #start{display:none!important}
       <div class="row" style="gap:14px;align-items:baseline"><span style="font-size:44px;font-weight:600;letter-spacing:-.04em">Starter</span><span class="muted" style="font-size:20px">vence el 6 nov · 30 días</span></div>
       <div class="col" style="gap:8px"><div class="row muted" style="justify-content:space-between;font-size:17px"><span>Vigencia</span><span class="mono">1 de 30 días</span></div><div style="height:10px;border-radius:4px;background:var(--line-2)"><div class="grow" data-w="4" data-wat="@Mi suscripción+0.4" style="height:10px;border-radius:4px;background:var(--fg-2);width:0"></div></div></div>
       <div class="col" style="gap:8px"><div class="row muted" style="justify-content:space-between;font-size:17px"><span>Proyectos</span><span class="mono">1 / 3</span></div><div style="height:10px;border-radius:4px;background:var(--line-2)"><div class="grow" data-w="33" data-wat="@vigencia" style="height:10px;border-radius:4px;background:var(--signal);width:0"></div></div></div>
-      <div class="col" style="gap:8px"><div class="row muted" style="justify-content:space-between;font-size:17px"><span>Construcciones del mes</span><span class="mono">12 / 150</span></div><div style="height:10px;border-radius:4px;background:var(--line-2)"><div class="grow" data-w="8" data-wat="@cuánto llevas" style="height:10px;border-radius:4px;background:var(--signal);width:0"></div></div></div>
+      <div class="col" style="gap:8px"><div class="row muted" style="justify-content:space-between;font-size:17px"><span>Construcciones del mes</span><span class="mono">12 / 150</span></div><div style="height:10px;border-radius:4px;background:var(--line-2)"><div class="grow" data-w="8" data-wat="@tu consumo" style="height:10px;border-radius:4px;background:var(--signal);width:0"></div></div></div>
     </div>
-    <div class="abs tag" style="left:1130px;top:780px;font-size:17px" data-fx="up" data-at="@cuánto llevas+0.5"><i class="ic sig" data-i="plug" data-s="16"></i>Adapter · mañana se conecta una pasarela real</div>
+    <div class="abs tag" style="left:1130px;top:780px;font-size:17px" data-fx="up" data-at="@tu consumo+0.5"><i class="ic sig" data-i="plug" data-s="16"></i>Adapter · mañana se conecta una pasarela real</div>
   </section>
 
   <!-- ═════════ 07 · BLOQUEOS ═════════ -->
@@ -622,7 +629,7 @@ body.render #ui,body.render #start{display:none!important}
 
 <button id="start" type="button" aria-label="Reproducir la presentación">
   <span class="b"><span class="play"><svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg></span>
-  <span class="tx"><span class="t1">Deploya · Avance 2 · 50 %</span><span class="t2">Presentación con voz · 5:42 · activa el sonido</span></span></span>
+  <span class="tx"><span class="t1">Deploya · Avance 2 · 50 %</span><span class="t2">Presentación con voz · 4:50 · activa el sonido</span></span></span>
 </button>
 <div id="ui">
   <button id="bPlay" type="button" aria-label="Reproducir o pausar"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path id="pIco" d="M8 5.5v13l11-6.5z"/></svg></button>

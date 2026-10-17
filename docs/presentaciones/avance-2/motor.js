@@ -90,7 +90,8 @@
       return sc.lead + sc.voz * pesoHasta(L, i) / pesoHasta(L, L.length) + off;
     };
   });
-  const byId = Object.fromEntries(scenes.map(s => [s.id, s]));
+  // La escena que entra queda encima de la que sale
+  scenes.forEach((sc, i) => { sc.el.style.zIndex = i + 1; });
 
   /* ── Medir posiciones (para el cursor) con todo visible y sin animar ── */
   const k0 = () => stage.getBoundingClientRect().width / 1920;
@@ -221,7 +222,7 @@
     },
     's01-numeros'(sc, lt, T) {
       const a1 = 46 / 145 * 100, a2 = 37 / 145 * 100;
-      const p1 = eo(prog(lt, T('@La meta') + .3, 1.4)), p2 = eo(prog(lt, T('@y llegamos') - .3, 1.6));
+      const p1 = eo(prog(lt, T('@En la primera entrega') + .3, 1.5)), p2 = eo(prog(lt, T('@y llegamos') - .3, 1.6));
       document.getElementById('barA1').style.width = a1 * p1 + '%';
       const b2 = document.getElementById('barA2'); b2.style.left = a1 + '%'; b2.style.width = a2 * p2 + '%';
       const pct = Math.round(a1 * p1 + a2 * p2);
@@ -296,25 +297,21 @@
       } else el.textContent = fin;
     },
     's04-stack'(sc, lt, T) {
-      const rows = document.querySelectorAll('#chk04 .q');
-      const tr = T('@reconoce'), tm = T('@Ese siempre manda');
-      const set = (r, html, color, border) => { const a = r.querySelector('.ans'); if (a.innerHTML !== html) a.innerHTML = html; a.style.color = color; r.style.borderColor = border || ''; r.style.background = border ? 'var(--signal-bg)' : ''; };
-      rows.forEach((r, i) => {
-        if (lt >= tm) {
-          if (i === 0) set(r, 'sí → se usa el tuyo', 'var(--ok)', 'var(--ok)');
-          else set(r, 'no hace falta', 'var(--fg-3)');
-        } else if (i === 0) set(r, lt >= tr ? 'no' : '', 'var(--fg-3)');
-        else if (i === 1) set(r, lt >= tr + .6 ? 'sí → receta Node.js 22' : '', 'var(--ok)', lt >= tr + .6 ? 'var(--signal)' : '');
-        else set(r, lt >= tr + 1 ? '—' : '', 'var(--fg-3)');
+      // Cada archivo se ilumina cuando la voz lo nombra; Node.js queda como el detectado
+      const marcas = [T('@Si ve un package.json'), T('@Si ve un requirements.txt'), T('@Un go.mod'), T('@Y si solo hay')];
+      const tDet = T('@Con eso escoge'), tManda = T('@Ese siempre manda');
+      document.querySelectorAll('#map04 .mp').forEach((r, i) => {
+        const on = lt >= marcas[i] && lt < (marcas[i + 1] ?? tDet);
+        const det = i === 0 && lt >= tDet && lt < tManda;
+        r.style.borderColor = on ? 'var(--signal)' : det ? 'var(--ok)' : '';
+        r.style.background = on ? 'var(--signal-bg)' : det ? 'color-mix(in oklab,var(--ok) 9%,var(--card))' : '';
+        r.style.opacity = lt >= tManda && i > 0 ? .55 : 1;
+        const d = r.querySelector('.det'); if (d) d.style.opacity = det ? 1 : 0;
       });
-      document.getElementById('fPkg').style.background = lt >= tr + .6 && lt < tm ? 'var(--signal-bg)' : '';
-      const marcas = [T('@Node, Python'), T('@Python'), T('@Go,'), T('@estática')];
-      document.querySelectorAll('#s04-stack .rc').forEach((c, i) => {
-        const on = lt >= marcas[i] && lt < marcas[i] + .9; const fija = i === 0 && lt >= T('@Como un buen');
-        c.style.borderColor = on ? 'var(--signal)' : fija ? 'var(--ok)' : '';
-        c.style.color = on ? 'var(--signal)' : fija ? 'var(--ok)' : '';
-        c.style.transform = on ? 'translateY(-4px)' : '';
-      });
+      const pkg = document.getElementById('fPkg');
+      pkg.style.background = (lt >= marcas[0] && lt < marcas[1]) || (lt >= tDet && lt < tManda) ? 'var(--signal-bg)' : '';
+      const tSin = T('@sin permisos');
+      document.querySelectorAll('#df04 .df').forEach((l, i) => { l.style.background = i === 4 && lt >= tSin && lt < tSin + 2.2 ? 'var(--signal-bg)' : ''; });
     },
     's05-sin-corte'(sc, lt, T) {
       const te = T('@Editas'), viejo = 'Hola desde el Avance 2', nuevo = 'Hola otra vez, sin cortes';
@@ -376,7 +373,7 @@
         const u = ((lt - t0) * .32 + i / 6) % 1; c.setAttribute('cx', 120 + 1680 * u); c.setAttribute('opacity', lt > t0 + .5 ? Math.min(1, u * 10, (1 - u) * 10) : 0);
       });
       const sw = (a, b, at) => { const p = eo(prog(lt, at, .6)); const ea = document.querySelector(a), eb = document.querySelector(b); ea.style.opacity = 1 - p; ea.style.transform = `translateY(${-14 * p}px)`; eb.style.opacity = p; eb.style.transform = `translateY(${14 * (1 - p)}px)`; };
-      sw('.swA', '.swB', T('@por una lista en las pruebas'));
+      sw('.swA', '.swB', T('@por una lista'));
       sw('.swC', '.swD', T('@por una real'));
       sc.keys.forEach(k => { const on = lt >= k.at; k.el.style.borderColor = on ? 'var(--signal)' : ''; k.el.style.background = on ? 'var(--signal-bg)' : ''; k.el.style.transform = lt >= k.at && lt < k.at + .5 ? 'translateY(-4px)' : ''; });
     },

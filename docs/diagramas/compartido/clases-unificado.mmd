@@ -150,6 +150,7 @@ classDiagram
         +validarDescenso(actual, destino, ahora) void
     }
     class CobroController {
+        -reactivacion ReactivacionService
         +mia() VistaSuscripcion
         +cotizacion(consulta) Cotizacion
         +contratar(cuerpo) ResultadoContratacion
@@ -183,14 +184,47 @@ classDiagram
     class RepositorioSuscripciones {
         <<abstract>>
         +deUsuario(usuarioId) Suscripcion
+        +candidatasCiclo() Suscripcion[]
         +crearSiNoExiste(nueva) void
         +actualizar(suscripcionId, cambio) Suscripcion
         +programarDescenso(suscripcionId, planSiguienteId) Suscripcion
     }
     class RepositorioPlanesPrisma
     class RepositorioSuscripcionesPrisma
-    class PoliticaCicloSuscripcion {
-        +avanzar(suscripcion, ahora) EstadoSuscripcion
+    class PoliticaCiclo {
+        <<State · tabla de transiciones pura>>
+        +DIAS_POR_VENCER = 7
+        +DIAS_GRACIA = 5
+        +DIAS_HASTA_CANCELAR = 30
+        +siguiente(suscripcion, ahora) SaltoCiclo
+        +cambioPorSalto(suscripcion, salto, ahora) CambioSuscripcion
+    }
+    class CicloSuscripcionService {
+        -suscripciones RepositorioSuscripciones
+        -contenedores ContenedoresClientePuerto
+        -reloj Reloj
+        +ejecutar() ResultadoCiclo
+    }
+    class ReactivacionService {
+        <<Decorator>>
+        -contratacion ContratacionService
+        -contenedores ContenedoresClientePuerto
+        +contratar(usuarioId, solicitud) ResultadoContratacion
+    }
+    class CicloController {
+        +ejecutar() ResultadoCiclo
+    }
+    class ColaCicloPuerto {
+        <<abstract>>
+        +iniciar(manejador) void
+        +cerrar() void
+    }
+    class ColaCicloBullMq
+    class ColaCicloMemoria
+    class TareaCicloDiaria {
+        -cola ColaCicloPuerto
+        -ciclo CicloSuscripcionService
+        +onApplicationBootstrap() void
     }
     class PasarelaPago {
         <<abstract>>
@@ -714,7 +748,18 @@ classDiagram
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
     PlantillaCorreo <|-- PlantillaRecuperacion
-    SuscripcionesService --> PoliticaCicloSuscripcion
+    CicloSuscripcionService --> PoliticaCiclo
+    CicloSuscripcionService --> RepositorioSuscripciones
+    CicloSuscripcionService --> ContenedoresClientePuerto : detenerTodos
+    ReactivacionService --> ContratacionService : decora contratar
+    ReactivacionService --> ContenedoresClientePuerto : reanudarTodos
+    CobroController --> ReactivacionService
+    CicloController --> CicloSuscripcionService
+    CicloController ..> RolGuard : protege
+    ColaCicloPuerto <|-- ColaCicloBullMq
+    ColaCicloPuerto <|-- ColaCicloMemoria
+    TareaCicloDiaria --> ColaCicloPuerto
+    TareaCicloDiaria --> CicloSuscripcionService
     ContratacionService --> PasarelaPago
     ContratacionService --> RepositorioPagos
     ContratacionService --> RepositorioPlanes

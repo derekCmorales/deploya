@@ -6,6 +6,11 @@ import test from "node:test";
 
 import {
   avisoEstado,
+  CONSERVADO_SUSPENDIDA,
+  contenedoresDetenidos,
+  NOTA_RENOVAR_SUSPENDIDA,
+  rutaRenovar,
+  textoQuePasoSuspendida,
   erroresTarjeta,
   fechaCorta,
   fechaLarga,
@@ -233,4 +238,36 @@ test("las pantallas de cobro no hacen fetch, no usan colores de Tailwind ni any"
     assert.doesNotMatch(codigo, /\b(?:bg|text|border)-(?:red|green|emerald|blue|yellow|amber|slate|gray)-\d/, `color de Tailwind en ${f}`);
     assert.doesNotMatch(codigo, /:\s*any\b|<any>/, `any en ${f}`);
   }
+});
+
+// ───────── 28 · Suscripción suspendida (M2-05) ─────────
+
+const proyecto = (estado) => ({ ultimoDespliegue: estado ? { estado } : null });
+
+test("28 suspendida: cuenta los proyectos cuyo último despliegue quedó Detenido", () => {
+  const lista = { proyectos: [proyecto("detenido"), proyecto("detenido"), proyecto("fallido"), proyecto(null), proyecto("detenido")] };
+
+  assert.equal(contenedoresDetenidos(lista), 3);
+  assert.equal(contenedoresDetenidos(null), null);
+});
+
+test("28 suspendida: «Qué pasó» con el plan, la fecha de vigencia y los contenedores", () => {
+  const s = { plan: { nombre: "Starter" }, vence: "2026-09-24T00:05:00.000Z" };
+
+  assert.equal(
+    textoQuePasoSuspendida(s, 3),
+    "Tu plan Starter venció el 24 sep y terminó el período de gracia. Detuvimos los 3 contenedores.",
+  );
+  assert.equal(textoQuePasoSuspendida(s, 1), "Tu plan Starter venció el 24 sep y terminó el período de gracia. Detuvimos el contenedor de tu proyecto.");
+  assert.equal(textoQuePasoSuspendida(s, null), "Tu plan Starter venció el 24 sep y terminó el período de gracia. Detuvimos los contenedores de tus proyectos.");
+});
+
+test("28 suspendida: «Renovar» lleva a 07 con el plan y la vigencia que tenía", () => {
+  assert.equal(rutaRenovar({ plan: { codigo: "starter" }, vigenciaDias: 30 }), "/planes/contratar?plan=starter&vigencia=30");
+  assert.equal(rutaRenovar({ plan: { codigo: "pro" }, vigenciaDias: 365 }), "/planes/contratar?plan=pro&vigencia=365");
+});
+
+test("28 suspendida: textos de la ficha", () => {
+  assert.deepEqual([...CONSERVADO_SUSPENDIDA], ["Código y configuración de cada proyecto", "Variables cifradas", "Historial de despliegues"]);
+  assert.equal(NOTA_RENOVAR_SUSPENDIDA, "Al renovar, volvemos a arrancar el último despliegue saludable de cada proyecto.");
 });

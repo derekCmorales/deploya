@@ -44,3 +44,13 @@ Cambios de clases: `PoliticaCiclo`, `CicloSuscripcionService`, `ContenedoresClie
 
 - **Reloj del servidor vs. UTC:** todas las comparaciones en UTC; la prueba fija `ahora`.
 - **Detener muchos contenedores a la vez:** van por la cola, uno por trabajo; si uno falla, los demás siguen y queda en la bitácora del trabajador.
+
+## Decisiones al aplicar (2026-10-17)
+
+- **Descenso al vencer:** si el plan nuevo es gratuito (Sandbox), la suscripción queda Activa y sin vigencia. Si se paga (p. ej. Pro → Starter), cambia de plan sin cobro y sigue el ciclo normal: pasa a Vencida hasta que el cliente pague Starter. El salto del descenso cuenta como el único salto de esa corrida.
+- **Un salto por corrida:** una Activa cuya fecha de vigencia ya pasó va directo a Vencida (un solo cambio de estado), sin pasar antes por Por vencer.
+- **Reanudar al renovar:** `ReactivacionService` (Decorator de `ContratacionService.contratar`, en `suscripciones/ciclo/`) pide `reanudarTodos` cuando el pago se aprueba y la suscripción venía Suspendida o Cancelada (en las dos el ciclo ya detuvo los contenedores). `CobroModule` importa `CicloModule`. No hay puerto nuevo en `suscripciones/`.
+- **Fallos de M5:** si `detenerTodos` o `reanudarTodos` fallan, el estado de la suscripción queda guardado igual y el error se registra en el log; el ciclo sigue con las demás.
+- **Tarea diaria:** `TareaCicloDiaria` programa la corrida en `onApplicationBootstrap` del trabajador (`CicloTrabajadorModule` en `trabajador.module.ts`); `trabajador.ts` no cambia.
+- **`GET /suscripciones/mia`** agrega `estadoDesde` (solo agrega un campo) para «Suspendida desde 29 sep 2026» de 28.
+- **Panel de 28:** `PanelSuscripcionSuspendida` en `(billing)/_componentes/`, montado en 08; la lista de proyectos (Eduardo) puede montarlo también.

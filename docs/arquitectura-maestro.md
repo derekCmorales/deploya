@@ -1846,6 +1846,7 @@ classDiagram
         +validarDescenso(actual, destino, ahora) void
     }
     class CobroController {
+        -reactivacion ReactivacionService
         +mia() VistaSuscripcion
         +cotizacion(consulta) Cotizacion
         +contratar(cuerpo) ResultadoContratacion
@@ -1879,14 +1880,47 @@ classDiagram
     class RepositorioSuscripciones {
         <<abstract>>
         +deUsuario(usuarioId) Suscripcion
+        +candidatasCiclo() Suscripcion[]
         +crearSiNoExiste(nueva) void
         +actualizar(suscripcionId, cambio) Suscripcion
         +programarDescenso(suscripcionId, planSiguienteId) Suscripcion
     }
     class RepositorioPlanesPrisma
     class RepositorioSuscripcionesPrisma
-    class PoliticaCicloSuscripcion {
-        +avanzar(suscripcion, ahora) EstadoSuscripcion
+    class PoliticaCiclo {
+        <<State · tabla de transiciones pura>>
+        +DIAS_POR_VENCER = 7
+        +DIAS_GRACIA = 5
+        +DIAS_HASTA_CANCELAR = 30
+        +siguiente(suscripcion, ahora) SaltoCiclo
+        +cambioPorSalto(suscripcion, salto, ahora) CambioSuscripcion
+    }
+    class CicloSuscripcionService {
+        -suscripciones RepositorioSuscripciones
+        -contenedores ContenedoresClientePuerto
+        -reloj Reloj
+        +ejecutar() ResultadoCiclo
+    }
+    class ReactivacionService {
+        <<Decorator>>
+        -contratacion ContratacionService
+        -contenedores ContenedoresClientePuerto
+        +contratar(usuarioId, solicitud) ResultadoContratacion
+    }
+    class CicloController {
+        +ejecutar() ResultadoCiclo
+    }
+    class ColaCicloPuerto {
+        <<abstract>>
+        +iniciar(manejador) void
+        +cerrar() void
+    }
+    class ColaCicloBullMq
+    class ColaCicloMemoria
+    class TareaCicloDiaria {
+        -cola ColaCicloPuerto
+        -ciclo CicloSuscripcionService
+        +onApplicationBootstrap() void
     }
     class PasarelaPago {
         <<abstract>>
@@ -2410,7 +2444,18 @@ classDiagram
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
     PlantillaCorreo <|-- PlantillaRecuperacion
-    SuscripcionesService --> PoliticaCicloSuscripcion
+    CicloSuscripcionService --> PoliticaCiclo
+    CicloSuscripcionService --> RepositorioSuscripciones
+    CicloSuscripcionService --> ContenedoresClientePuerto : detenerTodos
+    ReactivacionService --> ContratacionService : decora contratar
+    ReactivacionService --> ContenedoresClientePuerto : reanudarTodos
+    CobroController --> ReactivacionService
+    CicloController --> CicloSuscripcionService
+    CicloController ..> RolGuard : protege
+    ColaCicloPuerto <|-- ColaCicloBullMq
+    ColaCicloPuerto <|-- ColaCicloMemoria
+    TareaCicloDiaria --> ColaCicloPuerto
+    TareaCicloDiaria --> CicloSuscripcionService
     ContratacionService --> PasarelaPago
     ContratacionService --> RepositorioPagos
     ContratacionService --> RepositorioPlanes
@@ -2568,22 +2613,23 @@ No copiar estos cinco estados al despliegue.
 <!-- diagrama: docs/diagramas/m1-m10/m2-estados-suscripcion.mmd -->
 ```mermaid
 stateDiagram-v2
-    [*] --> Activa : contratacion con pago aprobado
+    [*] --> Activa : contratacion con pago aprobado<br/>(Sandbox: Activa sin vencimiento)
 
-    Activa --> PorVencer : faltan 7 dias o menos<br/>para el vencimiento
-    PorVencer --> Activa : renovacion exitosa<br/>(manual o automatica)
-    PorVencer --> Vencida : se cumple la fecha<br/>de vencimiento sin renovar
+    Activa --> PorVencer : faltan 7 dias o menos<br/>(DIAS_POR_VENCER)
+    Activa --> Vencida : se cumple la fecha de vigencia<br/>(un solo salto por corrida)
+    PorVencer --> Activa : renovacion manual aprobada
+    PorVencer --> Vencida : se cumple la fecha<br/>de vigencia sin renovar
 
-    Vencida --> Activa : renovacion exitosa dentro<br/>del periodo de gracia (5 dias)
-    Vencida --> Suspendida : termina el periodo de<br/>gracia sin renovacion
+    Activa --> Activa : descenso programado a Sandbox<br/>al vencer (sin cobro)
+    PorVencer --> Vencida : descenso programado a un plan<br/>de pago al vencer (sin cobro)
 
-    Suspendida --> Activa : renovacion exitosa durante<br/>la suspension (*)
-    Suspendida --> Cancelada : 30 dias en Suspendida<br/>sin renovar, o cancelacion<br/>solicitada por el cliente
+    Vencida --> Activa : renovacion aprobada<br/>durante la gracia
+    Vencida --> Suspendida : 5 dias en Vencida<br/>(DIAS_GRACIA)
 
-    Activa --> Cancelada : cancelacion solicitada<br/>por el cliente
-    PorVencer --> Cancelada : cancelacion solicitada<br/>por el cliente
+    Suspendida --> Activa : renovacion aprobada<br/>(M5 reanuda los contenedores)
+    Suspendida --> Cancelada : 30 dias en Suspendida<br/>(DIAS_HASTA_CANCELAR)
 
-    Cancelada --> [*] : recursos liberados<br/>(tras ventana de exportacion)
+    Cancelada --> Activa : contratacion aprobada<br/>(M5 reanuda los contenedores)
 
     note right of Activa
         Todos los entornos operan
@@ -2594,12 +2640,17 @@ stateDiagram-v2
         nuevos despliegues bloqueados
     end note
     note right of Suspendida
-        Contenedores detenidos;
+        Contenedores detenidos (M5);
         datos y configuracion conservados
     end note
     note right of Cancelada
-        Recursos liberados;
-        cliente puede exportar datos antes
+        Datos conservados;
+        solo cambia el estado
+    end note
+    note left of PorVencer
+        Tarea diaria 00:05 UTC (BullMQ)
+        o POST /admin/ciclo/ejecutar;
+        idempotente el mismo dia
     end note
 ```
 

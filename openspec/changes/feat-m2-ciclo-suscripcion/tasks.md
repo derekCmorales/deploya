@@ -4,14 +4,14 @@ Requiere `feat-m5-acciones-contenedor` y `feat-m5-bloqueos-cuota` en `main` (ya 
 
 ## 1. Dominio (Javier)
 
-- [ ] 1.1 `PoliticaCiclo.siguiente` con `DIAS_POR_VENCER`, `DIAS_GRACIA`, `DIAS_HASTA_CANCELAR`; Sandbox no vence
-- [ ] 1.2 Pruebas: «Por vencer», «Vencimiento sin renovar», «Fin de la gracia», «Treinta días suspendida», «Sandbox no vence», «Descenso programado al vencer», «Dos corridas el mismo día»
+- [x] 1.1 `PoliticaCiclo.siguiente` con `DIAS_POR_VENCER`, `DIAS_GRACIA`, `DIAS_HASTA_CANCELAR`; Sandbox no vence
+- [x] 1.2 Pruebas: «Por vencer», «Vencimiento sin renovar», «Fin de la gracia», «Treinta días suspendida», «Sandbox no vence», «Descenso programado al vencer», «Dos corridas el mismo día»
 
 ## 2. Servicio y tarea diaria (Javier)
 
-- [ ] 2.1 `CicloSuscripcionService.ejecutar()` (lee candidatas, aplica, guarda `estadoDesde`), `ContenedoresClientePuerto` y su doble
-- [ ] 2.2 `ColaCicloPuerto` (BullMQ repetible 00:05 UTC y memoria), procesador en el trabajador; `POST /admin/ciclo/ejecutar` con `RolGuard`
-- [ ] 2.3 Pruebas: «Fin de la gracia» pide detener los contenedores; «Renovar una suscripción suspendida» la deja Activa y pide reanudar; un Cliente en `/admin/ciclo/ejecutar` → 403
+- [x] 2.1 `CicloSuscripcionService.ejecutar()` (lee candidatas, aplica, guarda `estadoDesde`), `ContenedoresClientePuerto` y su doble
+- [x] 2.2 `ColaCicloPuerto` (BullMQ repetible 00:05 UTC y memoria), procesador en el trabajador; `POST /admin/ciclo/ejecutar` con `RolGuard`
+- [x] 2.3 Pruebas: «Fin de la gracia» pide detener los contenedores; «Renovar una suscripción suspendida» la deja Activa y pide reanudar; un Cliente en `/admin/ciclo/ejecutar` → 403
 
 ## 3. Contenedores (Derek)
 

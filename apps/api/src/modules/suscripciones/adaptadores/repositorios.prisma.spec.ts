@@ -127,6 +127,17 @@ describe("RepositorioSuscripcionesPrisma · cambios", () => {
     expect(suscripcion.planSiguiente).toMatchObject({ codigo: "sandbox" });
   });
 
+  it("candidatasCiclo lee las que tienen vigencia y no están Canceladas, con su estadoDesde", async () => {
+    const findMany = jest.fn().mockResolvedValue([fila]);
+    const [candidata] = await new RepositorioSuscripcionesPrisma(prismaDoble({ suscripcion: { findMany } })).candidatasCiclo();
+    expect(findMany).toHaveBeenCalledWith({
+      where: { vence: { not: null }, estado: { not: "cancelada" } },
+      include: { plan: true, planSiguiente: true },
+      orderBy: { vence: "asc" },
+    });
+    expect(candidata).toMatchObject({ estado: "activa", estadoDesde: ahora });
+  });
+
   it("programarDescenso solo toca planSiguienteId", async () => {
     const update = jest.fn().mockResolvedValue(fila);
     await new RepositorioSuscripcionesPrisma(prismaDoble({ suscripcion: { update } })).programarDescenso("s1", "plan-sandbox");

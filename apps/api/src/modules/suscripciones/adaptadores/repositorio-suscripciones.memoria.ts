@@ -16,11 +16,16 @@ export class RepositorioSuscripcionesMemoria extends RepositorioSuscripciones {
     return suscripcion ? { ...suscripcion } : null;
   }
 
+  async candidatasCiclo(): Promise<Suscripcion[]> {
+    return [...this.porUsuario.values()].filter((s) => s.vence !== null && s.estado !== "cancelada").map((s) => ({ ...s }));
+  }
+
   async crearSiNoExiste(nueva: NuevaSuscripcion): Promise<void> {
     if (this.porUsuario.has(nueva.usuarioId)) return;
     const { planId, ...resto } = nueva;
     this.porUsuario.set(nueva.usuarioId, {
       ...resto,
+      estadoDesde: nueva.inicio,
       id: `suscripcion-${this.siguienteId++}`,
       plan: this.plan(planId),
       planSiguiente: null,
@@ -29,7 +34,7 @@ export class RepositorioSuscripcionesMemoria extends RepositorioSuscripciones {
 
   async actualizar(suscripcionId: string, cambio: CambioSuscripcion): Promise<Suscripcion> {
     const actual = this.porId(suscripcionId);
-    const { planId, planSiguienteId, estadoDesde: _estadoDesde, ...resto } = cambio;
+    const { planId, planSiguienteId, ...resto } = cambio;
     return this.guardar({
       ...actual,
       ...resto,

@@ -51,6 +51,7 @@ export function suscripcionDesdePrisma(fila: SuscripcionConPlanes): Suscripcion 
     usuarioId: fila.usuarioId,
     plan: planDesdePrisma(fila.plan),
     estado: estadoDesdePrisma(fila.estado),
+    estadoDesde: fila.estadoDesde,
     vigenciaDias: fila.vigenciaDias,
     inicio: fila.inicio,
     vence: fila.vence,

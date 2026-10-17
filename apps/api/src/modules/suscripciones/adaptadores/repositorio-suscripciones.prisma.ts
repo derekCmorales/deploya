@@ -15,6 +15,15 @@ export class RepositorioSuscripcionesPrisma extends RepositorioSuscripciones {
     return fila ? suscripcionDesdePrisma(fila) : null;
   }
 
+  async candidatasCiclo(): Promise<Suscripcion[]> {
+    const filas = await this.prisma.suscripcion.findMany({
+      where: { vence: { not: null }, estado: { not: "cancelada" } },
+      include: INCLUIR_PLANES,
+      orderBy: { vence: "asc" },
+    });
+    return filas.map(suscripcionDesdePrisma);
+  }
+
   async crearSiNoExiste(nueva: NuevaSuscripcion): Promise<void> {
     await this.prisma.suscripcion.upsert({
       where: { usuarioId: nueva.usuarioId },

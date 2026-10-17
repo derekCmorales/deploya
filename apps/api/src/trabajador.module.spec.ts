@@ -4,6 +4,7 @@ import { PipelineDespliegue } from "./modules/construccion/pipeline/pipeline-des
 import { VigiaCancelacion } from "./modules/construccion/pipeline/vigia-cancelacion";
 import { AccionesContenedorService } from "./modules/orquestacion/acciones/acciones-contenedor.service";
 import { RetencionArtefactos } from "./modules/orquestacion/retencion/retencion-artefactos";
+import { TareaCicloDiaria } from "./modules/suscripciones/ciclo/tarea-ciclo-diaria";
 import { TrabajadorModule } from "./trabajador.module";
 
 describe("TrabajadorModule (inyección de dependencias)", () => {
@@ -17,5 +18,14 @@ describe("TrabajadorModule (inyección de dependencias)", () => {
     expect(modulo.get(VigiaCancelacion)).toBeInstanceOf(VigiaCancelacion);
     expect(modulo.get(RetencionArtefactos)).toBeInstanceOf(RetencionArtefactos);
     expect(modulo.get(AccionesContenedorService)).toBeInstanceOf(AccionesContenedorService);
+  });
+
+  it("registra la tarea diaria del ciclo §4.4 (M2-05) con el puerto de contenedores de M5", async () => {
+    const modulo = await Test.createTestingModule({ imports: [TrabajadorModule] })
+      .overrideProvider(PrismaService)
+      .useValue({})
+      .compile();
+
+    expect(modulo.get(TareaCicloDiaria)).toBeInstanceOf(TareaCicloDiaria);
   });
 });

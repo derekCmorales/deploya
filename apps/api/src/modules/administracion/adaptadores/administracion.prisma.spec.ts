@@ -14,7 +14,7 @@ const fila = {
   nombre: "María Ríos",
   rol: "cliente",
   estadoCuenta: "suspendida",
-  motivoSuspension: "Uso que incumple los términos de servicio (§7.2).",
+  motivoSuspension: "Uso que incumple los términos de servicio.",
   creado: CREADO,
   suscripcion: { estado: "por_vencer", estadoDesde: new Date("2026-10-14T15:00:00.000Z"), vence: new Date("2026-10-21T15:00:00.000Z"), plan: { nombre: "Pro" } },
   proyectos: [
@@ -111,7 +111,7 @@ describe("CuentasSuspensionPrisma", () => {
       adminId: "u-admin",
       usuarioId: "u-maria",
       motivo: "terminos",
-      textoMotivo: "Uso que incumple los términos de servicio (§7.2).",
+      textoMotivo: "Uso que incumple los términos de servicio.",
       detalle: null,
       marca,
     });
@@ -119,7 +119,7 @@ describe("CuentasSuspensionPrisma", () => {
     expect($transaction).toHaveBeenCalledWith(["cuenta", "sesiones", "accion"]);
     expect(update).toHaveBeenCalledWith({
       where: { id: "u-maria" },
-      data: { estadoCuenta: "suspendida", motivoSuspension: "Uso que incumple los términos de servicio (§7.2)." },
+      data: { estadoCuenta: "suspendida", motivoSuspension: "Uso que incumple los términos de servicio." },
     });
     expect(updateMany).toHaveBeenCalledWith({ where: { usuarioId: "u-maria", revocadaEn: null }, data: { revocadaEn: marca } });
     expect(create).toHaveBeenCalledWith({

@@ -123,6 +123,6 @@ describe("M9-02 · POST /admin/usuarios/:id/suspension", () => {
   it("la lista de motivos de 25b", () => {
     const { controlador } = armar();
 
-    expect(controlador.motivos().motivos[0]).toEqual({ clave: "terminos", texto: "Uso que incumple los términos de servicio (§7.2)." });
+    expect(controlador.motivos().motivos[0]).toEqual({ clave: "terminos", texto: "Uso que incumple los términos de servicio." });
   });
 });

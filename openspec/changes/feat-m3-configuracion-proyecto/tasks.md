@@ -13,7 +13,7 @@ Requiere `feat-m3-eliminar-proyecto` y el layout del proyecto (PR #31) en `main`
 
 - [x] 2.1 `/projects/[proyecto]/configuracion` (19) con borrador, «Descartar», «Guardar cambios» y «Zona de peligro»; el `Dialog` 19b con conteos reales; quitar «Eliminar proyecto» del detalle de la lista
 - [x] 2.2 Pruebas `node --test`: `cambiosDe` (solo lo que cambió), `confirmacionCoincide` (ya existe; se mueve)
-- [ ] 2.3 Revisión contra los artboards 19 y 19b en claro y oscuro
+- [x] 2.3 Revisión contra los artboards 19 y 19b en claro y oscuro — 17 oct: filas de 280px + campos, iconos en los campos, «Zona de peligro» y 19b con iconos y «Eliminar proyecto»; capturas en claro y oscuro
 
 ## 3. Cierre
 

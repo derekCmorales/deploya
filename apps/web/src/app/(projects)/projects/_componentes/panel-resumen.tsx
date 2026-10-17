@@ -1,23 +1,26 @@
 "use client";
 
-import { Container, GitCommitHorizontal, Package, Waypoints, type LucideIcon } from "lucide-react";
+import { Container, Cpu, ExternalLink, GitCommitHorizontal, Lock, MemoryStick, Network, Package, Waypoints, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyField } from "@/components/ui/copy-field";
 import { LineaTiempo } from "@/components/deploya/linea-tiempo";
 import { Skeleton } from "@/components/ui/skeleton";
+import { publicarEstadoActivo } from "@/hooks/use-estado-activo";
 import { useResumen } from "@/hooks/use-resumen";
 import { ESQUEMA_APPS } from "@/lib/api";
 import { rutaDespliegue } from "@/lib/despliegues";
 import { duracionFila, fechaFila, digestCorto } from "@/lib/historial";
 import { shaCorto, textoEtapa, type VistaDespliegue } from "@/lib/proyectos";
 import {
+  EVENTO_ACCION_CONTENEDOR,
   detalleImagen,
   duracionConstruccion,
   duracionTotalMs,
@@ -30,8 +33,6 @@ import {
   type ResumenProyecto,
 } from "@/lib/resumen";
 
-import { AccionesContenedor } from "./acciones-contenedor";
-
 const ICONO_HITO: Record<string, LucideIcon> = {
   recepcion: GitCommitHorizontal,
   construccion: Package,
@@ -39,7 +40,10 @@ const ICONO_HITO: Record<string, LucideIcon> = {
   enrutamiento: Waypoints,
 };
 
-/** Pantalla 13: estado actual, versión activa, recursos del plan y línea de tiempo del último despliegue. */
+/**
+ * Pantalla 13: estado actual con la versión activa, recursos del plan y línea de tiempo del último despliegue.
+ * «Reiniciar» y «Detener» van en la cabecera (`MarcoProyecto`): este panel le publica el estado del activo.
+ */
 export function PanelResumen({ proyectoId }: { proyectoId: string }) {
   const [origen, setOrigen] = useState<string | null>(null);
   const { datos, error, cargando, recargar } = useResumen(proyectoId, origen);
@@ -48,48 +52,75 @@ export function PanelResumen({ proyectoId }: { proyectoId: string }) {
   useEffect(() => {
     if (datos) setActualizado(Date.now());
   }, [datos]);
+  useAccionesDeCabecera(datos, setOrigen, recargar);
 
   if (error && !datos) return <Banner variant="bad" title="No pudimos cargar el resumen">{error.message}</Banner>;
   if (cargando || !datos) return <Cargando />;
 
-  const alAccionar = () => {
-    setOrigen(datos.activo?.estado ?? null);
-    recargar();
-  };
   return (
     <div className="flex flex-col gap-6 px-8 py-6">
-      <div className="flex flex-wrap items-start justify-end gap-2">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/projects/${proyectoId}/configuracion`}>Cambiar rama</Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/projects/${proyectoId}/configuracion#zona-de-peligro`}>Eliminar proyecto</Link>
-        </Button>
-        {datos.activo ? <AccionesContenedor proyectoId={proyectoId} estado={datos.activo.estado} alAccionar={alAccionar} /> : null}
+      <div className="flex flex-wrap items-stretch gap-6">
+        <EstadoActual resumen={datos} actualizado={textoActualizado(actualizado, ahora)} ahora={new Date(ahora)} />
+        <Recursos resumen={datos} />
       </div>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="flex flex-col gap-6">
-          <EstadoActual resumen={datos} actualizado={textoActualizado(actualizado, ahora)} />
-          <VersionActiva activo={datos.activo} ahora={new Date(ahora)} />
-        </div>
-        <div className="flex flex-col gap-6">
-          <Recursos resumen={datos} />
-          <UltimoDespliegue resumen={datos} />
-        </div>
+      <div className="flex flex-wrap items-stretch gap-6">
+        <UltimoDespliegue resumen={datos} />
       </div>
     </div>
   );
 }
 
-function EstadoActual({ resumen, actualizado }: { resumen: ResumenProyecto; actualizado: string }) {
+/** Publica el estado del activo para la cabecera y, cuando ella reinicia o detiene, sigue sondeando. */
+function useAccionesDeCabecera(datos: ResumenProyecto | null, setOrigen: (estado: string | null) => void, recargar: () => void) {
+  const estado = datos?.activo?.estado ?? null;
+  const estadoActual = useRef(estado);
+  estadoActual.current = estado;
+  useEffect(() => {
+    publicarEstadoActivo(estado);
+  }, [estado]);
+  useEffect(() => () => publicarEstadoActivo(null), []);
+  useEffect(() => {
+    const alAccionar = () => {
+      setOrigen(estadoActual.current);
+      recargar();
+    };
+    window.addEventListener(EVENTO_ACCION_CONTENEDOR, alAccionar);
+    return () => window.removeEventListener(EVENTO_ACCION_CONTENEDOR, alAccionar);
+  }, [setOrigen, recargar]);
+}
+
+function EstadoActual({ resumen, actualizado, ahora }: { resumen: ResumenProyecto; actualizado: string; ahora: Date }) {
   const despliegue = resumen.ultimo;
+  const url = resumen.proyecto.url;
   return (
-    <Card>
-      <CardHeader className="justify-between">
-        <CardTitle>Estado actual</CardTitle>
+    <Card className="flex min-w-[min(100%,560px)] flex-[2_1_0] flex-col">
+      <CardHeader>
+        <CardTitle className="grow">Estado actual</CardTitle>
         <span className="text-xs text-muted-foreground">{actualizado}</span>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-5">
+        <div className="flex flex-wrap items-end gap-4">
+          {url ? (
+            <div className="flex min-w-0 grow flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">URL pública</span>
+              <div className="flex items-center gap-2">
+                <CopyField
+                  value={url}
+                  prefijo={url.startsWith("https://") ? <Lock className="text-ok" aria-hidden /> : undefined}
+                  className="w-[420px] max-w-full"
+                />
+                <Button asChild variant="outline" size="icon-sm">
+                  <a href={url} target="_blank" rel="noreferrer" aria-label="Abrir en otra pestaña">
+                    <ExternalLink />
+                  </a>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <span className="grow" />
+          )}
+          {resumen.activo ? <EstadoDespliegue estado={resumen.activo.estado} size="lg" /> : null}
+        </div>
         {despliegue ? (
           <RielEtapas
             size="lg"
@@ -102,68 +133,67 @@ function EstadoActual({ resumen, actualizado }: { resumen: ResumenProyecto; actu
         ) : (
           <RielEtapas size="lg" etapas={["pendiente", "pendiente", "pendiente", "pendiente", "pendiente"]} />
         )}
-        {resumen.proyecto.url ? (
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted-foreground">URL pública</span>
-            <CopyField value={resumen.proyecto.url} />
-          </div>
-        ) : null}
       </CardContent>
+      {resumen.activo ? <VersionActiva activo={resumen.activo} ahora={ahora} /> : null}
     </Card>
   );
 }
 
-function VersionActiva({ activo, ahora }: { activo: VistaDespliegue | null; ahora: Date }) {
-  if (!activo) return null;
+/** Las tres celdas al pie de «Estado actual»: versión activa, imagen y publicación. */
+function VersionActiva({ activo, ahora }: { activo: VistaDespliegue; ahora: Date }) {
   const imagen = activo.imagen;
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Versión activa</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4 text-sm">
-        <div className="flex flex-col gap-1">
-          <span className="text-lg font-semibold tracking-[-0.02em]">#{activo.numero}</span>
-          {activo.commit ? (
-            <span className="text-muted-foreground">
-              {activo.commit.mensaje}
-              <span className="font-mono text-xs"> · {shaCorto(activo.commit.sha)}</span>
-            </span>
-          ) : null}
-        </div>
-        {imagen ? (
-          <Dato titulo="Imagen" valor={digestCorto(imagen.digest)} mono detalle={detalleImagen(imagen, textoConstruccion(activo))} />
-        ) : null}
-        {activo.terminado ? (
-          <Dato
-            titulo="Publicada"
-            valor={fechaFila(activo.terminado, ahora)}
-            detalle={activo.commit?.autor ? `por ${activo.commit.autor}` : undefined}
-          />
-        ) : null}
-      </CardContent>
-    </Card>
+    <dl className="mt-auto grid grid-cols-1 border-t border-border sm:grid-cols-3 sm:[&>div+div]:border-l [&>div+div]:border-border">
+      <div className="flex flex-col gap-1.5 p-4">
+        <dt className="text-xs text-muted-foreground">Versión activa</dt>
+        <dd className="flex items-center gap-2">
+          <span className="font-mono font-medium">#{activo.numero}</span>
+          {activo.commit ? <span className="font-mono text-xs text-muted-foreground">{shaCorto(activo.commit.sha)}</span> : null}
+        </dd>
+        {activo.commit ? <dd className="text-sm">{activo.commit.mensaje}</dd> : null}
+      </div>
+      <div className="flex flex-col gap-1.5 p-4">
+        <dt className="text-xs text-muted-foreground">Imagen</dt>
+        <dd className="font-mono text-[13px]">{imagen ? digestCorto(imagen.digest) : "—"}</dd>
+        {imagen ? <dd className="text-xs text-muted-foreground">{detalleImagen(imagen, textoConstruccion(activo))}</dd> : null}
+      </div>
+      <div className="flex flex-col gap-1.5 p-4">
+        <dt className="text-xs text-muted-foreground">Publicada</dt>
+        <dd className="font-medium">{activo.terminado ? fechaFila(activo.terminado, ahora) : "—"}</dd>
+        {activo.commit?.autor ? <dd className="text-xs text-muted-foreground">por {activo.commit.autor}</dd> : null}
+      </div>
+    </dl>
   );
 }
 
 function Recursos({ resumen }: { resumen: ResumenProyecto }) {
   return (
-    <Card>
-      <CardHeader className="justify-between">
-        <CardTitle>Recursos aplicados</CardTitle>
+    <Card className="flex min-w-[260px] flex-[1_1_0] flex-col">
+      <CardHeader>
+        <CardTitle className="grow">Recursos aplicados</CardTitle>
         <Badge variant="outline">{resumen.plan.nombre}</Badge>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 text-sm">
-        <dl className="grid grid-cols-3 gap-3">
-          <Dato titulo="CPU" valor={resumen.recursos ? textoCpu(resumen.recursos.cpus) : "—"} />
-          <Dato titulo="Memoria" valor={resumen.recursos ? textoMemoria(resumen.recursos.memoriaMb) : "—"} />
-          <Dato titulo="Puerto" valor={textoPuerto(resumen.proyecto.puertoInterno, ESQUEMA_APPS)} />
-        </dl>
+      <CardContent className="flex grow flex-col gap-4 text-sm">
+        <Recurso icono={Cpu} titulo="CPU" valor={resumen.recursos ? textoCpu(resumen.recursos.cpus) : "—"} />
+        <Recurso icono={MemoryStick} titulo="Memoria" valor={resumen.recursos ? textoMemoria(resumen.recursos.memoriaMb) : "—"} />
+        <Recurso icono={Network} titulo="Puerto" valor={textoPuerto(resumen.proyecto.puertoInterno, ESQUEMA_APPS)} />
+      </CardContent>
+      <CardFooter>
         <p className="text-xs text-muted-foreground">
           Aplicados con <code className="font-mono">--cpus</code> y <code className="font-mono">--memory</code> de Docker.
         </p>
-      </CardContent>
+      </CardFooter>
     </Card>
+  );
+}
+
+function Recurso({ icono: Icono, titulo, valor }: { icono: LucideIcon; titulo: string; valor: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <Icono className="size-4 text-muted-foreground" aria-hidden />
+      <span className="grow text-muted-foreground">{titulo}</span>
+      <span className="font-mono">{valor}</span>
+    </div>
   );
 }
 
@@ -172,34 +202,22 @@ function UltimoDespliegue({ resumen }: { resumen: ResumenProyecto }) {
   if (!ultimo) return null;
   const total = duracionTotalMs(ultimo);
   return (
-    <Card>
-      <CardHeader className="justify-between">
+    <Card className="flex min-w-[min(100%,360px)] flex-[1_1_0] flex-col gap-3 p-4">
+      <div className="flex items-center justify-between gap-3">
         <CardTitle>
           <Link href={rutaDespliegue(resumen.proyecto.id, ultimo.numero)} className="hover:underline">
             Último despliegue · #{ultimo.numero}
           </Link>
         </CardTitle>
-        {total !== null ? <span className="tnum text-xs text-muted-foreground">{duracionFila(total)}</span> : null}
-      </CardHeader>
-      <CardContent>
-        <LineaTiempo items={resumen.lineaTiempo.map(itemDe)} />
-      </CardContent>
+        {total !== null ? <span className="tnum font-mono text-xs text-muted-foreground">{duracionFila(total)}</span> : null}
+      </div>
+      <LineaTiempo items={resumen.lineaTiempo.map(itemDe)} />
     </Card>
   );
 }
 
 function itemDe(hito: HitoLineaTiempo) {
   return { icono: ICONO_HITO[hito.etapa] ?? Package, titulo: hito.titulo, detalle: hito.detalle, hora: horaHito(hito.marca) };
-}
-
-function Dato({ titulo, valor, detalle, mono }: { titulo: string; valor: string; detalle?: string; mono?: boolean }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <dt className="text-xs text-muted-foreground">{titulo}</dt>
-      <dd className={mono ? "font-mono text-[13px]" : "font-medium"}>{valor}</dd>
-      {detalle ? <dd className="text-xs text-muted-foreground">{detalle}</dd> : null}
-    </div>
-  );
 }
 
 function Cargando() {

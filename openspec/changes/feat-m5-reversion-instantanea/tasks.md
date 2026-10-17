@@ -24,8 +24,8 @@ Requiere `feat/m4-motor-construccion` en `main`. Pruebas sin Docker, red, base n
 ## 5. Web (Derek, A3)
 
 - [x] 5.1 `estados.ts` con `revirtiendo` (mismo tono que *Construyendo*); riel con etapas `omitida` en 12
-- [ ] 5.2 En 14, por fila: «Revertir a esta versión» si el artefacto está `disponible` y no es el activo; «imagen retirada» deshabilitado si no; confirma con `Dialog` y lleva a 12 del despliegue nuevo
-- [ ] 5.3 Pruebas `node --test`: `accionDeFila(fila)` (revertir, imagen retirada, versión activa)
+- [x] 5.2 En 14, por fila: «Revertir a esta versión» si el artefacto está `disponible` y no es el activo; «imagen retirada» deshabilitado si no; confirma con `Dialog` y lleva a 12 del despliegue nuevo — hecho en `panel-historial.tsx` con `accionDeFila` (M7-02)
+- [x] 5.3 Pruebas `node --test`: `accionDeFila(fila)` (revertir, imagen retirada, versión activa) — `test/historial.test.mjs`
 
 ## 6. Cierre
 

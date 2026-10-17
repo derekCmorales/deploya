@@ -2,11 +2,17 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
+  /** Pie dentro del panel, separado por un borde (p. ej. «Cargar más» en 14). */
+  footer?: React.ReactNode;
+}
+
 /** Tabla dentro de un panel con borde. Encabezados en 12px `muted-foreground`. */
-function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
+function Table({ className, footer, ...props }: TableProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <table className={cn("w-full border-collapse text-sm", className)} {...props} />
+      {footer ? <div className="flex items-center gap-2 border-t border-border px-4 py-3">{footer}</div> : null}
     </div>
   );
 }

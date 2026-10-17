@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, ExternalLink, RotateCw, X } from "lucide-react";
+import { Copy, ExternalLink, RefreshCw, X } from "lucide-react";
 import { notFound, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -181,14 +181,14 @@ function AccionesDeDespliegue({
   return (
     <div className="flex flex-col items-end gap-2">
       {acciones.cancelar ? (
-        <Button type="button" variant="outline" size="sm" disabled={ocupado} onClick={cancelar}>
+        <Button type="button" variant="ghost" size="sm" disabled={ocupado} onClick={cancelar}>
           <X />
           Cancelar despliegue
         </Button>
       ) : null}
       {acciones.reintentar ? (
         <Button type="button" size="sm" disabled={ocupado} onClick={reintentar}>
-          <RotateCw />
+          <RefreshCw />
           Reintentar
         </Button>
       ) : null}

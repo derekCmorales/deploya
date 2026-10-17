@@ -92,3 +92,21 @@ export function seguirResumen(resumen: ResumenProyecto, origen: string | null, e
   if (origen !== null && resumen.activo?.estado === origen) return true;
   return [resumen.activo, resumen.ultimo].some((d) => d !== null && enCurso(d.estado));
 }
+
+/** La cabecera avisa a 13 que pidió reiniciar o detener, para que siga sondeando hasta ver el cambio. */
+export const EVENTO_ACCION_CONTENEDOR = "deploya:accion-contenedor";
+
+export interface OpcionMasAcciones {
+  href: string;
+  etiqueta: "Cambiar rama" | "Eliminar proyecto";
+  destructiva: boolean;
+}
+
+/** «Más acciones» de la cabecera (13, 14): llevan a 19, donde viven el formulario y el diálogo 19b. */
+export function opcionesMasAcciones(proyectoId: string): OpcionMasAcciones[] {
+  const configuracion = `/projects/${proyectoId}/configuracion`;
+  return [
+    { href: `${configuracion}#fuente`, etiqueta: "Cambiar rama", destructiva: false },
+    { href: `${configuracion}#zona-de-peligro`, etiqueta: "Eliminar proyecto", destructiva: true },
+  ];
+}

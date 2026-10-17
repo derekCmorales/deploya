@@ -18,7 +18,7 @@ Requiere el layout del proyecto (`feat-m7-vista-despliegue`, PR #31) en `main`. 
 
 - [x] 3.1 `/projects/[proyecto]/despliegues/page.tsx`: `Segmented` Todos / Saludables / Fallidos, `Table`, fila activa, «Cargar más», acciones por fila con `Dialog`
 - [x] 3.2 Pruebas `node --test`: `accionDeFila` para cada caso, armado de la consulta con filtro y cursor
-- [ ] 3.3 Revisión contra los artboards 13 y 14 en claro y oscuro; solo componentes de `apps/web/src/components`
+- [x] 3.3 Revisión contra los artboards 13 y 14 en claro y oscuro; solo componentes de `apps/web/src/components` — 17 oct: capturas en claro y oscuro con API simulada; cabecera con «Más acciones» (`Menu`), «Reiniciar»/«Detener» en la cabecera de 13, celdas de versión activa dentro de «Estado actual», «Versión activa» como `Badge` de Señal y pie de la tabla dentro del panel. Falta montar `<ActividadProyecto />` cuando entre el PR de Eduardo (M7-03)
 
 ## 4. Cierre
 

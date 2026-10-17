@@ -1,5 +1,6 @@
 "use client";
 
+import { FileText, FolderGit2, GitBranch, Hash, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -22,6 +23,7 @@ import {
   type DatosProyecto,
 } from "@/lib/configuracion";
 import { urlProyecto } from "@/lib/proyectos";
+import { cn } from "@/lib/utils";
 
 import { EliminarProyecto, type ConteosProyecto } from "./eliminar-proyecto";
 
@@ -37,7 +39,7 @@ export function PanelConfiguracion({ proyectoId }: { proyectoId: string }) {
   if (cargando || !datos) return <Cargando />;
   if (!proyecto) return <Banner variant="bad" title="No encontramos este proyecto">Puede que ya no exista.</Banner>;
   return (
-    <div className="flex max-w-3xl flex-col gap-8 px-8 py-6">
+    <div className="flex max-w-[1040px] flex-col px-8 py-6">
       <Formulario key={proyecto.id} proyecto={proyecto} />
       <EliminarConNavegacion
         proyecto={proyecto}
@@ -98,48 +100,51 @@ function Formulario({ proyecto }: { proyecto: DatosProyecto & { id: string } }) 
 
   return (
     <form
-      className="flex flex-col gap-8"
+      className="flex flex-col"
       onSubmit={(evento) => {
         evento.preventDefault();
         void guardar();
       }}
     >
-      <Seccion titulo="General" descripcion="Cambiar el nombre no cambia el subdominio.">
-        <Campo id="nombre" etiqueta="Nombre del proyecto" valor={borrador.nombre} error={errores.nombre} alCambiar={(v) => editar("nombre", v)} />
+      <Seccion id="general" titulo="General" descripcion="Cambiar el nombre no cambia el subdominio.">
+        <Campo id="nombre" etiqueta="Nombre del proyecto" valor={borrador.nombre} error={errores.nombre} alCambiar={(v) => editar("nombre", v)} mono />
       </Seccion>
-      <Seccion titulo="Fuente" descripcion="De dónde traemos el código en cada despliegue.">
-        <Campo id="urlRepositorio" etiqueta="Repositorio" valor={borrador.urlRepositorio} error={errores.urlRepositorio} alCambiar={(v) => editar("urlRepositorio", v)} mono />
-        <Campo id="rama" etiqueta="Rama" valor={borrador.rama} error={errores.rama} alCambiar={(v) => editar("rama", v)} mono />
-      </Seccion>
-      <Seccion titulo="Contenedor" descripcion="Se construye con el Dockerfile de tu repositorio.">
-        <Campo id="rutaDockerfile" etiqueta="Ruta del Dockerfile" valor={borrador.rutaDockerfile} error={errores.rutaDockerfile} alCambiar={(v) => editar("rutaDockerfile", v)} mono />
-        <Campo id="puertoInterno" etiqueta="Puerto interno" valor={borrador.puertoInterno} error={errores.puertoInterno} alCambiar={(v) => editar("puertoInterno", v)} mono />
-      </Seccion>
-      {aviso ? <Banner variant="bad" title="No pudimos guardar los cambios">{aviso}</Banner> : null}
-      {guardado ? <Banner variant="muted" title="Cambios guardados">Aplican en el próximo despliegue.</Banner> : null}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-        <p className="text-xs text-muted-foreground">Los cambios aplican en el próximo despliegue.</p>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" disabled={ocupado || !hayCambios(cambios)} onClick={descartar}>
-            Descartar
-          </Button>
-          <Button type="submit" disabled={ocupado || !hayCambios(cambios)}>
-            Guardar cambios
-          </Button>
+      <Seccion id="fuente" titulo="Fuente" descripcion="De dónde traemos el código en cada despliegue.">
+        <div className="flex flex-wrap gap-3">
+          <Campo id="urlRepositorio" etiqueta="Repositorio" icono={FolderGit2} valor={borrador.urlRepositorio} error={errores.urlRepositorio} alCambiar={(v) => editar("urlRepositorio", v)} mono className="min-w-60 flex-[3_1_0]" />
+          <Campo id="rama" etiqueta="Rama" icono={GitBranch} valor={borrador.rama} error={errores.rama} alCambiar={(v) => editar("rama", v)} mono className="min-w-32 flex-[1_1_0]" />
         </div>
+      </Seccion>
+      <Seccion id="contenedor" titulo="Contenedor" descripcion="Se construye con el Dockerfile de tu repositorio.">
+        <div className="flex flex-wrap gap-3">
+          <Campo id="rutaDockerfile" etiqueta="Ruta del Dockerfile" icono={FileText} valor={borrador.rutaDockerfile} error={errores.rutaDockerfile} alCambiar={(v) => editar("rutaDockerfile", v)} mono className="min-w-48 flex-[2_1_0]" />
+          <Campo id="puertoInterno" etiqueta="Puerto interno" icono={Hash} valor={borrador.puertoInterno} error={errores.puertoInterno} alCambiar={(v) => editar("puertoInterno", v)} mono className="min-w-32 flex-[1_1_0]" />
+        </div>
+      </Seccion>
+      {aviso ? <Banner variant="bad" title="No pudimos guardar los cambios" className="mt-4">{aviso}</Banner> : null}
+      {guardado ? <Banner variant="muted" title="Cambios guardados" className="mt-4">Aplican en el próximo despliegue.</Banner> : null}
+      <div className="flex flex-wrap items-center justify-end gap-2 py-4">
+        <p className="grow text-xs text-muted-foreground">Los cambios aplican en el próximo despliegue.</p>
+        <Button type="button" variant="ghost" size="sm" disabled={ocupado || !hayCambios(cambios)} onClick={descartar}>
+          Descartar
+        </Button>
+        <Button type="submit" size="sm" disabled={ocupado || !hayCambios(cambios)}>
+          Guardar cambios
+        </Button>
       </div>
     </form>
   );
 }
 
-function Seccion({ titulo, descripcion, children }: { titulo: string; descripcion: string; children: React.ReactNode }) {
+/** Fila de 19: título y explicación en 280px a la izquierda, campos a la derecha. */
+function Seccion({ id, titulo, descripcion, children }: { id: string; titulo: string; descripcion: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-semibold">{titulo}</h3>
+    <section id={id} className="flex flex-wrap items-start gap-x-8 gap-y-4 border-b border-border py-[22px]">
+      <div className="flex w-[280px] flex-none flex-col gap-1.5">
+        <h2 className="text-sm font-semibold">{titulo}</h2>
         <p className="text-xs text-muted-foreground">{descripcion}</p>
       </div>
-      <div className="flex flex-col gap-4">{children}</div>
+      <div className="flex min-w-0 flex-1 flex-col gap-4">{children}</div>
     </section>
   );
 }
@@ -151,6 +156,8 @@ function Campo({
   error,
   alCambiar,
   mono,
+  icono: Icono,
+  className,
 }: {
   id: CampoConfiguracion;
   etiqueta: string;
@@ -158,18 +165,23 @@ function Campo({
   error?: string;
   alCambiar: (valor: string) => void;
   mono?: boolean;
+  icono?: LucideIcon;
+  className?: string;
 }) {
   return (
-    <Field id={id} label={etiqueta} error={error}>
-      <Input
-        id={id}
-        value={valor}
-        className={mono ? "font-mono" : undefined}
-        onChange={(e) => alCambiar(e.target.value)}
-        autoComplete="off"
-        aria-invalid={!!error}
-        aria-describedby={error ? `${id}-msg` : undefined}
-      />
+    <Field id={id} label={etiqueta} error={error} className={className}>
+      <div className="relative">
+        {Icono ? <Icono aria-hidden className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" /> : null}
+        <Input
+          id={id}
+          value={valor}
+          className={cn(mono && "font-mono", Icono && "pl-8")}
+          onChange={(e) => alCambiar(e.target.value)}
+          autoComplete="off"
+          aria-invalid={!!error}
+          aria-describedby={error ? `${id}-msg` : undefined}
+        />
+      </div>
     </Field>
   );
 }
@@ -200,7 +212,7 @@ function useConteos(proyectoId: string): ConteosProyecto | null {
 
 function Cargando() {
   return (
-    <div className="flex max-w-3xl flex-col gap-4 px-8 py-6" aria-busy="true" aria-label="Cargando configuración">
+    <div className="flex max-w-[1040px] flex-col gap-4 px-8 py-6" aria-busy="true" aria-label="Cargando configuración">
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Ellipsis, GitBranch, Lock, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { RequisitosContrasena } from "@/components/deploya/requisitos-contrasena";
@@ -10,6 +10,7 @@ import { CopyField } from "@/components/ui/copy-field";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Menu } from "@/components/ui/menu";
 import { Segmented } from "@/components/ui/segmented";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -59,7 +60,20 @@ export function Interactivos() {
             { value: "365", label: "365 días" },
           ]}
         />
-        <CopyField value="https://api-tienda.deploya.app" />
+        <CopyField value="https://api-tienda.deploya.app" prefijo={<Lock className="text-ok" aria-hidden />} />
+        <Menu
+          className="self-start"
+          disparador={
+            <Button variant="outline" size="icon-sm" aria-label="Más acciones">
+              <Ellipsis />
+            </Button>
+          }
+          opciones={[
+            { href: "/sistema", etiqueta: "Cambiar rama", icono: <GitBranch aria-hidden /> },
+            { href: "/sistema", etiqueta: "Eliminar proyecto", icono: <Trash2 aria-hidden />, destructiva: true },
+          ]}
+          separadorAntesDe={[1]}
+        />
         <label className="flex items-center gap-2 text-sm">
           <Checkbox defaultChecked /> Recordarme en este dispositivo
         </label>

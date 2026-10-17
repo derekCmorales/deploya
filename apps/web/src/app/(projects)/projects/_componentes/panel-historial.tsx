@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, RotateCcw } from "lucide-react";
+import { Info, Radio, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import type { EstadoDespliegueValor } from "@/components/deploya/estados";
+import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -96,7 +97,10 @@ export function PanelHistorial({ proyectoId }: { proyectoId: string }) {
           onValueChange={setFiltro}
           options={FILTROS_HISTORIAL.map((f) => ({ value: f.value, label: f.label }))}
         />
-        <p className="text-xs text-muted-foreground">Redesplegar vuelve a construir ese commit desde su Dockerfile</p>
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Info className="size-3.5" aria-hidden />
+          Redesplegar vuelve a construir ese commit desde su Dockerfile
+        </p>
       </div>
       {error ? <Banner variant="bad" title="No pudimos cargar los despliegues">{error}</Banner> : null}
       {avisoAccion ? <Banner variant="bad" title="No pudimos completar la acción">{avisoAccion}</Banner> : null}
@@ -107,8 +111,8 @@ export function PanelHistorial({ proyectoId }: { proyectoId: string }) {
         ocupado={ocupado}
         alReintentar={(fila) => void ejecutar("reintentar", fila)}
         alConfirmar={setConfirmacion}
+        pie={<Pie filas={filas.length} hayMas={siguiente !== null} cargando={cargando} alCargarMas={() => void cargar(siguiente, filas)} />}
       />
-      <Pie filas={filas.length} hayMas={siguiente !== null} cargando={cargando} alCargarMas={() => void cargar(siguiente, filas)} />
       <DialogoConfirmacion
         confirmacion={confirmacion}
         ocupado={ocupado}
@@ -126,6 +130,7 @@ function Tabla({
   ocupado,
   alReintentar,
   alConfirmar,
+  pie,
 }: {
   proyectoId: string;
   filas: FilaHistorial[];
@@ -133,12 +138,13 @@ function Tabla({
   ocupado: boolean;
   alReintentar: (fila: FilaHistorial) => void;
   alConfirmar: (confirmacion: Confirmacion) => void;
+  pie: React.ReactNode;
 }) {
   const ahora = new Date();
   if (cargando && filas.length === 0) return <Skeleton className="h-64 w-full" aria-busy="true" aria-label="Cargando despliegues" />;
   if (filas.length === 0) return <p className="text-sm text-muted-foreground">Todavía no hay despliegues con este filtro.</p>;
   return (
-    <Table>
+    <Table footer={pie}>
       <TableHeader>
         <TableRow>
           <TableHead>Versión</TableHead>
@@ -156,7 +162,7 @@ function Tabla({
         {filas.map((fila) => (
           <TableRow key={fila.id} data-activa={fila.activo}>
             <TableCell className="font-medium">
-              <Link href={rutaDespliegue(proyectoId, fila.numero)} className="hover:underline">
+              <Link href={rutaDespliegue(proyectoId, fila.numero)} className="font-mono text-[13px] hover:underline">
                 #{fila.numero}
               </Link>
             </TableCell>
@@ -204,30 +210,32 @@ function AccionesDeFila({
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
       {accion === "version-activa" ? (
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ok">
-          <Check className="size-3.5" aria-hidden />
+        <Badge variant="signal">
+          <Radio aria-hidden />
           Versión activa
-        </span>
+        </Badge>
       ) : null}
       {accion === "revertir" ? (
-        <Button type="button" variant="outline" size="sm" disabled={ocupado} onClick={() => alConfirmar({ accion: "revertir", fila })}>
+        <Button type="button" variant="outline" size="xs" disabled={ocupado} onClick={() => alConfirmar({ accion: "revertir", fila })}>
           <RotateCcw />
           Revertir
         </Button>
       ) : null}
       {accion === "imagen-retirada" ? (
-        <Button type="button" variant="outline" size="sm" disabled title="La retención ya borró la imagen de esta versión">
+        <Button type="button" variant="outline" size="xs" disabled title="La retención ya borró la imagen de esta versión">
           <RotateCcw />
           Imagen retirada
         </Button>
       ) : null}
       {accion === "reintentar" ? (
-        <Button type="button" variant="outline" size="sm" disabled={ocupado} onClick={() => alReintentar(fila)}>
+        <Button type="button" variant="outline" size="xs" disabled={ocupado} onClick={() => alReintentar(fila)}>
+          <RotateCcw />
           Reintentar
         </Button>
       ) : null}
       {puedeRedesplegar(fila) ? (
-        <Button type="button" variant="outline" size="sm" disabled={ocupado} onClick={() => alConfirmar({ accion: "redesplegar", fila })}>
+        <Button type="button" variant="outline" size="xs" disabled={ocupado} onClick={() => alConfirmar({ accion: "redesplegar", fila })}>
+          <RotateCcw />
           Redesplegar
         </Button>
       ) : null}
@@ -238,16 +246,16 @@ function AccionesDeFila({
 function Pie({ filas, hayMas, cargando, alCargarMas }: { filas: number; hayMas: boolean; cargando: boolean; alCargarMas: () => void }) {
   if (filas === 0) return null;
   return (
-    <div className="flex items-center justify-between gap-3">
-      <p className="text-xs text-muted-foreground">
+    <>
+      <span className="grow text-xs text-muted-foreground">
         {filas === 1 ? "Se muestra el último despliegue del proyecto." : `Se muestran los últimos ${filas} despliegues del proyecto.`}
-      </p>
+      </span>
       {hayMas ? (
-        <Button type="button" variant="outline" size="sm" disabled={cargando} onClick={alCargarMas}>
+        <Button type="button" variant="ghost" size="xs" disabled={cargando} onClick={alCargarMas}>
           Cargar más
         </Button>
       ) : null}
-    </div>
+    </>
   );
 }
 

@@ -457,9 +457,11 @@ Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit 
 | 2 | `detenerTodosDe` / `reanudarTodosDe` (Javier) | **Hecho** | `ContenedoresClientePuerto` en `orquestacion/`: M2 y M9 lo inyectan desde un módulo que importe `OrquestacionModule` (contrato 3.1) |
 | 3 | M5-04 reversión | **Hecho (API y web)** | Demo en compose con tres despliegues; ADR 0004 queda Propuesto hasta verla |
 | 4 | M4-02 cancelar, reintentar, redesplegar | **Hecho (API y web)** | Demo en compose: cancelar en Construyendo sin `docker build` colgado |
-| 5 | M7-02 pantallas 13 y 14 | **Hecho** | Comparar contra los artboards (hoy revisadas en claro y oscuro contra la ficha); montar `<ActividadProyecto />` de Eduardo |
-| 6 | M3-04 pantalla 19 | **Hecho** | Demo: rama `sin-dockerfile` → «Stack detectado: Node.js 22» |
+| 5 | M7-02 pantallas 13 y 14 | **Hecho** (revisadas contra el canvas el 17 de octubre) | Montar `<ActividadProyecto />` de Eduardo cuando entre su PR (M7-03); demo en compose |
+| 6 | M3-04 pantalla 19 | **Hecho** (19 y 19b revisadas contra el canvas el 17 de octubre) | Demo: rama `sin-dockerfile` → «Stack detectado: Node.js 22» |
 | 7 | M6-02 HTTPS y ADR 0007 | **Código y script hechos** | Correr `scripts/desplegar-vps.sh` en el VPS, SMTP con Eddy, `https://hola-deploya.<dominio>` con candado |
+
+**Revisión del 17 de octubre (rama `Entrega-85%`).** 13, 14, 19 y 19b quedaron iguales a sus artboards en claro y oscuro: cabecera del proyecto con ruta en mono, metadatos con iconos, riel y «Más acciones» (`Menu` nuevo del sistema: «Cambiar rama» y «Eliminar proyecto»); en 13, «Reiniciar» y «Detener» en la cabecera y la versión activa, la imagen y la publicación como celdas al pie de «Estado actual»; en 14, «Versión activa» como `Badge` de Señal y el pie con «Cargar más» dentro del panel (`Table footer`); en 19, filas de 280px con iconos en los campos y «Zona de peligro» como en el canvas; «Cancelar despliegue» (12) en fantasma y «Reintentar» (12c) con su icono. `pnpm check` en verde. Siguen pendientes las demos en compose y el VPS (no se pueden hacer sin Docker con red ni sin el dominio).
 
 ### Calendario hasta el viernes 23
 

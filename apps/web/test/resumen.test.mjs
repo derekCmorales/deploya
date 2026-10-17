@@ -6,6 +6,7 @@ import {
   duracionConstruccion,
   duracionTotalMs,
   horaHito,
+  opcionesMasAcciones,
   seguirResumen,
   tamanoImagen,
   textoActualizado,
@@ -63,4 +64,13 @@ test("el sondeo del resumen sigue mientras algo esté en curso o una acción no 
   assert.equal(seguirResumen(con("saludable", "saludable"), "saludable", enCurso), true);
   assert.equal(seguirResumen(con("detenido", "detenido"), "saludable", enCurso), false);
   assert.equal(seguirResumen(con(null, null), null, enCurso), false);
+});
+
+test("13 · «Más acciones» lleva a la Fuente de 19 y a su Zona de peligro, con Eliminar al final", () => {
+  const opciones = opcionesMasAcciones("p1");
+
+  assert.deepEqual(opciones, [
+    { href: "/projects/p1/configuracion#fuente", etiqueta: "Cambiar rama", destructiva: false },
+    { href: "/projects/p1/configuracion#zona-de-peligro", etiqueta: "Eliminar proyecto", destructiva: true },
+  ]);
 });

@@ -26,5 +26,5 @@ Requiere `feat-m5-acciones-contenedor` y `feat-m5-bloqueos-cuota` en `main` (ya 
 ## 5. Cierre
 
 - [x] 5.1 `clases-unificado.mmd`, `m2-estados-suscripcion.mmd` y `pnpm diagramas:sync`; `pnpm check` en verde; cobertura ≥ 80 % en `suscripciones/`
-- [ ] 5.2 Demo en compose: `suspendida@deploya.app` con un proyecto Saludable → `POST /admin/ciclo/ejecutar` → el subdominio deja de responder; renovar → vuelve
-- [ ] 5.3 Marcar la tarea 5.3 de `feat-m2-contratacion-suscripcion` (archivada) en el resumen del archive; `/opsx-archive` después del merge
+- [x] 5.2 Demo en compose: `suspendida@deploya.app` con un proyecto Saludable → `POST /admin/ciclo/ejecutar` → el subdominio deja de responder; renovar → vuelve
+- [x] 5.3 Marcar la tarea 5.3 de `feat-m2-contratacion-suscripcion` (archivada) en el resumen del archive; `/opsx-archive` después del merge

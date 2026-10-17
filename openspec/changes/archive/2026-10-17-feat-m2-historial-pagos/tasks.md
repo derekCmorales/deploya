@@ -21,5 +21,5 @@ Requiere `feat-m2-contratacion-suscripcion` (archivado). Sin base ni reloj reale
 ## 4. Cierre
 
 - [x] 4.1 `clases-unificado.mmd`; `pnpm check` en verde; cobertura ≥ 80 % en `suscripciones/`
-- [ ] 4.2 Demo: contratar Starter y descargar su PDF; una cuenta nueva ve 09b
-- [ ] 4.3 `/opsx-archive` después del merge
+- [x] 4.2 Demo: contratar Starter y descargar su PDF; una cuenta nueva ve 09b
+- [x] 4.3 `/opsx-archive` después del merge

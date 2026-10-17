@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePlanes } from "@/hooks/use-planes";
 import { useProyectos } from "@/hooks/use-proyectos";
 import { useSesion } from "@/hooks/use-sesion";
-import { useMiSuscripcion } from "@/hooks/use-suscripcion";
+import { useConsumoPeriodo, useMiSuscripcion } from "@/hooks/use-suscripcion";
 import { contenedoresDetenidos } from "@/lib/suscripcion";
 
 import { CabeceraCobro } from "../../_componentes/cabecera-cobro";
@@ -27,6 +27,7 @@ export function MiSuscripcionContenedor() {
   const suscripcion = useMiSuscripcion();
   const { estado: catalogo } = usePlanes();
   const { datos: proyectos } = useProyectos({ sondear: false });
+  const consumo = useConsumoPeriodo();
   const [ahora] = useState(() => new Date());
 
   return (
@@ -57,7 +58,7 @@ export function MiSuscripcionContenedor() {
         <>
           <TarjetaPlanActual suscripcion={suscripcion.datos} ahora={ahora} />
           <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[3fr_2fr]">
-            <PanelConsumo suscripcion={suscripcion.datos} proyectos={proyectos} ahora={ahora} />
+            <PanelConsumo suscripcion={suscripcion.datos} proyectos={proyectos} consumo={consumo} ahora={ahora} />
             <PanelCambiarPlan
               suscripcion={suscripcion.datos}
               catalogo={catalogo.tipo === "listo" ? catalogo.planes : null}

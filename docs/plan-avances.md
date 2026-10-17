@@ -195,7 +195,7 @@ Los changes están en `openspec/changes/` y validan con `openspec validate --all
 |---|---|---|---|
 | `feat-m1-estados-roles` | M1-04 | Eddy | Javier (usa `RolGuard` en M9) |
 | `feat-m1-recuperacion` | M1-05, M10-02 | Eddy | — |
-| `feat-m2-contratacion-suscripcion` | M2-02, M2-03, M2-04 | Javier | **Hecho**; falta archivar |
+| `feat-m2-contratacion-suscripcion` | M2-02, M2-03, M2-04 | Javier | **Hecho y archivado** (7 de octubre) |
 | `feat-m7-vista-despliegue` | M7-01 | Eduardo | Derek (consulta por número) |
 | `feat-m3-variables-cifradas` | M3-03 | Eduardo | Derek (variables al contenedor) |
 | `feat-m4-deteccion-stack` | M4-03 | Derek | Eduardo (11a, 11e) |
@@ -311,9 +311,9 @@ Están en `openspec/changes/` y validan con `openspec validate --all`. Cada due�
 | Change | Historias | Dueño | Toca a |
 |---|---|---|---|
 | `feat-m1-cuenta` | M1-06, M1-07 | Eddy | — |
-| `feat-m2-ciclo-suscripcion` | M2-05 | Javier (+ Derek, tarea 3) | Derek (`detenerTodosDe`, `reanudarTodosDe`) |
-| `feat-m2-historial-pagos` | M2-06 | Javier | — |
-| `feat-m9-usuarios-suspension` | M9-01, M9-02 | Javier | Eddy (`RolGuard`, ya en `main`), Derek (contenedores) |
+| `feat-m2-ciclo-suscripcion` | M2-05 | Javier (+ Derek, tarea 3) | Derek (`detenerTodosDe`, `reanudarTodosDe`) · **Hecho y archivado** (17 de octubre) |
+| `feat-m2-historial-pagos` | M2-06 | Javier | — · **Hecho y archivado** (17 de octubre) |
+| `feat-m9-usuarios-suspension` | M9-01, M9-02 | Javier | Eddy (`RolGuard`, ya en `main`), Derek (contenedores) · **Hecho y archivado** (17 de octubre) |
 | `feat-m5-reversion-instantanea` | M5-04 | Derek | — |
 | `feat-m4-acciones-despliegue` | M4-02 | Derek | — |
 | `feat-m7-resumen-historial` | M7-02 | Derek | Eduardo (monta `ActividadProyecto`) |
@@ -460,6 +460,18 @@ Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit 
 | 5 | M7-02 pantallas 13 y 14 | **Hecho** | Comparar contra los artboards (hoy revisadas en claro y oscuro contra la ficha); montar `<ActividadProyecto />` de Eduardo |
 | 6 | M3-04 pantalla 19 | **Hecho** | Demo: rama `sin-dockerfile` → «Stack detectado: Node.js 22» |
 | 7 | M6-02 HTTPS y ADR 0007 | **Código y script hechos** | Correr `scripts/desplegar-vps.sh` en el VPS, SMTP con Eddy, `https://hola-deploya.<dominio>` con candado |
+
+### Estado de Javier al sábado 17 de octubre (rama `Entrega-85%`)
+
+Las cuatro historias del Avance 3 (13 pts) están en la rama, con su change sincronizado a los specs y archivado. `pnpm test` en verde (API y web) y diagramas al día. Las demos se corrieron con Postgres y Redis reales (adaptadores del motor en stub) y, para el contenedor, con Docker, Traefik y BullMQ en el PR #36.
+
+| Historia | Estado | Evidencia |
+|---|---|---|
+| M2-05 ciclo §4.4 | **Hecho** | `PoliticaCiclo` en tabla; vencida → suspendida → cancelada y dos corridas el mismo día sin cambios; `POST /admin/ciclo/ejecutar` 403 a un Cliente; renovar reactiva (`ReactivacionService`); panel «Suscripción suspendida» de 28 |
+| M2-06 historial y PDF | **Hecho** | Cuenta nueva ve 09b; aprobado + rechazado en 09; PDF `DPY-AAAA-NNNNNN.pdf`; ajeno o rechazado → 404 |
+| M9-01 usuarios | **Hecho** | Búsqueda, filtro por Vencida (solo `vencida@`), detalle; Cliente → 403 |
+| M9-02 suspender | **Hecho** | Sesiones revocadas, `AccionAdministrativa`, 03b con el motivo; administrador 403, repetida 409, motivo fuera de la lista 400 |
+| Montar el consumo de M7-03 en 08 | **Hecho (contrato)** | 08 lee `GET /observabilidad/consumo` y dibuja Construcciones con porcentaje; si el endpoint aún no responde, muestra el límite del plan. Se verá el conteo real cuando el PR de M7-03 esté en la rama |
 
 ### Calendario hasta el viernes 23
 

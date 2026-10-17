@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useSondeo, type Sondeo } from "@/hooks/use-sondeo";
 import { ErrorApi, pedirApi } from "@/lib/api";
 import type { Vigencia } from "@/lib/planes";
-import { ultimos4, type Cotizacion, type FormularioTarjeta, type MiSuscripcion, type ResultadoContratacion } from "@/lib/suscripcion";
+import { ultimos4, type ConsumoPeriodo, type Cotizacion, type FormularioTarjeta, type MiSuscripcion, type ResultadoContratacion } from "@/lib/suscripcion";
 
 const leerMia = () => pedirApi<MiSuscripcion>("/suscripciones/mia");
 const nunca = () => false;
@@ -13,6 +13,13 @@ const nunca = () => false;
 /** `GET /suscripciones/mia` (08 y «Plan actual» de 06). `activo = false` no pide nada (visitante). */
 export function useMiSuscripcion({ activo = true }: { activo?: boolean } = {}): Sondeo<MiSuscripcion> {
   return useSondeo(activo ? leerMia : null, nunca);
+}
+
+const leerConsumo = () => pedirApi<ConsumoPeriodo>("/observabilidad/consumo");
+
+/** `GET /observabilidad/consumo` (M7-03): construcciones del mes y proyectos para «Consumo del período» de 08. */
+export function useConsumoPeriodo(): Sondeo<ConsumoPeriodo> {
+  return useSondeo(leerConsumo, nunca);
 }
 
 /** `GET /suscripciones/cotizacion` para el resumen de 07. */

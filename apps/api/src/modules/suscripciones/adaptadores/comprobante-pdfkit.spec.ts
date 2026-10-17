@@ -1,5 +1,5 @@
 import { Comprobante } from "../dominio/comprobante";
-import { ComprobantePdfKit, paraHelvetica } from "./comprobante-pdfkit";
+import { ComprobantePdfKit } from "./comprobante-pdfkit";
 
 const FIRMA_PDF = "%PDF-";
 
@@ -28,9 +28,6 @@ describe("M2-06 · ComprobantePdfKit", () => {
 
     expect(pdf.subarray(0, FIRMA_PDF.length).toString("latin1")).toBe(FIRMA_PDF);
     expect(pdf.length).toBeGreaterThan(1000);
-  });
-
-  it("la vigencia usa un guion que Helvetica sí tiene", () => {
-    expect(paraHelvetica("03 sep → 03 oct 2026")).toBe("03 sep – 03 oct 2026");
+    expect(pdf.toString("latin1")).toMatch(/\/BaseFont \/[A-Z]{6}\+Geist-Bold/);
   });
 });

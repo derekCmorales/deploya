@@ -37,7 +37,7 @@ Cambios de clases: `HistorialPagosService`, `Comprobante`, `ComprobantePdfPuerto
 
 ## Decisiones al aplicar (2026-10-17)
 
-- **Librería de PDF:** `pdfkit` 0.17 (y `@types/pdfkit`) en `apps/api`. Helvetica estándar no trae «→»: el PDF muestra la vigencia con «–»; el panel de 09 conserva «→».
+- **Librería de PDF:** `pdfkit` 0.17 (y `@types/pdfkit`) en `apps/api`. **Fuente del sistema:** Geist y Geist Mono (TTF de `geist` 1.8.1, licencia SIL OFL en `apps/api/assets/fuentes/OFL.txt`), copiadas al repo en vez de depender del paquete `geist`, que arrastra `next` como dependencia par a la imagen de la API. La marca va en Geist 700 con tracking −0,06 em y la «a» en Señal, como `wordmark.tsx`; la vigencia conserva «→».
 - **Vigencia del comprobante:** desde la fecha del pago por los días del plan. `Pago` no guarda el inicio de la vigencia (datos 1.3 sin cambios), así que en una renovación anticipada el comprobante no muestra la fecha en que empieza a sumar.
 - **Titular:** el nombre de la cuenta (`Usuario.nombre`); la pasarela simulada no guarda el titular de la tarjeta.
 - **PDF con estructura de recibo (pedido de Derek):** marca, número, «Total pagado» con «Aprobado», fecha de pago, «Facturado a» (titular y correo), «Método de pago», la partida (descripción, vigencia, monto), subtotal, total y un pie con agradecimiento y soporte. Colores del tema claro del design system en RGB. Sin leyendas de demo («simulado», «sin valor fiscal», «Prueba»): es un proyecto de clase; el aviso de cobros simulados que pide el requisito queda en la pantalla 09.

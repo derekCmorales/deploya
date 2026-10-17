@@ -91,7 +91,7 @@ export class ConsultaUsuariosPrisma extends ConsultaUsuariosPuerto {
       this.prisma.usuario.findMany({
         where,
         include: FILA,
-        orderBy: { creado: "desc" },
+        orderBy: [{ creado: "desc" }, { id: "asc" }],
         skip: (filtro.pagina - 1) * USUARIOS_POR_PAGINA,
         take: USUARIOS_POR_PAGINA,
       }),

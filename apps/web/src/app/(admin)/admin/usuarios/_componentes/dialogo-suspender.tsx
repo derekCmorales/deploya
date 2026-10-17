@@ -7,12 +7,11 @@ import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { suspenderCuenta, useMotivosSuspension } from "@/hooks/use-admin-usuarios";
 import { cuerpoSuspension, DETALLE_MAXIMO, type FilaUsuario } from "@/lib/admin-usuarios";
 import { ErrorApi } from "@/lib/api";
-
-const CAMPO =
-  "w-full rounded-md border border-input bg-sunken px-2.5 text-sm text-foreground placeholder:text-faint focus-visible:border-signal focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-signal-soft";
 
 /** 25b: motivo de la lista y detalle para el registro; el motivo es lo que verá el usuario en 03b. */
 export function DialogoSuspender({
@@ -33,14 +32,22 @@ export function DialogoSuspender({
   const [error, setError] = useState<string | null>(null);
   const cuerpo = cuerpoSuspension(motivo, detalle);
 
+  const cerrar = (siguiente: boolean) => {
+    if (!siguiente) {
+      setMotivo("");
+      setDetalle("");
+      setError(null);
+    }
+    alCambiar(siguiente);
+  };
+
   const confirmar = async () => {
     if (!cuerpo) return;
     setEnviando(true);
     setError(null);
     try {
       await suspenderCuenta(usuario.id, cuerpo);
-      setMotivo("");
-      setDetalle("");
+      cerrar(false);
       alSuspender();
     } catch (e) {
       setError(e instanceof ErrorApi ? e.message : "No pudimos suspender la cuenta.");
@@ -52,7 +59,7 @@ export function DialogoSuspender({
   return (
     <Dialog
       open={abierto}
-      onOpenChange={alCambiar}
+      onOpenChange={cerrar}
       title={
         <span className="flex items-center gap-2">
           <ShieldAlert className="size-5 text-bad" aria-hidden />
@@ -67,7 +74,7 @@ export function DialogoSuspender({
       }
       footer={
         <>
-          <Button variant="ghost" onClick={() => alCambiar(false)} disabled={enviando}>
+          <Button variant="ghost" onClick={() => cerrar(false)} disabled={enviando}>
             Cancelar
           </Button>
           <Button variant="destructive" onClick={() => void confirmar()} disabled={!cuerpo || enviando}>
@@ -77,14 +84,8 @@ export function DialogoSuspender({
         </>
       }
     >
-      <Field id="motivo-suspension" label="Motivo">
-        <select
-          id="motivo-suspension"
-          aria-describedby="motivo-suspension-msg"
-          className={`${CAMPO} h-9 cursor-pointer`}
-          value={motivo}
-          onChange={(e) => setMotivo(e.target.value)}
-        >
+      <Field id="motivo-suspension" label="Motivo" hint="Se muestra al usuario cuando intenta iniciar sesión.">
+        <Select id="motivo-suspension" aria-describedby="motivo-suspension-msg" value={motivo} onChange={(e) => setMotivo(e.target.value)}>
           <option value="" disabled>
             {motivos.datos ? "Elige un motivo" : "Cargando motivos…"}
           </option>
@@ -93,16 +94,14 @@ export function DialogoSuspender({
               {m.texto}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
-      <Field id="detalle-suspension" label="Detalle para el registro" hint="Se muestra al usuario cuando intenta iniciar sesión.">
-        <textarea
+      <Field id="detalle-suspension" label="Detalle para el registro">
+        <Textarea
           id="detalle-suspension"
-          aria-describedby="detalle-suspension-msg"
           rows={3}
           maxLength={DETALLE_MAXIMO}
           placeholder="Tráfico de minería detectado en 2 contenedores."
-          className={`${CAMPO} resize-none py-2`}
           value={detalle}
           onChange={(e) => setDetalle(e.target.value)}
         />

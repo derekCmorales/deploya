@@ -44,7 +44,7 @@ describe("ConsultaUsuariosPrisma", () => {
     const pagina = await consulta.buscar({ correo: null, suscripcion: "vencida", pagina: 3 });
 
     expect($transaction).toHaveBeenCalledWith(["contar", "leer"]);
-    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 40, take: 20, orderBy: { creado: "desc" } }));
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ skip: 40, take: 20, orderBy: [{ creado: "desc" }, { id: "asc" }] }));
     expect(pagina).toEqual({
       total: 42,
       pagina: 3,

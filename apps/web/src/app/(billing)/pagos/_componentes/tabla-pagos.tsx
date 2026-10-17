@@ -22,7 +22,7 @@ export function TablaPagos({ filas, seleccion, alSeleccionar }: { filas: FilaPag
       </TableHeader>
       <TableBody>
         {filas.map((f) => (
-          <TableRow key={f.id} data-activa={f.id === seleccion} aria-selected={f.id === seleccion} className="data-[activa=true]:bg-muted">
+          <TableRow key={f.id} data-activa={f.id === seleccion} aria-current={f.id === seleccion ? "true" : undefined} className="data-[activa=true]:bg-muted">
             <TableCell className="whitespace-nowrap text-muted-foreground tabular-nums">{fechaPago(f.fecha)}</TableCell>
             <TableCell>
               <div className="flex flex-col gap-0.5">

@@ -145,6 +145,7 @@ Importa desde `@/components/...`. Catálogo vivo: `/sistema`.
 | `Badge` | Variantes `muted`, `outline`, `signal`, `ok`, `warn`, `bad`; `size="lg"`. |
 | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`, `Sunken` | Superficies. Nada de cards dentro de cards. |
 | `Field` + `Input` | Etiqueta, control, pista y error (`aria-invalid`, `aria-describedby="<id>-msg"`). Valores técnicos con `className="font-mono"`. |
+| `Textarea`, `Select` | Mismo trato que `Input`: texto largo (`rows`) y lista nativa de opciones cerradas. |
 | `Checkbox`, `Switch` | Controles nativos accesibles. |
 | `Segmented` | Opciones cortas excluyentes (30 / 365 días, filtros). |
 | `Tabs` / `TabsNav` | Vistas del mismo recurso. `TabsNav` para rutas con `aria-current="page"`. |

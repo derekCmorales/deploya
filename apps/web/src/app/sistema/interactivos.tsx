@@ -11,7 +11,9 @@ import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Segmented } from "@/components/ui/segmented";
+import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 export function Interactivos() {
   const [vigencia, setVigencia] = useState<"30" | "365">("30");
@@ -34,6 +36,17 @@ export function Interactivos() {
         </Field>
         <Field id="repo" label="URL del repositorio">
           <Input id="repo" className="font-mono" placeholder="https://github.com/usuario/proyecto" />
+        </Field>
+        <Field id="motivo" label="Motivo">
+          <Select id="motivo" defaultValue="">
+            <option value="" disabled>
+              Elige un motivo
+            </option>
+            <option value="abuso-recursos">Uso abusivo de recursos de la plataforma.</option>
+          </Select>
+        </Field>
+        <Field id="detalle" label="Detalle para el registro">
+          <Textarea id="detalle" rows={3} placeholder="Tráfico de minería detectado en 2 contenedores." />
         </Field>
       </div>
       <div className="flex flex-col gap-5">

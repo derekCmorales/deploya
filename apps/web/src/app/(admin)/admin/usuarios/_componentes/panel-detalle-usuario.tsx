@@ -150,6 +150,7 @@ export function PanelDetalleUsuario({ detalle, ahora, alSuspender }: { detalle: 
       </section>
 
       <DialogoSuspender
+        key={d.id}
         usuario={d}
         abierto={suspendiendo}
         alCambiar={setSuspendiendo}

@@ -49,7 +49,7 @@ export function TablaUsuarios({
             <TableRow
               key={u.id}
               data-activa={u.id === seleccion}
-              aria-selected={u.id === seleccion}
+              aria-current={u.id === seleccion ? "true" : undefined}
               tabIndex={0}
               className="cursor-pointer last:border-b hover:bg-muted focus-visible:bg-muted focus-visible:outline-none data-[activa=true]:bg-muted data-[activa=true]:shadow-[inset_2px_0_0_var(--foreground)]"
               onClick={() => alSeleccionar(u.id)}

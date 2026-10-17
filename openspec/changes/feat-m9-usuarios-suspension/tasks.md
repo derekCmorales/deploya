@@ -4,13 +4,13 @@ Requiere `feat-m1-estados-roles` en `main` (ya está) y la tarea 3.1 de `feat-m2
 
 ## 1. Usuarios (M9-01)
 
-- [ ] 1.1 `ConsultaUsuariosPuerto` (Prisma y memoria); `GET /admin/usuarios` y `GET /admin/usuarios/:id` con `RolGuard`
-- [ ] 1.2 Pruebas: «Buscar por correo», «Filtrar por suscripción», «Detalle de un usuario», un Cliente → 403
+- [x] 1.1 `ConsultaUsuariosPuerto` (Prisma y memoria); `GET /admin/usuarios` y `GET /admin/usuarios/:id` con `RolGuard`
+- [x] 1.2 Pruebas: «Buscar por correo», «Filtrar por suscripción», «Detalle de un usuario», un Cliente → 403
 
 ## 2. Suspender (M9-02)
 
-- [ ] 2.1 `SuspensionService`, `MOTIVOS_SUSPENSION`, `POST /admin/usuarios/:id/suspension`
-- [ ] 2.2 Pruebas: «Suspender cuenta» (sesiones revocadas, acción registrada, contenedores pedidos a M5), «No se suspende a un administrador», «Cuenta ya suspendida», «Motivo fuera de la lista»
+- [x] 2.1 `SuspensionService`, `MOTIVOS_SUSPENSION`, `POST /admin/usuarios/:id/suspension`
+- [x] 2.2 Pruebas: «Suspender cuenta» (sesiones revocadas, acción registrada, contenedores pedidos a M5), «No se suspende a un administrador», «Cuenta ya suspendida», «Motivo fuera de la lista»
 
 ## 3. Web
 

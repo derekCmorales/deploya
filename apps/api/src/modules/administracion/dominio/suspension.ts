@@ -9,7 +9,7 @@ export const DETALLE_MAXIMO = 500;
  * (`Usuario.motivoSuspension`).
  */
 export const MOTIVOS_SUSPENSION = {
-  terminos: "Uso que incumple los términos de servicio (§7.2).",
+  terminos: "Uso que incumple los términos de servicio.",
   "abuso-recursos": "Uso abusivo de recursos de la plataforma.",
   "contenido-malicioso": "Publicación de contenido malicioso o ilícito.",
   "pago-fraudulento": "Pago fraudulento o desconocido por el titular.",

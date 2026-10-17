@@ -2,8 +2,8 @@ import { CuentaYaSuspendida, DetalleInvalido, MotivoInvalido, NoSePuedeSuspender
 import { DETALLE_MAXIMO, exigirSuspendible, MOTIVOS_SUSPENSION, validarSolicitudSuspension } from "./suspension";
 
 describe("M9-02 · reglas de la suspensión", () => {
-  it("el motivo de la ficha 25b es el texto que muestra 03b", () => {
-    expect(MOTIVOS_SUSPENSION.terminos).toBe("Uso que incumple los términos de servicio (§7.2).");
+  it("el motivo «terminos» es el texto que muestra 03b", () => {
+    expect(MOTIVOS_SUSPENSION.terminos).toBe("Uso que incumple los términos de servicio.");
   });
 
   it("acepta un motivo de la lista con su detalle recortado", () => {

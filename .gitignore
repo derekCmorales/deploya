@@ -9,3 +9,7 @@ apps/web/.next
 apps/api/dist
 **/*.tsbuildinfo
 .prisma
+
+# VPS: el archivo generado por scripts/desplegar-vps.sh y los secretos nunca se versionan.
+.env.vps
+infra/traefik/plataforma.generada.yml

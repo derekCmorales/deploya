@@ -68,7 +68,9 @@ AccionesProyectoService.detenerTodosDe(usuarioId: string): Promise<{ encolados: 
 // un trabajo «detener» por proyecto con despliegue activo Saludable; los demás se omiten
 AccionesProyectoService.reanudarTodosDe(usuarioId: string): Promise<{ encolados: number }>
 // un trabajo «reiniciar» por proyecto con despliegue activo Detenido
-// M2 y M9 los ven por su puerto ContenedoresClientePuerto { detenerTodos, reanudarTodos } (adaptador en M2)
+// M2 y M9 los ven por ContenedoresClientePuerto { detenerTodos, reanudarTodos }: puerto y adaptador ContenedoresClienteM5
+// viven en orquestacion/ y OrquestacionModule exporta el token. Inyéctenlo desde un módulo que importe OrquestacionModule
+// (OrquestacionModule ya importa SuscripcionesModule: el ciclo se rompe con un módulo del ciclo que importe a ambos).
 ```
 
 ### Variables de entorno (M3, HTTP · v2.1 · A2)
@@ -171,7 +173,8 @@ GET  /proyectos/:id/resumen             (M7-02, pantalla 13)
 
 PATCH /proyectos/:id                    (M3-04, pantalla 19) body { nombre?, urlRepositorio?, rama?, rutaDockerfile?, puertoInterno? }
   → 200 { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno }   · aplica en el próximo despliegue
-  → 400 { codigo: "RutaInvalida" | "PuertoInvalido" | "RepositorioInaccesible" | "RamaInexistente" } · 409 { codigo: "NombreRepetido" }
+  → 400 { codigo: "ruta-invalida" | "puerto-invalido" | "url-invalida" | "datos-invalidos" } · 422 { codigo: "repositorio-no-accesible" | "rama-no-encontrada" | "stack-no-reconocido" }
+  → 409 { codigo: "nombre-repetido" } · 404 { codigo: "proyecto-no-encontrado" }   // los códigos son los de M3 (kebab-case), como en el alta
 
 GET  /observabilidad/consumo            (M7-03, pantalla 08)
   → 200 { periodo: { desde, reinicia }, proyectos: { usados, limite }, construcciones: { usadas, limite } }   // mes calendario UTC (I7)
@@ -217,3 +220,6 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 2.1 | 2026-10-02 | Avance 2: consulta por número, variables (HTTP y M3 → M5), `BloqueosService`; `detener` responde 202 |
 | 2.1 | 2026-10-06 | Solo agrega: `detectar` acepta `rutaDockerfile`; `ResultadoDeteccion.nombre` y `.dockerfile`; `StackNoReconocido.pista` |
 | 3 | 2026-10-11 | Avance 3, solo agrega: historial y resumen (M7-02), códigos de cancelar, reintentar y redesplegar (M4-02), `PATCH /proyectos/:id` (M3-04), consumo y actividad (M7-03), `certificado` (M6-02), `detenerTodosDe` / `reanudarTodosDe` para M2 y M9 |
+| 3.1 | 2026-10-14 | Solo aclara: `ContenedoresClientePuerto` y su adaptador `ContenedoresClienteM5` viven en M5 (`orquestacion/`) y `OrquestacionModule` exporta el token; `ProyectosLecturaPuerto.deUsuario` (interno de M4/M5) |
+| 3.2 | 2026-10-14 | Solo aclara `PATCH /proyectos/:id`: los códigos de error son los de M3 en kebab-case (`nombre-repetido`, `ruta-invalida`, `puerto-invalido`, `repositorio-no-accesible`, `rama-no-encontrada`), no los nombres de clase; el único consumidor es la pantalla 19 |
+| 3.3 | 2026-10-14 | Solo precisa `GET /despliegues/:id`: `certificado` es `{ vence }` (ISO 8601) solo si la `url` es https y Traefik ya emitió el certificado; en cualquier otro caso, `null` |

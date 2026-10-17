@@ -26,3 +26,23 @@ export function accionPermitida(tipo: Exclude<TipoAccion, "eliminar">, estado: E
 export function exigirAccionPermitida(tipo: Exclude<TipoAccion, "eliminar">, estado: EstadoDespliegue): void {
   if (!accionPermitida(tipo, estado)) throw new AccionNoPermitida(tipo, estado);
 }
+
+/** Pedido masivo sobre todos los proyectos de un cliente (M2 al suspender o renovar, M9 al suspender la cuenta). */
+export type PedidoMasivo = "detener" | "reanudar";
+
+/** Cuántos trabajos quedaron en la cola `operacion` tras un pedido masivo. */
+export interface ResultadoMasivo {
+  encolados: number;
+}
+
+interface ReglaMasiva {
+  tipo: Exclude<TipoAccion, "eliminar">;
+  /** Único estado del despliegue activo sobre el que actúa el pedido; los demás proyectos se omiten. */
+  estado: EstadoDespliegue;
+}
+
+/** Tabla de reglas (OCP): un pedido nuevo es una fila, no una rama. Reanudar reutiliza `reiniciar`. */
+export const REGLAS_MASIVAS: Readonly<Record<PedidoMasivo, ReglaMasiva>> = {
+  detener: { tipo: "detener", estado: "saludable" },
+  reanudar: { tipo: "reiniciar", estado: "detenido" },
+};

@@ -22,18 +22,8 @@ import {
   type ProyectoEnLista,
 } from "@/lib/proyectos";
 
-import { EliminarProyecto } from "./eliminar-proyecto";
-
 /** Panel derecho de la pantalla 10: el proyecto seleccionado y su último despliegue. */
-export function DetalleProyecto({
-  proyecto,
-  plan,
-  onEliminado,
-}: {
-  proyecto: ProyectoEnLista;
-  plan: PlanProyectos;
-  onEliminado: () => void;
-}) {
+export function DetalleProyecto({ proyecto, plan }: { proyecto: ProyectoEnLista; plan: PlanProyectos }) {
   const ultimo = proyecto.ultimoDespliegue;
   const { datos: vista } = useDespliegue(ultimo?.id ?? null);
   const despliegue = vista ?? ultimo;
@@ -111,8 +101,6 @@ export function DetalleProyecto({
           <span className="text-xs text-muted-foreground">Subdominio automático con HTTPS</span>
         </Dato>
       </dl>
-
-      <EliminarProyecto proyecto={proyecto} onEliminado={onEliminado} />
     </div>
   );
 }

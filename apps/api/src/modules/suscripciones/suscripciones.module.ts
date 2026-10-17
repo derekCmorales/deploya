@@ -13,7 +13,11 @@ import { RepositorioSuscripciones } from "./puertos/repositorio-suscripciones.pu
 import { SuscripcionesController } from "./suscripciones.controller";
 import { SuscripcionesService } from "./suscripciones.service";
 
-/** `ContratacionService` se exporta solo para `CobroModule` (las rutas con sesión de M2). */
+/**
+ * `ContratacionService` se exporta para `CobroModule` (las rutas con sesión de M2) y
+ * `RepositorioSuscripciones` para el ciclo §4.4 (`CicloModule` y `CicloTrabajadorModule`);
+ * `RepositorioPagos` para el historial de pagos de `CobroModule` (M2-06).
+ */
 @Module({
   controllers: [SuscripcionesController],
   providers: [
@@ -25,6 +29,6 @@ import { SuscripcionesService } from "./suscripciones.service";
     { provide: PasarelaPago, useClass: PasarelaSimulada },
     { provide: Espera, useClass: EsperaTemporizador },
   ],
-  exports: [SuscripcionesService, ContratacionService],
+  exports: [SuscripcionesService, ContratacionService, RepositorioSuscripciones, RepositorioPagos],
 })
 export class SuscripcionesModule {}

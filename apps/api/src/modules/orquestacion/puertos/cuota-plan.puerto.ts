@@ -13,6 +13,12 @@ export interface PermisoPlan {
   construccionesMes: number;
 }
 
+/** Cómo se llama el plan del cliente (la pantalla 13 muestra «Starter»). */
+export interface PlanContratado {
+  codigo: string;
+  nombre: string;
+}
+
 /**
  * Puerto estrecho sobre `SuscripcionesService.cuotaDe` (M2). El adaptador real lo
  * envuelve cuando M2 exporte el servicio; el motor no conoce el resto de la cuota.
@@ -20,4 +26,5 @@ export interface PermisoPlan {
 export abstract class CuotaPlanPuerto {
   abstract recursosDe(usuarioId: string): Promise<RecursosPlan>;
   abstract permisoDe(usuarioId: string): Promise<PermisoPlan>;
+  abstract planDe(usuarioId: string): Promise<PlanContratado>;
 }

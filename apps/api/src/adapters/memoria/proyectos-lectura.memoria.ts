@@ -13,4 +13,8 @@ export class ProyectosLecturaMemoria extends ProyectosLecturaPuerto {
   async porId(proyectoId: string): Promise<ProyectoDesplegable | null> {
     return this.proyectos.get(proyectoId) ?? null;
   }
+
+  async deUsuario(usuarioId: string): Promise<ProyectoDesplegable[]> {
+    return [...this.proyectos.values()].filter((p) => p.usuarioId === usuarioId);
+  }
 }

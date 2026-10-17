@@ -446,6 +446,21 @@ Miércoles: cada quien comprueba su parte en el VPS y se corrige. Jueves: recorr
 | Demo en compose y revisión visual: 8.2 motor, 5.2 detección, 6.3 acciones, 4.3 bloqueos, 5.2 vista de despliegue, 5.3 variables | Derek |
 | `/opsx-archive` de `feat-m4-motor-construccion`, `feat-m4-deteccion-stack`, `feat-m5-acciones-contenedor`, `feat-m5-bloqueos-cuota`, `feat-m7-vista-despliegue`, `feat-m3-variables-cifradas` (tras la demo) | Derek |
 
+### Estado de Derek al miércoles 14 de octubre (rama `Entrega-85%`)
+
+Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit por historia, `pnpm check` en verde, `openspec validate --all` 27 de 27). Lo que falta depende de Docker real, del VPS o de cuentas externas, y **no está marcado como hecho** en los `tasks.md`.
+
+| Paso | Historia | Estado | Qué falta |
+|---|---|---|---|
+| 0 | Cerrar el Avance 2 | **Pendiente** | Demos en compose (8.2, 5.2, 6.3, 4.3, 5.2, 5.3) y `/opsx-archive` de los seis changes: solo se marcan tras verlas funcionar |
+| 1 | VPS y dominio | **Archivos listos** | `docker-compose.vps.yml`, `traefik.vps.yml`, `plataforma.vps.yml`, `.env.vps.example`, [infra-vps.md](infra-vps.md). Falta comprar el dominio, los registros A, el VPS y el token DNS |
+| 2 | `detenerTodosDe` / `reanudarTodosDe` (Javier) | **Hecho** | `ContenedoresClientePuerto` en `orquestacion/`: M2 y M9 lo inyectan desde un módulo que importe `OrquestacionModule` (contrato 3.1) |
+| 3 | M5-04 reversión | **Hecho (API y web)** | Demo en compose con tres despliegues; ADR 0004 queda Propuesto hasta verla |
+| 4 | M4-02 cancelar, reintentar, redesplegar | **Hecho (API y web)** | Demo en compose: cancelar en Construyendo sin `docker build` colgado |
+| 5 | M7-02 pantallas 13 y 14 | **Hecho** | Comparar contra los artboards (hoy revisadas en claro y oscuro contra la ficha); montar `<ActividadProyecto />` de Eduardo |
+| 6 | M3-04 pantalla 19 | **Hecho** | Demo: rama `sin-dockerfile` → «Stack detectado: Node.js 22» |
+| 7 | M6-02 HTTPS y ADR 0007 | **Código y script hechos** | Correr `scripts/desplegar-vps.sh` en el VPS, SMTP con Eddy, `https://hola-deploya.<dominio>` con candado |
+
 ### Calendario hasta el viernes 23
 
 | Día | Qué |

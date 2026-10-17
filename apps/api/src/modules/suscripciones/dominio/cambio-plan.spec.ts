@@ -14,6 +14,7 @@ function suscripcion(plan: Plan, cambios: Partial<Suscripcion> = {}): Suscripcio
     usuarioId: "u1",
     plan,
     estado: "activa",
+    estadoDesde: new Date("2026-09-03T12:00:00.000Z"),
     vigenciaDias: pagada ? 30 : null,
     inicio: new Date("2026-09-03T12:00:00.000Z"),
     vence: pagada ? new Date("2026-10-03T12:00:00.000Z") : null,

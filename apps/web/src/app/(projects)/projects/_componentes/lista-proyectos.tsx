@@ -33,12 +33,10 @@ export function ListaProyectos({
   lista,
   seleccionado,
   onSeleccionar,
-  onEliminado,
 }: {
   lista: Lista;
   seleccionado: string | null;
   onSeleccionar: (id: string) => void;
-  onEliminado: () => void;
 }) {
   const [busqueda, setBusqueda] = useState("");
   const visibles = filtrarProyectos(lista.proyectos, busqueda);
@@ -122,7 +120,7 @@ export function ListaProyectos({
             <Meter label="Proyectos del plan" value={lista.usados} max={lista.maximo} tonoAlLimite="warn" />
           </div>
         </div>
-        {activo ? <DetalleProyecto key={activo.id} proyecto={activo} plan={lista.plan} onEliminado={onEliminado} /> : null}
+        {activo ? <DetalleProyecto key={activo.id} proyecto={activo} plan={lista.plan} /> : null}
       </div>
     </section>
   );

@@ -23,6 +23,8 @@ export abstract class ContenedorPuerto {
   abstract eliminar(contenedorId: string): Promise<void>;
   /** Detiene y borra todos los contenedores del proyecto; no falla si ya no hay. */
   abstract eliminarContenedoresDe(subdominio: string): Promise<void>;
+  /** Borra una imagen por su etiqueta (retención de artefactos, M5-04); no falla si ya no existe. */
+  abstract eliminarImagen(imagen: string): Promise<void>;
   /** Borra las imágenes `deploya/<subdominio>:*`; no falla si ya no hay. */
   abstract eliminarImagenesDe(subdominio: string): Promise<void>;
 }

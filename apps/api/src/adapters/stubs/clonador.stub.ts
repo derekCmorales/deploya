@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { Commit } from "../../modules/construccion/dominio/despliegue";
+import { DespliegueCancelado } from "../../modules/construccion/dominio/errores";
 import {
   ClonadorRepositorioPuerto,
   type ClonListo,
@@ -28,11 +29,14 @@ export class ClonadorStub extends ClonadorRepositorioPuerto {
   commit: Commit = { sha: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678", mensaje: "feat: demo", autor: "Deploya" };
   archivos = new Map<string, string>([["Dockerfile", "FROM node:22-alpine\nEXPOSE 8080\n"]]);
   error: Error | null = null;
+  readonly solicitudes: SolicitudClon[] = [];
   readonly escritos: { directorio: string; ruta: string; contenido: string }[] = [];
   readonly limpiados: string[] = [];
 
   async clonar(solicitud: SolicitudClon): Promise<ClonListo> {
+    if (solicitud.senal?.aborted) throw new DespliegueCancelado();
     if (this.error) throw this.error;
+    this.solicitudes.push(solicitud);
     return { directorio: `/tmp/deploya/${solicitud.despliegueId}`, commit: this.commit };
   }
 

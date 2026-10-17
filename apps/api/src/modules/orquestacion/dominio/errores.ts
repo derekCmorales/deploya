@@ -46,3 +46,33 @@ export class AccionNoPermitida extends RechazoOrquestacion {
     this.name = "AccionNoPermitida";
   }
 }
+
+/** M5-04: revertir a un artefacto cuya imagen la retención ya borró. */
+export class ArtefactoNoDisponible extends RechazoOrquestacion {
+  readonly codigo = "artefacto-no-disponible";
+
+  constructor(readonly artefactoId: string) {
+    super("La imagen de esa versión ya fue retirada del servidor");
+    this.name = "ArtefactoNoDisponible";
+  }
+}
+
+/** M5-04: revertir al artefacto que ya atiende el tráfico. */
+export class ArtefactoYaActivo extends RechazoOrquestacion {
+  readonly codigo = "artefacto-ya-activo";
+
+  constructor(readonly artefactoId: string) {
+    super("Esa versión ya es la activa");
+    this.name = "ArtefactoYaActivo";
+  }
+}
+
+/** M5-04: el proyecto tiene un despliegue que aún no termina. */
+export class DespliegueEnCurso extends RechazoOrquestacion {
+  readonly codigo = "despliegue-en-curso";
+
+  constructor(readonly proyectoId: string) {
+    super("Hay un despliegue en curso: espera a que termine");
+    this.name = "DespliegueEnCurso";
+  }
+}

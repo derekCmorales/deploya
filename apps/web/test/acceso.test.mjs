@@ -58,7 +58,11 @@ test("28 · el 403 y la sección de administración no hacen fetch, no usan colo
     "src/components/estados/sin-permisos.tsx",
     "src/app/(admin)/layout.tsx",
     "src/app/(admin)/acceso-administracion.tsx",
-    "src/app/(admin)/admin/page.tsx",
+    "src/app/(admin)/admin/usuarios/page.tsx",
+    "src/app/(admin)/admin/usuarios/_componentes/usuarios-contenedor.tsx",
+    "src/app/(admin)/admin/usuarios/_componentes/tabla-usuarios.tsx",
+    "src/app/(admin)/admin/usuarios/_componentes/panel-detalle-usuario.tsx",
+    "src/app/(admin)/admin/usuarios/_componentes/dialogo-suspender.tsx",
   ]) {
     const codigo = leer(ruta);
     assert.doesNotMatch(codigo, /\bfetch\(/, `fetch en ${ruta}`);

@@ -1,5 +1,5 @@
 import { DatosAltaInvalidos } from "./errores";
-import { subdominioDesdeNombre } from "./subdominio";
+import { esSubdominioReservado, SUBDOMINIOS_DE_PLATAFORMA, subdominioDesdeNombre } from "./subdominio";
 
 describe("subdominioDesdeNombre", () => {
   it("Subdominio desde el nombre: «Mi App Web» → mi-app-web", () => {
@@ -22,5 +22,21 @@ describe("subdominioDesdeNombre", () => {
 
   it("un nombre sin letras ni números lanza DatosAltaInvalidos", () => {
     expect(() => subdominioDesdeNombre("!@#$%")).toThrow(DatosAltaInvalidos);
+  });
+});
+
+describe("esSubdominioReservado (M6-02)", () => {
+  it.each(["api", "www", "web", "admin", "mail", "traefik"])("%s lo usa la plataforma en el VPS", (subdominio) => {
+    expect(esSubdominioReservado(subdominio, SUBDOMINIOS_DE_PLATAFORMA)).toBe(true);
+  });
+
+  it("un nombre normal o uno que solo contiene el reservado no lo es", () => {
+    expect(esSubdominioReservado("hola-deploya", SUBDOMINIOS_DE_PLATAFORMA)).toBe(false);
+    expect(esSubdominioReservado("api-tienda", SUBDOMINIOS_DE_PLATAFORMA)).toBe(false);
+    expect(esSubdominioReservado(subdominioDesdeNombre("API"), SUBDOMINIOS_DE_PLATAFORMA)).toBe(true);
+  });
+
+  it("sin reservados (desarrollo) ningún nombre lo es", () => {
+    expect(esSubdominioReservado("api", [])).toBe(false);
   });
 });

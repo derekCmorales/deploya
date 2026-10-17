@@ -1,22 +1,31 @@
 import { Injectable } from "@nestjs/common";
 import { Reloj } from "../../compartido/reloj";
+import { CertificadoPuerto } from "../enrutamiento/puertos/certificado.puerto";
 import { BloqueosService } from "../orquestacion/bloqueos.service";
-import type { Despliegue, DespliegueCreado, ProyectoDesplegable } from "./dominio/despliegue";
-import { DespliegueNoEncontrado, ProyectoNoEncontrado } from "./dominio/errores";
+import type { Commit, Despliegue, DespliegueCreado, ProyectoDesplegable } from "./dominio/despliegue";
+import { CommitDesconocido, DespliegueNoEncontrado, ProyectoNoEncontrado } from "./dominio/errores";
 import { DISPARADOR_SIN_CONSTRUCCION, type DisparadorDespliegue } from "./dominio/estados";
+import { PAGINA_HISTORIAL, type FiltroHistorial } from "./dominio/historial";
 import { LINEAS_POR_PAGINA } from "./dominio/motor.constantes";
 import { ColaConstruccionPuerto } from "./puertos/cola-construccion.puerto";
 import { ProyectosLecturaPuerto } from "./puertos/proyectos-lectura.puerto";
 import { RepositorioArtefactos } from "./puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "./puertos/repositorio-despliegues.puerto";
 import {
+  filaHistorial,
   paginaBitacora,
   resumenDespliegue,
   vistaDespliegue,
   type PaginaBitacora,
+  type PaginaHistorial,
   type ResumenDespliegue,
   type VistaDespliegue,
 } from "./vista-despliegue";
+
+export interface OpcionesDespliegue {
+  /** Commit ya desplegado en el proyecto que se vuelve a clonar (reintentar, redesplegar). */
+  commitSha?: string;
+}
 
 /**
  * Facade de M4: única puerta que usan M3 y la web. Registra y encola; nunca construye
@@ -31,13 +40,21 @@ export class ConstruccionService {
     private readonly cola: ColaConstruccionPuerto,
     private readonly bloqueos: BloqueosService,
     private readonly reloj: Reloj,
+    private readonly certificado: CertificadoPuerto,
   ) {}
 
-  /** Contrato interno M3 → M4: M3 ya validó al dueño al persistir el proyecto. */
-  async crearDespliegue(proyectoId: string, disparador: DisparadorDespliegue = "manual"): Promise<DespliegueCreado> {
+  /**
+   * Contrato interno M3 → M4: M3 ya validó al dueño al persistir el proyecto. Con `commitSha`
+   * (reintentar, redesplegar) el despliegue nace con ese commit y Recepción lo clona fijo.
+   */
+  async crearDespliegue(
+    proyectoId: string,
+    disparador: DisparadorDespliegue = "manual",
+    opciones: OpcionesDespliegue = {},
+  ): Promise<DespliegueCreado> {
     const proyecto = await this.proyectos.porId(proyectoId);
     if (!proyecto) throw new ProyectoNoEncontrado(proyectoId);
-    return this.registrarYEncolar(proyecto, disparador);
+    return this.registrarYEncolar(proyecto, disparador, await this.commitFijado(proyecto.id, opciones.commitSha));
   }
 
   /** `POST /proyectos/:id/despliegues`: un proyecto ajeno se trata como inexistente. */
@@ -58,6 +75,25 @@ export class ConstruccionService {
     return this.vistaDe(despliegue);
   }
 
+  /**
+   * `GET /proyectos/:id/despliegues?filtro=&antesDe=` (pantalla 14): `PAGINA_HISTORIAL` filas por
+   * página y cursor por número, así «Cargar más» no repite filas aunque entren despliegues nuevos.
+   */
+  async historial(proyectoId: string, usuarioId: string, filtro: FiltroHistorial, antesDe: number | null): Promise<PaginaHistorial> {
+    await this.proyectoDe(proyectoId, usuarioId);
+    const [pedidos, activo, artefactos] = await Promise.all([
+      this.despliegues.historialDe(proyectoId, filtro, antesDe, PAGINA_HISTORIAL + 1),
+      this.despliegues.activoDe(proyectoId),
+      this.artefactos.deProyecto(proyectoId),
+    ]);
+    const pagina = pedidos.slice(0, PAGINA_HISTORIAL);
+    const imagenes = new Map(artefactos.map((a) => [a.id, a]));
+    return {
+      despliegues: pagina.map((d) => filaHistorial(d, activo?.id ?? null, d.artefactoId ? (imagenes.get(d.artefactoId) ?? null) : null)),
+      siguiente: pedidos.length > PAGINA_HISTORIAL ? (pagina.at(-1)?.numero ?? null) : null,
+    };
+  }
+
   async bitacoraDesde(despliegueId: string, usuarioId: string, desde: number): Promise<PaginaBitacora> {
     const despliegue = await this.despliegueDe(despliegueId, usuarioId);
     const lineas = await this.despliegues.lineasDesde(despliegue.id, desde, LINEAS_POR_PAGINA);
@@ -75,7 +111,11 @@ export class ConstruccionService {
   }
 
   /** M5-03: se verifica antes de crear nada, así el cliente recibe el 409 al instante. */
-  private async registrarYEncolar(proyecto: ProyectoDesplegable, disparador: DisparadorDespliegue): Promise<DespliegueCreado> {
+  private async registrarYEncolar(
+    proyecto: ProyectoDesplegable,
+    disparador: DisparadorDespliegue,
+    commit?: Commit,
+  ): Promise<DespliegueCreado> {
     if (disparador !== DISPARADOR_SIN_CONSTRUCCION) await this.bloqueos.verificar(proyecto.usuarioId);
     const despliegue = await this.despliegues.crear({
       proyectoId: proyecto.id,
@@ -83,17 +123,33 @@ export class ConstruccionService {
       rama: proyecto.rama,
       estado: "encolado",
       creado: this.reloj.ahora(),
+      commit,
     });
     await this.cola.encolar({ despliegueId: despliegue.id, plan: "construccion" });
     return { id: despliegue.id, numero: despliegue.numero, estado: despliegue.estado };
   }
 
-  private async vistaDe(despliegue: Despliegue): Promise<VistaDespliegue> {
+  /** El commit completo con el que se desplegó antes; sin él no hay nada que fijar (`commit-desconocido`). */
+  private async commitFijado(proyectoId: string, commitSha: string | undefined): Promise<Commit | undefined> {
+    if (!commitSha) return undefined;
+    const previo = await this.despliegues.porCommit(proyectoId, commitSha);
+    if (!previo?.commit) throw new CommitDesconocido(commitSha);
+    return previo.commit;
+  }
+
+  /** El cuerpo de `GET /despliegues/:id`; M7 lo reutiliza para el resumen del proyecto. */
+  async vistaDe(despliegue: Despliegue): Promise<VistaDespliegue> {
     const artefacto = despliegue.artefactoId ? await this.artefactos.porId(despliegue.artefactoId) : null;
     const imagen = artefacto
       ? { numero: artefacto.numero, digest: artefacto.digest, tamanoBytes: artefacto.tamanoBytes, receta: artefacto.receta }
       : null;
-    return vistaDespliegue(despliegue, imagen);
+    return vistaDespliegue(despliegue, imagen, await this.vencimientoDe(despliegue));
+  }
+
+  /** Solo un despliegue servido por HTTPS tiene certificado que mostrar. */
+  private async vencimientoDe(despliegue: Despliegue): Promise<Date | null> {
+    if (!despliegue.url?.startsWith("https://")) return null;
+    return this.certificado.venceEl(new URL(despliegue.url).hostname);
   }
 
   private async proyectoDe(proyectoId: string, usuarioId: string): Promise<ProyectoDesplegable> {

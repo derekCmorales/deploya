@@ -1,6 +1,6 @@
 # 0005 — Traefik v3 con proveedor de archivo y una red por proyecto
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-27
 - **Autor:** @derekCmorales · **Módulos:** M5, M6
 - **Change de OpenSpec:** `feat/m4-motor-construccion` (lo mínimo para `<proyecto>.localhost`); `feat/m6-*` para HTTPS en el VPS
@@ -11,7 +11,7 @@ Hace falta publicar cada app en `<subdominio>.localhost` (desarrollo) y `https:/
 
 ## Decisión
 
-Usamos **Traefik v3 con el proveedor de archivo** vigilando un volumen `traefik_dinamico`. `EnrutamientoTraefikArchivo` escribe `/traefik/dinamico/<subdominio>.yml` con un router `Host(<subdominio>.<DOMINIO_APPS>)` hacia `http://<contenedor>:<puerto>`. Conmutar es reescribir ese archivo **después** de que el nuevo pasa la salud; luego se detiene el anterior. Cada proyecto tiene su red `deploya-p-<subdominio>`; el adaptador de contenedores conecta a esa red a Traefik y al worker (para la salud), y a nada más. En el VPS se agrega un certificado comodín por DNS-01 (M6-02).
+Usamos **Traefik v3 con el proveedor de archivo** vigilando un volumen `traefik_dinamico`. `EnrutamientoTraefikArchivo` escribe `/traefik/dinamico/<subdominio>.yml` con un router `Host(<subdominio>.<DOMINIO_BASE>)` hacia `http://<contenedor>:<puerto>`. Conmutar es reescribir ese archivo **después** de que el nuevo pasa la salud; luego se detiene el anterior. Cada proyecto tiene su red `deploya-p-<subdominio>`; el adaptador de contenedores conecta a esa red a Traefik y al worker (para la salud), y a nada más. En el VPS se agrega un certificado comodín por DNS-01 (M6-02).
 
 ## Alternativas consideradas
 

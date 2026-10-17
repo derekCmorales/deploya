@@ -73,6 +73,10 @@ export class ContenedorDocker extends ContenedorPuerto {
     for (const { Id } of contenedores) await this.eliminar(Id);
   }
 
+  async eliminarImagen(imagen: string): Promise<void> {
+    await this.ignorar([ESTADO_NO_EXISTE], () => this.docker.getImage(imagen).remove({ force: true }));
+  }
+
   async eliminarImagenesDe(subdominio: string): Promise<void> {
     const imagenes = await this.docker.listImages({ filters: { reference: [`${PREFIJO_IMAGEN}/${subdominio}`] } });
     for (const { Id } of imagenes) {

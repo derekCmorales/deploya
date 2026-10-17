@@ -69,3 +69,12 @@ export class CambioEsDescenso extends ErrorSuscripciones {
 export class DescensoNoPermitido extends ErrorSuscripciones {
   readonly codigo = "descenso-no-permitido";
 }
+
+/** Pago ajeno, inexistente o sin comprobante (rechazado): responde 404 sin generar archivo. */
+export class PagoNoEncontrado extends ErrorSuscripciones {
+  readonly codigo = "pago-no-encontrado";
+
+  constructor(readonly pagoId: string) {
+    super("No encontramos ese comprobante.");
+  }
+}

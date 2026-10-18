@@ -7,6 +7,7 @@ import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, estaTerminado, type EstadoDesplieg
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
+  type MuestraDespliegue,
   type NuevoDespliegue,
 } from "../../modules/construccion/puertos/repositorio-despliegues.puerto";
 
@@ -139,7 +140,7 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return Math.max(0, ...numeros) + 1;
   }
 
-  async desplieguesDesde(proyectoId: string, desde: Date): Promise<{ creado: Date; estado: EstadoDespliegue }[]> {
+  async desplieguesDesde(proyectoId: string, desde: Date): Promise<MuestraDespliegue[]> {
     return [...this.despliegues.values()]
       .filter((d) => d.proyectoId === proyectoId && d.creado >= desde)
       .map((d) => ({ creado: d.creado, estado: d.estado }));

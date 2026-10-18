@@ -1,12 +1,13 @@
+const DIAS_POR_SEMANA = 7;
+
 /**
- * Genera el texto resumen de actividad basado en la longitud de los días (pantalla 13).
+ * Resumen del mapa de actividad (pantalla 13): las semanas salen de los días que manda la API.
+ * Ejemplo con 84 días: «12 semanas · 38 despliegues · 2 con fallo».
  */
 export function textoActividad(dias: readonly { total: number; fallidos: number }[]): string {
+  const semanas = Math.round(dias.length / DIAS_POR_SEMANA);
   const totalDespliegues = dias.reduce((acc, d) => acc + d.total, 0);
   const totalFallidos = dias.reduce((acc, d) => acc + d.fallidos, 0);
-  
-  const semanas = 12;
-
   return `${semanas} semanas · ${totalDespliegues} despliegues · ${totalFallidos} con fallo`;
 }
 

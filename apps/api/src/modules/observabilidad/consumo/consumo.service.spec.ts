@@ -1,217 +1,86 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { RepositorioDesplieguesMemoria } from "../../../adapters/memoria/repositorio-despliegues.memoria";
+import { ProyectosLecturaMemoria } from "../../../adapters/memoria/proyectos-lectura.memoria";
+import { CuotaPlanStub } from "../../../adapters/stubs/cuota-plan.stub";
+import { RelojFijo } from "../../../compartido/reloj";
+import { proyectoDemo } from "../../../pruebas/motor";
+import type { DisparadorDespliegue } from "../../construccion/dominio/estados";
+import { CuotaProyectosPuerto, type CuotaProyectos } from "../../proyectos/puertos/cuota-proyectos.puerto";
+import { SuscripcionNoEncontrada } from "../../suscripciones/dominio/errores";
 import { ConsumoService } from "./consumo.service";
-import { Reloj } from "../../../compartido/reloj";
-import {
-  CambiosDespliegue,
-  MuestraDespliegue,
-  NuevoDespliegue,
-  RepositorioDespliegues,
-} from "../../construccion/puertos/repositorio-despliegues.puerto";
-import { ProyectosLecturaPuerto } from "../../construccion/puertos/proyectos-lectura.puerto";
-import {
-  CuotaPlanPuerto,
-  PermisoPlan,
-  PlanContratado,
-  RecursosPlan,
-} from "../../orquestacion/puertos/cuota-plan.puerto";
-import {
-  CuotaProyectos,
-  CuotaProyectosPuerto,
-} from "../../proyectos/puertos/cuota-proyectos.puerto";
-import { Despliegue, LineaBitacora } from "../../construccion/dominio/despliegue";
-import { Etapa, EstadoEtapa } from "../../construccion/dominio/estados";
-import { FiltroHistorial } from "../../construccion/dominio/historial";
 
-class RelojFijoStub extends Reloj {
-  constructor(private readonly fechaFija: Date) {
-    super();
-  }
-  ahora(): Date {
-    return this.fechaFija;
+const USUARIO = "usuario-1";
+const MAX_PROYECTOS = 3;
+const CONSTRUCCIONES_MES = 150;
+
+class CuotaProyectosFija extends CuotaProyectosPuerto {
+  sinSuscripcion = false;
+
+  async cuotaDe(usuarioId: string): Promise<CuotaProyectos> {
+    if (this.sinSuscripcion) throw new SuscripcionNoEncontrada(usuarioId);
+    return { plan: "Starter", maxProyectos: MAX_PROYECTOS, cpus: 0.5, memoriaMb: 512 };
   }
 }
 
-interface RegistroConstruccion {
-  proyectoId: string;
-  creado: Date;
-  estado: string;
+function escenario(hoy: string) {
+  const despliegues = new RepositorioDesplieguesMemoria();
+  const proyectos = new ProyectosLecturaMemoria();
+  const cuotaPlan = new CuotaPlanStub();
+  const cuotaProyectos = new CuotaProyectosFija();
+  cuotaPlan.permiso = { estado: "activa", construccionesMes: CONSTRUCCIONES_MES };
+  for (const id of ["proyecto-1", "proyecto-2", "proyecto-3"]) {
+    proyectos.agregar(proyectoDemo({ id, subdominio: id }));
+    despliegues.registrarDueno(id, USUARIO);
+  }
+  const servicio = new ConsumoService(new RelojFijo(new Date(hoy)), despliegues, proyectos, cuotaPlan, cuotaProyectos);
+
+  async function desplegar(creado: string, cuantos = 1, disparador: DisparadorDespliegue = "manual") {
+    for (let i = 0; i < cuantos; i++) {
+      await despliegues.crear({ proyectoId: "proyecto-1", disparador, rama: "main", estado: "saludable", creado: new Date(creado) });
+    }
+  }
+
+  return { servicio, cuotaProyectos, desplegar };
 }
 
-class RepositorioDesplieguesStub extends RepositorioDespliegues {
-  private despliegues: RegistroConstruccion[] = [];
+describe("Consumo del período (M7-03)", () => {
+  it("Consumo cerca del límite", async () => {
+    const { servicio, desplegar } = escenario("2026-10-14T12:00:00.000Z");
+    await desplegar("2026-10-02T10:00:00.000Z", 96);
 
-  agregar(d: RegistroConstruccion): void {
-    this.despliegues.push(d);
-  }
+    const consumo = await servicio.de(USUARIO);
 
-  async contarConstruccionesDesde(_usuarioId: string, desde: Date): Promise<number> {
-    return this.despliegues.filter((d) => d.creado >= desde && d.estado !== "reversion").length;
-  }
-
-  async desplieguesDesde(_proyectoId: string, _desde: Date): Promise<MuestraDespliegue[]> {
-    return [];
-  }
-
-  crear(_nuevo: NuevoDespliegue): Promise<Despliegue> {
-    throw new Error("Method not implemented.");
-  }
-  porId(_id: string): Promise<Despliegue | null> {
-    throw new Error("Method not implemented.");
-  }
-  porNumero(_proyectoId: string, _numero: number): Promise<Despliegue | null> {
-    throw new Error("Method not implemented.");
-  }
-  porCommit(_proyectoId: string, _commitSha: string): Promise<Despliegue | null> {
-    throw new Error("Method not implemented.");
-  }
-  cambiarEstado(_id: string, _estado: unknown, _cambios?: CambiosDespliegue): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  marcarEtapa(_id: string, _etapa: Etapa, _estado: EstadoEtapa, _marca: Date): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  agregarLineas(_id: string, _lineas: LineaBitacora[]): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  lineasDesde(_id: string, _desde: number, _limite: number): Promise<LineaBitacora[]> {
-    throw new Error("Method not implemented.");
-  }
-  ultimosDe(_proyectoIds: string[]): Promise<Despliegue[]> {
-    throw new Error("Method not implemented.");
-  }
-  activoDe(_proyectoId: string): Promise<Despliegue | null> {
-    throw new Error("Method not implemented.");
-  }
-  historialDe(
-    _proyectoId: string,
-    _filtro: FiltroHistorial,
-    _antesDe: number | null,
-    _limite: number,
-  ): Promise<Despliegue[]> {
-    throw new Error("Method not implemented.");
-  }
-  enCursoDe(_proyectoId: string): Promise<Despliegue | null> {
-    throw new Error("Method not implemented.");
-  }
-  marcarActivo(_proyectoId: string, _despliegueId: string): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-}
-
-class ProyectosLecturaStub implements ProyectosLecturaPuerto {
-  async contarPorUsuario(): Promise<number> {
-    return 1;
-  }
-  async porId(): Promise<null> {
-    return null;
-  }
-  async deUsuario(): Promise<never[]> {
-    return [];
-  }
-}
-
-class CuotaPlanStub implements CuotaPlanPuerto {
-  async recursosDe(_usuarioId: string): Promise<RecursosPlan> {
-    return {
-      construccionesMes: 150,
-      limiteConstrucciones: 150,
-      construccionesPorMes: 150,
-      construcciones: 150,
-      limite: 150,
-    } as unknown as RecursosPlan;
-  }
-  async permisoDe(_usuarioId: string): Promise<PermisoPlan> {
-    return {
-      permitido: true,
-      construccionesMes: 150,
-      limiteConstrucciones: 150,
-      construccionesPorMes: 150,
-      construcciones: 150,
-      limite: 150,
-    } as unknown as PermisoPlan;
-  }
-  async planDe(_usuarioId: string): Promise<PlanContratado> {
-    return {
-      construccionesMes: 150,
-      limiteConstrucciones: 150,
-      construccionesPorMes: 150,
-      construcciones: 150,
-      limite: 150,
-    } as unknown as PlanContratado;
-  }
-  async limiteConstrucciones(): Promise<number> {
-    return 150;
-  }
-}
-
-class CuotaProyectosStub implements CuotaProyectosPuerto {
-  async cuotaDe(_usuarioId: string): Promise<CuotaProyectos> {
-    return {
-      usados: 1,
-      actuales: 1,
-      proyectosActivos: 1,
-      limite: 3,
-      maximo: 3,
-      proyectosMaximos: 3,
-      limiteProyectos: 3,
-    } as unknown as CuotaProyectos;
-  }
-  async limiteProyectos(): Promise<number> {
-    return 3;
-  }
-}
-
-describe("ConsumoService", () => {
-  let servicio: ConsumoService;
-  let repoDespliegues: RepositorioDesplieguesStub;
-  let reloj: RelojFijoStub;
-
-  beforeEach(async () => {
-    repoDespliegues = new RepositorioDesplieguesStub();
-    reloj = new RelojFijoStub(new Date("2026-10-01T00:00:00.000Z")); // 1 de octubre
-
-    const modulo: TestingModule = await Test.createTestingModule({
-      providers: [
-        ConsumoService,
-        { provide: Reloj, useValue: reloj },
-        { provide: RepositorioDespliegues, useValue: repoDespliegues },
-        { provide: ProyectosLecturaPuerto, useClass: ProyectosLecturaStub },
-        { provide: CuotaPlanPuerto, useClass: CuotaPlanStub },
-        { provide: CuotaProyectosPuerto, useClass: CuotaProyectosStub },
-      ],
-    }).compile();
-
-    servicio = modulo.get<ConsumoService>(ConsumoService);
+    expect(consumo.proyectos).toEqual({ usados: 3, limite: MAX_PROYECTOS });
+    expect(consumo.construcciones).toEqual({ usadas: 96, limite: CONSTRUCCIONES_MES });
+    expect(consumo.periodo).toEqual({
+      desde: new Date("2026-10-01T00:00:00.000Z"),
+      reinicia: new Date("2026-11-01T00:00:00.000Z"),
+    });
   });
 
-  it("escenario 'Mes nuevo': con despliegues en septiembre, el 1 de octubre muestra 0 construcciones usadas", async () => {
-    repoDespliegues.agregar({
-      proyectoId: "p1",
-      creado: new Date("2026-09-15T10:00:00.000Z"),
-      estado: "saludable",
-    });
+  it("Mes nuevo", async () => {
+    const { servicio, desplegar } = escenario("2026-10-01T00:00:00.000Z");
+    await desplegar("2026-09-30T23:59:59.000Z", 28);
 
-    const resultado = await servicio.de("user-1");
+    const consumo = await servicio.de(USUARIO);
 
-    expect(resultado.construcciones.usadas).toBe(0);
-    expect(resultado.construcciones.limite).toBe(150);
-    expect(resultado.periodo).toBeDefined();
+    expect(consumo.construcciones.usadas).toBe(0);
+    expect(consumo.periodo.reinicia).toEqual(new Date("2026-11-01T00:00:00.000Z"));
   });
 
-  it("escenario 'la reversión no suma': los despliegues de tipo reversion no incrementan el contador de construcciones", async () => {
-    repoDespliegues.agregar({
-      proyectoId: "p1",
-      creado: new Date("2026-10-02T10:00:00.000Z"),
-      estado: "saludable",
-    });
-    repoDespliegues.agregar({
-      proyectoId: "p1",
-      creado: new Date("2026-10-03T10:00:00.000Z"),
-      estado: "reversion",
-    });
+  it("la reversión no suma construcciones", async () => {
+    const { servicio, desplegar } = escenario("2026-10-14T12:00:00.000Z");
+    await desplegar("2026-10-02T10:00:00.000Z");
+    await desplegar("2026-10-03T10:00:00.000Z", 1, "reversion");
 
-    const resultado = await servicio.de("user-1");
+    const consumo = await servicio.de(USUARIO);
 
-    expect(resultado.construcciones.usadas).toBe(1);
+    expect(consumo.construcciones.usadas).toBe(1);
+  });
+
+  it("sin suscripción propaga SuscripcionNoEncontrada (el filtro de M2 la vuelve 404)", async () => {
+    const { servicio, cuotaProyectos } = escenario("2026-10-14T12:00:00.000Z");
+    cuotaProyectos.sinSuscripcion = true;
+
+    await expect(servicio.de(USUARIO)).rejects.toThrow(SuscripcionNoEncontrada);
   });
 });

@@ -7,7 +7,6 @@ import { ProyectosLecturaPuerto } from "../../construccion/puertos/proyectos-lec
 import { periodoDe, type PeriodoConsumo } from "../dominio/periodo";
 
 export interface ConsumoPeriodoDto {
-  [x: string]: any;
   periodo: PeriodoConsumo;
   proyectos: { usados: number; limite: number };
   construcciones: { usadas: number; limite: number };

@@ -27,14 +27,12 @@ import { VariablesModule } from "./variables.module";
       useFactory: () => new FuenteGitHubPublica(fetch, process.env.GITHUB_TOKEN, process.env.GITHUB_API_URL || undefined),
     },
     { provide: CuotaProyectosPuerto, useClass: CuotaProyectosSuscripciones },
-    /** Con TLS (VPS) la web y la API ocupan la raíz y api.<dominio>: un proyecto no puede quitárselos. */
+    // Con TLS (VPS) la web y la API ocupan la raíz y api.<dominio>: un proyecto no puede quitárselos.
     {
       provide: SUBDOMINIOS_RESERVADOS,
       useFactory: () => (configuracionEnrutamientoDesde(process.env).certResolver ? SUBDOMINIOS_DE_PLATAFORMA : []),
     },
   ],
-  exports: [
-    CuotaProyectosPuerto,
-  ],
+  exports: [CuotaProyectosPuerto],
 })
 export class ProyectosModule {}

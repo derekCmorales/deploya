@@ -1729,6 +1729,28 @@ classDiagram
         +cerrar(token) void
         +usuarioDe(token) UsuarioSesion
     }
+    class CuentaService {
+        -usuarios RepositorioUsuarios
+        -sesiones RepositorioSesiones
+        -hash HashContrasena
+        -generador GeneradorToken
+        -reloj Reloj
+        +perfil(usuarioId) PerfilCuenta
+        +renombrar(usuarioId, nombre) PerfilCuenta
+        +cambiarContrasena(usuarioId, tokenSesion, cambio) void
+        +cerrarTodas(usuarioId) void
+    }
+    class CuentaController {
+        +perfil(usuarioId) PerfilCuenta
+        +renombrar(usuarioId, cuerpo) PerfilCuenta
+        +cambiarContrasena(usuarioId, cuerpo, solicitud) void
+        +cerrarTodas(usuarioId, respuesta) void
+    }
+    class NombreCuenta {
+        <<ValueObject>>
+        +valor String
+        +de(texto)$ NombreCuenta
+    }
     class RecuperacionService {
         -usuarios RepositorioUsuarios
         -tokens RepositorioTokensCuenta
@@ -1747,6 +1769,7 @@ classDiagram
         +registrarActividad(id, marca) void
         +revocar(id, marca) void
         +revocarTodasDe(usuarioId, marca) void
+        +revocarTodasMenos(usuarioId, sesionId, marca) void
     }
     class UsuarioActual {
         <<decorator>>
@@ -1758,6 +1781,7 @@ classDiagram
         +crear(usuario) Usuario
         +cambiarEstado(id, estado) void
         +cambiarHash(id, hashContrasena) void
+        +cambiarNombre(id, nombre) void
     }
     class RepositorioTokensCuenta {
         <<abstract>>
@@ -2499,6 +2523,15 @@ classDiagram
     SesionService --> GeneradorToken
     SesionGuard --> SesionService
     RecuperacionService --> PoliticaContrasena
+    CuentaController --> CuentaService
+    CuentaController ..> SesionGuard : protege
+    CuentaService --> NombreCuenta
+    CuentaService --> PoliticaContrasena
+    CuentaService --> RepositorioUsuarios
+    CuentaService --> RepositorioSesiones : revocarTodasMenos
+    CuentaService --> HashContrasena
+    CuentaService --> GeneradorToken
+    IdentidadService --> NombreCuenta
     RecuperacionService --> RepositorioUsuarios
     RecuperacionService --> RepositorioTokensCuenta
     RecuperacionService --> RepositorioSesiones

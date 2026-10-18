@@ -32,4 +32,12 @@ export class RepositorioSesionesMemoria extends RepositorioSesiones {
       if (sesion.usuarioId === usuarioId && !sesion.revocadaEn) this.sesiones.set(sesion.id, { ...sesion, revocadaEn: marca });
     }
   }
+
+  async revocarTodasMenos(usuarioId: string, sesionId: string, marca: Date): Promise<void> {
+    for (const sesion of this.sesiones.values()) {
+      if (sesion.usuarioId === usuarioId && sesion.id !== sesionId && !sesion.revocadaEn) {
+        this.sesiones.set(sesion.id, { ...sesion, revocadaEn: marca });
+      }
+    }
+  }
 }

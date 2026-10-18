@@ -1,6 +1,8 @@
 import { DIAS_INACTIVIDAD_SESION } from "./dominio/sesion";
 
 export const COOKIE_SESION = "deploya_sesion";
+/** Token de Nest de `ConfiguracionCookie` (lo inyectan los controladores que ponen o vencen la cookie). */
+export const CONFIGURACION_COOKIE = Symbol("CONFIGURACION_COOKIE");
 const SEGUNDOS_POR_DIA = 24 * 60 * 60;
 
 /** Configuración de la cookie leída del entorno: `Secure` solo cuando la web va por HTTPS (VPS). */

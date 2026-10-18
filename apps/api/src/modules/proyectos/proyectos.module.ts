@@ -13,6 +13,10 @@ import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { VariablesModule } from "./variables.module";
 
+/**
+ * `RepositorioProyectos` lo provee `AdaptersModule`: el motor lee del mismo almacén.
+ * La cuota sale de M2 (`cuotaDe`) y la sesión de M1 (`SesionGuard`).
+ */
 @Module({
   imports: [ConstruccionModule, IdentidadModule, SuscripcionesModule, OrquestacionModule, VariablesModule],
   controllers: [ProyectosController],
@@ -23,14 +27,14 @@ import { VariablesModule } from "./variables.module";
       useFactory: () => new FuenteGitHubPublica(fetch, process.env.GITHUB_TOKEN, process.env.GITHUB_API_URL || undefined),
     },
     { provide: CuotaProyectosPuerto, useClass: CuotaProyectosSuscripciones },
+    /** Con TLS (VPS) la web y la API ocupan la raíz y api.<dominio>: un proyecto no puede quitárselos. */
     {
       provide: SUBDOMINIOS_RESERVADOS,
       useFactory: () => (configuracionEnrutamientoDesde(process.env).certResolver ? SUBDOMINIOS_DE_PLATAFORMA : []),
     },
   ],
   exports: [
-    ProyectosService,
-    CuotaProyectosPuerto, // <-- ¡Añadir esto para que ObservabilidadModule pueda consumirlo!
+    CuotaProyectosPuerto,
   ],
 })
 export class ProyectosModule {}

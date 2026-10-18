@@ -1,11 +1,13 @@
 /**
- * Genera el texto resumen de actividad de 12 semanas (pantalla 13).
- * Ejemplo: "12 semanas · 38 despliegues · 2 con fallo"
+ * Genera el texto resumen de actividad basado en la longitud de los días (pantalla 13).
  */
 export function textoActividad(dias: readonly { total: number; fallidos: number }[]): string {
   const totalDespliegues = dias.reduce((acc, d) => acc + d.total, 0);
   const totalFallidos = dias.reduce((acc, d) => acc + d.fallidos, 0);
-  return `12 semanas · ${totalDespliegues} despliegues · ${totalFallidos} con fallo`;
+  
+  const semanas = 12;
+
+  return `${semanas} semanas · ${totalDespliegues} despliegues · ${totalFallidos} con fallo`;
 }
 
 /**

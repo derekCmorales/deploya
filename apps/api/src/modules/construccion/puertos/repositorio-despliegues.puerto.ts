@@ -27,6 +27,11 @@ export interface CambiosDespliegue {
   terminado?: Date;
 }
 
+export interface MuestraDespliegue {
+  creado: Date;
+  estado: EstadoDespliegue;
+}
+
 /**
  * Persistencia del agregado Despliegue (etapas y bitácora incluidas).
  * `crear` asigna `numero = máximo del proyecto + 1` y las cinco etapas en Pendiente.
@@ -59,5 +64,8 @@ export abstract class RepositorioDespliegues {
    */
   abstract contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number>;
 
-  abstract desplieguesDesde(proyectoId: string, desde: Date): Promise<{ creado: Date; estado: EstadoDespliegue }[]>;
+  /**
+   * Devuelve los despliegues de un proyecto desde una fecha dada.
+   */
+  abstract desplieguesDesde(proyectoId: string, desde: Date): Promise<MuestraDespliegue[]>;
 }

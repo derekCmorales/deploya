@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Reloj } from "../../compartido/reloj";
 import type { Rol, Usuario } from "./dominio/cuenta";
-import { ContrasenaActualIncorrecta, ContrasenaDebil, CuentaInexistente } from "./dominio/errores";
+import { ContrasenaActualIncorrecta, ContrasenaDebil, ContrasenaRepetida, CuentaInexistente } from "./dominio/errores";
 import { NombreCuenta } from "./dominio/nombre-cuenta";
 import { PoliticaContrasena } from "./dominio/politica-contrasena";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
@@ -52,20 +52,24 @@ export class CuentaService {
   }
 
   /**
-   * Comprueba la actual, aplica la política del registro, guarda el hash nuevo y cierra las
-   * demás sesiones. La sesión desde la que se cambia (la del token de la cookie) sigue viva.
+   * Comprueba la actual, exige una nueva distinta que cumpla la política del registro, cierra
+   * las demás sesiones y después guarda el hash nuevo. Ese orden importa: si revocar falla, la
+   * contraseña no cambia y las otras sesiones no quedan vivas con la clave nueva. La sesión
+   * desde la que se cambia (la del token de la cookie) sigue viva.
    */
   async cambiarContrasena(usuarioId: string, tokenSesion: string, cambio: CambioContrasena): Promise<void> {
     const usuario = await this.usuario(usuarioId);
     if (!(await this.hash.coincide(cambio.actual, usuario.hashContrasena))) throw new ContrasenaActualIncorrecta();
+    if (cambio.nueva === cambio.actual) throw new ContrasenaRepetida();
     const politica = this.politica.validar(cambio.nueva);
     if (!politica.valida) throw new ContrasenaDebil(politica.incumplidas);
 
     const ahora = this.reloj.ahora();
-    await this.usuarios.cambiarHash(usuario.id, await this.hash.calcular(cambio.nueva));
+    const hashNuevo = await this.hash.calcular(cambio.nueva);
     const actual = await this.sesiones.porHuella(this.generador.huella(tokenSesion));
     if (actual) await this.sesiones.revocarTodasMenos(usuario.id, actual.id, ahora);
     else await this.sesiones.revocarTodasDe(usuario.id, ahora);
+    await this.usuarios.cambiarHash(usuario.id, hashNuevo);
   }
 
   /** «Cerrar todas» (05b): todas las sesiones, incluida la actual; la cookie la borra el controlador. */

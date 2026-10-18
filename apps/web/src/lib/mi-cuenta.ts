@@ -25,11 +25,12 @@ export interface DatosContrasena {
 
 export type ErroresContrasena = Partial<Record<keyof DatosContrasena, string>>;
 
-/** 05b: «Confirmar» distinto de «Nueva contraseña» bloquea el envío, igual que una nueva débil. */
+/** 05b: «Confirmar» distinto de «Nueva contraseña» bloquea el envío, igual que una nueva débil o igual a la actual. */
 export function erroresContrasena(datos: DatosContrasena, nuevaCumple: boolean): ErroresContrasena {
   const errores: ErroresContrasena = {};
   if (datos.actual === "") errores.actual = "Escribe tu contraseña actual.";
   if (!nuevaCumple) errores.nueva = "Mínimo 12 caracteres, mayúsculas y minúsculas, un número y un símbolo.";
+  else if (datos.actual !== "" && datos.nueva === datos.actual) errores.nueva = "La nueva contraseña debe ser distinta de la actual.";
   if (datos.confirmacion !== datos.nueva) errores.confirmacion = "Las contraseñas no coinciden.";
   return errores;
 }

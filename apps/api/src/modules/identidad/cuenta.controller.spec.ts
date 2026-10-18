@@ -1,12 +1,13 @@
-import type { ArgumentsHost } from "@nestjs/common";
+import { UnauthorizedException, type ArgumentsHost, type ExecutionContext } from "@nestjs/common";
 import { GUARDS_METADATA, HTTP_CODE_METADATA } from "@nestjs/common/constants";
 import type { Request, Response } from "express";
 import { COOKIE_SESION, cookieSesionVencida } from "./cookie-sesion";
 import { CuentaController } from "./cuenta.controller";
 import type { CuentaService } from "./cuenta.service";
-import { ContrasenaActualIncorrecta, CuentaInexistente, NombreInvalido } from "./dominio/errores";
-import { ErroresIdentidadFilter } from "./identidad.controller";
+import { ContrasenaActualIncorrecta, ContrasenaRepetida, CuentaInexistente, NombreInvalido } from "./dominio/errores";
+import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { SesionGuard } from "./sesion.guard";
+import type { SesionService } from "./sesion.service";
 
 const LOCAL = { segura: false };
 const PERFIL = { nombre: "Derek", correo: "derek@tiendademo.com", rol: "cliente", verificado: true, creado: new Date("2026-09-03") };
@@ -30,8 +31,19 @@ function respuestaDe(error: Error) {
 }
 
 describe("CuentaController (M1-06, M1-07)", () => {
-  it("todas las rutas exigen sesión: sin cookie responde 401 (SesionGuard)", () => {
+  it("todas las rutas exigen sesión: el controlador lleva SesionGuard", () => {
     expect(Reflect.getMetadata(GUARDS_METADATA, CuentaController)).toEqual([SesionGuard]);
+  });
+
+  it("sin cookie, SesionGuard responde 401 SinSesion antes de llegar a Mi cuenta", async () => {
+    const sesiones = { usuarioDe: jest.fn() } as unknown as SesionService;
+    const contexto = { switchToHttp: () => ({ getRequest: () => ({ headers: {} }) }) } as unknown as ExecutionContext;
+
+    const error = await new SesionGuard(sesiones).canActivate(contexto).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(UnauthorizedException);
+    expect((error as UnauthorizedException).getResponse()).toEqual({ codigo: "SinSesion", mensaje: "Inicia sesión para continuar." });
+    expect(sesiones.usuarioDe).not.toHaveBeenCalled();
   });
 
   it("GET /identidad/cuenta devuelve el perfil de la sesión", async () => {
@@ -80,6 +92,10 @@ describe("CuentaController (M1-06, M1-07)", () => {
     const actual = respuestaDe(new ContrasenaActualIncorrecta());
     expect(actual.status).toHaveBeenCalledWith(400);
     expect(actual.json).toHaveBeenCalledWith(expect.objectContaining({ codigo: "ContrasenaActualIncorrecta" }));
+
+    const repetida = respuestaDe(new ContrasenaRepetida());
+    expect(repetida.status).toHaveBeenCalledWith(400);
+    expect(repetida.json).toHaveBeenCalledWith(expect.objectContaining({ codigo: "ContrasenaRepetida" }));
 
     const inexistente = respuestaDe(new CuentaInexistente("u-1"));
     expect(inexistente.status).toHaveBeenCalledWith(401);

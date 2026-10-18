@@ -9,6 +9,7 @@ import { RUTA_INGRESAR } from "@/components/shell/menu-usuario";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSesion } from "@/hooks/use-sesion";
@@ -155,10 +156,14 @@ function FormularioContrasena() {
   );
 }
 
-/** «Cerrar todas»: la API revoca todas las sesiones y vence la cookie; la web vuelve a 03. */
+/**
+ * «Cerrar todas»: primero se confirma en un diálogo (el escenario dice «confirma»); después la
+ * API revoca todas las sesiones y vence la cookie, y la web vuelve a 03.
+ */
 function CerrarTodas() {
   const router = useRouter();
   const { salir } = useSesion();
+  const [confirmando, setConfirmando] = useState(false);
   const [cerrando, setCerrando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -171,8 +176,13 @@ function CerrarTodas() {
       router.replace(RUTA_INGRESAR);
     } catch {
       setCerrando(false);
+      setConfirmando(false);
       setError("No pudimos cerrar las sesiones. Intenta de nuevo.");
     }
+  }
+
+  function cambiarConfirmacion(abierto: boolean) {
+    if (!cerrando) setConfirmando(abierto);
   }
 
   return (
@@ -189,13 +199,30 @@ function CerrarTodas() {
           type="button"
           variant="destructive-outline"
           size="sm"
-          onClick={() => void cerrar()}
+          onClick={() => setConfirmando(true)}
           disabled={cerrando}
         >
-          {cerrando ? <Loader2 className="animate-spin" aria-hidden /> : <LogOut aria-hidden />}
+          <LogOut aria-hidden />
           Cerrar todas
         </Button>
       </div>
+      <Dialog
+        open={confirmando}
+        onOpenChange={cambiarConfirmacion}
+        title="Cerrar sesión en todos los dispositivos"
+        description="Invalida todas tus sesiones, incluida esta. Tendrás que volver a iniciar sesión."
+        footer={
+          <>
+            <Button type="button" variant="outline" onClick={() => cambiarConfirmacion(false)} disabled={cerrando}>
+              Cancelar
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => void cerrar()} disabled={cerrando}>
+              {cerrando ? <Loader2 className="animate-spin" aria-hidden /> : <LogOut aria-hidden />}
+              Cerrar todas
+            </Button>
+          </>
+        }
+      />
       {error ? (
         <p className="text-xs text-bad" role="alert">
           {error}

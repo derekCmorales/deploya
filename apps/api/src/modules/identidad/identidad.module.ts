@@ -7,7 +7,7 @@ import { HashContrasenaScrypt } from "./adaptadores/hash-contrasena-scrypt";
 import { RepositorioSesionesPrisma } from "./adaptadores/repositorio-sesiones.prisma";
 import { RepositorioTokensCuentaPrisma } from "./adaptadores/repositorio-tokens-cuenta.prisma";
 import { RepositorioUsuariosPrisma } from "./adaptadores/repositorio-usuarios.prisma";
-import { configuracionCookieDesde } from "./cookie-sesion";
+import { CONFIGURACION_COOKIE, configuracionCookieDesde } from "./cookie-sesion";
 import { CONFIGURACION_IDENTIDAD, configuracionIdentidadDesde } from "./configuracion-identidad";
 import { CuentaController } from "./cuenta.controller";
 import { CuentaService } from "./cuenta.service";
@@ -22,7 +22,7 @@ import { RepositorioUsuarios } from "./puertos/repositorio-usuarios.puerto";
 import { RolGuard } from "./rol.guard";
 import { RecuperacionController } from "./recuperacion.controller";
 import { RecuperacionService } from "./recuperacion.service";
-import { CONFIGURACION_COOKIE, SesionController } from "./sesion.controller";
+import { SesionController } from "./sesion.controller";
 import { SesionGuard } from "./sesion.guard";
 import { SesionService } from "./sesion.service";
 

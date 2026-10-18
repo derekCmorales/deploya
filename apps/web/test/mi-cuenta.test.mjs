@@ -36,6 +36,23 @@ test("05b · sin la actual o con una nueva débil también se bloquea; todo bien
   assert.deepEqual(erroresContrasena({ actual: "Vieja#Clave2026", nueva: "Nueva#Clave2026", confirmacion: "Nueva#Clave2026" }, true), {});
 });
 
+test("05b · la nueva igual a la actual se bloquea antes de llamar a la API", () => {
+  const datos = { actual: "Vieja#Clave2026", nueva: "Vieja#Clave2026", confirmacion: "Vieja#Clave2026" };
+  assert.deepEqual(erroresContrasena(datos, true), { nueva: "La nueva contraseña debe ser distinta de la actual." });
+});
+
+test("Cerrar sesión en todos los dispositivos: «Cerrar todas» pide confirmación en un diálogo antes de llamar a la API", () => {
+  const seguridad = leer("src/app/(cuenta)/cuenta/_componentes/seguridad.tsx");
+  const cuerpo = seguridad.slice(seguridad.indexOf("function CerrarTodas"));
+
+  assert.match(cuerpo, /onClick=\{\(\) => setConfirmando\(true\)\}/, "el botón de la tarjeta solo abre el diálogo");
+  assert.match(cuerpo, /<Dialog\s+open=\{confirmando\}/);
+  assert.match(cuerpo, /title="Cerrar sesión en todos los dispositivos"/);
+  assert.match(cuerpo, /variant="destructive" onClick=\{\(\) => void cerrar\(\)\}/, "solo el botón del diálogo cierra las sesiones");
+  assert.equal(cuerpo.match(/cerrarTodasLasSesiones\(\)/g)?.length, 1);
+  assert.match(cuerpo, />\s*Cancelar\s*</);
+});
+
 test("Cambiar contraseña: 204 es cambiada; ContrasenaActualIncorrecta va al campo «Contraseña actual»", () => {
   assert.deepEqual(resultadoCambioContrasena(204, "", ""), { tipo: "cambiada" });
   assert.deepEqual(resultadoCambioContrasena(400, "ContrasenaActualIncorrecta", "x"), { tipo: "actual-incorrecta" });

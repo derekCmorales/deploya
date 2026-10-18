@@ -57,3 +57,20 @@ Cerrar todas
 ## Nota de implementación
 
 «Último cambio: 22 sep 2026» no se muestra (change `feat-m1-cuenta`, `design.md` decisión 5): no hay columna con la fecha del último cambio de contraseña y no se agregan migraciones. `Usuario.actualizado` no sirve como sustituto porque cambia con cualquier edición.
+
+Textos de los estados que no salen en el canvas (change `feat-m1-cuenta`):
+
+```text
+Estado · Contraseña cambiada
+Contraseña actualizada
+Cerramos tus sesiones en otros dispositivos; esta sigue abierta.
+Estado · Confirmar «Cerrar todas» (diálogo)
+Cerrar sesión en todos los dispositivos
+Invalida todas tus sesiones, incluida esta. Tendrás que volver a iniciar sesión.
+Cancelar
+Cerrar todas
+Errores del formulario
+La contraseña actual no es correcta.
+La nueva contraseña debe ser distinta de la actual.
+Las contraseñas no coinciden.
+```

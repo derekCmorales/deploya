@@ -1,7 +1,7 @@
 import { BadRequestException, type ArgumentsHost } from "@nestjs/common";
 import { HTTP_CODE_METADATA } from "@nestjs/common/constants";
 import { ContrasenaDebil, ContrasenasNoCoinciden, TokenNoValido } from "./dominio/errores";
-import { ErroresIdentidadFilter } from "./identidad.controller";
+import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { RecuperacionController, RESPUESTA_RECUPERACION } from "./recuperacion.controller";
 import type { RecuperacionService } from "./recuperacion.service";
 

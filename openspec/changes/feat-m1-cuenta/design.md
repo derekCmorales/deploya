@@ -42,7 +42,11 @@ El canvas muestra «Último cambio: 22 sep 2026», pero no hay columna con la fe
 | `RepositorioSesiones.revocarTodasMenos` | Repository | I, D | Método nuevo en un puerto estrecho; memoria y Prisma cumplen el mismo contrato (L) |
 | `HashContrasena` (existente) | Adapter | D | El servicio no conoce scrypt |
 
-Cambios de clases: `CuentaService`, `CuentaController`, `NombreCuenta`, `RepositorioSesiones.revocarTodasMenos` → `clases-unificado.mmd`. Errores nuevos: `NombreInvalido` y `ContrasenaActualIncorrecta` (400).
+Cambios de clases: `CuentaService`, `CuentaController`, `NombreCuenta`, `RepositorioSesiones.revocarTodasMenos` → `clases-unificado.mmd`. Errores nuevos: `NombreInvalido`, `ContrasenaActualIncorrecta` y `ContrasenaRepetida` (400). `ErroresIdentidadFilter` y `textoDe` viven en sus propios archivos (`errores-identidad.filter.ts`, `cuerpo-solicitud.ts`) y `CONFIGURACION_COOKIE` en `cookie-sesion.ts`, para que ningún controlador dependa de otro.
+
+### 6. Orden del cambio de contraseña y confirmación de «Cerrar todas»
+
+`cambiarContrasena` revoca primero las demás sesiones y después guarda el hash nuevo: si revocar falla, la contraseña no cambia, en vez de quedar la clave nueva con las otras sesiones vivas. Una nueva igual a la actual se rechaza (`ContrasenaRepetida`). En la web, «Cerrar todas» abre un `Dialog` de confirmación con los textos de la ficha 05b; solo su botón llama a la API.
 
 ## Risks / Trade-offs
 

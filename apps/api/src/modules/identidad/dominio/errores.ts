@@ -97,3 +97,11 @@ export class CuentaInexistente extends Error {
     this.name = "CuentaInexistente";
   }
 }
+
+/** Pantalla 05b (M1-07): la nueva es igual a la actual; cambiarla no protegería nada. */
+export class ContrasenaRepetida extends Error {
+  constructor() {
+    super("La nueva contraseña debe ser distinta de la actual");
+    this.name = "ContrasenaRepetida";
+  }
+}

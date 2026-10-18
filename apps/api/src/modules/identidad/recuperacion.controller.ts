@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Post, UseFilters } from "@nestjs/common";
 import { ContrasenasNoCoinciden } from "./dominio/errores";
-import { ErroresIdentidadFilter, textoDe } from "./identidad.controller";
+import { textoDe } from "./cuerpo-solicitud";
+import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { RecuperacionService } from "./recuperacion.service";
 
 const HTTP_ACEPTADO = 202;

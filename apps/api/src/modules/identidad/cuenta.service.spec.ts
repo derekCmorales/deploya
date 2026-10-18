@@ -2,7 +2,7 @@ import { RelojFijo } from "../../compartido/reloj";
 import { RepositorioSesionesMemoria } from "./adaptadores/repositorio-sesiones.memoria";
 import { RepositorioUsuariosMemoria } from "./adaptadores/repositorio-usuarios.memoria";
 import { CuentaService } from "./cuenta.service";
-import { ContrasenaActualIncorrecta, ContrasenaDebil, CuentaInexistente, NombreInvalido } from "./dominio/errores";
+import { ContrasenaActualIncorrecta, ContrasenaDebil, ContrasenaRepetida, CuentaInexistente, NombreInvalido } from "./dominio/errores";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
 import { HashContrasena } from "./puertos/hash-contrasena.puerto";
 
@@ -126,6 +126,31 @@ describe("M1-07 · Mi cuenta · Seguridad", () => {
 
     expect(error).toBeInstanceOf(ContrasenaDebil);
     expect((error as ContrasenaDebil).reglasIncumplidas.length).toBeGreaterThan(0);
+    expect((await usuarios.porId(usuario.id))?.hashContrasena).toBe(`hash(${CLAVE_ACTUAL})`);
+  });
+
+  it("la nueva igual a la actual se rechaza con ContrasenaRepetida y nada cambia", async () => {
+    const { servicio, usuarios, sesiones, usuario, abrir } = await armar();
+    await abrir("este-navegador");
+    await abrir("otro-navegador");
+
+    await expect(
+      servicio.cambiarContrasena(usuario.id, "este-navegador", { actual: CLAVE_ACTUAL, nueva: CLAVE_ACTUAL }),
+    ).rejects.toBeInstanceOf(ContrasenaRepetida);
+
+    expect([...sesiones.sesiones.values()].every((s) => s.revocadaEn === null)).toBe(true);
+    expect((await usuarios.porId(usuario.id))?.hashContrasena).toBe(`hash(${CLAVE_ACTUAL})`);
+  });
+
+  it("si revocar las otras sesiones falla, la contraseña no cambia (primero se revoca, después se guarda)", async () => {
+    const { servicio, usuarios, sesiones, usuario, abrir } = await armar();
+    await abrir("este-navegador");
+    jest.spyOn(sesiones, "revocarTodasMenos").mockRejectedValue(new Error("base caída"));
+
+    await expect(
+      servicio.cambiarContrasena(usuario.id, "este-navegador", { actual: CLAVE_ACTUAL, nueva: CLAVE_NUEVA }),
+    ).rejects.toThrow("base caída");
+
     expect((await usuarios.porId(usuario.id))?.hashContrasena).toBe(`hash(${CLAVE_ACTUAL})`);
   });
 

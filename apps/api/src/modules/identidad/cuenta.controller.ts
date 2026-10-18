@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Patch, Post, Req, Res, UseFilters, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { COOKIE_SESION, cookieSesionVencida, leerCookie, type ConfiguracionCookie } from "./cookie-sesion";
+import { CONFIGURACION_COOKIE, COOKIE_SESION, cookieSesionVencida, leerCookie, type ConfiguracionCookie } from "./cookie-sesion";
 import { CuentaService, type PerfilCuenta } from "./cuenta.service";
-import { ErroresIdentidadFilter, textoDe } from "./identidad.controller";
-import { CONFIGURACION_COOKIE } from "./sesion.controller";
+import { textoDe } from "./cuerpo-solicitud";
+import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { SesionGuard } from "./sesion.guard";
 import { UsuarioActual } from "./usuario-actual.decorator";
 

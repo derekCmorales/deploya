@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { COOKIE_SESION, configuracionCookieDesde, cookieSesion, cookieSesionVencida, leerCookie } from "./cookie-sesion";
 import { CredencialesInvalidas, CuentaNoVerificada, CuentaSuspendida } from "./dominio/errores";
 import type { UsuarioSesion } from "./dominio/sesion";
-import { ErroresIdentidadFilter } from "./identidad.controller";
+import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { SesionController } from "./sesion.controller";
 import { SesionGuard, type SolicitudConSesion } from "./sesion.guard";
 import type { SesionService } from "./sesion.service";

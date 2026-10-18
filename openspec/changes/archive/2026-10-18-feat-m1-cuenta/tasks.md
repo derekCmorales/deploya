@@ -25,4 +25,4 @@ Requiere `feat-m1-sesion` y `feat-m1-recuperacion` en `main` (ya están). Prueba
 
 - [x] 4.1 `clases-unificado.mmd` y `pnpm diagramas:sync`; pruebas en verde (identidad 133, web 144); cobertura de `identidad/` 91 %, 100 % en `CuentaService`, `CuentaController` y `NombreCuenta`
 - [x] 4.2 Demo en compose con dos navegadores: cambiar la contraseña en uno cierra la sesión del otro y la actual sigue; «Cerrar todas» lleva a 03
-- [ ] 4.3 `/opsx-archive` después del merge
+- [x] 4.3 `/opsx-archive` después del merge

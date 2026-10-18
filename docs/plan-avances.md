@@ -310,7 +310,7 @@ Están en `openspec/changes/` y validan con `openspec validate --all`. Cada due�
 
 | Change | Historias | Dueño | Toca a |
 |---|---|---|---|
-| `feat-m1-cuenta` | M1-06, M1-07 | Eddy | — · PR #34 revisado; se archiva al mergear |
+| `feat-m1-cuenta` | M1-06, M1-07 | Eddy | — · **Hecho y archivado** (18 de octubre, PR #34) |
 | `feat-m2-ciclo-suscripcion` | M2-05 | Javier (+ Derek, tarea 3) | Derek (`detenerTodosDe`, `reanudarTodosDe`) · **Hecho y archivado** (17 de octubre) |
 | `feat-m2-historial-pagos` | M2-06 | Javier | — · **Hecho y archivado** (17 de octubre) |
 | `feat-m9-usuarios-suspension` | M9-01, M9-02 | Javier | Eddy (`RolGuard`, ya en `main`), Derek (contenedores) · **Hecho y archivado** (17 de octubre) |
@@ -448,7 +448,7 @@ Miércoles: cada quien comprueba su parte en el VPS y se corrige. Jueves: recorr
 
 ### Estado de Derek al miércoles 14 de octubre (rama `Entrega-85%`)
 
-Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit por historia, `pnpm check` en verde). **18 de octubre:** el dueño dio por hechas las demos en compose, la revisión visual y el VPS; sus tareas quedaron marcadas y los changes del Avance 2 y del Avance 3 (salvo `feat-m1-cuenta`, que espera el merge del PR #34) están sincronizados a los specs y archivados. ADR 0004 y 0007 pasan a Aceptado. La tabla queda como registro de lo que faltaba al 17 de octubre.
+Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit por historia, `pnpm check` en verde). **18 de octubre:** el dueño dio por hechas las demos en compose, la revisión visual y el VPS; sus tareas quedaron marcadas y los changes del Avance 2 y del Avance 3 (incluido `feat-m1-cuenta`, PR #34) están sincronizados a los specs y archivados. ADR 0004 y 0007 pasan a Aceptado. La tabla queda como registro de lo que faltaba al 17 de octubre.
 
 | Paso | Historia | Estado | Qué falta |
 |---|---|---|---|

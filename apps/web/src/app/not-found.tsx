@@ -1,17 +1,10 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 
-import { Button } from "@/components/ui/button";
+import { PaginaInexistente } from "@/components/estados/pagina-inexistente";
 
+export const metadata: Metadata = { title: "Página inexistente · Deploya" };
+
+/** Pantalla 28 · 404 (WEB-02). */
 export default function NotFound() {
-  return (
-    <main className="p-6">
-      <h1 className="text-lg font-semibold">No encontrado</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Esa ruta no existe. Guía del kit: docs/diseno/.
-      </p>
-      <Button className="mt-4" asChild>
-        <Link href="/">Volver al inicio</Link>
-      </Button>
-    </main>
-  );
+  return <PaginaInexistente />;
 }

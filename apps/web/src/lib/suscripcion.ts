@@ -242,6 +242,26 @@ export function textoQuePasoSuspendida(s: Pick<MiSuscripcion, "plan" | "vence">,
   return `Tu plan ${s.plan.nombre}${vencio} y terminó el período de gracia. ${textoDetenidos(detenidos)}`;
 }
 
+// ───────── Gracia de Vencida (10c, WEB-02) ─────────
+
+/** Espejo de `DIAS_GRACIA` de M2 (`politica-ciclo.ts`): días en Vencida antes de pasar a Suspendida. */
+export const DIAS_GRACIA = 5;
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
+
+/** Último día con los servicios en línea: `vence` + 5 días. */
+export function finDeGracia(venceIso: string): string {
+  return new Date(new Date(venceIso).getTime() + DIAS_GRACIA * MS_POR_DIA).toISOString();
+}
+
+/** «Tu plan Starter venció el 24 sep · despliegues bloqueados» y hasta cuándo siguen en línea los servicios. */
+export function textoVencida(s: Pick<MiSuscripcion, "plan" | "vence" | "estadoDesde">): AvisoEstado {
+  const vence = s.vence ?? s.estadoDesde;
+  return {
+    titulo: `Tu plan ${s.plan.nombre} venció el ${fechaCorta(vence)} · despliegues bloqueados`,
+    texto: `Tus servicios siguen en línea hasta el ${fechaCorta(finDeGracia(vence))} (${DIAS_GRACIA} días de gracia). No puedes desplegar ni crear proyectos hasta renovar.`,
+  };
+}
+
 /** «Renovar» lleva a 07 con el plan y la vigencia que tenía. */
 export function rutaRenovar(s: Pick<MiSuscripcion, "plan" | "vigenciaDias">): string {
   return rutaContratar(s.plan.codigo, vigenciaDeParametro(String(s.vigenciaDias)));

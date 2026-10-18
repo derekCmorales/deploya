@@ -2,9 +2,10 @@
 
 import { Box, Ellipsis, ExternalLink, GitBranch, Globe, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { notFound, usePathname } from "next/navigation";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
+import { ErrorConexionApi } from "@/components/estados/error-conexion-api";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { TabsNav } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -12,18 +13,25 @@ import { Menu } from "@/components/ui/menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEstadoActivo } from "@/hooks/use-estado-activo";
 import { useProyectos } from "@/hooks/use-proyectos";
+import { useMiSuscripcion } from "@/hooks/use-suscripcion";
 import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
 import { etapasDelRiel, urlProyecto, type ProyectoEnLista } from "@/lib/proyectos";
+import { esFalloDeConexion } from "@/lib/reintento";
 import { EVENTO_ACCION_CONTENEDOR, opcionesMasAcciones } from "@/lib/resumen";
+import { sinVigencia } from "@/lib/suscripcion";
 
 import { AccionesContenedor } from "./acciones-contenedor";
 import { BotonDesplegar } from "./boton-desplegar";
 
-/** Cabecera y pestañas de 13–19: Resumen, Despliegues, Variables y Configuración. */
+/**
+ * Cabecera y pestañas de 13–19: Resumen, Despliegues, Variables y Configuración. Un proyecto que
+ * no está en la lista es el 404 de 28; si la API no responde, el error de conexión de 28 (WEB-02).
+ */
 export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
   const ruta = usePathname();
-  const { datos } = useProyectos({ sondear: false });
+  const { datos, error, recargar } = useProyectos({ sondear: false });
   const proyecto = datos?.proyectos.find((p) => p.id === proyectoId) ?? null;
+  if (datos && !proyecto) notFound();
   const resumen = `/projects/${proyectoId}`;
   const despliegues = `/projects/${proyectoId}/despliegues`;
   const variables = `/projects/${proyectoId}/variables`;
@@ -40,6 +48,7 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
         </span>
         <span className="text-foreground">{proyecto?.nombre ?? "…"}</span>
       </nav>
+      {error && esFalloDeConexion(error.estado) ? <ErrorConexionApi error={error} ruta="/proyectos" onReintentar={recargar} /> : null}
       {proyecto ? <Identidad proyecto={proyecto} enResumen={ruta === resumen} /> : <Skeleton className="h-8 w-64" />}
       <TabsNav aria-label="Secciones del proyecto">
         <Link href={resumen} aria-current={ruta === resumen ? "page" : undefined}>
@@ -63,6 +72,8 @@ function Identidad({ proyecto, enResumen }: { proyecto: ProyectoEnLista; enResum
   const ultimo = proyecto.ultimoDespliegue;
   const url = urlProyecto(proyecto.subdominio, DOMINIO_APPS, ESQUEMA_APPS);
   const enLinea = ultimo?.estado === "saludable";
+  const suscripcion = useMiSuscripcion();
+  const bloqueada = suscripcion.datos ? sinVigencia(suscripcion.datos.estado) : false;
   return (
     <div className="flex flex-wrap items-start justify-between gap-6">
       <div className="flex flex-col gap-2">
@@ -96,7 +107,7 @@ function Identidad({ proyecto, enResumen }: { proyecto: ProyectoEnLista; enResum
           </Button>
         ) : null}
         {enResumen ? <AccionesDelResumen proyectoId={proyecto.id} /> : null}
-        <BotonDesplegar proyectoId={proyecto.id} />
+        <BotonDesplegar proyectoId={proyecto.id} bloqueado={bloqueada} />
         <MasAcciones proyectoId={proyecto.id} />
       </div>
     </div>

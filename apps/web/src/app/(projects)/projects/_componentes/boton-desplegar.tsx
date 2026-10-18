@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button";
 import { ErrorApi, pedirApi } from "@/lib/api";
 import { rutaDespliegue } from "@/lib/despliegues";
 
-/** «Desplegar»: crea un despliegue manual y lleva a la pantalla 12 del nuevo; un bloqueo de M5 se explica en línea. */
-export function BotonDesplegar({ proyectoId }: { proyectoId: string }) {
+/**
+ * «Desplegar»: crea un despliegue manual y lleva a la pantalla 12 del nuevo; un bloqueo de M5 se
+ * explica en línea. Con la suscripción sin vigencia (10c, WEB-02) queda deshabilitado de entrada.
+ */
+export function BotonDesplegar({ proyectoId, bloqueado = false }: { proyectoId: string; bloqueado?: boolean }) {
   const router = useRouter();
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export function BotonDesplegar({ proyectoId }: { proyectoId: string }) {
   };
   return (
     <div className="flex flex-col items-end gap-2">
-      <Button type="button" size="sm" disabled={ocupado} onClick={desplegar}>
+      <Button type="button" size="sm" disabled={ocupado || bloqueado} onClick={desplegar}>
         <Rocket />
         Desplegar
       </Button>

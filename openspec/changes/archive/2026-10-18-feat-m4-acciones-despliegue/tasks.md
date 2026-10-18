@@ -26,5 +26,5 @@ Requiere `feat-m4-motor-construccion` y `feat-m5-bloqueos-cuota` en `main` (ya e
 ## 5. Cierre
 
 - [x] 5.1 `clases-unificado.mmd` y `pnpm diagramas:sync`; `pnpm check` en verde; cobertura ≥ 80 % en `construccion/`
-- [ ] 5.2 Demo en compose: cancelar `hola-deploya` en Construyendo (`docker ps` sin build colgado); reintentar `roto`; redesplegar #1 desde 14
-- [ ] 5.3 Marcar la tarea 4.1 de `feat-m5-reversion-instantanea` (hecha); `/opsx-archive` después del merge (antes que la reversión)
+- [x] 5.2 Demo en compose: cancelar `hola-deploya` en Construyendo (`docker ps` sin build colgado); reintentar `roto`; redesplegar #1 desde 14
+- [x] 5.3 Marcar la tarea 4.1 de `feat-m5-reversion-instantanea` (hecha); `/opsx-archive` después del merge (antes que la reversión)

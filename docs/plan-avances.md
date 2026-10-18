@@ -310,17 +310,17 @@ Están en `openspec/changes/` y validan con `openspec validate --all`. Cada due�
 
 | Change | Historias | Dueño | Toca a |
 |---|---|---|---|
-| `feat-m1-cuenta` | M1-06, M1-07 | Eddy | — |
+| `feat-m1-cuenta` | M1-06, M1-07 | Eddy | — · PR #34 revisado; se archiva al mergear |
 | `feat-m2-ciclo-suscripcion` | M2-05 | Javier (+ Derek, tarea 3) | Derek (`detenerTodosDe`, `reanudarTodosDe`) · **Hecho y archivado** (17 de octubre) |
 | `feat-m2-historial-pagos` | M2-06 | Javier | — · **Hecho y archivado** (17 de octubre) |
 | `feat-m9-usuarios-suspension` | M9-01, M9-02 | Javier | Eddy (`RolGuard`, ya en `main`), Derek (contenedores) · **Hecho y archivado** (17 de octubre) |
-| `feat-m5-reversion-instantanea` | M5-04 | Derek | — |
-| `feat-m4-acciones-despliegue` | M4-02 | Derek | — |
-| `feat-m7-resumen-historial` | M7-02 | Derek | Eduardo (monta `ActividadProyecto`) |
-| `feat-m3-configuracion-proyecto` | M3-04 | Derek | — |
-| `feat-m6-vps-https` | M6-02, ADR | Derek | Eddy (SMTP del proveedor) |
-| `feat-m7-consumo-actividad` | M7-03 | Eduardo | Javier (08) y Derek (13) montan sus componentes |
-| `feat-m3-estados-sistema` | WEB-02 | Eduardo | — |
+| `feat-m5-reversion-instantanea` | M5-04 | Derek | — · **Hecho y archivado** (18 de octubre) |
+| `feat-m4-acciones-despliegue` | M4-02 | Derek | — · **Hecho y archivado** (18 de octubre) |
+| `feat-m7-resumen-historial` | M7-02 | Derek | Eduardo (monta `ActividadProyecto`) · **Hecho y archivado** (18 de octubre) |
+| `feat-m3-configuracion-proyecto` | M3-04 | Derek | — · **Hecho y archivado** (18 de octubre) |
+| `feat-m6-vps-https` | M6-02, ADR | Derek | Eddy (SMTP del proveedor) · **Hecho y archivado** (18 de octubre) |
+| `feat-m7-consumo-actividad` | M7-03 | Eduardo | Javier (08) y Derek (13) montan sus componentes · **Hecho y archivado** (18 de octubre) |
+| `feat-m3-estados-sistema` | WEB-02 | Eduardo | — · **Hecho y archivado** (18 de octubre) |
 
 ### Eddy — cuentas (4 pts)
 
@@ -448,7 +448,7 @@ Miércoles: cada quien comprueba su parte en el VPS y se corrige. Jueves: recorr
 
 ### Estado de Derek al miércoles 14 de octubre (rama `Entrega-85%`)
 
-Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit por historia, `pnpm check` en verde, `openspec validate --all` 27 de 27). Lo que falta depende de Docker real, del VPS o de cuentas externas, y **no está marcado como hecho** en los `tasks.md`.
+Todo el código de Derek del Avance 3 está en la rama `Entrega-85%` (un commit por historia, `pnpm check` en verde). **18 de octubre:** el dueño dio por hechas las demos en compose, la revisión visual y el VPS; sus tareas quedaron marcadas y los changes del Avance 2 y del Avance 3 (salvo `feat-m1-cuenta`, que espera el merge del PR #34) están sincronizados a los specs y archivados. ADR 0004 y 0007 pasan a Aceptado. La tabla queda como registro de lo que faltaba al 17 de octubre.
 
 | Paso | Historia | Estado | Qué falta |
 |---|---|---|---|

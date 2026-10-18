@@ -23,5 +23,5 @@ Sin base ni reloj reales: `Reloj` falso y repositorios en memoria.
 
 - [x] 4.1 `clases-unificado.mmd` y `pnpm diagramas:sync`
 - [x] 4.2 `pnpm check` en verde; cobertura ≥ 80 % en `orquestacion/`
-- [ ] 4.3 Demo en compose: con `vencida@deploya.app`, «Desplegar» muestra el banner; con Sandbox y 30 construcciones en el mes, la 31 se rechaza
-- [ ] 4.4 Marcar la tarea 5.3 de `feat/m3-alta-proyecto`; `/opsx-archive` después del merge
+- [x] 4.3 Demo en compose: con `vencida@deploya.app`, «Desplegar» muestra el banner; con Sandbox y 30 construcciones en el mes, la 31 se rechaza
+- [x] 4.4 Marcar la tarea 5.3 de `feat/m3-alta-proyecto`; `/opsx-archive` después del merge

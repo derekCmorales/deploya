@@ -16,9 +16,9 @@ Sin base ni reloj reales. Pruebas web con `node --test`.
 
 - [x] 3.1 `ConsumoPeriodo` (dos `Meter`) y `ActividadProyecto` (`MapaActividad`); avisar a Javier (08) y a Derek (13) para montarlos
 - [x] 3.2 Pruebas `node --test`: texto «12 semanas · N despliegues · M con fallo», fecha «Se reinicia el …»
-- [ ] 3.3 Revisión contra los artboards 08 y 13 en claro y oscuro
+- [x] 3.3 Revisión contra los artboards 08 y 13 en claro y oscuro
 
 ## 4. Cierre
 
 - [x] 4.1 `clases-unificado.mmd`; `pnpm check` en verde
-- [ ] 4.2 `/opsx-archive` después del merge
+- [x] 4.2 `/opsx-archive` después del merge

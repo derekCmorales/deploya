@@ -23,11 +23,11 @@ Requiere el layout del proyecto de `feat/m7-vista-despliegue` para la pantalla 1
 
 - [x] 4.1 11c en el asistente (tabla clave / valor enmascarado, «Añadir variable», aviso de `PORT`); 17 con borrador, Descartar, Guardar, Guardar y desplegar (lleva a 12), Mostrar / Ocultar
 - [x] 4.2 Pruebas `node --test`: validación de clave en el cliente, conteo de «cambios sin aplicar», armado del cuerpo del `PUT`
-- [ ] 4.3 Revisión contra los artboards 11c y 17 en claro y oscuro
+- [x] 4.3 Revisión contra los artboards 11c y 17 en claro y oscuro
 
 ## 5. Cierre
 
 - [x] 5.1 `CLAVE_CIFRADO_VARIABLES` en `docker-compose.yml` y `.env.example`; `clases-unificado.mmd` y `pnpm diagramas:sync`
 - [x] 5.2 `pnpm check` en verde; cobertura ≥ 80 % en `proyectos/` y `orquestacion/`
-- [ ] 5.3 Demo en compose: `hola-deploya` muestra `SALUDO`; cambiarla en 17 → Guardar y desplegar → la app nueva responde con el valor nuevo sin corte
-- [ ] 5.4 `/opsx-archive` después del merge
+- [x] 5.3 Demo en compose: `hola-deploya` muestra `SALUDO`; cambiarla en 17 → Guardar y desplegar → la app nueva responde con el valor nuevo sin corte
+- [x] 5.4 `/opsx-archive` después del merge

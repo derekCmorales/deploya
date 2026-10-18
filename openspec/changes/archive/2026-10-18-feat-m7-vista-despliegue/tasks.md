@@ -21,10 +21,10 @@ Requiere `feat/m4-motor-construccion` en `main` (ya está). Pruebas web con `nod
 
 - [x] 4.1 Layout `/projects/[proyecto]` (cabecera y pestañas; Resumen y Despliegues como «llega en el Avance 3»), página `despliegues/[n]` con los tres estados
 - [x] 4.2 «Desplegar» en 11d y la fila de 10 llevan a 12
-- [ ] 4.3 Revisión contra los artboards 12, 12b y 12c en claro y oscuro; solo componentes de `apps/web/src/components`
+- [x] 4.3 Revisión contra los artboards 12, 12b y 12c en claro y oscuro; solo componentes de `apps/web/src/components`
 
 ## 5. Cierre
 
 - [x] 5.1 `pnpm check` en verde
-- [ ] 5.2 Demo en compose: `hola-deploya` de punta a punta en 12; rama `roto` termina en 12c con la línea resaltada
-- [ ] 5.3 `/opsx-archive` después del merge
+- [x] 5.2 Demo en compose: `hola-deploya` de punta a punta en 12; rama `roto` termina en 12c con la línea resaltada
+- [x] 5.3 `/opsx-archive` después del merge

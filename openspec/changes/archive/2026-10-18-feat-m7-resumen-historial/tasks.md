@@ -23,5 +23,5 @@ Requiere el layout del proyecto (`feat-m7-vista-despliegue`, PR #31) en `main`. 
 ## 4. Cierre
 
 - [x] 4.1 `clases-unificado.mmd`; `pnpm check` en verde; cobertura ≥ 80 % en `observabilidad/`
-- [ ] 4.2 Demo: tres despliegues de `hola-deploya`; 14 filtra el fallido; revertir a #1 desde 14 y ver 13 con la versión activa #1
-- [ ] 4.3 `/opsx-archive` después del merge
+- [x] 4.2 Demo: tres despliegues de `hola-deploya`; 14 filtra el fallido; revertir a #1 desde 14 y ver 13 con la versión activa #1
+- [x] 4.3 `/opsx-archive` después del merge

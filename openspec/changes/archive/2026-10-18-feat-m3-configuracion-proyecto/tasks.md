@@ -18,5 +18,5 @@ Requiere `feat-m3-eliminar-proyecto` y el layout del proyecto (PR #31) en `main`
 ## 3. Cierre
 
 - [x] 3.1 `clases-unificado.mmd`; `pnpm check` en verde; cobertura ≥ 80 % en `proyectos/`
-- [ ] 3.2 Demo: cambiar la rama de `hola-deploya` a `sin-dockerfile` → Desplegar → «Stack detectado: Node.js 22»; eliminar desde 19b y `docker ps -a` limpio
-- [ ] 3.3 `/opsx-archive` después del merge (después de `feat-m3-eliminar-proyecto`)
+- [x] 3.2 Demo: cambiar la rama de `hola-deploya` a `sin-dockerfile` → Desplegar → «Stack detectado: Node.js 22»; eliminar desde 19b y `docker ps -a` limpio
+- [x] 3.3 `/opsx-archive` después del merge (después de `feat-m3-eliminar-proyecto`)

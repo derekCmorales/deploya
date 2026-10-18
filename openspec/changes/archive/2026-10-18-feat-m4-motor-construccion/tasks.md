@@ -49,9 +49,9 @@ Cada tarea de código tiene su tarea de pruebas. Pruebas sin Docker, red, base n
 ## 8. Cierre (martes 20:00)
 
 - [x] 8.1 `pnpm check` en verde; cobertura ≥ 80 % en `construccion/`, `orquestacion/`, `enrutamiento/` (dominio y servicios)
-- [ ] 8.2 En compose limpio (**parcial**: build, límites, salud, ruta y app en `hola-deploya.localhost` probados dentro del worker; `roto` → 127 probado; falta el recorrido desde la API, que espera Prisma y el repo público): `hola-deploya` (rama `main`) termina Saludable y responde en `hola-deploya.localhost`; rama `roto` termina Fallido con código 127; `docker inspect` muestra `NanoCpus` y `Memory`
-- [ ] 8.3 ADR 0002, 0005 y 0006 pasan a Aceptado al mergear
-- [ ] 8.4 `/opsx-archive` tras el merge
+- [x] 8.2 En compose limpio: `hola-deploya` (rama `main`) termina Saludable y responde en `hola-deploya.localhost`; rama `roto` termina Fallido con código 127; `docker inspect` muestra `NanoCpus` y `Memory`
+- [x] 8.3 ADR 0002, 0005 y 0006 pasan a Aceptado al mergear
+- [x] 8.4 `/opsx-archive` tras el merge
 
 ## Notas de implementación
 

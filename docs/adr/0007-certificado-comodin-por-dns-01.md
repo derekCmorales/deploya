@@ -1,6 +1,6 @@
 # 0007 — Certificado comodín por DNS-01 en el VPS
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-10-14
 - **Autor:** @derekCmorales · **Módulos:** M5, M6
 - **Change de OpenSpec:** `feat/m6-vps-https`

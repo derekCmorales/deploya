@@ -2088,6 +2088,22 @@ classDiagram
         -construccion ConstruccionService
         +resumen(proyectoId, usuarioId) ResumenProyecto
     }
+    class ConsumoService {
+        <<Facade de lectura>>
+        -despliegues RepositorioDespliegues
+        -proyectos ProyectosLecturaPuerto
+        -cuotaPlan CuotaPlanPuerto
+        -cuotaProyectos CuotaProyectosPuerto
+        -reloj Reloj
+        +de(usuarioId) ConsumoPeriodo
+    }
+    class ActividadService {
+        <<Service Layer>>
+        -despliegues RepositorioDespliegues
+        -proyectos DetalleProyectoPuerto
+        -reloj Reloj
+        +de(proyectoId, usuarioId) ActividadProyecto
+    }
     class LineaTiempoDespliegue {
         <<Builder puro>>
         +de(despliegue, contexto) List~HitoLineaTiempo~
@@ -2347,6 +2363,7 @@ classDiagram
         +enCursoDe(proyectoId) Despliegue
         +marcarActivo(proyectoId, despliegueId) void
         +contarConstruccionesDesde(usuarioId, desde) Integer
+        +desplieguesDesde(proyectoId, desde) List~MuestraDespliegue~
     }
     class RepositorioArtefactos {
         <<abstract>>
@@ -2570,6 +2587,12 @@ classDiagram
     ResumenProyectoService --> ConstruccionService : vistaDe
     ResumenProyectoService ..> LineaTiempoDespliegue : de
     DetalleProyectoPuerto ..> RepositorioProyectos : mismo almacén
+    ConsumoService --> RepositorioDespliegues : contarConstruccionesDesde
+    ConsumoService --> ProyectosLecturaPuerto : deUsuario
+    ConsumoService --> CuotaPlanPuerto : permisoDe
+    ConsumoService --> CuotaProyectosPuerto : cuotaDe
+    ActividadService --> RepositorioDespliegues : desplieguesDesde
+    ActividadService --> DetalleProyectoPuerto
     AccionesDespliegueService --> ConstruccionService : crearDespliegue
     AccionesDespliegueService --> PoliticaAcciones
     AccionesDespliegueService --> CancelacionesPuerto : pedir

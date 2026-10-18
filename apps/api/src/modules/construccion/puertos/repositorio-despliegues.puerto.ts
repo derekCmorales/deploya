@@ -27,6 +27,12 @@ export interface CambiosDespliegue {
   terminado?: Date;
 }
 
+/** Lo mínimo de un despliegue para el mapa de actividad (M7-03). */
+export interface MuestraDespliegue {
+  creado: Date;
+  estado: EstadoDespliegue;
+}
+
 /**
  * Persistencia del agregado Despliegue (etapas y bitácora incluidas).
  * `crear` asigna `numero = máximo del proyecto + 1` y las cinco etapas en Pendiente.
@@ -58,4 +64,10 @@ export abstract class RepositorioDespliegues {
    * desde esa fecha salvo los de `reversion`, que no construyen. Terminen como terminen.
    */
   abstract contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number>;
+
+  /**
+   * Fecha y estado de cada despliegue del proyecto creado desde `desde`, reversiones incluidas:
+   * la actividad cuenta despliegues, no construcciones (pantalla 13).
+   */
+  abstract desplieguesDesde(proyectoId: string, desde: Date): Promise<MuestraDespliegue[]>;
 }

@@ -33,5 +33,6 @@ import { VariablesModule } from "./variables.module";
       useFactory: () => (configuracionEnrutamientoDesde(process.env).certResolver ? SUBDOMINIOS_DE_PLATAFORMA : []),
     },
   ],
+  exports: [CuotaProyectosPuerto],
 })
 export class ProyectosModule {}

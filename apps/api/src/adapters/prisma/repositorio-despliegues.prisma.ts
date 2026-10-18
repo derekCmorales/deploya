@@ -8,6 +8,7 @@ import { DISPARADOR_SIN_CONSTRUCCION, ESTADOS_TERMINALES, ETAPAS, type EstadoDes
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
+  type MuestraDespliegue,
   type NuevoDespliegue,
 } from "../../modules/construccion/puertos/repositorio-despliegues.puerto";
 import { despliegueDesdePrisma, estadoEtapaAPrisma, lineaDesdePrisma } from "./traduccion-motor";
@@ -154,6 +155,14 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     return this.prisma.despliegue.count({
       where: { proyecto: { usuarioId }, creado: { gte: desde }, disparador: { not: DISPARADOR_SIN_CONSTRUCCION } },
     });
+  }
+
+  async desplieguesDesde(proyectoId: string, desde: Date): Promise<MuestraDespliegue[]> {
+    const filas = await this.prisma.despliegue.findMany({
+      where: { proyectoId, creado: { gte: desde } },
+      select: { creado: true, estado: true },
+    });
+    return filas.map((f) => ({ creado: f.creado, estado: f.estado as EstadoDespliegue }));
   }
 
   private async crearConSiguienteNumero(nuevo: NuevoDespliegue): Promise<Despliegue> {

@@ -1,0 +1,11 @@
+# Solo lo incluye scripts/instalar.sh. desplegar-vps.sh no lo usa: la nube sigue en modo nube.
+# Suma variables; no reemplaza el environment del VPS.
+services:
+  api:
+    environment:
+      MODO_INSTALACION: autoalojado
+      SECRETO_SESION: ${SECRETO_SESION:?Define SECRETO_SESION en .env}
+  worker:
+    environment:
+      MODO_INSTALACION: autoalojado
+      SECRETO_SESION: ${SECRETO_SESION:?Define SECRETO_SESION en .env}

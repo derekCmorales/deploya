@@ -1,6 +1,6 @@
 # Contrato · Modo de instalación y autoalojado (M2, M9 → M1, scripts)
 
-Versión 1 · 2026-10-20 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.1 · 2026-10-20 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Variables de entorno
 
@@ -8,7 +8,7 @@ Versión 1 · 2026-10-20 · dueños: Javier (modo, límites, registro, Admin · 
 |---|---|---|
 | `MODO_INSTALACION` | `nube` (por defecto) · `autoalojado` | `instalar.sh` |
 | `DOMINIO_BASE`, `ESQUEMA_PUBLICO`, `CERT_RESOLVER` | Las de M6-02 | `instalar.sh` |
-| `CLAVE_CIFRADO_VARIABLES`, secreto de sesión | Generados (32 bytes) | `instalar.sh`; `.env` con permisos 600 |
+| `CLAVE_CIFRADO_VARIABLES`, `SECRETO_SESION` | Generados (32 bytes cada uno) | `instalar.sh`; `.env` con permisos 600 |
 | SMTP (`SMTP_*`) | Opcionales en autoalojado | `instalar.sh` o el asistente (31) |
 
 ## Strategy por modo (sin `if` sueltos)
@@ -59,8 +59,11 @@ PATCH /admin/instalacion/limites   { cpu, memoriaMb, proyectosPorUsuario: number
 
 Todos pasan `shellcheck` en CI.
 
+`ultimo.json`: `{ "ultimo": "AAAA-MM-DD", "tamanoMb": number, "ruta": "…tar.gz" }` — los mismos campos que `respaldo` en `GET /admin/instalacion`. `version.json`: `{ "instalada", "disponible", "respaldoPrevio", "versionAnterior" }`. `disponible` es `null` si no hay otra versión. `--volver` usa `versionAnterior` y `respaldoPrevio`.
+
 ## Historial
 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1 | 2026-10-20 | Sprint fuera de alcance (SP-06, SP-16, SP-17, SP-18, SP-19) |
+| 1.1 | 2026-10-20 | SP-16/SP-19: `SECRETO_SESION` y la forma de `ultimo.json` y `version.json` |

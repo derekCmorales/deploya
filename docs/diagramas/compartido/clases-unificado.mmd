@@ -692,6 +692,9 @@ classDiagram
         +marcarActivo(proyectoId, despliegueId) void
         +contarConstruccionesDesde(usuarioId, desde) Integer
         +desplieguesDesde(proyectoId, desde) List~MuestraDespliegue~
+        +tiemposDe(proyectoId, ultimos) List~TiemposDespliegue~
+        +activosSaludables() List~DespliegueMuestreable~
+        +entraronDesde(proyectoId, desde) List~EntradaVentana~
     }
     class RepositorioArtefactos {
         <<abstract>>
@@ -710,6 +713,36 @@ classDiagram
         +eliminarContenedoresDe(subdominio) void
         +eliminarImagen(imagen) void
         +eliminarImagenesDe(subdominio) void
+    }
+    class MetricasContenedorPuerto {
+        <<abstract>>
+        +muestra(contenedorId) MuestraContenedor
+    }
+    class MuestrasMetricas {
+        <<abstract>>
+        +guardar(muestra) void
+        +deProyecto(proyectoId, desde) List~Muestra~
+        +purgarAntesDe(fecha) Integer
+    }
+    class ColaMuestreoPuerto {
+        <<abstract>>
+        +iniciar(manejador) void
+        +cerrar() void
+    }
+    class MuestreoMetricas {
+        +correr() void
+    }
+    class TareaMuestreoMetricas {
+        +onApplicationBootstrap() void
+    }
+    class LecturaMetricasService {
+        +leer(proyectoId, usuarioId, rango) RespuestaMetricas
+    }
+    class TiemposDespliegue {
+        +numero Integer
+        +reversion Boolean
+        +falloEn Etapa
+        +etapas Record
     }
     class ColaOperacionPuerto {
         <<abstract>>
@@ -743,6 +776,9 @@ classDiagram
     class LectorFuenteLocal
     class RecetaProyectoPrisma
     class RepositorioDesplieguesPrisma
+    class MetricasDockerStats
+    class MuestrasMetricasPrisma
+    class ColaMuestreoBullMq
     class ContenedorDocker
     class ColaOperacionBullMq
     class VariablesEntornoPendientes
@@ -996,6 +1032,20 @@ classDiagram
     RepositorioDespliegues <|-- RepositorioDesplieguesPrisma
     RepositorioArtefactos <|-- RepositorioArtefactosPrisma
     ContenedorPuerto <|-- ContenedorDocker
+    MetricasContenedorPuerto <|-- MetricasDockerStats
+    MuestrasMetricas <|-- MuestrasMetricasPrisma
+    ColaMuestreoPuerto <|-- ColaMuestreoBullMq
+    TareaMuestreoMetricas --> ColaMuestreoPuerto
+    TareaMuestreoMetricas --> MuestreoMetricas
+    MuestreoMetricas --> MetricasContenedorPuerto
+    MuestreoMetricas --> MuestrasMetricas
+    MuestreoMetricas --> RepositorioDespliegues : activosSaludables
+    MuestreoMetricas --> Reloj
+    LecturaMetricasService --> MuestrasMetricas
+    LecturaMetricasService --> RepositorioDespliegues : entraronDesde
+    LecturaMetricasService --> CuotaPlanPuerto : recursosDe
+    LecturaMetricasService --> DetalleProyectoPuerto
+    LecturaMetricasService --> Reloj
     ColaOperacionPuerto <|-- ColaOperacionBullMq
     PasoEjecucion --> VariablesEntornoPuerto
     VariablesEntornoPuerto <|-- VariablesEntornoProyecto

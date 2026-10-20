@@ -10,13 +10,15 @@ import { ConsumoService } from "./consumo/consumo.service";
 import { ConsumoController } from "./consumo/consumo.controller";
 import { ActividadService } from "./actividad/actividad.service";
 import { ActividadController } from "./actividad/actividad.controller";
+import { LecturaMetricasService } from "./metricas/lectura-metricas.service";
+import { MetricasProyectoController } from "./metricas/metricas-proyecto.controller";
 
 /**
  * M7: modelo de lectura sobre lo que exportan M3, M4 y M5 (consumo del período y actividad).
  */
 @Module({
   imports: [IdentidadModule, ConstruccionModule, OrquestacionModule, ProyectosModule],
-  controllers: [ObservabilidadController, ResumenProyectoController, ConsumoController, ActividadController],
-  providers: [ResumenProyectoService, ConsumoService, ActividadService],
+  controllers: [ObservabilidadController, ResumenProyectoController, ConsumoController, ActividadController, MetricasProyectoController],
+  providers: [ResumenProyectoService, ConsumoService, ActividadService, LecturaMetricasService],
 })
 export class ObservabilidadModule {}

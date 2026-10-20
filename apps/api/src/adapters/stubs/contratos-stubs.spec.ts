@@ -2,13 +2,16 @@ import { CancelacionesPuerto } from "../../modules/construccion/puertos/cancelac
 import { ColaConstruccionPuerto } from "../../modules/construccion/puertos/cola-construccion.puerto";
 import { ColaOperacionPuerto } from "../../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../../modules/orquestacion/puertos/contenedor.puerto";
+import { MetricasContenedorPuerto } from "../../modules/orquestacion/puertos/metricas-contenedor.puerto";
 import { ContenedorDocker } from "../reales/contenedor-docker";
+import { MetricasDockerStats } from "../reales/metricas-docker-stats";
 import { CancelacionesRedis } from "../reales/cancelaciones-redis";
 import { ColaBullMq, ColaOperacionBullMq } from "../reales/cola-bullmq";
 import { CancelacionesMemoria } from "./cancelaciones.memoria";
 import { ColaMemoria } from "./cola.memoria";
 import { ColaOperacionMemoria } from "./cola-operacion.memoria";
 import { ContenedorStub } from "./contenedor.stub";
+import { MetricasContenedorStub } from "./metricas-contenedor.stub";
 
 /** LSP: el stub y el adaptador real cumplen el mismo contrato, método por método. */
 function metodosDe(clase: abstract new (...args: never[]) => unknown): string[] {
@@ -27,6 +30,7 @@ describe("Stubs del motor (M5-02)", () => {
 
   it.each([
     ["ContenedorPuerto", ContenedorStub, ContenedorDocker, ContenedorPuerto],
+    ["MetricasContenedorPuerto", MetricasContenedorStub, MetricasDockerStats, MetricasContenedorPuerto],
     ["ColaOperacionPuerto", ColaOperacionMemoria, ColaOperacionBullMq, ColaOperacionPuerto],
     ["CancelacionesPuerto", CancelacionesMemoria, CancelacionesRedis, CancelacionesPuerto],
   ] as const)("%s: el stub y el real son el mismo puerto y el real implementa cada método del stub", (_n, stub, real, puerto) => {

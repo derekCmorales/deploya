@@ -6,9 +6,9 @@ El repo hoy es del curso y no tiene licencia; sin licencia no es código abierto
 
 ## Decisions
 
-### 1. La licencia la decide el equipo
+### 1. Licencia AGPL-3.0
 
-El ADR 0008 compara Apache-2.0 y AGPL-3.0; se cierra en este change.
+El ADR 0008 compara Apache-2.0 y AGPL-3.0. Este change elige **AGPL-3.0** (`LICENSE`). El ADR sigue en estado Propuesto hasta el merge de `feat-m2-modo-autoalojado`; aquí no se marca Aceptado.
 
 ### 2. Escaneo antes de abrir
 

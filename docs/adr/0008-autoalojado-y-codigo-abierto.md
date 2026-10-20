@@ -1,6 +1,6 @@
 # 0008 — Deploya de código abierto y autoalojado con un modo de instalación
 
-- **Estado:** Propuesto (pasa a Aceptado al mergear `feat-m2-modo-autoalojado`; la licencia la elige el equipo en `chore-open-source`)
+- **Estado:** Propuesto (pasa a Aceptado al mergear `feat-m2-modo-autoalojado`). `chore-open-source` elige AGPL-3.0; el estado sigue Propuesto hasta ese merge.
 - **Fecha:** 2026-10-20
 - **Autor:** @derekCmorales · **Módulos:** M1, M2, M9, transversal
 - **Change de OpenSpec:** `feat/m2-modo-autoalojado`, `chore/open-source`, `feat/instalador-autoalojado`
@@ -13,7 +13,7 @@ Restricciones: un sprint, cuatro personas, no romper la nube ni los contratos de
 
 ## Decisión
 
-Publicamos el repositorio con una licencia de código abierto y agregamos `MODO_INSTALACION=nube|autoalojado`. Cada módulo registra la implementación de sus puertos según el modo (Strategy): en autoalojado hay un plan «Autoalojado» sin cobro ni vencimiento, los límites por proyecto los fija el administrador, no corre el ciclo §4.4, el primer administrador se crea con un código de un solo uso que imprime el instalador y el registro puede ser abierto, con invitación o cerrado. `scripts/instalar.sh`, `respaldar.sh` y `actualizar.sh` hacen la instalación y la operación con un comando. Contrato: [instalacion.md](../contratos/instalacion.md).
+Publicamos el repositorio con licencia AGPL-3.0 (elegida en `chore-open-source`; el texto está en `LICENSE`) y agregamos `MODO_INSTALACION=nube|autoalojado`. El estado de este ADR sigue Propuesto hasta el merge de `feat-m2-modo-autoalojado`. Cada módulo registra la implementación de sus puertos según el modo (Strategy): en autoalojado hay un plan «Autoalojado» sin cobro ni vencimiento, los límites por proyecto los fija el administrador, no corre el ciclo §4.4, el primer administrador se crea con un código de un solo uso que imprime el instalador y el registro puede ser abierto, con invitación o cerrado. `scripts/instalar.sh`, `respaldar.sh` y `actualizar.sh` hacen la instalación y la operación con un comando. Contrato: [instalacion.md](../contratos/instalacion.md).
 
 ## Alternativas consideradas
 
@@ -24,7 +24,7 @@ Publicamos el repositorio con una licencia de código abierto y agregamos `MODO_
 | Rama o fork aparte para autoalojado | Aísla | Dos productos que divergen; doble mantenimiento |
 | **Strategy por puerto según el modo** | Una base de código; se prueba cada implementación sola | Más clases pequeñas que registrar |
 | Licencia Apache-2.0 | Simple, la usa Coolify | Permite una nube cerrada con nuestro código |
-| Licencia AGPL-3.0 (propuesta) | Quien ofrezca Deploya como servicio publica sus cambios | Algunas empresas la evitan |
+| Licencia AGPL-3.0 (elegida en `chore-open-source`) | Quien ofrezca Deploya como servicio publica sus cambios | Algunas empresas la evitan. El ADR sigue Propuesto hasta el merge de `feat-m2-modo-autoalojado` |
 
 ## Consecuencias
 

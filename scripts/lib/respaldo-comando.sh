@@ -1,6 +1,8 @@
 # shellcheck shell=bash
 # Command: pg_dump + entorno sin la clave de cifrado + manifiesto. Conserva 7.
 
+MAX_RESPALDOS=7
+
 clave_es() {
   [[ "${1%%=*}" == "CLAVE_CIFRADO_VARIABLES" ]]
 }

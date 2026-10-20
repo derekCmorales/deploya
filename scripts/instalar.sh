@@ -27,19 +27,13 @@ parsear() {
   done
 }
 
-elegir_estrategia() {
-  if [[ "$SIN_COMODIN" == "1" ]]; then
-    # shellcheck source=lib/estrategia-certificado-http01.sh
-    source "${LIB}/estrategia-certificado-http01.sh"
-    return
-  fi
-  # shellcheck source=lib/estrategia-certificado-comodin.sh
-  source "${LIB}/estrategia-certificado-comodin.sh"
-}
-
 parsear "$@"
 # shellcheck source=lib/comun.sh
 source "${LIB}/comun.sh"
+# shellcheck source=lib/secretos.sh
+source "${LIB}/secretos.sh"
+# shellcheck source=lib/estrategia.sh
+source "${LIB}/estrategia.sh"
 # shellcheck source=lib/etapa-requisitos.sh
 source "${LIB}/etapa-requisitos.sh"
 # shellcheck source=lib/etapa-dominio.sh
@@ -60,6 +54,6 @@ if [[ "$CODIGO_NUEVO" == "1" ]]; then
   exit 0
 fi
 recordar_modo
-elegir_estrategia
+cargar_estrategia "$SIN_COMODIN"
 ui "deploya · instalador autoalojado · v${VERSION_INSTALADOR}"
 correr_etapas

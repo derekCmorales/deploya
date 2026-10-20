@@ -2,6 +2,22 @@
 # Command: respaldo previo, versión nueva, migración y reinicio de la plataforma.
 # Los contenedores de proyecto llevan la etiqueta app.deploya.proyecto y no se detienen.
 
+leer_json() {
+  local archivo="$1" clave="$2" linea valor
+  [[ -f "$archivo" ]] || return 1
+  while IFS= read -r linea || [[ -n "$linea" ]]; do
+    if [[ "$linea" == *"\"${clave}\""* ]]; then
+      valor="${linea#*:}"
+      valor="${valor//\"/}"
+      valor="${valor//,/}"
+      valor="${valor// /}"
+      printf '%s' "$valor"
+      return 0
+    fi
+  done < "$archivo"
+  return 1
+}
+
 nombres_de_proyectos() {
   docker ps --filter "label=app.deploya.proyecto" --format '{{.Names}}'
 }

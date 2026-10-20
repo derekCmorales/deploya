@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -130,6 +130,24 @@ function valor(texto, clave) {
 
 function lineasTraza(traza) {
   return readFileSync(traza, "utf8").split("\n").filter(Boolean);
+}
+
+function pathSin(escena, nombre) {
+  const filtro = join(escena.raiz, "sistema");
+  mkdirSync(filtro);
+  const nombres = [
+    "awk", "install", "mktemp", "mkdir", "chmod", "sed", "tar", "rm", "cat",
+    "cp", "mv", "find", "sort", "wc", "date", "basename", "dirname", "openssl",
+    "curl", "dig", "free", "df", "ss", "bash", "env",
+  ];
+  for (const cmd of nombres) {
+    if (cmd === nombre) continue;
+    const origen = [`/usr/bin/${cmd}`, `/bin/${cmd}`].find((ruta) => existsSync(ruta));
+    if (origen) symlinkSync(origen, join(filtro, cmd));
+  }
+  const doble = join(escena.bin, nombre);
+  if (existsSync(doble)) rmSync(doble);
+  escena.entorno.PATH = `${escena.bin}:${filtro}`;
 }
 
 function entornoPlano(ruta) {
@@ -267,5 +285,33 @@ it("Respaldo sin la clave", () => {
   assert.equal(ultimo.ultimo, "2026-10-08");
   assert.equal(ultimo.ruta.endsWith("/2026-10-08.tar.gz"), true);
   assert.equal(typeof ultimo.tamanoMb, "number");
+  rmSync(escena.raiz, { recursive: true, force: true });
+});
+
+it("Docker anterior a 24 se detiene en requisitos", () => {
+  const escena = escenario();
+  doble(escena.bin, "docker", sh([
+    'if [[ "$1" == "version" ]]; then printf "%s\\n" "20.10.7"; exit 0; fi',
+    'if [[ "$1" == "compose" && "$2" == "version" ]]; then printf "%s\\n" "2.29.1"; exit 0; fi',
+    "exit 0",
+  ]));
+  const resultado = correr("instalar.sh", [], escena.entorno);
+  assert.notEqual(resultado.status, 0);
+  assert.equal(existsSync(escena.entorno.DEPLOYA_ENV), false);
+  assert.match(resultado.stdout, /Hace falta Docker 24 o más nuevo \(hay 20\.10\.7\)\./);
+  assert.match(resultado.stdout, /\[1\/5\]/);
+  assert.equal(resultado.stdout.includes("[2/5]"), false);
+  rmSync(escena.raiz, { recursive: true, force: true });
+});
+
+it("Sin dig se detiene en requisitos", () => {
+  const escena = escenario();
+  pathSin(escena, "dig");
+  const resultado = correr("instalar.sh", [], escena.entorno);
+  assert.notEqual(resultado.status, 0);
+  assert.equal(existsSync(escena.entorno.DEPLOYA_ENV), false);
+  assert.match(resultado.stdout, /Falta dig\./);
+  assert.match(resultado.stdout, /\[1\/5\]/);
+  assert.equal(resultado.stdout.includes("[2/5]"), false);
   rmSync(escena.raiz, { recursive: true, force: true });
 });

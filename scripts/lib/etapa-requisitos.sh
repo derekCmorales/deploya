@@ -1,22 +1,59 @@
 # shellcheck shell=bash
-# Etapa 1. Comprueba Docker, Compose v2, RAM, disco y los puertos 80 y 443.
+# Etapa 1. Comprueba Docker 24+, Compose v2, las herramientas, RAM, disco y los puertos.
 
-comprobar_docker() {
-  if ! REQ_DOCKER="$(docker version --format '{{.Server.Version}}' 2>/dev/null)"; then
-    ui "✗"
-    ui "Falta Docker. Instala Docker y Compose v2."
-    return 1
+DOCKER_MIN_MAYOR=24
+RAM_MIN_MB=2048
+DISCO_MIN_GB=20
+HERRAMIENTAS=(curl dig openssl ss)
+
+docker_es_reciente() {
+  local mayor="${1%%.*}"
+  mayor="${mayor#v}"
+  if [[ "$mayor" =~ ^[0-9]+$ ]] && ((mayor >= DOCKER_MIN_MAYOR)); then
+    return 0
   fi
-  if ! REQ_COMPOSE="$(docker compose version --short 2>/dev/null)"; then
+  return 1
+}
+
+comprobar_compose() {
+  local version
+  if ! version="$(docker compose version --short 2>/dev/null)"; then
     ui "✗"
     ui "Falta Compose v2."
     return 1
   fi
-  if [[ "$REQ_COMPOSE" != 2.* && "$REQ_COMPOSE" != v2* ]]; then
+  if [[ "$version" == 2.* || "$version" == v2* ]]; then
+    return 0
+  fi
+  ui "✗"
+  ui "Hace falta Compose v2 (hay ${version})."
+  return 1
+}
+
+comprobar_docker() {
+  if ! REQ_DOCKER="$(docker version --format '{{.Server.Version}}' 2>/dev/null)"; then
     ui "✗"
-    ui "Hace falta Compose v2 (hay ${REQ_COMPOSE})."
+    ui "Falta Docker. Instala Docker ${DOCKER_MIN_MAYOR} y Compose v2."
     return 1
   fi
+  if ! docker_es_reciente "$REQ_DOCKER"; then
+    ui "✗"
+    ui "Hace falta Docker ${DOCKER_MIN_MAYOR} o más nuevo (hay ${REQ_DOCKER})."
+    return 1
+  fi
+  comprobar_compose
+}
+
+comprobar_herramientas() {
+  local nombre
+  for nombre in "${HERRAMIENTAS[@]}"; do
+    if command -v "$nombre" >/dev/null 2>&1; then
+      continue
+    fi
+    ui "✗"
+    ui "Falta ${nombre}."
+    return 1
+  done
 }
 
 leer_ram_mb() {
@@ -72,6 +109,7 @@ comprobar_puertos() {
 
 etapa_requisitos_comprobar() {
   comprobar_docker || return 1
+  comprobar_herramientas || return 1
   comprobar_recursos || return 1
   comprobar_puertos || return 1
 }

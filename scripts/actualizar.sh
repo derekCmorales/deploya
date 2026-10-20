@@ -6,12 +6,15 @@ RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LIB="${RAIZ}/scripts/lib"
 # shellcheck source=lib/comun.sh
 source "${LIB}/comun.sh"
+# shellcheck source=lib/estrategia.sh
+source "${LIB}/estrategia.sh"
 # shellcheck source=lib/respaldo-comando.sh
 source "${LIB}/respaldo-comando.sh"
 # shellcheck source=lib/actualizacion.sh
 source "${LIB}/actualizacion.sh"
 
 init_rutas
+cargar_estrategia_guardada
 cd "$RAIZ"
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then

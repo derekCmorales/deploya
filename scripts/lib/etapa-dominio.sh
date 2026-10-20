@@ -1,6 +1,8 @@
 # shellcheck shell=bash
 # Etapa 2. El comodín tiene que apuntar a esta máquina antes de escribir .env.
 
+URL_IP_PUBLICA="https://ifconfig.me"
+
 dominio_valido() {
   [[ "$1" =~ ^[A-Za-z0-9.-]+$ ]]
 }

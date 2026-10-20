@@ -39,3 +39,21 @@ Se generan desde las fuentes del canvas; si cambias una pantalla en el diseño, 
 | 25 | [Admin · Usuarios](25-Admin-usuarios.md) | `/admin/usuarios` | Javier | A3 |
 | 25b | [Admin · Suspender cuenta](25b-Admin-suspender.md) | `/admin/usuarios` | Javier | A3 |
 | 28 | [Estados del sistema](28-Estados-del-sistema.md) | `not-found · 403 · sesión expirada · suspendida · error de API · carga` | Eduardo (403 y sesión: Eddy; suspendida: Javier) | A2–A3 |
+
+### Sprint fuera de alcance
+
+Página «Sprint · fuera de alcance» del canvas. Plan: [../../plan-avances.md § Sprint fuera de alcance](../../plan-avances.md#sprint-fuera-de-alcance). Las ilustraciones de 01 y 03 (SP-01) no tienen ficha nueva: Eddy elige el artboard y la idea dentro de los lineamientos de `feat-web-ilustraciones-acceso`.
+
+| # | Pantalla | Ruta | Dueño | Entrega |
+|---|---|---|---|---|
+| 08c | [Mi suscripción · Ritmo de construcciones](08c-Suscripcion-ritmo.md) | `/suscripcion` | Eduardo | Sprint |
+| 13c | [Resumen · Últimas 24 h](13c-Resumen-ultimas-24h.md) | `/projects/[proyecto]` | Eduardo | Sprint |
+| 14c | [Despliegues · Tiempo por etapa](14c-Despliegues-tiempo-por-etapa.md) | `/projects/[proyecto]/despliegues` | Eduardo (datos: Derek) | Sprint |
+| 15 | [Bitácoras de ejecución](15-Proyecto-bitacoras.md) | `/projects/[proyecto]/bitacoras` | Eduardo | Si da tiempo |
+| 16 | [Proyecto · Métricas](16-Proyecto-metricas.md) | `/projects/[proyecto]/metricas` | Eduardo (datos: Derek) | Sprint |
+| 24b | [Correos de avisos](24b-Correos-avisos.md) | `— (plantillas M10)` | Eddy (ganchos: Derek, Javier) | Sprint |
+| 25c | [Admin · Reactivar cuenta](25c-Admin-reactivar.md) | `/admin/usuarios` | Javier | Sprint |
+| 27 | [Admin · Infraestructura](27-Admin-infraestructura.md) | `/admin/infraestructura` | Eduardo | Si da tiempo |
+| 30 | [Deploya autoalojado · instalación](30-Modo-autoalojado.md) | `— (scripts/instalar.sh)` | Derek (modo: Javier) | Sprint |
+| 31 | [Autoalojado · Configura tu instalación](31-Autoalojado-asistente.md) | `/configurar` | Eddy | Sprint |
+| 32 | [Admin · Instalación](32-Admin-instalacion.md) | `/admin/instalacion` | Javier (scripts: Derek) | Sprint |

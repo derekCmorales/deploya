@@ -12,6 +12,8 @@
 
 Filtros Todos / Saludables / Fallidos; tabla con versión, commit, fecha, duración, estado y digest; fila activa resaltada; «Redesplegar» reconstruye ese commit.
 
+**Sprint fuera de alcance:** Tarjeta «Tiempo por etapa» encima de la tabla (sprint fuera de alcance): [14c](14c-Despliegues-tiempo-por-etapa.md).
+
 ## Componentes
 
 - `AppShell` — header de 56px

@@ -12,6 +12,8 @@
 
 Cabecera del proyecto con acciones (Visitar, Reiniciar, Detener, Desplegar); `TabsNav` Resumen · Despliegues · Variables · Configuración; estado actual, versión activa, recursos aplicados, `MapaActividad`, `LineaTiempo` del último despliegue.
 
+**Sprint fuera de alcance:** Tarjeta «Últimas 24 h» (sprint fuera de alcance): [13c](13c-Resumen-ultimas-24h.md).
+
 ## Componentes
 
 - `AppShell` — header de 56px

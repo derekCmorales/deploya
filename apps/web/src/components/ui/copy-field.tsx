@@ -6,8 +6,18 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/** Valor copiable en mono (URL pública, digest, comando). */
-function CopyField({ value, label = "Copiar", className }: { value: string; label?: string; className?: string }) {
+/** Valor copiable en mono (URL pública, digest, comando). `prefijo`: icono antes del valor (candado de HTTPS en 13). */
+function CopyField({
+  value,
+  label = "Copiar",
+  prefijo,
+  className,
+}: {
+  value: string;
+  label?: string;
+  prefijo?: React.ReactNode;
+  className?: string;
+}) {
   const [copiado, setCopiado] = React.useState(false);
   React.useEffect(() => {
     if (!copiado) return;
@@ -21,6 +31,7 @@ function CopyField({ value, label = "Copiar", className }: { value: string; labe
         className,
       )}
     >
+      {prefijo ? <span className="flex shrink-0 [&_svg]:size-3.5">{prefijo}</span> : null}
       <span className="min-w-0 flex-1 truncate font-mono text-[13px]">{value}</span>
       <Button
         type="button"

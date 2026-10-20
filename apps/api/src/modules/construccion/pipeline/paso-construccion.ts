@@ -35,6 +35,7 @@ export class PasoConstruccion extends PasoPipeline {
     const imagen = await this.constructorImagen.construir(
       { directorio, rutaDockerfile, etiqueta, tiempoMaximoMs: TIEMPO_MAXIMO_CONSTRUCCION_MS },
       (texto) => bitacora.escribir(this.etapa, texto),
+      contexto.senal,
     );
     const artefacto = await this.artefactos.registrar({
       proyectoId: proyecto.id,

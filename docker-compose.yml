@@ -78,8 +78,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-deploya}:${POSTGRES_PASSWORD:-deploya}@postgres:5432/${POSTGRES_DB:-deploya}
       REDIS_URL: redis://redis:6379
       MOTOR_ADAPTADORES: docker
-      DOMINIO_APPS: ${DOMINIO_APPS:-localhost}
-      ESQUEMA_APPS: ${ESQUEMA_APPS:-http}
+      DOMINIO_BASE: ${DOMINIO_BASE:-localhost}
+      ESQUEMA_PUBLICO: ${ESQUEMA_PUBLICO:-http}
+      CERT_RESOLVER: ${CERT_RESOLVER:-}
       TRAEFIK_DINAMICO: /traefik/dinamico
       TRAEFIK_CONTENEDOR: deploya-traefik
       TRABAJADOR_CONTENEDOR: deploya-worker

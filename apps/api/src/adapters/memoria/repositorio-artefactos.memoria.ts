@@ -19,4 +19,17 @@ export class RepositorioArtefactosMemoria extends RepositorioArtefactos {
   async porId(id: string): Promise<Artefacto | null> {
     return this.artefactos.find((a) => a.id === id) ?? null;
   }
+
+  async deProyecto(proyectoId: string): Promise<Artefacto[]> {
+    return this.artefactos.filter((a) => a.proyectoId === proyectoId).sort((a, b) => b.numero - a.numero);
+  }
+
+  async disponiblesDe(proyectoId: string): Promise<Artefacto[]> {
+    return (await this.deProyecto(proyectoId)).filter((a) => a.disponible);
+  }
+
+  async marcarNoDisponible(id: string): Promise<void> {
+    const artefacto = this.artefactos.find((a) => a.id === id);
+    if (artefacto) artefacto.disponible = false;
+  }
 }

@@ -1,6 +1,7 @@
 import { Global, Module, type DynamicModule, type Provider } from "@nestjs/common";
 import Docker from "dockerode";
 import { Reloj, RelojSistema } from "../compartido/reloj";
+import { CancelacionesPuerto } from "../modules/construccion/puertos/cancelaciones.puerto";
 import { ClonadorRepositorioPuerto } from "../modules/construccion/puertos/clonador-repositorio.puerto";
 import { ColaConstruccionPuerto } from "../modules/construccion/puertos/cola-construccion.puerto";
 import { ConstructorImagenPuerto } from "../modules/construccion/puertos/constructor-imagen.puerto";
@@ -8,6 +9,8 @@ import { ProyectosLecturaPuerto } from "../modules/construccion/puertos/proyecto
 import { RecetaProyectoPuerto } from "../modules/construccion/puertos/receta-proyecto.puerto";
 import { RepositorioArtefactos } from "../modules/construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
+import { DetalleProyectoPuerto } from "../modules/observabilidad/puertos/detalle-proyecto.puerto";
+import { CertificadoPuerto } from "../modules/enrutamiento/puertos/certificado.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
 import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
@@ -21,11 +24,15 @@ import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.p
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
 import { RepositorioVariablesPrisma } from "./prisma/repositorio-variables.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
+import { CancelacionesRedis } from "./reales/cancelaciones-redis";
+import { CertificadoAcmeArchivo } from "./reales/certificado-acme-archivo";
 import { ColaBullMq, ColaOperacionBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
 import { ContenedorDocker } from "./reales/contenedor-docker";
 import { EnrutamientoTraefikArchivo } from "./reales/enrutamiento-traefik-archivo";
 import { VerificacionHttp } from "./reales/verificacion-http";
+import { CancelacionesMemoria } from "./stubs/cancelaciones.memoria";
+import { CertificadoAusente } from "./stubs/certificado-ausente";
 import { ClonadorStub } from "./stubs/clonador.stub";
 import { ColaMemoria } from "./stubs/cola.memoria";
 import { ColaOperacionMemoria } from "./stubs/cola-operacion.memoria";
@@ -59,6 +66,7 @@ const PERSISTENCIA: Provider[] = [
   { provide: RepositorioProyectos, useClass: RepositorioProyectosPrisma },
   { provide: RepositorioVariables, useClass: RepositorioVariablesPrisma },
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
+  { provide: DetalleProyectoPuerto, useExisting: RepositorioProyectos },
   { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
 ];
 
@@ -67,6 +75,11 @@ const COMUNES: Provider[] = [
   { provide: Reloj, useClass: RelojSistema },
   ...PERSISTENCIA,
   puerto(ColaConstruccionPuerto, { docker: (c) => new ColaBullMq(c.redisUrl), stub: () => new ColaMemoria() }),
+  puerto(CertificadoPuerto, {
+    docker: (c) => (c.enrutamiento.certResolver ? new CertificadoAcmeArchivo(c.acmeArchivo) : new CertificadoAusente()),
+    stub: () => new CertificadoAusente(),
+  }),
+  puerto(CancelacionesPuerto, { docker: (c) => new CancelacionesRedis(c.redisUrl), stub: () => new CancelacionesMemoria() }),
   puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
 ];
 
@@ -80,7 +93,7 @@ const SOLO_TRABAJADOR: Provider[] = [
   puerto(VerificacionEntornoPuerto, { docker: (_c, reloj) => new VerificacionHttp(reloj), stub: () => new VerificacionEntornoStub() }),
   puerto(EnrutamientoPuerto, {
     docker: (c) =>
-      new EnrutamientoTraefikArchivo({ directorio: c.traefikDinamico, dominio: c.dominioApps, esquema: c.esquemaApps }),
+      new EnrutamientoTraefikArchivo({ directorio: c.traefikDinamico, ...c.enrutamiento }),
     stub: () => new EnrutamientoStub(),
   }),
 ];

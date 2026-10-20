@@ -145,14 +145,16 @@ Importa desde `@/components/...`. Catálogo vivo: `/sistema`.
 | `Badge` | Variantes `muted`, `outline`, `signal`, `ok`, `warn`, `bad`; `size="lg"`. |
 | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`, `Sunken` | Superficies. Nada de cards dentro de cards. |
 | `Field` + `Input` | Etiqueta, control, pista y error (`aria-invalid`, `aria-describedby="<id>-msg"`). Valores técnicos con `className="font-mono"`. |
+| `Textarea`, `Select` | Mismo trato que `Input`: texto largo (`rows`) y lista nativa de opciones cerradas. |
 | `Checkbox`, `Switch` | Controles nativos accesibles. |
 | `Segmented` | Opciones cortas excluyentes (30 / 365 días, filtros). |
 | `Tabs` / `TabsNav` | Vistas del mismo recurso. `TabsNav` para rutas con `aria-current="page"`. |
 | `Banner` | Avisos `muted`, `warn`, `bad`, `signal` con acciones. |
 | `Meter` | Consumo frente al límite; cambia a `warn` al 80 % y `bad` al 100 %. `tonoAlLimite="warn"` cuando llegar al límite no es un error (proyectos del plan). |
-| `Table` y partes | Tablas en panel; fila activa con `data-activa="true"`. |
-| `CopyField` | Valor copiable en mono. |
+| `Table` y partes | Tablas en panel; fila activa con `data-activa="true"`; `footer` para el pie dentro del panel («Cargar más»). |
+| `CopyField` | Valor copiable en mono; `prefijo` para el candado de HTTPS (13). |
 | `Dialog` | Modal nativo. Confirmación destructiva: escribir el nombre. |
+| `Menu` | «Más acciones» (13, 14): popover de 230px con enlaces; la opción destructiva al final, tras un separador. |
 | `Skeleton`, `Kbd`, `Avatar`, `Tooltip`, `Separator`, `ScrollArea` | Apoyo. |
 
 ### Deploya (`components/deploya`)

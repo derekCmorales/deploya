@@ -2,6 +2,8 @@ import type { CambioSuscripcion, NuevaSuscripcion, Suscripcion } from "../domini
 
 export abstract class RepositorioSuscripciones {
   abstract deUsuario(usuarioId: string): Promise<Suscripcion | null>;
+  /** Las que el ciclo §4.4 puede mover: con vigencia (no Sandbox) y sin terminar (no Cancelada). */
+  abstract candidatasCiclo(): Promise<Suscripcion[]>;
   /** Idempotente: si la cuenta ya tiene suscripción, no la toca (invariante I1). */
   abstract crearSiNoExiste(nueva: NuevaSuscripcion): Promise<void>;
   /** Plan, estado y vigencia tras un pago aprobado. */

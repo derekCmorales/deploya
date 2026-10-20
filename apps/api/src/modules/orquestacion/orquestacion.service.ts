@@ -77,6 +77,11 @@ export class OrquestacionService {
     await this.contenedores.eliminarImagenesDe(subdominio);
   }
 
+  /** Retención de artefactos (M5-04): el artefacto queda en el historial sin su imagen. */
+  async eliminarImagen(imagen: string): Promise<void> {
+    await this.contenedores.eliminarImagen(imagen);
+  }
+
   async detenerContenedor(contenedorId: string): Promise<void> {
     await this.contenedores.detener(contenedorId);
   }

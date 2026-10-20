@@ -1,6 +1,6 @@
 import type Docker from "dockerode";
 import { pack } from "tar-fs";
-import { ConstruccionFallida, TiempoConstruccionAgotado } from "../../modules/construccion/dominio/errores";
+import { ConstruccionFallida, DespliegueCancelado, TiempoConstruccionAgotado } from "../../modules/construccion/dominio/errores";
 import {
   ConstructorImagenPuerto,
   type ImagenConstruida,
@@ -27,9 +27,11 @@ export class ConstructorDocker extends ConstructorImagenPuerto {
     super();
   }
 
-  async construir(solicitud: SolicitudConstruccion, alLinea: (texto: string) => void): Promise<ImagenConstruida> {
+  async construir(solicitud: SolicitudConstruccion, alLinea: (texto: string) => void, senal?: AbortSignal): Promise<ImagenConstruida> {
     const cancelacion = new AbortController();
     const temporizador = setTimeout(() => cancelacion.abort(), solicitud.tiempoMaximoMs);
+    // El cliente canceló: se corta `docker build` por la misma vía que el tiempo máximo.
+    senal?.addEventListener("abort", () => cancelacion.abort(), { once: true });
     let errorDeLectura: Error | null = null;
     const contexto = this.empaquetar(solicitud.directorio);
     // Sin este manejador, un error de lectura del clon tumbaría el proceso del worker.
@@ -49,6 +51,7 @@ export class ConstructorDocker extends ConstructorImagenPuerto {
       const imagen = await this.docker.getImage(solicitud.etiqueta).inspect();
       return { digest: imagen.Id, tamanoBytes: imagen.Size };
     } catch (error) {
+      if (senal?.aborted) throw new DespliegueCancelado();
       if (errorDeLectura) throw new ConstruccionFallida(CODIGO_DESCONOCIDO, `no se pudo leer el código: ${(errorDeLectura as Error).message}`);
       if (cancelacion.signal.aborted) throw new TiempoConstruccionAgotado();
       throw error;

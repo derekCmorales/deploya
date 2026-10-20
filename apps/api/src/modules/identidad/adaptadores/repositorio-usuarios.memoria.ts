@@ -30,6 +30,11 @@ export class RepositorioUsuariosMemoria extends RepositorioUsuarios {
     if (usuario) this.usuarios.set(id, { ...usuario, hashContrasena });
   }
 
+  async cambiarNombre(id: string, nombre: string): Promise<void> {
+    const usuario = this.usuarios.get(id);
+    if (usuario) this.usuarios.set(id, { ...usuario, nombre });
+  }
+
   /** Solo para pruebas: lo que en la base escribe M9 (motivo en `Usuario` y fecha en `AccionAdministrativa`). */
   suspender(id: string, motivo: string, desde: Date): void {
     const usuario = this.usuarios.get(id);

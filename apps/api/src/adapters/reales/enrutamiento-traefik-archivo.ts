@@ -1,5 +1,6 @@
 import { rename, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { ConfiguracionEnrutamiento } from "../../modules/enrutamiento/configuracion-enrutamiento";
 import { EnrutamientoPuerto, type RutaPublica } from "../../modules/enrutamiento/puertos/enrutamiento.puerto";
 
 const ETIQUETA_DNS = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
@@ -12,15 +13,18 @@ export class RutaInvalida extends Error {
   }
 }
 
-export interface OpcionesTraefik {
+export interface OpcionesTraefik extends ConfiguracionEnrutamiento {
   directorio: string;
-  dominio: string;
-  esquema: string;
 }
+
+/** Puntos de entrada de `traefik.yml` y `traefik.vps.yml`: `web` (80) y `websecure` (443, solo en el VPS). */
+const PUNTO_ENTRADA_HTTP = "web";
+const PUNTO_ENTRADA_HTTPS = "websecure";
 
 /**
  * Traefik v3 con proveedor de archivo (ADR 0005): una ruta por proyecto en
- * `<directorio>/<subdominio>.yml`, escrita de forma atómica (temporal + rename).
+ * `<directorio>/<subdominio>.yml`, escrita de forma atómica (temporal + rename). Con resolvedor
+ * ACME la ruta declara TLS (certificado comodín por DNS-01, ADR 0007); sin él, igual que en desarrollo.
  */
 export class EnrutamientoTraefikArchivo extends EnrutamientoPuerto {
   constructor(private readonly opciones: OpcionesTraefik) {
@@ -31,9 +35,9 @@ export class EnrutamientoTraefikArchivo extends EnrutamientoPuerto {
     validar(ruta);
     const destino = this.archivo(ruta.subdominio);
     const temporal = `${destino}.tmp`;
-    await writeFile(temporal, configuracionRuta(ruta, this.opciones.dominio), "utf8");
+    await writeFile(temporal, configuracionRuta(ruta, this.opciones), "utf8");
     await rename(temporal, destino);
-    return { url: `${this.opciones.esquema}://${ruta.subdominio}.${this.opciones.dominio}` };
+    return { url: `${this.opciones.esquema}://${ruta.subdominio}.${this.opciones.dominioBase}` };
   }
 
   async retirar(subdominio: string): Promise<void> {
@@ -45,14 +49,16 @@ export class EnrutamientoTraefikArchivo extends EnrutamientoPuerto {
   }
 }
 
-export function configuracionRuta(ruta: RutaPublica, dominio: string): string {
+export function configuracionRuta(ruta: RutaPublica, configuracion: Pick<ConfiguracionEnrutamiento, "dominioBase" | "certResolver">): string {
+  const { dominioBase, certResolver } = configuracion;
   return [
     "http:",
     "  routers:",
     `    ${ruta.subdominio}:`,
-    `      rule: "Host(\`${ruta.subdominio}.${dominio}\`)"`,
+    `      rule: "Host(\`${ruta.subdominio}.${dominioBase}\`)"`,
     `      service: ${ruta.subdominio}`,
-    "      entryPoints: [web]",
+    `      entryPoints: [${certResolver ? PUNTO_ENTRADA_HTTPS : PUNTO_ENTRADA_HTTP}]`,
+    ...bloqueTls(dominioBase, certResolver),
     "  services:",
     `    ${ruta.subdominio}:`,
     "      loadBalancer:",
@@ -60,6 +66,18 @@ export function configuracionRuta(ruta: RutaPublica, dominio: string): string {
     `          - url: "http://${ruta.host}:${ruta.puerto}"`,
     "",
   ].join("\n");
+}
+
+/** Pide el certificado de `*.<dominioBase>`: Traefik lo emite una vez y lo reusa en cada proyecto. */
+function bloqueTls(dominioBase: string, certResolver: string | null): string[] {
+  if (!certResolver) return [];
+  return [
+    "      tls:",
+    `        certResolver: ${certResolver}`,
+    "        domains:",
+    `          - main: "${dominioBase}"`,
+    `            sans: ["*.${dominioBase}"]`,
+  ];
 }
 
 function validar(ruta: RutaPublica): void {

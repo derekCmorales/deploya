@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Banner } from "@/components/ui/banner";
-import { useMiSuscripcion } from "@/hooks/use-suscripcion";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
@@ -23,34 +22,36 @@ import {
   type ListaProyectos as Lista,
   type ProyectoEnLista,
 } from "@/lib/proyectos";
-import { avisoEstado, RUTA_SUSCRIPCION, sinVigencia } from "@/lib/suscripcion";
+import { avisoEstado, RUTA_SUSCRIPCION, sinVigencia, type MiSuscripcion } from "@/lib/suscripcion";
 import { cn } from "@/lib/utils";
 
 import { DetalleProyecto } from "./detalle-proyecto";
 
-/** Pantalla 10: lista de proyectos + detalle del seleccionado (patrón D de la guía). */
+/**
+ * Pantalla 10: lista de proyectos + detalle del seleccionado (patrón D de la guía). La suscripción
+ * llega del panel; el aviso de Vencida (10c) lo pinta el panel arriba de la lista.
+ */
 export function ListaProyectos({
   lista,
+  suscripcion,
   seleccionado,
   onSeleccionar,
-  onEliminado,
 }: {
   lista: Lista;
+  suscripcion: MiSuscripcion | null;
   seleccionado: string | null;
   onSeleccionar: (id: string) => void;
-  onEliminado: () => void;
 }) {
   const [busqueda, setBusqueda] = useState("");
   const visibles = filtrarProyectos(lista.proyectos, busqueda);
   const activo = lista.proyectos.find((p) => p.id === seleccionado) ?? lista.proyectos[0];
   const contador = contadorProyectos(lista);
-  const suscripcion = useMiSuscripcion();
-  const bloqueada = suscripcion.datos ? sinVigencia(suscripcion.datos.estado) : false;
-  const aviso = suscripcion.datos ? avisoEstado(suscripcion.datos.estado) : null;
+  const bloqueada = suscripcion ? sinVigencia(suscripcion.estado) : false;
+  const aviso = suscripcion ? avisoEstado(suscripcion.estado) : null;
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-background">
-      {bloqueada && aviso ? (
+      {bloqueada && aviso && suscripcion?.estado !== "vencida" ? (
         <Banner
           variant="bad"
           title={aviso.titulo}
@@ -122,7 +123,7 @@ export function ListaProyectos({
             <Meter label="Proyectos del plan" value={lista.usados} max={lista.maximo} tonoAlLimite="warn" />
           </div>
         </div>
-        {activo ? <DetalleProyecto key={activo.id} proyecto={activo} plan={lista.plan} onEliminado={onEliminado} /> : null}
+        {activo ? <DetalleProyecto key={activo.id} proyecto={activo} plan={lista.plan} /> : null}
       </div>
     </section>
   );

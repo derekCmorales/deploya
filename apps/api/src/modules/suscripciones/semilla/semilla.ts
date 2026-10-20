@@ -1,4 +1,5 @@
 import { sumarDias } from "../dominio/cambio-plan";
+import { DIAS_GRACIA } from "../dominio/politica-ciclo";
 import type { CambioSuscripcion, EstadoSuscripcionValor } from "../dominio/suscripcion";
 
 export interface PlanSemilla {
@@ -32,12 +33,12 @@ export const ADMIN_CORREO_POR_DEFECTO = "admin@deploya.app";
 export const CLIENTE_DEMO_CORREO = "cliente@deploya.app";
 export const VENCIDA_DEMO_CORREO = "vencida@deploya.app";
 export const SUSPENDIDA_DEMO_CORREO = "suspendida@deploya.app";
+/** Cuenta Activa en Sandbox que el administrador suspende en la demo de M9-02. */
+export const SUSPENDER_DEMO_CORREO = "demo@deploya.app";
 
 /** Las cuentas de demo de bloqueos tienen Starter de 30 días con `vence` en el pasado. */
 export const CODIGO_PLAN_DEMO = "starter";
 const VIGENCIA_DEMO_DIAS = 30;
-/** Días de Vencida antes de pasar a Suspendida (§4.4). */
-const DIAS_GRACIA = 5;
 
 /** Cuántos días lleva vencida la suscripción y cuántos después de `vence` empezó su estado. */
 const FECHAS_DEMO: Record<EstadoDemo, { diasDesdeVence: number; diasHastaEstado: number }> = {
@@ -107,8 +108,8 @@ export function planesSemilla(): PlanSemilla[] {
 }
 
 /**
- * Administrador, cliente de demostración y las cuentas Vencida y Suspendida de M5-03, las tres de
- * cliente con la misma contraseña. Sin `ADMIN_CLAVE` el seed no escribe nada.
+ * Administrador, cliente de demostración, las cuentas Vencida y Suspendida de M5-03 y `demo@` para
+ * suspenderla en M9-02; las de cliente con la misma contraseña. Sin `ADMIN_CLAVE` el seed no escribe nada.
  */
 export function usuariosSemilla(entorno: NodeJS.ProcessEnv): UsuarioSemilla[] {
   const claveAdmin = entorno.ADMIN_CLAVE;
@@ -140,6 +141,12 @@ export function usuariosSemilla(entorno: NodeJS.ProcessEnv): UsuarioSemilla[] {
       clave: claveCliente,
       rol: "cliente",
       estadoDemo: "suspendida",
+    },
+    {
+      correo: SUSPENDER_DEMO_CORREO,
+      nombre: "Cliente para suspender",
+      clave: claveCliente,
+      rol: "cliente",
     },
   ];
 }

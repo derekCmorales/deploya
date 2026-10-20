@@ -1,13 +1,12 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Post, Req, Res, UseFilters, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { COOKIE_SESION, cookieSesion, cookieSesionVencida, leerCookie, type ConfiguracionCookie } from "./cookie-sesion";
+import { CONFIGURACION_COOKIE, COOKIE_SESION, cookieSesion, cookieSesionVencida, leerCookie, type ConfiguracionCookie } from "./cookie-sesion";
 import type { UsuarioSesion } from "./dominio/sesion";
-import { ErroresIdentidadFilter, textoDe } from "./identidad.controller";
+import { textoDe } from "./cuerpo-solicitud";
+import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { SesionGuard } from "./sesion.guard";
 import { SesionService } from "./sesion.service";
 import { UsuarioActual } from "./usuario-actual.decorator";
-
-export const CONFIGURACION_COOKIE = Symbol("CONFIGURACION_COOKIE");
 
 /** Pantalla 03 (M1-03). El token viaja solo en la cookie HttpOnly; el JSON lleva el usuario. */
 @Controller("identidad/sesion")

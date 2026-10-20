@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  accionesDe,
   aplicarBloque,
   avisoVersionAnterior,
   etiquetaEtapaActual,
@@ -13,8 +14,11 @@ import {
   marcaVisible,
   puedeDetener,
   puedeReiniciar,
+  rutaCancelar,
   rutaDespliegue,
+  rutaReintentar,
   sondearBitacora,
+  textoCertificado,
   textoParaCopiar,
   tiempoTranscurrido,
 } from "../src/lib/despliegues.ts";
@@ -76,16 +80,19 @@ test("12 · la ruta y la etiqueta de etapa salen del número", () => {
   assert.equal(etiquetaEtapaActual([{ estado: "completada" }]), null);
 });
 
-test("12 · la vista no muestra Cancelar y usa la bitácora del sistema", () => {
+test("12 y 12c · la vista ofrece Cancelar despliegue y Reintentar con los textos de la ficha y usa la bitácora del sistema", () => {
   const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
   const panel = readFileSync(join(raiz, "src/app/(projects)/projects/_componentes/panel-despliegue.tsx"), "utf8");
   assert.match(panel, /Bitácora de construcción/);
   assert.match(panel, /Se actualiza cada 3 s/);
   assert.match(panel, /Copiar/);
-  assert.doesNotMatch(panel, /Cancelar despliegue/);
-  assert.doesNotMatch(panel, /Reintentar/);
-  assert.match(panel, /Reiniciar/);
-  assert.match(panel, /Detener/);
+  assert.match(panel, /Cancelar despliegue/);
+  assert.match(panel, /Reintentar/);
+  assert.match(panel, /accionesDe\(/);
+  assert.match(panel, /AccionesContenedor/);
+  const acciones = readFileSync(join(raiz, "src/app/(projects)/projects/_componentes/acciones-contenedor.tsx"), "utf8");
+  assert.match(acciones, /Reiniciar/);
+  assert.match(acciones, /Detener/);
   assert.doesNotMatch(panel, /\bfetch\(/);
 });
 
@@ -96,5 +103,29 @@ test("12b · Reiniciar y Detener solo cuando el contrato lo permite", () => {
   assert.equal(puedeDetener("saludable"), true);
   assert.equal(puedeDetener("detenido"), false);
   assert.equal(puedeDetener("fallido"), false);
+});
+
+test("accionesDe: Cancelar en Encolado, Construyendo y Revirtiendo; Reintentar solo en Fallido", () => {
+  assert.deepEqual(accionesDe("encolado"), { cancelar: true, reintentar: false });
+  assert.deepEqual(accionesDe("construyendo"), { cancelar: true, reintentar: false });
+  assert.deepEqual(accionesDe("revirtiendo"), { cancelar: true, reintentar: false });
+  assert.deepEqual(accionesDe("fallido"), { cancelar: false, reintentar: true });
+  for (const estado of ["aprovisionando", "publicando", "saludable", "detenido", "cancelado"]) {
+    assert.deepEqual(accionesDe(estado), { cancelar: false, reintentar: false }, estado);
+  }
+});
+
+test("las rutas de cancelar y reintentar son las del contrato", () => {
+  assert.equal(rutaCancelar("d-1"), "/despliegues/d-1/cancelar");
+  assert.equal(rutaReintentar("d-1"), "/despliegues/d-1/reintentar");
+});
+
+test("12b · el vencimiento del certificado solo se muestra cuando hay TLS", () => {
+  const fecha = (iso) => (iso === "2027-01-12T05:14:24.000Z" ? "12 ene 2027" : null);
+
+  assert.equal(textoCertificado({ vence: "2027-01-12T05:14:24.000Z" }, fecha), "Certificado hasta 12 ene 2027");
+  assert.equal(textoCertificado(null, fecha), null);
+  assert.equal(textoCertificado(undefined, fecha), null);
+  assert.equal(textoCertificado({ vence: "no es fecha" }, fecha), null);
 });
 

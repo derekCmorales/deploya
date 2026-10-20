@@ -1,6 +1,6 @@
 import type Docker from "dockerode";
 import { PassThrough } from "node:stream";
-import { ConstruccionFallida } from "../../modules/construccion/dominio/errores";
+import { ConstruccionFallida, DespliegueCancelado } from "../../modules/construccion/dominio/errores";
 import { ConstructorDocker } from "./constructor-docker";
 
 type Evento = { stream?: string; error?: string; errorDetail?: { code?: number } };
@@ -60,5 +60,20 @@ describe("ConstructorDocker", () => {
     const promesa = new ConstructorDocker(docker, () => contexto).construir(solicitud, () => undefined);
 
     await expect(promesa).rejects.toThrow("no se pudo leer el código: ENOENT /tmp/x");
+  });
+
+  it("si el cliente cancela, aborta el build y lanza DespliegueCancelado (no tiempo agotado)", async () => {
+    const cliente = new AbortController();
+    const docker = {
+      buildImage: (_contexto: unknown, opciones: { abortSignal: AbortSignal }) =>
+        new Promise((_resolver, rechazar) => {
+          opciones.abortSignal.addEventListener("abort", () => rechazar(new Error("aborted")));
+          cliente.abort();
+        }),
+    } as unknown as Docker;
+
+    const promesa = new ConstructorDocker(docker, empaquetarFalso).construir(solicitud, () => undefined, cliente.signal);
+
+    await expect(promesa).rejects.toThrow(DespliegueCancelado);
   });
 });

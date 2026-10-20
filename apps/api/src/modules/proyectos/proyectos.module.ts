@@ -7,6 +7,8 @@ import { CuotaProyectosSuscripciones } from "./adaptadores/cuota-proyectos.suscr
 import { FuenteGitHubPublica } from "./adaptadores/fuente-github-publica";
 import { ProyectosController } from "./proyectos.controller";
 import { ProyectosService } from "./proyectos.service";
+import { configuracionEnrutamientoDesde } from "../enrutamiento/configuracion-enrutamiento";
+import { SUBDOMINIOS_DE_PLATAFORMA, SUBDOMINIOS_RESERVADOS } from "./dominio/subdominio";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { VariablesModule } from "./variables.module";
@@ -25,6 +27,12 @@ import { VariablesModule } from "./variables.module";
       useFactory: () => new FuenteGitHubPublica(fetch, process.env.GITHUB_TOKEN, process.env.GITHUB_API_URL || undefined),
     },
     { provide: CuotaProyectosPuerto, useClass: CuotaProyectosSuscripciones },
+    // Con TLS (VPS) la web y la API ocupan la raíz y api.<dominio>: un proyecto no puede quitárselos.
+    {
+      provide: SUBDOMINIOS_RESERVADOS,
+      useFactory: () => (configuracionEnrutamientoDesde(process.env).certResolver ? SUBDOMINIOS_DE_PLATAFORMA : []),
+    },
   ],
+  exports: [CuotaProyectosPuerto],
 })
 export class ProyectosModule {}

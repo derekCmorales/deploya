@@ -387,6 +387,7 @@ model LineaBitacora {
 - Administrador: `ADMIN_CORREO` (por defecto `admin@deploya.app`) y `ADMIN_CLAVE` (obligatoria, sin valor por defecto), `rol = administrador`, `estadoCuenta = activa`, con Sandbox.
 - Cliente de demostración para Eduardo hasta que llegue el guard: `cliente@deploya.app`, `activa`, con Sandbox.
 - Avance 2 (M5-03): `vencida@deploya.app` y `suspendida@deploya.app` en **Starter** de 30 días con `vence` en el pasado, para demostrar los bloqueos antes del ciclo §4.4 (M2-05). `vencida@`: `vence` = hace 2 días, **Vencida** desde `vence`. `suspendida@`: `vence` = hace 10 días, **Suspendida** desde `vence` + 5 días (gracia). En ambas `inicio` = `vence` − 30 días y sin descenso pendiente. Solo se escriben si la cuenta sigue con la Sandbox recién asignada (`vence` nulo), así una segunda corrida no las toca. Misma contraseña de demo que `cliente@deploya.app`.
+- Avance 3 (M9-02): `demo@deploya.app`, cliente con **Sandbox** Activa y la misma contraseña de demo que `cliente@deploya.app`, para que el administrador la suspenda en la demo. Idempotente como las demás (`upsert` por correo).
 - El hash de contraseña del seed usa la **misma** función que M1: scrypt de `node:crypto`, formato `scrypt:<sal>:<hash>` en hex (`HashContrasenaScrypt`).
 
 ## Servicios que se exportan sobre estos datos

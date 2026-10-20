@@ -8,6 +8,8 @@ export interface Suscripcion {
   usuarioId: string;
   plan: Plan;
   estado: EstadoSuscripcionValor;
+  /** Desde cuándo está en `estado`: cuenta la gracia de Vencida y los 30 días de Suspendida (M2-05). */
+  estadoDesde: Date;
   vigenciaDias: number | null;
   inicio: Date;
   vence: Date | null;

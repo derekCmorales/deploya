@@ -1,0 +1,30 @@
+# Rutas de la plataforma en el VPS (web en la raíz, API en api.). Entran al mismo directorio que las de
+# los proyectos (/traefik/dinamico) como archivo de solo lectura: el nombre empieza con «_» y un
+# subdominio de proyecto nunca lo hace. El dominio base se fija con DOMINIO_BASE en la plantilla
+# generada por scripts/desplegar-vps.sh (no se versiona el dominio real aquí).
+http:
+  routers:
+    plataforma-web:
+      rule: "Host(`__DOMINIO_BASE__`)"
+      service: plataforma-web
+      entryPoints: [websecure]
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: "__DOMINIO_BASE__"
+            sans: ["*.__DOMINIO_BASE__"]
+    plataforma-api:
+      rule: "Host(`api.__DOMINIO_BASE__`)"
+      service: plataforma-api
+      entryPoints: [websecure]
+      tls:
+        certResolver: letsencrypt
+  services:
+    plataforma-web:
+      loadBalancer:
+        servers:
+          - url: "http://web:3000"
+    plataforma-api:
+      loadBalancer:
+        servers:
+          - url: "http://api:3000"

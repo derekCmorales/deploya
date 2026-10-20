@@ -13,6 +13,7 @@ const MAPA: Record<EstadoDespliegueValor, { texto: string; icono: LucideIcon; va
   fallido: { texto: "Fallido", icono: CircleX, variante: "bad" },
   cancelado: { texto: "Cancelado", icono: Ban, variante: "muted" },
   detenido: { texto: "Detenido", icono: CircleStop, variante: "muted" },
+  revirtiendo: { texto: "Revirtiendo", icono: LoaderCircle, variante: "signal", gira: true },
 };
 
 /** Badge canónico del estado de un despliegue: palabra, icono y tono fijos. */

@@ -41,4 +41,11 @@ export class RepositorioSesionesPrisma extends RepositorioSesiones {
   async revocarTodasDe(usuarioId: string, marca: Date): Promise<void> {
     await this.prisma.sesion.updateMany({ where: { usuarioId, revocadaEn: null }, data: { revocadaEn: marca } });
   }
+
+  async revocarTodasMenos(usuarioId: string, sesionId: string, marca: Date): Promise<void> {
+    await this.prisma.sesion.updateMany({
+      where: { usuarioId, revocadaEn: null, id: { not: sesionId } },
+      data: { revocadaEn: marca },
+    });
+  }
 }

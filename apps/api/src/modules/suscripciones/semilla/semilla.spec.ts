@@ -33,13 +33,14 @@ describe("usuariosSemilla", () => {
     expect(() => usuariosSemilla({})).toThrow(/ADMIN_CLAVE/);
   });
 
-  it("administrador con ADMIN_CORREO normalizado, cliente de demostración y cuentas Vencida y Suspendida", () => {
+  it("administrador con ADMIN_CORREO normalizado, cliente de demostración, cuentas Vencida y Suspendida y demo@", () => {
     const usuarios = usuariosSemilla({ ADMIN_CORREO: " Jefa@Deploya.App ", ADMIN_CLAVE: "Clave-Admin-1" });
     expect(usuarios).toEqual([
       { correo: "jefa@deploya.app", nombre: "Administrador", clave: "Clave-Admin-1", rol: "administrador" },
       { correo: "cliente@deploya.app", nombre: "Cliente de demostración", clave: "Clave-Admin-1", rol: "cliente" },
       { correo: "vencida@deploya.app", nombre: "Cliente con suscripción vencida", clave: "Clave-Admin-1", rol: "cliente", estadoDemo: "vencida" },
       { correo: "suspendida@deploya.app", nombre: "Cliente con suscripción suspendida", clave: "Clave-Admin-1", rol: "cliente", estadoDemo: "suspendida" },
+      { correo: "demo@deploya.app", nombre: "Cliente para suspender", clave: "Clave-Admin-1", rol: "cliente" },
     ]);
   });
 

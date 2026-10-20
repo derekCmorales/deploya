@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, UseFilters, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, UseFilters, UseGuards } from "@nestjs/common";
 import { SesionGuard } from "../identidad/sesion.guard";
 import { UsuarioActual } from "../identidad/usuario-actual.decorator";
 import { validarAltaProyecto, validarConfirmacionEliminar, validarConsultaRepositorio, validarReemplazoVariables } from "./dominio/alta-proyecto";
+import { cambiosProyectoDe } from "./dominio/cambios-proyecto";
 import type { ValidacionRepositorio } from "./dominio/proyecto";
 import { ErroresProyectosFilter } from "./errores-proyectos.filter";
-import { ProyectosService, type ListaProyectos, type ProyectoCreado } from "./proyectos.service";
+import { ProyectosService, vistaConfiguracion, type ListaProyectos, type ProyectoCreado, type VistaConfiguracion } from "./proyectos.service";
 
 /** Borde HTTP de M3. El usuario sale de la sesión (`SesionGuard` + `@UsuarioActual()`), nunca del cuerpo. */
 @Controller("proyectos")
@@ -34,6 +35,13 @@ export class ProyectosController {
   @UseGuards(SesionGuard)
   crear(@UsuarioActual("id") usuarioId: string, @Body() cuerpo: unknown): Promise<ProyectoCreado> {
     return this.proyectos.crear(usuarioId, validarAltaProyecto(cuerpo));
+  }
+
+  /** 19: aplica en el próximo despliegue; no despliega. El cuerpo nunca cambia el subdominio. */
+  @Patch(":id")
+  @UseGuards(SesionGuard)
+  configurar(@UsuarioActual("id") usuarioId: string, @Param("id") id: string, @Body() cuerpo: unknown): Promise<VistaConfiguracion> {
+    return this.proyectos.configurar(usuarioId, id, cambiosProyectoDe(cuerpo)).then(vistaConfiguracion);
   }
 
   @Get(":id/variables")

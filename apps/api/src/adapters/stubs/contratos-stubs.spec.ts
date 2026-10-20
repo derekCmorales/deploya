@@ -1,7 +1,12 @@
+import { CancelacionesPuerto } from "../../modules/construccion/puertos/cancelaciones.puerto";
+import { ColaConstruccionPuerto } from "../../modules/construccion/puertos/cola-construccion.puerto";
 import { ColaOperacionPuerto } from "../../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../../modules/orquestacion/puertos/contenedor.puerto";
 import { ContenedorDocker } from "../reales/contenedor-docker";
-import { ColaOperacionBullMq } from "../reales/cola-bullmq";
+import { CancelacionesRedis } from "../reales/cancelaciones-redis";
+import { ColaBullMq, ColaOperacionBullMq } from "../reales/cola-bullmq";
+import { CancelacionesMemoria } from "./cancelaciones.memoria";
+import { ColaMemoria } from "./cola.memoria";
 import { ColaOperacionMemoria } from "./cola-operacion.memoria";
 import { ContenedorStub } from "./contenedor.stub";
 
@@ -23,10 +28,18 @@ describe("Stubs del motor (M5-02)", () => {
   it.each([
     ["ContenedorPuerto", ContenedorStub, ContenedorDocker, ContenedorPuerto],
     ["ColaOperacionPuerto", ColaOperacionMemoria, ColaOperacionBullMq, ColaOperacionPuerto],
+    ["CancelacionesPuerto", CancelacionesMemoria, CancelacionesRedis, CancelacionesPuerto],
   ] as const)("%s: el stub y el real son el mismo puerto y el real implementa cada método del stub", (_n, stub, real, puerto) => {
     expect(stub.prototype).toBeInstanceOf(puerto);
     expect(real.prototype).toBeInstanceOf(puerto);
     expect(metodosDe(stub).length).toBeGreaterThan(0);
     expect(metodosDe(stub).filter((m) => !metodosDe(real).includes(m))).toEqual([]);
+  });
+
+  it("ColaConstruccionPuerto: la memoria y BullMQ encolan y quitan (la memoria suma `tomar` solo para las pruebas)", () => {
+    for (const cola of [ColaMemoria, ColaBullMq]) {
+      expect(cola.prototype).toBeInstanceOf(ColaConstruccionPuerto);
+      expect(metodosDe(cola)).toEqual(expect.arrayContaining(["encolar", "quitar"]));
+    }
   });
 });

@@ -60,7 +60,7 @@ test("el shell lleva la marca, la navegación y el toggle de tema", () => {
 test("los estados de despliegue siguen el núcleo v4.1", () => {
   const estados = leer("src/components/deploya/estados.ts");
   assert.match(estados, /"cancelado"/);
-  assert.doesNotMatch(estados, /revirtiendo/);
+  assert.match(estados, /"revirtiendo"/);
   for (const e of ["activa", "por-vencer", "vencida", "suspendida", "cancelada"]) {
     assert.match(estados, new RegExp(`"${e}"`));
   }

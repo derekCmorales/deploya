@@ -1,6 +1,6 @@
 # 0004 — Versionado inmutable y reversión sin reconstruir
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-27
 - **Autor:** @derekCmorales · **Módulos:** M4, M5 (consumidor: M7 en pantalla 14)
 - **Change de OpenSpec:** `feat/m5-reversion-instantanea`

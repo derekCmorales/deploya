@@ -3,10 +3,12 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../compartido/prisma/prisma.service";
 import type { Despliegue, LineaBitacora } from "../../modules/construccion/dominio/despliegue";
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
-import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
+import { ESTADO_POR_FILTRO, type FiltroHistorial } from "../../modules/construccion/dominio/historial";
+import { DISPARADOR_SIN_CONSTRUCCION, ESTADOS_TERMINALES, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
+  type MuestraDespliegue,
   type NuevoDespliegue,
 } from "../../modules/construccion/puertos/repositorio-despliegues.puerto";
 import { despliegueDesdePrisma, estadoEtapaAPrisma, lineaDesdePrisma } from "./traduccion-motor";
@@ -55,6 +57,15 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
   async porNumero(proyectoId: string, numero: number): Promise<Despliegue | null> {
     const fila = await this.prisma.despliegue.findUnique({
       where: { proyectoId_numero: { proyectoId, numero } },
+      include: CON_ETAPAS,
+    });
+    return fila ? despliegueDesdePrisma(fila) : null;
+  }
+
+  async porCommit(proyectoId: string, commitSha: string): Promise<Despliegue | null> {
+    const fila = await this.prisma.despliegue.findFirst({
+      where: { proyectoId, commitSha },
+      orderBy: { numero: "asc" },
       include: CON_ETAPAS,
     });
     return fila ? despliegueDesdePrisma(fila) : null;
@@ -116,6 +127,26 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     return proyecto?.despliegueActivo ? despliegueDesdePrisma(proyecto.despliegueActivo) : null;
   }
 
+  async historialDe(proyectoId: string, filtro: FiltroHistorial, antesDe: number | null, limite: number): Promise<Despliegue[]> {
+    const estado = ESTADO_POR_FILTRO[filtro];
+    const filas = await this.prisma.despliegue.findMany({
+      where: { proyectoId, ...(antesDe === null ? {} : { numero: { lt: antesDe } }), ...(estado ? { estado } : {}) },
+      orderBy: { numero: "desc" },
+      take: limite,
+      include: CON_ETAPAS,
+    });
+    return filas.map(despliegueDesdePrisma);
+  }
+
+  async enCursoDe(proyectoId: string): Promise<Despliegue | null> {
+    const fila = await this.prisma.despliegue.findFirst({
+      where: { proyectoId, estado: { notIn: [...ESTADOS_TERMINALES] } },
+      orderBy: { numero: "desc" },
+      include: CON_ETAPAS,
+    });
+    return fila ? despliegueDesdePrisma(fila) : null;
+  }
+
   async marcarActivo(proyectoId: string, despliegueId: string): Promise<void> {
     await this.prisma.proyecto.update({ where: { id: proyectoId }, data: { despliegueActivoId: despliegueId } });
   }
@@ -124,6 +155,14 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     return this.prisma.despliegue.count({
       where: { proyecto: { usuarioId }, creado: { gte: desde }, disparador: { not: DISPARADOR_SIN_CONSTRUCCION } },
     });
+  }
+
+  async desplieguesDesde(proyectoId: string, desde: Date): Promise<MuestraDespliegue[]> {
+    const filas = await this.prisma.despliegue.findMany({
+      where: { proyectoId, creado: { gte: desde } },
+      select: { creado: true, estado: true },
+    });
+    return filas.map((f) => ({ creado: f.creado, estado: f.estado as EstadoDespliegue }));
   }
 
   private async crearConSiguienteNumero(nuevo: NuevoDespliegue): Promise<Despliegue> {
@@ -137,7 +176,13 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
           disparador: nuevo.disparador,
           rama: nuevo.rama,
           creado: nuevo.creado,
-          etapas: { create: ETAPAS.map((etapa) => ({ etapa })) },
+          ...(nuevo.commit
+            ? { commitSha: nuevo.commit.sha, commitMensaje: nuevo.commit.mensaje, commitAutor: nuevo.commit.autor }
+            : {}),
+          ...(nuevo.artefactoId ? { artefactoId: nuevo.artefactoId } : {}),
+          etapas: {
+            create: ETAPAS.map((etapa) => ({ etapa, ...(nuevo.etapasOmitidas?.includes(etapa) ? { estado: "omitida" as const } : {}) })),
+          },
         },
         include: CON_ETAPAS,
       });

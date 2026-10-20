@@ -1,7 +1,7 @@
 "use client";
 
-import { Copy, ExternalLink, RotateCw, Square } from "lucide-react";
-import { notFound } from "next/navigation";
+import { Copy, ExternalLink, RefreshCw, X } from "lucide-react";
+import { notFound, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Bitacora } from "@/components/deploya/bitacora";
@@ -16,21 +16,26 @@ import { useDesplieguePorNumero } from "@/hooks/use-despliegue-por-numero";
 import { ErrorApi, pedirApi } from "@/lib/api";
 import {
   INTERVALO_RELOJ_MS,
+  accionesDe,
   avisoVersionAnterior,
   etapaVisible,
   etiquetaEtapaActual,
   lineaDeError,
   numeroAnterior,
-  puedeDetener,
-  puedeReiniciar,
+  rutaCancelar,
+  rutaDespliegue,
+  rutaReintentar,
+  textoCertificado,
   textoParaCopiar,
   tiempoTranscurrido,
 } from "@/lib/despliegues";
+import { AccionesContenedor } from "./acciones-contenedor";
+import { fechaCorta } from "@/lib/fechas";
 import { haceCuanto, recursosPlan, shaCorto, textoEtapa, type VistaDespliegue } from "@/lib/proyectos";
 
 const HTTP_NO_ENCONTRADO = 404;
 
-/** Pantallas 12, 12b y 12c: riel grande y bitácora en vivo. Sin «Cancelar» (es del Avance 3). */
+/** Pantallas 12, 12b y 12c: riel grande y bitácora en vivo, con «Cancelar despliegue» y «Reintentar». */
 export function PanelDespliegue({ proyectoId, numeroTexto }: { proyectoId: string; numeroTexto: string }) {
   const numero = Number(numeroTexto);
   const [origen, setOrigen] = useState<string | null>(null);
@@ -79,7 +84,7 @@ function Vista({
 
   return (
     <div className="flex flex-col gap-6 px-8 py-6">
-      <Cabecera despliegue={despliegue} transcurrido={transcurrido} etiqueta={etiqueta} />
+      <Cabecera proyectoId={proyectoId} despliegue={despliegue} transcurrido={transcurrido} etiqueta={etiqueta} alAccionar={alAccionar} />
       <RielEtapas
         size="lg"
         etapas={despliegue.etapas.map((etapa) => etapa.estado)}
@@ -98,13 +103,17 @@ function Vista({
 }
 
 function Cabecera({
+  proyectoId,
   despliegue,
   transcurrido,
   etiqueta,
+  alAccionar,
 }: {
+  proyectoId: string;
   despliegue: VistaDespliegue;
   transcurrido: string | null;
   etiqueta: string | null;
+  alAccionar: () => void;
 }) {
   const commit = despliegue.commit;
   return (
@@ -120,11 +129,71 @@ function Cabecera({
           </p>
         ) : null}
       </div>
-      <dl className="flex gap-6 text-sm">
-        <Dato titulo={tituloTiempo(despliegue.estado)} valor={transcurrido ?? "—"} />
-        {etiqueta ? <Dato titulo="Etapa" valor={etiqueta} /> : null}
-      </dl>
+      <div className="flex flex-wrap items-start gap-6">
+        <dl className="flex gap-6 text-sm">
+          <Dato titulo={tituloTiempo(despliegue.estado)} valor={transcurrido ?? "—"} />
+          {etiqueta ? <Dato titulo="Etapa" valor={etiqueta} /> : null}
+        </dl>
+        <AccionesDeDespliegue proyectoId={proyectoId} despliegue={despliegue} alAccionar={alAccionar} />
+      </div>
     </header>
+  );
+}
+
+/** M4-02: «Cancelar despliegue» (12) y «Reintentar» (12c). Reintentar lleva al despliegue nuevo. */
+function AccionesDeDespliegue({
+  proyectoId,
+  despliegue,
+  alAccionar,
+}: {
+  proyectoId: string;
+  despliegue: VistaDespliegue;
+  alAccionar: () => void;
+}) {
+  const router = useRouter();
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const acciones = accionesDe(despliegue.estado);
+  if (!acciones.cancelar && !acciones.reintentar) return null;
+
+  const ejecutar = async (peticion: () => Promise<void>) => {
+    setOcupado(true);
+    setError(null);
+    try {
+      await peticion();
+    } catch (e) {
+      setError(e instanceof ErrorApi ? e.message : "No pudimos completar la acción.");
+    } finally {
+      setOcupado(false);
+    }
+  };
+  const cancelar = () =>
+    ejecutar(async () => {
+      await pedirApi(rutaCancelar(despliegue.id), { metodo: "POST" });
+      alAccionar();
+    });
+  const reintentar = () =>
+    ejecutar(async () => {
+      const creado = await pedirApi<{ numero: number }>(rutaReintentar(despliegue.id), { metodo: "POST" });
+      router.push(rutaDespliegue(proyectoId, creado.numero));
+    });
+
+  return (
+    <div className="flex flex-col items-end gap-2">
+      {acciones.cancelar ? (
+        <Button type="button" variant="ghost" size="sm" disabled={ocupado} onClick={cancelar}>
+          <X />
+          Cancelar despliegue
+        </Button>
+      ) : null}
+      {acciones.reintentar ? (
+        <Button type="button" size="sm" disabled={ocupado} onClick={reintentar}>
+          <RefreshCw />
+          Reintentar
+        </Button>
+      ) : null}
+      {error ? <p className="text-xs text-bad">{error}</p> : null}
+    </div>
   );
 }
 
@@ -169,6 +238,7 @@ function Saludable({
   alAccionar: () => void;
 }) {
   const digest = despliegue.imagen?.digest;
+  const certificado = textoCertificado(despliegue.certificado, (iso) => fechaCorta(iso));
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -180,48 +250,17 @@ function Saludable({
         ) : (
           <span />
         )}
-        <Acciones proyectoId={proyectoId} estado={despliegue.estado} alAccionar={alAccionar} />
+        <AccionesContenedor proyectoId={proyectoId} estado={despliegue.estado} alAccionar={alAccionar} />
       </div>
       <p className="text-muted-foreground">
         {digest ? `Imagen ${acortarDigest(digest)}` : "Imagen"}
         {despliegue.imagen?.receta ? ` · receta ${despliegue.imagen.receta}` : null}
         {despliegue.recursos ? ` · ${recursosPlan(despliegue.recursos)}` : null}
         {despliegue.url?.startsWith("https://") ? " · TLS activo" : null}
+        {certificado ? ` · ${certificado}` : null}
       </p>
       {despliegue.terminado ? <p className="text-muted-foreground">Publicado {haceCuanto(despliegue.terminado, new Date(ahora))}</p> : null}
       {aviso ? <p>{aviso}</p> : null}
-    </div>
-  );
-}
-
-function Acciones({ proyectoId, estado, alAccionar }: { proyectoId: string; estado: string; alAccionar: () => void }) {
-  const [ocupado, setOcupado] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const pedir = async (accion: "reiniciar" | "detener") => {
-    setOcupado(true);
-    setError(null);
-    try {
-      await pedirApi(`/proyectos/${proyectoId}/${accion}`, { metodo: "POST" });
-      alAccionar();
-    } catch (e) {
-      setError(e instanceof ErrorApi ? e.message : "No pudimos completar la acción.");
-    } finally {
-      setOcupado(false);
-    }
-  };
-  return (
-    <div className="flex flex-col items-end gap-2">
-      <div className="flex gap-2">
-        <Button type="button" variant="outline" size="sm" disabled={ocupado || !puedeReiniciar(estado)} onClick={() => pedir("reiniciar")}>
-          <RotateCw />
-          Reiniciar
-        </Button>
-        <Button type="button" variant="outline" size="sm" disabled={ocupado || !puedeDetener(estado)} onClick={() => pedir("detener")}>
-          <Square />
-          Detener
-        </Button>
-      </div>
-      {error ? <p className="text-xs text-bad">{error}</p> : null}
     </div>
   );
 }

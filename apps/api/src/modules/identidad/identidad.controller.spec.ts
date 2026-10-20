@@ -2,7 +2,9 @@ import { BadRequestException, type ArgumentsHost } from "@nestjs/common";
 import { HTTP_CODE_METADATA } from "@nestjs/common/constants";
 import { Test } from "@nestjs/testing";
 import { ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
-import { ErroresIdentidadFilter, IdentidadController, REENVIO_ACEPTADO, textoDe } from "./identidad.controller";
+import { textoDe } from "./cuerpo-solicitud";
+import { ErroresIdentidadFilter } from "./errores-identidad.filter";
+import { IdentidadController, REENVIO_ACEPTADO } from "./identidad.controller";
 import { IdentidadService } from "./identidad.service";
 
 const CUENTA = { usuarioId: "u-1", correoEnmascarado: "d•••k@t•••••••o.com", estadoCuenta: "pendiente" as const, correoEnviado: true };

@@ -3,15 +3,13 @@ import type { ReactNode } from "react";
 
 import { RUTA_PLANES } from "@/components/shell/nav-panel";
 import { TabsNav } from "@/components/ui/tabs";
-import { RUTA_SUSCRIPCION } from "@/lib/suscripcion";
+import { RUTA_PAGOS, RUTA_SUSCRIPCION } from "@/lib/suscripcion";
 
-const PROXIMA_ENTREGA = "Llega en la próxima entrega";
-
-export type SeccionCobro = "suscripcion" | "planes";
+export type SeccionCobro = "suscripcion" | "planes" | "pagos";
 
 /**
- * Cabecera común de 06 y 08: eyebrow, título, subtítulo, acciones y las pestañas
- * Mi suscripción · Planes · Historial de pagos (09 llega con M2-06).
+ * Cabecera común de 06, 08 y 09: eyebrow, título, subtítulo, acciones y las pestañas
+ * Mi suscripción · Planes · Historial de pagos.
  */
 export function CabeceraCobro({
   eyebrow,
@@ -43,9 +41,9 @@ export function CabeceraCobro({
         <Link href={RUTA_PLANES} aria-current={actual === "planes" ? "page" : undefined}>
           Planes
         </Link>
-        <a aria-disabled="true" tabIndex={-1} title={PROXIMA_ENTREGA} className="pointer-events-none opacity-40">
+        <Link href={RUTA_PAGOS} aria-current={actual === "pagos" ? "page" : undefined}>
           Historial de pagos
-        </a>
+        </Link>
       </TabsNav>
     </>
   );

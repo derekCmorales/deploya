@@ -167,3 +167,33 @@ export class ConfirmacionNoCoincide extends ErrorProyectos {
     super("Escribe el nombre exacto del proyecto para eliminarlo.");
   }
 }
+
+/** M3-04: otro proyecto del mismo cliente ya usa ese nombre. */
+export class NombreRepetido extends ErrorProyectos {
+  readonly codigo = "nombre-repetido";
+
+  constructor(readonly nombre: string) {
+    super(`Ya tienes un proyecto llamado ${nombre}.`);
+  }
+
+  detalle(): Record<string, unknown> {
+    return { nombre: this.nombre };
+  }
+}
+
+/** M3-04: la ruta del Dockerfile debe ser relativa al repositorio y quedarse dentro de él. */
+export class RutaInvalida extends ErrorProyectos {
+  readonly codigo = "ruta-invalida";
+
+  constructor() {
+    super("La ruta del Dockerfile es relativa al repositorio y no puede salir de él (sin «..»).");
+  }
+}
+
+export class PuertoInvalido extends ErrorProyectos {
+  readonly codigo = "puerto-invalido";
+
+  constructor() {
+    super("El puerto debe ser un entero entre 1 y 65535.");
+  }
+}

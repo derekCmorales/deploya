@@ -32,4 +32,4 @@ Publicamos el repositorio con una licencia de código abierto y agregamos `MODO_
 - Más difícil: la seguridad del servidor queda en manos de quien instala (contenedores sin privilegios y con límites, como hoy; se documenta en `SECURITY.md`); hay que mantener los scripts y probarlos con `shellcheck`.
 - Deuda aceptada: sin actualizaciones automáticas ni multi-nodo; respaldos locales (el administrador los copia fuera).
 - SOLID: Open/Closed y Dependency Inversion (los servicios dependen de `CatalogoPlanes`, `PoliticaCuotas`, `AltaPrimerUsuario`, `PoliticaRegistroPuerto`, no del modo). Patrones: Strategy, Composite (`SaludInstalacion`), Pipeline en el instalador.
-- Antes de hacer público el repositorio: `gitleaks` sobre todo el historial y acuerdo de los cuatro (y consulta al catedrático por las reglas de la universidad).
+- El repositorio **ya es público** (confirmado el 20 de octubre). Por eso `gitleaks` sobre todo el historial va primero en `chore-open-source`: cualquier secreto que aparezca ya está expuesto y se **rota de inmediato** (token del DNS, SMTP, `CLAVE_CIFRADO_VARIABLES` del VPS); no se reescribe la historia de `main`.

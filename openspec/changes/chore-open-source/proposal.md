@@ -4,7 +4,7 @@ Change: `chore/open-source`. Módulo dueño: **transversal** — Derek. Specs to
 
 ## Why
 
-Para que Deploya sea de código abierto (ADR 0008) el repositorio necesita licencia, documentación para quien llega de fuera y la certeza de que el historial no expone secretos.
+El repositorio ya es público, pero sin licencia no es código abierto (ADR 0008). Necesita licencia, documentación para quien llega de fuera y la certeza de que el historial no expone secretos; si los expone, rotarlos ya.
 
 ## What Changes
 
@@ -15,7 +15,7 @@ Para que Deploya sea de código abierto (ADR 0008) el repositorio necesita licen
 
 ## Non-goals
 
-- Hacer público el repositorio sin el acuerdo de los cuatro y la consulta al catedrático.
+- Cambiar la visibilidad del repositorio (ya es público).
 - Traducir la documentación.
 
 ## Capabilities

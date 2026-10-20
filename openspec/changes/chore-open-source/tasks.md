@@ -2,6 +2,10 @@
 
 Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` del spec delta tiene su `it(...)` con el mismo nombre.
 
+## 0. Primero
+
+- [ ] 0.1 `gitleaks detect` sobre todo el historial; rotar en el VPS cualquier secreto que aparezca (el repo ya es público)
+
 ## 1. Documentos
 
 - [ ] 1.1 `LICENSE`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`

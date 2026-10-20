@@ -12,7 +12,7 @@ El ADR 0008 compara Apache-2.0 y AGPL-3.0; se cierra en este change.
 
 ### 2. Escaneo antes de abrir
 
-Si `gitleaks` encuentra algo, se rota el secreto antes de hacer público el repositorio.
+El repositorio ya es público: si `gitleaks` encuentra algo, ese secreto ya está expuesto y se rota de inmediato (y se actualiza en el VPS). No se reescribe la historia de `main`.
 
 ## Diseño: SOLID y patrones
 

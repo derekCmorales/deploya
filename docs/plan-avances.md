@@ -514,6 +514,8 @@ Solo después de la entrega del Avance 3, y si el núcleo está estable, se toma
 
 **Aprobado el 20 de octubre**, después de la entrega del 85 %. La versión visual (resumen, una hoja por persona y las 11 pantallas nuevas) está en la página **«Sprint · fuera de alcance»** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Alcance y modo autoalojado: [alcance.md § Sprint fuera de alcance](alcance.md#sprint-fuera-de-alcance).
 
+Prompts para los agentes de cada persona: [handoff/prompt-sprint-fuera-de-alcance.md](handoff/prompt-sprint-fuera-de-alcance.md).
+
 ### Reglas
 
 - Los puntos del sprint **no** cuentan para el porcentaje del núcleo (145 pts): se suman aparte.
@@ -528,7 +530,7 @@ Solo después de la entrega del Avance 3, y si el núcleo está estable, se toma
 |---|---|---|---|
 | `apps/web`, `apps/api` (npm) | **Ninguna** | Gráficas en SVG a mano; ilustraciones con `framer-motion` ^13.4 (ya instalado) | — |
 | CI (`.github/workflows`) | `shellcheck`, `bats-core` | Revisar y probar `instalar.sh`, `respaldar.sh`, `actualizar.sh` | Eddy con Derek (`feat-instalador-autoalojado`) |
-| CI (`.github/workflows`) | `gitleaks` | Historial sin secretos antes de abrir el repo | Eddy con Derek (`chore-open-source`) |
+| CI (`.github/workflows`) | `gitleaks` | Historial y PRs sin secretos (el repo ya es público) | Eddy con Derek (`chore-open-source`) |
 | Servidor autoalojado | Docker 24+, Docker Compose v2, `curl`, `dig`, `openssl` | Requisitos que comprueba la etapa 1 del instalador | Documentado en el README (`chore-open-source`) |
 | Servicios externos | Proveedor DNS con API (Cloudflare u otro soportado por Traefik) o `--sin-comodin` | Certificado comodín por DNS-01 (ADR 0007) | Quien instala |
 
@@ -633,6 +635,6 @@ Las ilustraciones son libres: Eddy elige el artboard y la idea. Lineamientos en 
 |---|---|
 | SP-07 | Una muestra por minuto por contenedor Saludable, purga de 24 h y la lectura con los despliegues de la ventana |
 | SP-08 | Un Saludable y un Fallido mandan su correo; un Cancelado no; un fallo del aviso no cambia el estado |
-| SP-09 | `LICENSE`, README, `CONTRIBUTING.md`, `SECURITY.md` y `gitleaks` limpio sobre todo el historial |
+| SP-09 | `gitleaks` sobre todo el historial **el día 1** y rotación inmediata de lo que aparezca (el repo ya es público); `LICENSE`, README, `CONTRIBUTING.md` y `SECURITY.md` |
 | SP-16 | En un servidor limpio, `instalar.sh` llega a HTTPS; con el DNS mal se detiene sin escribir nada y `--continuar` retoma |
 | SP-19 | `actualizar.sh` respalda antes, migra y no corta las apps publicadas; `--volver` restaura |

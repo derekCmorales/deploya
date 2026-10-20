@@ -4,12 +4,12 @@
 
 ### Requirement: Repositorio de código abierto
 
-El repositorio SHALL incluir licencia, README para usuarios externos, guía de contribución y política de seguridad, y su historial SHALL estar libre de secretos antes de hacerse público.
+El repositorio SHALL incluir licencia, README para usuarios externos, guía de contribución y política de seguridad, y su historial SHALL revisarse con `gitleaks`; cualquier secreto encontrado SHALL rotarse, porque el repositorio ya es público.
 
 #### Scenario: Historial sin secretos
 
 - **WHEN** CI corre `gitleaks` sobre todo el historial
-- **THEN** no encuentra secretos
+- **THEN** no encuentra secretos, o cada secreto encontrado ya fue rotado y está en la lista de permitidos con su motivo
 
 #### Scenario: Contribuir
 

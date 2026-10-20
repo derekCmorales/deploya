@@ -245,7 +245,7 @@ Sus puntos **no** cambian el porcentaje del núcleo (145): es trabajo extra sobr
 | Reactivar una cuenta suspendida | M9 | Sprint | Punto 1 |
 | Muestreo de CPU y memoria, pestaña Métricas y tarjeta de 24 h | M5, M7 | Sprint | Punto 2 (sin transferencia ni peticiones) |
 | Tiempo por etapa (14c) y ritmo de construcciones (08c) | M7 | Sprint | Nuevo: datos que ya guarda el núcleo |
-| Deploya open source y autoalojado: licencia, modo de instalación, instalador, asistente, Admin · Instalación, actualizar y respaldar | transversal, M1, M2, M9 | Sprint | Nuevo ([ADR 0008](adr/0008-autoalojado-y-codigo-abierto.md)) |
+| Deploya open source (el repo ya es público; falta licencia) y autoalojado: licencia, modo de instalación, instalador, asistente, Admin · Instalación, actualizar y respaldar | transversal, M1, M2, M9 | Sprint | Nuevo ([ADR 0008](adr/0008-autoalojado-y-codigo-abierto.md)) |
 | Bitácoras de ejecución | M7 | Si da tiempo | Punto 3 (polling cada 3 s, sin WebSocket) |
 | Estado de la infraestructura en admin | M9 | Si da tiempo | Punto 15 (solo lectura) |
 

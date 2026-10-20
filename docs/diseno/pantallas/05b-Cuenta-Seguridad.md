@@ -12,6 +12,8 @@
 
 Cambiar contraseña con la actual; cerrar sesión en todos los dispositivos.
 
+**Sprint fuera de alcance:** «Último cambio: …» sale de `Usuario.contrasenaCambiadaEn`; si es nulo, «Nunca la has cambiado» (sprint fuera de alcance, SP-03).
+
 ## Componentes
 
 - `AppShell` — header de 56px

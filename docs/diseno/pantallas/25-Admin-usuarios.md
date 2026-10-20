@@ -12,6 +12,8 @@
 
 Lista + detalle: tabla filtrable por correo y estado de suscripción; panel con suscripción, proyectos (estado de despliegue) y pagos.
 
+**Sprint fuera de alcance:** Reactivar una cuenta suspendida (sprint fuera de alcance): [25c](25c-Admin-reactivar.md).
+
 ## Componentes
 
 - `AppShell` — header de 56px

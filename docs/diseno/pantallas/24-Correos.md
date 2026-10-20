@@ -12,6 +12,8 @@
 
 Dos plantillas: verificación (24 h) y recuperación (30 min). Botón + enlace en texto plano + pie con soporte.
 
+**Sprint fuera de alcance:** Correos de avisos (sprint fuera de alcance): [24b](24b-Correos-avisos.md).
+
 ## Componentes
 
 - `Wordmark`

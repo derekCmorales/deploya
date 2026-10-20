@@ -12,6 +12,8 @@
 
 Plan actual con `EstadoSuscripcion`, vigencia con barra y días restantes, `Meter` de proyectos y construcciones, cambiar plan (ascenso inmediato, descenso al vencer).
 
+**Sprint fuera de alcance:** «Ritmo de construcciones» dentro de Consumo del período (sprint fuera de alcance): [08c](08c-Suscripcion-ritmo.md).
+
 ## Componentes
 
 - `AppShell` — header de 56px

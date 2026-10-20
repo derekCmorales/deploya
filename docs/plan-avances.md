@@ -509,3 +509,132 @@ Plan B: el video del martes y compose local, por si el VPS o la red fallan duran
 Pruebas e2e (Eddy), requisitos y manual de usuario (Javier), guion, video y accesibilidad (Eduardo), diseño final y manual técnico (Derek), estabilización y ensayo (todos).
 
 Solo después de la entrega del Avance 3, y si el núcleo está estable, se toma algo de [Fuera de alcance · solo si da el tiempo](alcance.md#fuera-de-alcance--solo-si-da-el-tiempo), en su orden.
+
+## Sprint fuera de alcance
+
+**Aprobado el 20 de octubre**, después de la entrega del 85 %. La versión visual (resumen, una hoja por persona y las 11 pantallas nuevas) está en la página **«Sprint · fuera de alcance»** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Alcance y modo autoalojado: [alcance.md § Sprint fuera de alcance](alcance.md#sprint-fuera-de-alcance).
+
+Prompts para los agentes de cada persona: [handoff/prompt-sprint-fuera-de-alcance.md](handoff/prompt-sprint-fuera-de-alcance.md).
+
+### Reglas
+
+- Los puntos del sprint **no** cuentan para el porcentaje del núcleo (145 pts): se suman aparte.
+- Cada historia entra con su change de OpenSpec (ya propuestos en `openspec/changes/`, validan con `openspec validate --all`), una prueba unitaria por escenario y su revisión contra el canvas en claro y oscuro. Misma definición de terminado que el núcleo.
+- Si el sprint aprieta, se recorta en este orden: **SP-19, SP-15, SP-14**. Si una historia no entra, las dos **si da tiempo** (SP-12 y SP-13) pasan a fijas.
+- Sin dependencias npm nuevas: las gráficas son SVG a mano, como `MapaActividad`. Las ilustraciones usan `framer-motion`, que ya está instalado. Si alguien necesita una librería, lo justifica en el `design.md` de su change y lo dice en el PR.
+- La landing pública (nube vs. autoalojado) la hace Derek aparte y no suma puntos aquí.
+
+### Dependencias nuevas
+
+| Dónde | Qué | Para qué | Quién la agrega |
+|---|---|---|---|
+| `apps/web`, `apps/api` (npm) | **Ninguna** | Gráficas en SVG a mano; ilustraciones con `framer-motion` ^13.4 (ya instalado) | — |
+| CI (`.github/workflows`) | `shellcheck`, `bats-core` | Revisar y probar `instalar.sh`, `respaldar.sh`, `actualizar.sh` | Eddy con Derek (`feat-instalador-autoalojado`) |
+| CI (`.github/workflows`) | `gitleaks` | Historial y PRs sin secretos (el repo ya es público) | Eddy con Derek (`chore-open-source`) |
+| Servidor autoalojado | Docker 24+, Docker Compose v2, `curl`, `dig`, `openssl` | Requisitos que comprueba la etapa 1 del instalador | Documentado en el README (`chore-open-source`) |
+| Servicios externos | Proveedor DNS con API (Cloudflare u otro soportado por Traefik) o `--sin-comodin` | Certificado comodín por DNS-01 (ADR 0007) | Quien instala |
+
+### Historias
+
+| Id | Historia | Pantallas | Dueño | Change | Pts | Prioridad |
+|---|---|---|---|---|---|---|
+| SP-01 | Ilustraciones de acceso con movimiento (idea y artboard a elección de Eddy) | 01, 03 | Eddy | `feat-web-ilustraciones-acceso` | 2 | Sprint |
+| SP-02 | Plantillas de avisos y `AvisosPuerto` | 24b | Eddy | `feat-m10-avisos-correo` | 3 | Sprint |
+| SP-03 | «Último cambio» de la contraseña (columna: Javier; pantalla: Eddy) | 05b | Eddy + Javier | `feat-m1-ultimo-cambio-contrasena` | 1 | Sprint |
+| SP-04 | El ciclo §4.4 avisa Por vencer y Suspendida | 24b | Javier | `feat-m10-avisos-correo` | 1 | Sprint |
+| SP-05 | Reactivar una cuenta suspendida | 25c | Javier | `feat-m9-reactivar-cuenta` | 2 | Sprint |
+| SP-06 | Modo autoalojado: plan sin cobro, límites de instalación y primer admin con código | 30 | Javier | `feat-m2-modo-autoalojado` | 2 | Sprint |
+| SP-07 | Muestreo de CPU y memoria y `GET /proyectos/:id/metricas` | 16 | Derek | `feat-m5-muestreo-metricas` | 3 | Sprint |
+| SP-08 | El pipeline avisa Saludable y Fallido (un `OyenteDespliegue` más) | 24b | Derek | `feat-m10-avisos-correo` | 1 | Sprint |
+| SP-09 | Código abierto: licencia, README, CONTRIBUTING, SECURITY, historial sin secretos | — | Derek | `chore-open-source` | 1.5 | Sprint |
+| SP-10 | Familia de gráficas y pestaña Métricas | 16 | Eduardo | `feat-m7-metricas` | 4 | Sprint |
+| SP-11 | Tarjeta «Últimas 24 h» en el Resumen | 13c | Eduardo | `feat-m7-metricas` | 1 | Sprint |
+| SP-12 | Bitácoras de ejecución | 15 | Eduardo | `feat-m7-bitacoras-ejecucion` | 3 | Si da tiempo |
+| SP-13 | Admin · Infraestructura | 27 | Eduardo | `feat-m9-infraestructura` | 3 | Si da tiempo |
+| SP-14 | Tiempo por etapa en Despliegues | 14c | Eduardo | `feat-m7-tiempo-por-etapa` | 2 | Sprint |
+| SP-15 | Ritmo de construcciones en Mi suscripción | 08c | Eduardo | `feat-m7-ritmo-construcciones` | 2 | Sprint |
+| SP-16 | Instalador por etapas con comprobaciones | 30 | Derek | `feat-instalador-autoalojado` | 2.5 | Sprint |
+| SP-17 | Asistente de primera configuración | 31 | Eddy | `feat-m1-asistente-instalacion` | 2 | Sprint |
+| SP-18 | Admin · Instalación: estado, registro, límites y respaldos | 32 | Javier | `feat-m9-ajustes-instalacion` | 3 | Sprint |
+| SP-19 | Actualizar y respaldar con un comando | 32 | Derek | `feat-instalador-autoalojado` | 1.5 | Sprint |
+
+| Persona | Sprint | Si da tiempo |
+|---|---|---|
+| Eddy | 7.5 (SP-01, SP-02, SP-03 pantalla, SP-17) | — |
+| Javier | 8.5 (SP-03 columna, SP-04, SP-05, SP-06, SP-18) | — |
+| Eduardo | 9 (SP-10, SP-11, SP-14, SP-15) | 6 (SP-12, SP-13) |
+| Derek | 9.5 (SP-07, SP-08, SP-09, SP-16, SP-19) | — |
+| **Total** | **34.5** | **6** |
+
+### Dependencias entre personas
+
+Quién espera a quién. Los contratos están en [contratos/](contratos/); cambiarlos exige avisar al consumidor antes de mergear.
+
+| Quién entrega | Qué | A quién | Cuándo | Contrato |
+|---|---|---|---|---|
+| Javier | Columna `Usuario.contrasenaCambiadaEn` (migración) | Eddy (SP-03) | Día 1 | [datos-nucleo.md](contratos/datos-nucleo.md) |
+| Eddy | `AvisosPuerto` exportado por `NotificacionesModule` | Derek (SP-08), Javier (SP-04) | Día 2 | [avisos.md](contratos/avisos.md) |
+| Eduardo | `GraficaUso`, `GraficaEtapas`, `GraficaRitmo` en `/sistema` | Eduardo (SP-11, SP-14, SP-15, SP-13) | Día 3 | [diseno/README.md § Gráficas](diseno/README.md#gráficas) |
+| Derek | `GET /proyectos/:id/metricas` y `MuestrasMetricas` | Eduardo (SP-10, SP-11, SP-13) | Día 3 | [metricas.md](contratos/metricas.md) |
+| Derek | `RepositorioDespliegues.tiemposDe(proyectoId, ultimos)` (lee `EtapaDespliegue`) | Eduardo (SP-14, arma `GET /proyectos/:id/despliegues/tiempos`) | Día 4 | [metricas.md](contratos/metricas.md) |
+| Eduardo | `GET /observabilidad/consumo/diario` (amplía M7-03) | Eduardo (SP-15) | Día 6 | [metricas.md](contratos/metricas.md) |
+| Javier | `MODO_INSTALACION`, `ConfiguracionInstalacion`, límites y código de configuración | Eddy (SP-17), Derek (SP-16) | Día 3 | [instalacion.md](contratos/instalacion.md) |
+| Javier | Política de registro e `Invitacion` | Eddy (registro en 01) | Día 7 | [instalacion.md](contratos/instalacion.md) |
+| Derek | El instalador escribe `.env` y el código de configuración | Eddy (SP-17), Javier (SP-06) | Día 5 | [instalacion.md](contratos/instalacion.md) |
+| Derek | `respaldar.sh` y `actualizar.sh` dejan su estado en JSON | Javier (SP-18) | Día 8 | [instalacion.md](contratos/instalacion.md) |
+
+### Calendario (10 días)
+
+| Días | Qué |
+|---|---|
+| 0 | PR 0 en `main` (este plan, los changes, contratos, fichas y ADR 0008). Cada quien **revisa** sus changes (`/opsx-update` si algo no le cuadra) |
+| 1–3 | Columna y «Último cambio» · plantillas y `AvisosPuerto` · muestreo y lectura de métricas · familia de gráficas · licencia y README · modo autoalojado |
+| 4–6 | Ganchos del pipeline y del ciclo · reactivar · pestaña Métricas y 13c · instalador por etapas · asistente (31) · propuesta de ilustraciones en el canvas |
+| 7–9 | 14c y 08c · Admin · Instalación (32) · actualizar y respaldar · correos en el VPS · si da tiempo: 15 y 27 |
+| 10 | Demo del sprint en el VPS e instalación limpia en un servidor aparte |
+
+### Qué se demuestra
+
+Métricas de un proyecto con el chip `#14` donde subió la memoria; tiempo por etapa y ritmo de construcciones; un despliegue Saludable y uno Fallido que llegan por correo; el ciclo manda «vence en 7 días» una sola vez; reactivar una cuenta suspendida; 05b con «Último cambio»; las ilustraciones nuevas. Después, en un servidor limpio: `./scripts/instalar.sh`, el asistente con el código de configuración, registro con invitación, límites por proyecto, `actualizar.sh` y un respaldo.
+
+### Eddy (7.5 pts)
+
+| Id | Terminado cuando |
+|---|---|
+| SP-01 | Su propuesta está en el canvas y luego en 01 y 03; con `prefers-reduced-motion` no se mueve nada; `pnpm check` en verde |
+| SP-02 | Las cuatro plantillas de 24b pasan sus pruebas y `AvisosPuerto` está exportado; un error del SMTP no se propaga |
+| SP-03 | 05b muestra «Último cambio: …» o «Nunca la has cambiado» |
+| SP-17 | En una instalación limpia, el asistente pide el código, crea el administrador y termina con correo probado o «sin correo» |
+
+Las ilustraciones son libres: Eddy elige el artboard y la idea. Lineamientos en la hoja del canvas y en `feat-web-ilustraciones-acceso`: solo pantallas de acceso, solo tokens, animar `transform` y `opacity`, todo quieto con movimiento reducido, `aria-hidden`, sin librerías nuevas sin avisar.
+
+### Javier (8.5 pts)
+
+| Id | Terminado cuando |
+|---|---|
+| SP-03 | Migración con `contrasenaCambiadaEn` aplicada en compose (día 1) |
+| SP-04 | Correr el ciclo dos veces manda un solo correo de «Por vencer» y uno de «Suspendida» |
+| SP-05 | Reactivar a `suspendida@` la deja entrar; con la suscripción vigente sus apps vuelven |
+| SP-06 | En autoalojado no hay Suscripción ni planes; sin código de configuración no se crea administrador |
+| SP-18 | Cambiar el registro a «Con invitación» y entrar con un enlace; sin enlace, 403. Los límites aplican en el próximo despliegue |
+
+### Eduardo (9 pts + 6 si da tiempo)
+
+| Id | Terminado cuando |
+|---|---|
+| SP-10 | Métricas (16) con 1 h / 24 h, zona de aviso, chips de despliegue, punto en vivo, tooltip y «Ver tabla»; las tres gráficas en `/sistema` |
+| SP-11 | 13c en el Resumen con las dos gráficas compactas y el estado en palabra |
+| SP-14 | 14c encima de la tabla de 14: mediana, % de Construcción, fallos y reversiones sin Construcción |
+| SP-15 | 08c dentro de `ConsumoPeriodo`: acumulado del mes calendario, proyección al cierre y zona de aviso |
+| SP-12 | *Si da tiempo.* 15 con la salida del contenedor cada 3 s, pausa, filtro y descarga |
+| SP-13 | *Si da tiempo.* 27 solo para Administrador, con CPU, memoria y disco del VPS y la cola |
+
+### Derek (9.5 pts)
+
+| Id | Terminado cuando |
+|---|---|
+| SP-07 | Una muestra por minuto por contenedor Saludable, purga de 24 h y la lectura con los despliegues de la ventana |
+| SP-08 | Un Saludable y un Fallido mandan su correo; un Cancelado no; un fallo del aviso no cambia el estado |
+| SP-09 | `gitleaks` sobre todo el historial **el día 1** y rotación inmediata de lo que aparezca (el repo ya es público); `LICENSE`, README, `CONTRIBUTING.md` y `SECURITY.md` |
+| SP-16 | En un servidor limpio, `instalar.sh` llega a HTTPS; con el DNS mal se detiene sin escribir nada y `--continuar` retoma |
+| SP-19 | `actualizar.sh` respalda antes, migra y no corta las apps publicadas; `--volver` restaura |

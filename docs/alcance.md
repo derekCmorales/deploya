@@ -43,9 +43,26 @@ Un cliente se registra, verifica su correo, contrata un plan con pago simulado, 
 | 19, 19b | Proyecto · Configuración y eliminar | M3 (+ M5) | Derek |
 | 12, 12b, 12c | Despliegue en curso, Saludable, Fallido | UI: Eduardo · motor: Derek | Eduardo + Derek |
 | 28 | Estados del sistema (404, 403, sesión expirada, suscripción suspendida, error de API, carga) | transversal web | Eduardo (+ Javier: suspendida) |
+
+Pantallas del **sprint fuera de alcance** (aprobado el 20 de octubre; página «Sprint · fuera de alcance» del canvas). Detalle en [§ Sprint fuera de alcance](#sprint-fuera-de-alcance).
+
+| # | Pantalla | Módulo | Dueño |
+|---|---|---|---|
+| 01, 03 | Ilustraciones de acceso con movimiento (idea y artboard a elección de Eddy) | web (auth) | Eddy |
+| 08c | Mi suscripción · Ritmo de construcciones | M7 | Eduardo |
+| 13c | Resumen · Últimas 24 h | M7 | Eduardo |
+| 14c | Despliegues · Tiempo por etapa | M7 | Eduardo |
+| 15 | Bitácoras de ejecución (*si da tiempo*) | M7 | Eduardo |
+| 16 | Proyecto · Métricas | M7 (datos: M5) | Eduardo (datos: Derek) |
+| 24b | Correos de avisos: despliegue saludable, fallido, plan por vencer, suscripción suspendida | M10 | Eddy |
+| 25c | Admin · Reactivar cuenta | M9 | Javier |
+| 27 | Admin · Infraestructura (*si da tiempo*) | M9 | Eduardo |
+| 30 | Deploya autoalojado · instalación | transversal | Derek |
+| 31 | Autoalojado · Configura tu instalación | M1 | Eddy |
+| 32 | Admin · Instalación | M9 | Javier |
 | Main | Identidad visual v4.1 → migrada a [diseno/](diseno/README.md) y `apps/web/src/components` | design system | Eduardo (hecho) |
 
-Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que hace **reales** las pantallas 10–14 y 19. La numeración tiene huecos (15, 16, 18, 20–23, 26, 27): son pantallas que se recortaron con el alcance.
+Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que hace **reales** las pantallas 10–14 y 19. La numeración tiene huecos (18, 20–23, 26): son pantallas que se recortaron con el alcance. 15, 16 y 27 volvieron con el sprint fuera de alcance; 29 no existe.
 
 ## Alcance por módulo
 
@@ -190,10 +207,10 @@ Nada de esta lista se empieza hasta que todo lo **Debe** de tu módulo esté ter
 
 | # | Qué | Módulo | Por qué salió |
 |---|---|---|---|
-| 1 | Reactivar una cuenta suspendida desde admin | M9 | Sin pantalla; se hace por seed/SQL en la demo |
-| 2 | Métricas de CPU y memoria en vivo (`docker stats`) | M7 | No hay pantalla de métricas en v4.1 |
-| 3 | Bitácoras de ejecución del contenedor (runtime) | M7 | Solo se muestra la bitácora de construcción |
-| 4 | Correos de resultado de despliegue y de vencimiento de plan | M10 | v4.1 solo diseña verificación y recuperación |
+| ~~1~~ | ~~Reactivar una cuenta suspendida desde admin~~ | M9 | **Entró en el sprint fuera de alcance** (SP-05, pantalla 25c) |
+| ~~2~~ | ~~Métricas de CPU y memoria en vivo (`docker stats`)~~ | M7 | **Entró en el sprint fuera de alcance** (SP-07, SP-10, SP-11; pantallas 16 y 13c) |
+| 3 | Bitácoras de ejecución del contenedor (runtime) | M7 | En el sprint fuera de alcance como **si da tiempo** (SP-12, pantalla 15) |
+| ~~4~~ | ~~Correos de resultado de despliegue y de vencimiento de plan~~ | M10 | **Entró en el sprint fuera de alcance** (SP-02, SP-04, SP-08; pantalla 24b) |
 | 5 | Renovación automática | M2 | v4.1 solo muestra renovación manual |
 | ~~6~~ | ~~Reversión instantánea sin reconstruir (estado Revirtiendo)~~ | M4 M5 | **Entró al núcleo** como M5-04 (retroalimentación de la entrega 1) |
 | 7 | Dominios personalizados | M6 | Sin pantalla |
@@ -204,7 +221,7 @@ Nada de esta lista se empieza hasta que todo lo **Debe** de tu módulo esté ter
 | 12 | Prorrateo al cambiar de plan | M2 | Ascenso paga completo; descenso al vencer |
 | 13 | Complementos (§4.3) | M2 | Sin pantalla |
 | 14 | Gestión de planes desde admin (crear, editar, descontinuar) | M9 | Catálogo fijo por seed |
-| 15 | Estado de la infraestructura en admin | M9 | Sin pantalla |
+| 15 | Estado de la infraestructura en admin | M9 | En el sprint fuera de alcance como **si da tiempo** (SP-13, pantalla 27) |
 | 16 | Bitácora de auditoría completa de cuenta | M1 | Solo se registra la suspensión (M9) |
 | 17 | Roles Operador de infraestructura y Soporte | M1 | Solo Cliente y Administrador |
 | 18 | Cancelación por el cliente y exportar datos | M2 | Cancelada solo llega por el ciclo §4.4 |
@@ -213,6 +230,30 @@ Nada de esta lista se empieza hasta que todo lo **Debe** de tu módulo esté ter
 | 21 | Asistente de diagnóstico y servidor de integración (M8 completo) | M8 | Sin pantalla; mayor riesgo |
 
 Fuera de alcance **siempre** (ya excluido en la propuesta §6.2): varios nodos y escalado horizontal, servidor de correo propio, CDN y multirregión, app de escritorio y CLI, cobro con dinero real, entornos de vista previa por PR.
+
+## Sprint fuera de alcance
+
+**Aprobado el 20 de octubre**, después de la entrega del 85 %. Diseño: página **«Sprint · fuera de alcance»** del canvas Deploya v4.1 (guía por persona y 11 pantallas nuevas). Plan, puntos y dependencias: [plan-avances.md § Sprint fuera de alcance](plan-avances.md#sprint-fuera-de-alcance). Cada historia entra con su change de OpenSpec en `openspec/changes/`.
+
+Sus puntos **no** cambian el porcentaje del núcleo (145): es trabajo extra sobre un núcleo terminado. Si el sprint aprieta, se recorta en este orden: SP-19, SP-15, SP-14. Si algo no entra, lo **si da tiempo** (15 y 27) pasa a fijo.
+
+| Qué | Módulo | Prioridad | De dónde viene |
+|---|---|---|---|
+| Ilustraciones de acceso con movimiento | web (auth) | Sprint | Pedido de Eddy; solo pantallas de acceso |
+| Correos de despliegue (saludable, fallido) y de suscripción (por vencer, suspendida) + `AvisosPuerto` | M10, M4, M2 | Sprint | Punto 4 |
+| «Último cambio» de la contraseña en 05b (`Usuario.contrasenaCambiadaEn`) | M1, Prisma | Sprint | Ya dibujado en 05b |
+| Reactivar una cuenta suspendida | M9 | Sprint | Punto 1 |
+| Muestreo de CPU y memoria, pestaña Métricas y tarjeta de 24 h | M5, M7 | Sprint | Punto 2 (sin transferencia ni peticiones) |
+| Tiempo por etapa (14c) y ritmo de construcciones (08c) | M7 | Sprint | Nuevo: datos que ya guarda el núcleo |
+| Deploya open source (el repo ya es público; falta licencia) y autoalojado: licencia, modo de instalación, instalador, asistente, Admin · Instalación, actualizar y respaldar | transversal, M1, M2, M9 | Sprint | Nuevo ([ADR 0008](adr/0008-autoalojado-y-codigo-abierto.md)) |
+| Bitácoras de ejecución | M7 | Si da tiempo | Punto 3 (polling cada 3 s, sin WebSocket) |
+| Estado de la infraestructura en admin | M9 | Si da tiempo | Punto 15 (solo lectura) |
+
+**No entra** (sigue en la lista de arriba): dominios personalizados, repos privados, zip, WebSocket, renovación automática, prorrateo, complementos, admin de planes, roles nuevos, 2FA, M8. La landing pública (nube vs. autoalojado) la hace Derek aparte, fuera de estos puntos.
+
+### Modo autoalojado
+
+`MODO_INSTALACION=nube|autoalojado` elige implementaciones de los puertos (Strategy), sin ramas por tipo. En autoalojado: un plan «Autoalojado» sin cobro ni vencimiento; los límites por proyecto (CPU, memoria, proyectos por usuario) los fija el administrador; no hay pantalla de Suscripción ni tarea del ciclo §4.4; el primer administrador se crea con un código de configuración de un solo uso que imprime el instalador; el registro puede ser abierto, con invitación o cerrado. Todo lo demás (alta, motor, reversión, Traefik, correos) es igual que en la nube.
 
 ## Cambios frente a la propuesta
 
@@ -228,5 +269,6 @@ Fuera de alcance **siempre** (ya excluido en la propuesta §6.2): varios nodos y
 | M8 asistente + integración | Fuera |
 | Métricas CPU/memoria/transferencia en vivo | Estado, etapas, bitácora de construcción y consumo del plan |
 | Dominios personalizados | Solo subdominio automático |
+| Solo la plataforma en la nube | Además, código abierto y autoalojado con el mismo producto (sprint fuera de alcance, ADR 0008) |
 
 Plan de entregas y reparto por persona: [plan-avances.md](plan-avances.md).

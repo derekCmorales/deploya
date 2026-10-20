@@ -1,6 +1,6 @@
 # Contrato · Datos del núcleo v4.1 (schema Prisma)
 
-Versión 1 · 2026-09-27 · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
+Versión 2 · 2026-10-20 (versión 1: 2026-09-27) · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
 
 Este documento **firma** el modelo de datos del núcleo para que DB-01 salga el lunes sin idas y vueltas. Javier lo implementa en `apps/api/prisma/schema.prisma` y el seed; cualquier campo nuevo o renombrado pasa por aquí y se avisa a los consumidores antes de mergear (regla de [AGENTS.md](../../AGENTS.md)). Diagrama: [erd-unificado.mmd](../diagramas/compartido/erd-unificado.mmd).
 
@@ -19,7 +19,7 @@ Este documento **firma** el modelo de datos del núcleo para que DB-01 salga el 
 2. **Ids** `uuid` en texto. **Fechas** `DateTime` UTC. **Dinero** `Decimal(10,2)`, nunca `Float`.
 3. **Enums de Postgres** con nombres en minúscula. Donde el valor de la API lleva guion (`por-vencer`, `en-curso`, `cambio-plan`) el enum de Prisma usa `_` y `@map("…-…")`; el repositorio traduce en el borde (`valor.replaceAll("_", "-")`). Los valores de la API son los de `apps/web/src/components/deploya/estados.ts`.
 4. **Secretos:** contraseñas y tokens solo como hash; variables de entorno cifradas (AES-256-GCM, formato `v1:<iv>:<tag>:<cifrado>` en base64, clave en `CLAVE_CIFRADO_VARIABLES`); de la tarjeta solo los últimos 4 dígitos.
-5. **Sin tablas fuera del núcleo:** nada de espacios de trabajo, miembros, complementos, dominios personalizados, métricas ni notificaciones persistidas. El ERD de la propuesta completa queda en el historial de git.
+5. **Sin tablas fuera del núcleo:** nada de espacios de trabajo, miembros, complementos, dominios personalizados ni notificaciones persistidas. El ERD de la propuesta completa queda en el historial de git. Las únicas tablas nuevas después del núcleo son las del sprint fuera de alcance ([abajo](#sprint-fuera-de-alcance--versión-2)): `MuestraMetrica`, `ConfiguracionInstalacion` e `Invitacion`.
 
 ## Schema
 
@@ -412,6 +412,67 @@ SuscripcionesService.cuotaDe(usuarioId: string): Promise<Cuota>; // lanza Suscri
 // M4 → M3 y web: docs/contratos/despliegues.md
 ```
 
+## Sprint fuera de alcance · versión 2
+
+Aprobado el 20 de octubre ([plan-avances.md § Sprint fuera de alcance](../plan-avances.md#sprint-fuera-de-alcance)). Solo **agrega**: nada del núcleo se renombra ni se quita. Cada migración va en el change que la usa y la revisa Javier.
+
+```prisma
+model Usuario {
+  // …campos del núcleo…
+  contrasenaCambiadaEn DateTime? // SP-03 · M1 la escribe al cambiar (M1-07) y al restablecer (M1-05); null = nunca
+}
+
+// M5 · Derek (SP-07) · una fila por contenedor Saludable y minuto; se purga lo de más de 24 h
+model MuestraMetrica {
+  despliegueId String
+  despliegue   Despliegue @relation(fields: [despliegueId], references: [id], onDelete: Cascade)
+  tomada       DateTime
+  cpu          Decimal    @db.Decimal(6, 3) // vCPU usadas
+  memoriaMb    Int
+
+  @@id([despliegueId, tomada])
+  @@index([tomada])
+}
+
+// M2/M9 · Javier (SP-06, SP-18) · una sola fila (id = "instalacion"); solo existe en autoalojado
+model ConfiguracionInstalacion {
+  id                   String    @id @default("instalacion")
+  hashCodigo           String?   // sha256 del código de configuración; null cuando ya hay administrador
+  codigoVence          DateTime?
+  politicaRegistro     PoliticaRegistro @default(invitacion)
+  cpuPorProyecto       Decimal   @db.Decimal(4, 2) @default(1)
+  memoriaMbPorProyecto Int       @default(1024)
+  proyectosPorUsuario  Int?      // null = sin límite
+  actualizado          DateTime  @updatedAt
+}
+
+enum PoliticaRegistro {
+  abierto
+  invitacion
+  cerrado
+}
+
+// M9 · Javier (SP-18)
+model Invitacion {
+  id        String    @id @default(uuid())
+  correo    String
+  hashToken String    @unique
+  vence     DateTime  // 7 días
+  usada     DateTime?
+  creadaPor String    // adminId
+  creado    DateTime  @default(now())
+}
+```
+
+| Tabla o campo | Dueño (escribe) | Lo exporta como |
+|---|---|---|
+| `Usuario.contrasenaCambiadaEn` | M1 · Eddy | `GET /identidad/cuenta` |
+| `MuestraMetrica` | M5 · Derek | `MuestrasMetricas` y `GET /proyectos/:id/metricas` ([metricas.md](metricas.md)) |
+| `ConfiguracionInstalacion`, `Invitacion` | M9 · Javier | `InstalacionService`, `PoliticaRegistroPuerto` ([instalacion.md](instalacion.md)) |
+| `AccionAdministrativa.accion` | M9 · Javier | Valores nuevos: `reactivar-cuenta`, `cambiar-registro`, `cambiar-limites`, `crear-invitacion` |
+
+Seed en autoalojado: plan `autoalojado` (precio 0, sin vencimiento; sus columnas de límites no se usan porque `LimitesDeInstalacion` lee `ConfiguracionInstalacion`) y la fila de `ConfiguracionInstalacion`; no se siembran los cuatro planes de la nube ni el admin de demo.
+
 ## Cambios frente al schema de arranque
 
 | Antes | Ahora | Por qué |
@@ -430,3 +491,4 @@ SuscripcionesService.cuotaDe(usuarioId: string): Promise<Cuota>; // lanza Suscri
 | 1.1 | 2026-10-02 | Seed: cuentas de demo Vencida y Suspendida para M5-03. Sin cambios de tablas en el Avance 2 |
 | 1.2 | 2026-10-06 | Seed: las cuentas Vencida y Suspendida quedan en Starter de 30 días con `vence` en el pasado (gracia de 5 días); el hash del seed es scrypt, igual que M1. Sin cambios de tablas |
 | 1.3 | 2026-10-11 | Avance 3: sin cambios de tablas. M2-05 escribe `Suscripcion.estado` y `estadoDesde` desde la tarea diaria; M9-02 escribe `Usuario.estadoCuenta`, `motivoSuspension` y una `AccionAdministrativa` por suspensión |
+| 2 | 2026-10-20 | Sprint fuera de alcance: `Usuario.contrasenaCambiadaEn`, `MuestraMetrica`, `ConfiguracionInstalacion`, `Invitacion` y acciones administrativas nuevas. Solo agrega |

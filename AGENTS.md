@@ -19,7 +19,7 @@ Instrucciones para humanos y agentes que tocan este repo. Si algo aquí choca co
 
 ## Alcance
 
-Núcleo v4.1 ([docs/alcance.md](docs/alcance.md), manda sobre la propuesta). Pantallas de referencia: canvas **Deploya v4.1**. Lo de *fuera de alcance · solo si da el tiempo* **no se borra ni se implementa** sin un change de OpenSpec propio y sin haber terminado lo **Debe** del módulo. M8 (asistente e integración) queda como stub. Fuente: solo repositorio público de GitHub con `Dockerfile` o con un stack que M4 reconoce (Node, Python, Go, estático; desde A2). Reversión sin reconstruir (M5-04) y detección de stack (M4-03) volvieron al núcleo por indicación del curso.
+Núcleo v4.1 ([docs/alcance.md](docs/alcance.md), manda sobre la propuesta). Pantallas de referencia: canvas **Deploya v4.1**. Lo de *fuera de alcance · solo si da el tiempo* **no se borra ni se implementa** sin un change de OpenSpec propio y sin haber terminado lo **Debe** del módulo. M8 (asistente e integración) queda como stub. Fuente: solo repositorio público de GitHub con `Dockerfile` o con un stack que M4 reconoce (Node, Python, Go, estático; desde A2). Reversión sin reconstruir (M5-04) y detección de stack (M4-03) volvieron al núcleo por indicación del curso. El **sprint fuera de alcance** (aprobado el 20 de octubre: correos de avisos, métricas y gráficas, reactivar cuenta, autoalojado; bitácoras de ejecución e infraestructura si da tiempo) está en [docs/alcance.md § Sprint fuera de alcance](docs/alcance.md#sprint-fuera-de-alcance); cada historia con su change.
 
 ## Arquitectura
 

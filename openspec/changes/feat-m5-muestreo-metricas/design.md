@@ -24,8 +24,10 @@ Se guardan muestras crudas por minuto y la API promedia cada 30 min para 24 h; 1
 
 ### 5. Precisiones que el contrato deja abiertas
 
-- Serie `24h`: cubos de 30 min que terminan en `ahora`. `en` es el inicio del cubo. Un cubo sin muestras no entra (no se rellena con 0). Con muestras en los 48 cubos, la serie trae 48 puntos. Serie `1h`: un punto por minuto que tenga muestra.
-- Si el despliegue activo no está Saludable, `serie` va vacía. `despliegues` y `promedioPorVersion` siguen saliendo de la ventana.
+- Serie `24h`: 48 cubos de 30 min **alineados a :00/:30 UTC**. El último es el que contiene `ahora` (`floor(ahora / 30 min) × 30 min`) y los demás van hacia atrás; `en` es el inicio del cubo, así la gráfica no "baila" entre peticiones. Un cubo sin muestras no entra (no se rellena con 0). Con muestras en los 48 cubos, la serie trae 48 puntos. La ventana de 24 h empieza en el primer cubo (a lo sumo 30 min después de `ahora − 24 h`), así serie, pico, chips y promedios miran el mismo intervalo. Serie `1h`: un punto por minuto que tenga muestra, `en` es el minuto truncado.
+- `pico` (`cpu` y `memoriaMb`, cada uno con `valor` y `en`) es el máximo de las muestras **crudas** de la ventana: los promedios de 30 min esconden el pico que la pantalla 16 muestra («Pico: 452 MB, hoy 14:00»). En un empate gana la muestra más antigua. Es `null` por medida si no hay muestras.
+- Si el despliegue activo no está Saludable (o no hay activo), `serie` va vacía, `pico` va en `null` y `aviso` trae «El contenedor no está corriendo»; si corre, `aviso` es `null`. `despliegues` y `promedioPorVersion` siguen saliendo de la ventana.
+- Muestreo en lotes de `CONTENEDORES_EN_PARALELO` (5) con `Promise.all` por lote: con timeout de 10 s por contenedor, un tick secuencial con varios colgados pasaba de 60 s. La concurrencia acotada no abre N llamadas a Docker a la vez; un contenedor ilegible se registra y no frena al resto.
 - `despliegues[].en` es `Despliegue.creado`. `deProyecto` incluye `version` (el `numero`) para armar el promedio sin otra consulta; el JSON no expone el id.
 - `tiemposDe` devuelve los últimos `ultimos` del más antiguo al más reciente. Duración = `terminada − iniciada` en ms. Etapa omitida, sin marcas, o posterior a `falloEn` = 0. `falloEn` solo si el estado es `fallido`. `reversion` es `disparador = reversion`.
 
@@ -37,10 +39,12 @@ Se guardan muestras crudas por minuto y la API promedia cada 30 min para 24 h; 1
 | `MuestrasMetricas` | Repository | L | Prisma y memoria con el mismo contrato |
 | `MuestreoMetricas` | Caso de uso | S | Una corrida: muestrear y purgar |
 | `ColaMuestreoPuerto` / `TareaMuestreoMetricas` | Scheduler (BullMQ) | S, D | Programa el tick; la prueba usa memoria |
+| `MuestreoMetricas.enLotes` | Batching con concurrencia acotada | S | El tick no crece linealmente con los contenedores colgados |
 | `LecturaMetricasService` | Facade de lectura | S | Compone puertos; la serie es una función pura |
+| `serieDe` / `picoDe` / `desdeDe` | Función pura (objeto valor de lectura) | S | Cubos alineados, pico y ventana sin base ni reloj; se prueban con fechas fijas |
 | `tiemposDeDespliegue` | Función pura | S | La duración no depende de Prisma |
 
-Cambios de clases y puertos: `MetricasContenedorPuerto`, `MetricasDockerStats`, `MuestrasMetricas`, `MuestreoMetricas`, `ColaMuestreoPuerto`, `LecturaMetricasService`, `RepositorioDespliegues.tiemposDe` → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
+`RespuestaMetricas` pasa a la versión 1.1 del contrato ([metricas.md](../../../docs/contratos/metricas.md)) con `pico` y `aviso`; el cambio es aditivo y Eduardo ya está avisado. Cambios de clases y puertos: `MetricasContenedorPuerto`, `MetricasDockerStats`, `MuestrasMetricas`, `MuestreoMetricas`, `ColaMuestreoPuerto`, `LecturaMetricasService`, `RepositorioDespliegues.tiemposDe` → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
 
 ## Risks / Trade-offs
 

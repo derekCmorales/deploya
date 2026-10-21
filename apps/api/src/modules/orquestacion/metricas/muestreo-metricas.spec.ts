@@ -4,8 +4,9 @@ import { RepositorioDesplieguesMemoria } from "../../../adapters/memoria/reposit
 import { MetricasContenedorStub } from "../../../adapters/stubs/metricas-contenedor.stub";
 import type { EstadoDespliegue } from "../../construccion/dominio/estados";
 import type { NuevoDespliegue } from "../../construccion/puertos/repositorio-despliegues.puerto";
+import type { MuestraContenedor } from "../puertos/metricas-contenedor.puerto";
 import { MuestraIlegible } from "./dominio/errores";
-import { CADA_MS_MUESTREO, programacionMuestreo, RETENCION_MUESTRAS_MS } from "./metricas.constantes";
+import { CADA_MS_MUESTREO, CONTENEDORES_EN_PARALELO, programacionMuestreo, RETENCION_MUESTRAS_MS } from "./metricas.constantes";
 import { ColaMuestreoMemoria } from "./cola-muestreo.memoria";
 import { MuestreoMetricas } from "./muestreo-metricas";
 import { TareaMuestreoMetricas } from "./tarea-muestreo";
@@ -14,8 +15,8 @@ const AHORA = new Date("2026-10-20T17:00:00.000Z");
 const PROYECTO = "api-tienda";
 const HORA_MS = 60 * 60 * 1000;
 
-function alta(estado: EstadoDespliegue): NuevoDespliegue {
-  return { proyectoId: PROYECTO, disparador: "manual", rama: "main", estado, creado: AHORA };
+function alta(estado: EstadoDespliegue, proyectoId: string = PROYECTO): NuevoDespliegue {
+  return { proyectoId, disparador: "manual", rama: "main", estado, creado: AHORA };
 }
 
 function armar() {
@@ -25,6 +26,36 @@ function armar() {
   const metricas = new MetricasContenedorStub();
   const muestreo = new MuestreoMetricas(metricas, muestras, despliegues, reloj);
   return { reloj, despliegues, muestras, metricas, muestreo };
+}
+
+async function publicarProyectos(
+  despliegues: RepositorioDesplieguesMemoria,
+  muestras: MuestrasMetricasMemoria,
+  total: number,
+): Promise<void> {
+  for (let indice = 0; indice < total; indice += 1) {
+    const proyectoId = `${PROYECTO}-${indice}`;
+    const despliegue = await despliegues.crear(alta("saludable", proyectoId));
+    await despliegues.cambiarEstado(despliegue.id, "saludable", { contenedorId: `contenedor-${indice}` });
+    await despliegues.marcarActivo(proyectoId, despliegue.id);
+    muestras.vincular(despliegue.id, proyectoId, despliegue.numero);
+  }
+}
+
+/** Doble que cuenta cuántas lecturas están a medias a la vez; cede el turno una vez por lectura. */
+class MedidorConcurrente {
+  readonly pedidos: string[] = [];
+  maximoEnVuelo = 0;
+  private enVuelo = 0;
+
+  async medir(contenedorId: string): Promise<MuestraContenedor> {
+    this.pedidos.push(contenedorId);
+    this.enVuelo += 1;
+    this.maximoEnVuelo = Math.max(this.maximoEnVuelo, this.enVuelo);
+    await Promise.resolve();
+    this.enVuelo -= 1;
+    return { cpu: 0.1, memoriaMb: 100 };
+  }
 }
 
 describe("Muestreo de métricas (SP-07)", () => {
@@ -91,6 +122,38 @@ describe("Muestreo de métricas (SP-07)", () => {
     await expect(muestreo.correr()).resolves.toBeUndefined();
 
     expect(await muestras.deProyecto(PROYECTO, new Date(0))).toEqual([]);
+  });
+
+  it("con más contenedores que el lote se muestrean todos sin pasar de la concurrencia acotada", async () => {
+    const { despliegues, muestras, metricas, muestreo } = armar();
+    const total = CONTENEDORES_EN_PARALELO * 2 + 1;
+    await publicarProyectos(despliegues, muestras, total);
+    const medidor = new MedidorConcurrente();
+    metricas.muestra = (contenedorId) => medidor.medir(contenedorId);
+
+    await muestreo.correr();
+
+    expect(medidor.pedidos).toHaveLength(total);
+    expect(await muestras.deProyecto(`${PROYECTO}-0`, new Date(0))).toHaveLength(1);
+    expect(await muestras.deProyecto(`${PROYECTO}-${total - 1}`, new Date(0))).toHaveLength(1);
+    expect(medidor.maximoEnVuelo).toBe(CONTENEDORES_EN_PARALELO);
+  });
+
+  it("un contenedor ilegible entre varios no frena al resto del lote", async () => {
+    const { despliegues, muestras, metricas, muestreo } = armar();
+    const total = CONTENEDORES_EN_PARALELO + 2;
+    await publicarProyectos(despliegues, muestras, total);
+    const medidor = new MedidorConcurrente();
+    metricas.muestra = (contenedorId) =>
+      contenedorId === "contenedor-1" ? Promise.reject(new MuestraIlegible("stats vacío")) : medidor.medir(contenedorId);
+
+    await muestreo.correr();
+
+    const guardadas = await Promise.all(
+      Array.from({ length: total }, (_, indice) => muestras.deProyecto(`${PROYECTO}-${indice}`, new Date(0))),
+    );
+    expect(guardadas.flat()).toHaveLength(total - 1);
+    expect(guardadas[1]).toEqual([]);
   });
 
   it("Purga de 24 h", async () => {

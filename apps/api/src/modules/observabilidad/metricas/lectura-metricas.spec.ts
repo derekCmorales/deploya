@@ -7,11 +7,13 @@ import { ProyectoNoEncontrado } from "../../construccion/dominio/errores";
 import type { NuevoDespliegue } from "../../construccion/puertos/repositorio-despliegues.puerto";
 import { INTERVALO_PROMEDIO_MS, PUNTOS_SERIE_24H, VENTANA_24H_MS } from "../../orquestacion/metricas/metricas.constantes";
 import { DetalleProyectoPuerto, type DetalleProyecto } from "../puertos/detalle-proyecto.puerto";
+import { AVISO_CONTENEDOR_NO_CORRE } from "./dominio/serie-metricas";
 import { ErroresMetricasFilter, rangoMetricas, MetricasProyectoController } from "./metricas-proyecto.controller";
 import { RangoMetricasInvalido } from "./errores";
 import { LecturaMetricasService } from "./lectura-metricas.service";
 
-const AHORA = new Date("2026-10-20T18:00:00.000Z");
+const AHORA = new Date("2026-10-20T18:10:00.000Z");
+const ULTIMO_CUBO = new Date("2026-10-20T18:00:00.000Z");
 const PROYECTO = "api-tienda";
 const DUENO = "usuario-1";
 const HORA_MS = 60 * 60 * 1000;
@@ -74,9 +76,9 @@ describe("Lectura de métricas (SP-07)", () => {
     await despliegues.cambiarEstado(activo.id, "saludable", { contenedorId: "c1" });
     await despliegues.marcarActivo(PROYECTO, activo.id);
     muestras.vincular(activo.id, PROYECTO, activo.numero);
-    const desde = new Date(AHORA.getTime() - VENTANA_24H_MS);
+    const primerCubo = new Date(ULTIMO_CUBO.getTime() - (PUNTOS_SERIE_24H - 1) * INTERVALO_PROMEDIO_MS);
     for (let cubo = 0; cubo < PUNTOS_SERIE_24H; cubo += 1) {
-      const en = new Date(desde.getTime() + cubo * INTERVALO_PROMEDIO_MS + MINUTO_MS);
+      const en = new Date(primerCubo.getTime() + cubo * INTERVALO_PROMEDIO_MS + MINUTO_MS);
       await muestras.guardar({ despliegueId: activo.id, tomada: en, cpu: 0.1, memoriaMb: 400 });
       await muestras.guardar({ despliegueId: activo.id, tomada: new Date(en.getTime() + MINUTO_MS), cpu: 0.3, memoriaMb: 434 });
     }
@@ -85,9 +87,48 @@ describe("Lectura de métricas (SP-07)", () => {
 
     expect(respuesta.limite).toEqual({ cpu: 0.5, memoriaMb: 512 });
     expect(respuesta.serie).toHaveLength(PUNTOS_SERIE_24H);
-    expect(respuesta.serie[0]).toEqual({ en: desde, cpu: 0.2, memoriaMb: 417 });
+    expect(respuesta.serie[0]).toEqual({ en: primerCubo, cpu: 0.2, memoriaMb: 417 });
+    expect(respuesta.serie.at(-1)?.en).toEqual(ULTIMO_CUBO);
     expect(respuesta.serie.every((punto) => punto.cpu === 0.2 && punto.memoriaMb === 417)).toBe(true);
     expect(respuesta.promedioPorVersion).toEqual([{ version: activo.numero, cpu: 0.2, memoriaMb: 417 }]);
+  });
+
+  it("los cubos de 24 h empiezan en :00 o :30 sin importar cuándo se pide", async () => {
+    const { despliegues, muestras, lectura } = armar();
+    const activo = await despliegues.crear(alta(AHORA));
+    await despliegues.cambiarEstado(activo.id, "saludable", { contenedorId: "c1" });
+    await despliegues.marcarActivo(PROYECTO, activo.id);
+    muestras.vincular(activo.id, PROYECTO, activo.numero);
+    for (const tomada of ["2026-10-20T16:47:31.000Z", "2026-10-20T17:03:12.000Z", "2026-10-20T18:07:59.000Z"]) {
+      await muestras.guardar({ despliegueId: activo.id, tomada: new Date(tomada), cpu: 0.1, memoriaMb: 100 });
+    }
+
+    const respuesta = await lectura.leer(PROYECTO, DUENO, "24h");
+
+    expect(respuesta.serie.map((punto) => punto.en.toISOString())).toEqual([
+      "2026-10-20T16:30:00.000Z",
+      "2026-10-20T17:00:00.000Z",
+      "2026-10-20T18:00:00.000Z",
+    ]);
+  });
+
+  it("Pico de la ventana", async () => {
+    const { despliegues, muestras, lectura } = armar();
+    const activo = await despliegues.crear(alta(AHORA));
+    await despliegues.cambiarEstado(activo.id, "saludable", { contenedorId: "c1" });
+    await despliegues.marcarActivo(PROYECTO, activo.id);
+    muestras.vincular(activo.id, PROYECTO, activo.numero);
+    const cpuMax = new Date("2026-10-20T03:30:20.000Z");
+    const memoriaMax = new Date("2026-10-20T14:00:40.000Z");
+    await muestras.guardar({ despliegueId: activo.id, tomada: cpuMax, cpu: 0.27, memoriaMb: 300 });
+    await muestras.guardar({ despliegueId: activo.id, tomada: new Date(cpuMax.getTime() + MINUTO_MS), cpu: 0.05, memoriaMb: 310 });
+    await muestras.guardar({ despliegueId: activo.id, tomada: memoriaMax, cpu: 0.1, memoriaMb: 452 });
+    await muestras.guardar({ despliegueId: activo.id, tomada: new Date(memoriaMax.getTime() + MINUTO_MS), cpu: 0.1, memoriaMb: 400 });
+
+    const respuesta = await lectura.leer(PROYECTO, DUENO, "24h");
+
+    expect(respuesta.pico).toEqual({ cpu: { valor: 0.27, en: cpuMax }, memoriaMb: { valor: 452, en: memoriaMax } });
+    expect(Math.max(...respuesta.serie.map((punto) => punto.memoriaMb))).toBeLessThan(452);
   });
 
   it("la serie de 1 h agrupa por minuto", async () => {
@@ -136,6 +177,31 @@ describe("Lectura de métricas (SP-07)", () => {
     const respuesta = await lectura.leer(PROYECTO, DUENO, "1h");
 
     expect(respuesta.serie).toEqual([]);
+    expect(respuesta.pico).toEqual({ cpu: null, memoriaMb: null });
+    expect(respuesta.aviso).toBe(AVISO_CONTENEDOR_NO_CORRE);
+  });
+
+  it("sin despliegue activo la serie va vacía con aviso", async () => {
+    const { lectura } = armar();
+
+    const respuesta = await lectura.leer(PROYECTO, DUENO, "24h");
+
+    expect(respuesta.serie).toEqual([]);
+    expect(respuesta.pico).toEqual({ cpu: null, memoriaMb: null });
+    expect(respuesta.aviso).toBe("El contenedor no está corriendo");
+  });
+
+  it("un contenedor Saludable sin muestras no trae aviso ni pico", async () => {
+    const { despliegues, lectura } = armar();
+    const activo = await despliegues.crear(alta(AHORA));
+    await despliegues.cambiarEstado(activo.id, "saludable", { contenedorId: "c1" });
+    await despliegues.marcarActivo(PROYECTO, activo.id);
+
+    const respuesta = await lectura.leer(PROYECTO, DUENO, "1h");
+
+    expect(respuesta.serie).toEqual([]);
+    expect(respuesta.pico).toEqual({ cpu: null, memoriaMb: null });
+    expect(respuesta.aviso).toBeNull();
   });
 
   it("un proyecto ajeno o inexistente es 404", async () => {

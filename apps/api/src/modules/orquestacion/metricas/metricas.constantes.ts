@@ -17,6 +17,9 @@ export const MS_POR_MINUTO = 60_000;
 export const PORCENTAJE_A_VCPU = 100;
 export const DECIMALES_CPU = 3;
 
+/** Contenedores que se miden a la vez: acota el tick aunque varios cuelguen hasta su timeout. */
+export const CONTENEDORES_EN_PARALELO = 5;
+
 export const COLA_MUESTREO = "muestreo-metricas";
 export const PROGRAMADOR_MUESTREO = "muestreo-cada-minuto";
 

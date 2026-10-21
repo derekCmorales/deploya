@@ -1,13 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Reloj } from "../../../compartido/reloj";
 import { RepositorioDespliegues, type DespliegueMuestreable } from "../../construccion/puertos/repositorio-despliegues.puerto";
-import { RETENCION_MUESTRAS_MS } from "./metricas.constantes";
+import { CONTENEDORES_EN_PARALELO, RETENCION_MUESTRAS_MS } from "./metricas.constantes";
 import { MetricasContenedorPuerto, type MuestraContenedor } from "../puertos/metricas-contenedor.puerto";
 import { MuestrasMetricas } from "../puertos/muestras-metricas.puerto";
 
 /**
  * Un tick: muestra el contenedor del despliegue activo Saludable de cada proyecto
- * y purga lo de más de 24 h. Un contenedor ilegible no frena al resto.
+ * en lotes de `CONTENEDORES_EN_PARALELO` y purga lo de más de 24 h.
+ * Un contenedor ilegible no frena al resto.
  */
 @Injectable()
 export class MuestreoMetricas {
@@ -27,7 +28,9 @@ export class MuestreoMetricas {
 
   private async muestrearActivos(): Promise<void> {
     const activos = await this.despliegues.activosSaludables();
-    for (const activo of activos) await this.guardarMuestra(activo);
+    for (const lote of enLotes(activos, CONTENEDORES_EN_PARALELO)) {
+      await Promise.all(lote.map((activo) => this.guardarMuestra(activo)));
+    }
   }
 
   private async guardarMuestra(activo: DespliegueMuestreable): Promise<void> {
@@ -54,4 +57,10 @@ export class MuestreoMetricas {
     const limite = new Date(this.reloj.ahora().getTime() - RETENCION_MUESTRAS_MS);
     await this.muestras.purgarAntesDe(limite);
   }
+}
+
+function enLotes<T>(elementos: T[], tamano: number): T[][] {
+  const lotes: T[][] = [];
+  for (let inicio = 0; inicio < elementos.length; inicio += tamano) lotes.push(elementos.slice(inicio, inicio + tamano));
+  return lotes;
 }

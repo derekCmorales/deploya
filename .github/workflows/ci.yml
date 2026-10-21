@@ -30,6 +30,29 @@ jobs:
       - run: pnpm build
       - run: pnpm validate:mermaid
 
+  secretos:
+    name: Secretos (gitleaks)
+    runs-on: ubuntu-latest
+    env:
+      # Binario oficial con checksum de gitleaks_8.30.1_checksums.txt; sin acciones de terceros.
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Instalar gitleaks con checksum verificado
+        run: |
+          archivo="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL -o "${RUNNER_TEMP}/${archivo}" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archivo}"
+          echo "${GITLEAKS_SHA256}  ${RUNNER_TEMP}/${archivo}" | sha256sum --check -
+          tar -xzf "${RUNNER_TEMP}/${archivo}" -C "${RUNNER_TEMP}" gitleaks
+      - name: Escanear todo el historial
+        run: >-
+          "${RUNNER_TEMP}/gitleaks" detect --source .
+          --config .gitleaks.toml --log-opts=--all --redact --no-banner
+
   smoke:
     name: Smoke compose
     runs-on: ubuntu-latest

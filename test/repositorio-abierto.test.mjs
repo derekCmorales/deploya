@@ -9,47 +9,97 @@ import { fileURLToPath } from "node:url";
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..");
 const VERSION = "8.30.1";
-const ARCHIVO = `gitleaks_${VERSION}_linux_x64.tar.gz`;
-const SHA256 = "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb";
-const URL_GITLEAKS = `https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/${ARCHIVO}`;
+const BASE_DESCARGA = `https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}`;
+const URL_INSTALACION = "https://github.com/gitleaks/gitleaks#installing";
+const MODO_EJECUTABLE = 0o755;
 const ESPERA_ESCANEO_MS = 120_000;
+// Fuente: gitleaks_8.30.1_checksums.txt del release oficial v8.30.1.
+const ARCHIVOS_POR_PLATAFORMA = {
+  "linux-x64": {
+    nombre: `gitleaks_${VERSION}_linux_x64.tar.gz`,
+    sha256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb",
+  },
+  "linux-arm64": {
+    nombre: `gitleaks_${VERSION}_linux_arm64.tar.gz`,
+    sha256: "e4a487ee7ccd7d3a7f7ec08657610aa3606637dab924210b3aee62570fb4b080",
+  },
+  "darwin-x64": {
+    nombre: `gitleaks_${VERSION}_darwin_x64.tar.gz`,
+    sha256: "dfe101a4db2255fc85120ac7f3d25e4342c3c20cf749f2c20a18081af1952709",
+  },
+  "darwin-arm64": {
+    nombre: `gitleaks_${VERSION}_darwin_arm64.tar.gz`,
+    sha256: "b40ab0ae55c505963e365f271a8d3846efbc170aa17f2607f13df610a9aeb6a5",
+  },
+};
 const cache = join(tmpdir(), `deploya-gitleaks-${VERSION}`);
-const binario = join(cache, "gitleaks");
+const binarioEnCache = join(cache, "gitleaks");
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
-function versionInstalada() {
-  if (!existsSync(binario)) return "";
+function partesDeVersion(texto) {
+  const coincidencia = texto.match(/(\d+)\.(\d+)\.(\d+)/);
+  return coincidencia ? coincidencia.slice(1).map(Number) : null;
+}
+
+function esVersionSuficiente(texto) {
+  const encontrada = partesDeVersion(texto);
+  if (!encontrada) return false;
+  const minima = partesDeVersion(VERSION);
+  for (let i = 0; i < minima.length; i += 1) {
+    if (encontrada[i] !== minima[i]) return encontrada[i] > minima[i];
+  }
+  return true;
+}
+
+function versionDe(ejecutable) {
   try {
-    return execFileSync(binario, ["version"], { encoding: "utf8" });
+    return execFileSync(ejecutable, ["version"], { encoding: "utf8", stdio: "pipe" });
   } catch {
     return "";
   }
 }
 
-async function descargarTar() {
-  const respuesta = await fetch(URL_GITLEAKS);
+function sirve(ejecutable) {
+  return esVersionSuficiente(versionDe(ejecutable));
+}
+
+function archivoDeLaPlataforma() {
+  const clave = `${process.platform}-${process.arch}`;
+  const archivo = ARCHIVOS_POR_PLATAFORMA[clave];
+  if (archivo) return archivo;
+  const soportadas = Object.keys(ARCHIVOS_POR_PLATAFORMA).join(", ");
+  throw new Error(
+    `no hay gitleaks ${VERSION} para ${clave} (soportadas: ${soportadas}). ` +
+      `Instala gitleaks ${VERSION} o superior y ponlo en el PATH: ${URL_INSTALACION}`,
+  );
+}
+
+async function descargarTar(archivo) {
+  const respuesta = await fetch(`${BASE_DESCARGA}/${archivo.nombre}`);
   if (!respuesta.ok) throw new Error(`no se pudo bajar gitleaks (${respuesta.status})`);
   const bytes = Buffer.from(await respuesta.arrayBuffer());
-  if (sha256(bytes) !== SHA256) throw new Error("el checksum de gitleaks no coincide");
+  if (sha256(bytes) !== archivo.sha256) throw new Error("el checksum de gitleaks no coincide");
   return bytes;
 }
 
-function extraer(bytes) {
+function extraer(archivo, bytes) {
   mkdirSync(cache, { recursive: true });
-  const tar = join(cache, ARCHIVO);
+  const tar = join(cache, archivo.nombre);
   writeFileSync(tar, bytes);
   execFileSync("tar", ["-xzf", tar, "-C", cache]);
-  chmodSync(binario, 0o755);
+  chmodSync(binarioEnCache, MODO_EJECUTABLE);
 }
 
 /** El escenario pide gitleaks sobre el historial; el binario no es dependencia npm. */
 async function asegurarGitleaks() {
-  if (versionInstalada().includes(VERSION)) return binario;
-  extraer(await descargarTar());
-  return binario;
+  if (sirve("gitleaks")) return "gitleaks";
+  if (existsSync(binarioEnCache) && sirve(binarioEnCache)) return binarioEnCache;
+  const archivo = archivoDeLaPlataforma();
+  extraer(archivo, await descargarTar(archivo));
+  return binarioEnCache;
 }
 
 function clonSuperficial() {
@@ -66,9 +116,7 @@ function detalleFallo(error) {
   return error.message;
 }
 
-/** actions/checkout deja un solo commit; sin esto el escaneo no ve el historial. */
-function completarHistorial() {
-  if (!clonSuperficial()) return;
+function traerHistorialCompleto() {
   try {
     execFileSync("git", ["fetch", "--unshallow"], {
       cwd: repo,
@@ -83,6 +131,18 @@ function completarHistorial() {
   if (clonSuperficial()) {
     throw new Error("el clon sigue siendo superficial después de git fetch --unshallow");
   }
+}
+
+/**
+ * actions/checkout deja un solo commit; sin historial el escaneo no ve nada.
+ * Solo CI completa el clon por su cuenta; en local no se toca el repo de quien corre la prueba.
+ */
+function completarHistorial() {
+  if (!clonSuperficial()) return;
+  if (!process.env.CI) {
+    throw new Error("el clon es superficial: corre git fetch --unshallow y repite pnpm test");
+  }
+  traerHistorialCompleto();
 }
 
 function argumentos(informe) {
@@ -101,6 +161,7 @@ function argumentos(informe) {
 it("Historial sin secretos", { timeout: ESPERA_ESCANEO_MS }, async () => {
   completarHistorial();
   const bin = await asegurarGitleaks();
+  mkdirSync(cache, { recursive: true });
   const informe = join(cache, "informe.json");
   execFileSync(bin, argumentos(informe), { cwd: repo, stdio: "pipe" });
   const hallazgos = JSON.parse(readFileSync(informe, "utf8"));

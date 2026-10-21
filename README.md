@@ -1,6 +1,6 @@
 # Deploya
 
-PaaS de alojamiento web: de un repositorio público de GitHub con `Dockerfile` a un contenedor con los límites de tu plan y subdominio HTTPS. Monolito modular **NestJS + Next.js**, cola Redis, PostgreSQL. Licencia [AGPL-3.0](LICENSE).
+PaaS de alojamiento web: de un repositorio público de GitHub con `Dockerfile` (o con un stack que Deploya reconoce: Node, Python, Go o estático) a un contenedor con los límites de tu plan y subdominio HTTPS. Monolito modular **NestJS + Next.js**, cola Redis, PostgreSQL. Licencia [AGPL-3.0](LICENSE).
 
 **Alcance núcleo v4.1** (recortado por el curso): [docs/alcance.md](docs/alcance.md). Qué entrega cada quien y cuándo: [docs/plan-avances.md](docs/plan-avances.md). Lo demás está documentado como *fuera de alcance · solo si da el tiempo*.
 
@@ -8,7 +8,7 @@ Ciclo de despliegue: **Recepción → Construcción → Ejecución → Enrutamie
 
 ## Qué es
 
-Deploya toma un repositorio público de GitHub, construye la imagen y la publica en un subdominio HTTPS, con los límites del plan. Sirve para probar el producto en local y, en un servidor propio, para autoalojarlo.
+Deploya toma un repositorio público de GitHub con `Dockerfile` o con un stack que M4 reconoce (Node, Python, Go, estático), construye la imagen y la publica en un subdominio HTTPS, con los límites del plan. Sirve para probar el producto en local y, en un servidor propio, para autoalojarlo.
 
 ## Cómo probarlo
 
@@ -23,7 +23,7 @@ Define `ADMIN_CLAVE` en `.env`. API en [http://localhost:3001/health](http://loc
 
 ## Autoalojado
 
-En un servidor propio el comando es `./scripts/instalar.sh`. El script entra con el change `feat/instalador-autoalojado`; todavía no está en este repositorio. La primera etapa comprueba Docker 24+, Docker Compose v2, `curl`, `dig` y `openssl`. Contrato: [docs/contratos/instalacion.md](docs/contratos/instalacion.md). La decisión sigue propuesta en el [ADR 0008](docs/adr/0008-autoalojado-y-codigo-abierto.md) hasta el merge de `feat-m2-modo-autoalojado`.
+En un servidor propio el comando es `./scripts/instalar.sh`, que entra con el change `feat-instalador-autoalojado` (PR #42). La primera etapa comprueba Docker 24+, Docker Compose v2, `curl`, `dig` y `openssl`. Contrato: [docs/contratos/instalacion.md](docs/contratos/instalacion.md). La decisión sigue propuesta en el [ADR 0008](docs/adr/0008-autoalojado-y-codigo-abierto.md) hasta el merge de `feat-m2-modo-autoalojado`.
 
 ## Contribuir
 
@@ -47,7 +47,7 @@ Necesitas [Docker](https://docs.docker.com/get-docker/) con Compose v2, y para t
 | Solo base y cola (para desarrollar fuera de Docker) | `docker compose up postgres redis` |
 | API con recarga | `set -a; . ./.env; set +a; pnpm dev:api` → `http://localhost:3001` |
 | Web con recarga | `pnpm dev:web` → `http://localhost:3000` |
-| Pruebas (API, web y repositorio) | `pnpm test` |
+| Pruebas (API, web y repositorio); la de repositorio corre gitleaks sobre el historial y necesita red la primera vez si gitleaks no está instalado | `pnpm test` |
 | Cobertura de la API | `pnpm test:cov` |
 | Lo mismo que CI antes de pedir revisión | `pnpm check` |
 | Copiar los `.mmd` a los documentos que los embeben | `pnpm diagramas:sync` |
@@ -92,7 +92,7 @@ Necesitas [Docker](https://docs.docker.com/get-docker/) con Compose v2, y para t
 | `e2e` | Smoke del compose (CI) y, en la entrega final, el recorrido e2e |
 | `openspec` | Un spec por módulo en `specs/`, changes en curso en `changes/` y cerrados en `changes/archive/` |
 | `docs` | Todo lo de la tabla de arriba |
-| `scripts` | Validación de Mermaid y sincronización de diagramas |
+| `scripts` | Validación de Mermaid y sincronización de diagramas; despliegue del VPS (`desplegar-vps.sh`) y, con el autoalojado, `instalar.sh`, `respaldar.sh` y `actualizar.sh` |
 | `.agents` `.claude` `.cursor` `.github` `.opencode` | Comandos y skills de OpenSpec generados para cada herramienta (no editar); reglas de Cursor en `.cursor/rules` |
 
 ## Nunca a `main`

@@ -31,4 +31,4 @@ El repositorio ya es público, pero sin licencia no es código abierto (ADR 0008
 ## Impact
 
 - Raíz: `LICENSE`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`.
-- CI: paso de `gitleaks` en `.github/workflows` (con Eddy, dueño de workflows).
+- CI: job `secretos` de `gitleaks` en `.github/workflows/ci.yml` (lo agrega Derek, acordado con Eddy, dueño de workflows).

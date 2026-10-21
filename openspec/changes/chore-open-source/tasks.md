@@ -13,8 +13,8 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 2. Seguridad
 
-- [ ] 2.1 `gitleaks` sobre el historial y en CI (con Eddy). El historial ya lo cubren 0.1 y la prueba «Historial sin secretos». El paso de gitleaks en `.github/workflows` lo agrega Eddy; este change no edita workflows.
-- [x] 2.2 Prueba: «Historial sin secretos». Si falta el binario, el test baja gitleaks 8.30.1 (linux x64) y comprueba el checksum; sin dependencia npm nueva.
+- [x] 2.1 `gitleaks` sobre el historial y en CI. El historial ya lo cubren 0.1 y la prueba «Historial sin secretos». Hecho por Derek (acordado con Eddy): paso de gitleaks en CI (job `secretos` de `.github/workflows/ci.yml`: `fetch-depth: 0`, binario oficial 8.30.1 con checksum verificado, `--config .gitleaks.toml --log-opts=--all --redact`; sin acciones de terceros).
+- [x] 2.2 Prueba: «Historial sin secretos». Usa `gitleaks` del PATH si es 8.30.1 o superior; si no, baja gitleaks 8.30.1 para linux x64/arm64 o darwin x64/arm64 y comprueba el SHA-256 oficial; otra plataforma falla con cómo instalarlo. Solo completa un clon superficial con `fetch --unshallow` si `CI` está definido. Sin dependencia npm nueva.
 
 ## 3. Cierre
 

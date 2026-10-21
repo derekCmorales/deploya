@@ -1,0 +1,22 @@
+# Traefik cuando el proveedor DNS no admite el comodín (HTTP-01, un certificado por proyecto).
+# No redirige todo :80 a HTTPS: el desafío necesita responder en el puerto 80.
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  file:
+    directory: /traefik/dinamico
+    watch: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      storage: /acme/acme.json
+      httpChallenge:
+        entryPoint: web
+
+log:
+  level: INFO

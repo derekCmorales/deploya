@@ -4,7 +4,10 @@ import { RepositorioSuscripcionesMemoria } from "../adaptadores/repositorio-susc
 import { SuscripcionesService } from "../suscripciones.service";
 import { DestinoSemillaMemoria } from "./destino-semilla.memoria";
 import { sembrar, type Hashear } from "./sembrar";
-import { ClaveAdminFaltante } from "./semilla";
+import { ClaveAdminFaltante, CodigoConfiguracionInvalido } from "./semilla";
+
+const HASH_A = "a".repeat(64);
+const HASH_B = "b".repeat(64);
 
 const ENTORNO = { ADMIN_CLAVE: "Clave-Admin-1" };
 /** `RelojFijo` arranca en 2026-09-30T12:00:00Z. */
@@ -130,6 +133,47 @@ describe("sembrar", () => {
   it("sin ADMIN_CLAVE no escribe nada", async () => {
     const { destino, correr } = armar();
     await expect(correr({})).rejects.toBeInstanceOf(ClaveAdminFaltante);
+    expect(destino.planes).toHaveLength(0);
+    expect(destino.usuarios).toHaveLength(0);
+  });
+
+  it("Autoalojado sin administrador ni cuentas de demo", async () => {
+    const { destino, correr } = armar();
+    await correr({ MODO_INSTALACION: "autoalojado" });
+    expect(destino.planes).toHaveLength(4);
+    expect(destino.usuarios).toHaveLength(0);
+    expect(destino.codigo).toBeNull();
+  });
+
+  it("El hash del instalador queda guardado", async () => {
+    const { destino, correr } = armar();
+    const base = { MODO_INSTALACION: "autoalojado", HASH_CODIGO_CONFIGURACION: HASH_A, CODIGO_VENCE: "2026-10-20T03:30:00.000Z" };
+    await correr(base);
+    expect(destino.codigo).toEqual({ hashCodigo: HASH_A, codigoVence: new Date("2026-10-20T03:30:00.000Z") });
+    await correr({ ...base, HASH_CODIGO_CONFIGURACION: HASH_B, CODIGO_VENCE: "2026-10-20T04:30:00.000Z" });
+    expect(destino.usuarios).toHaveLength(0);
+    expect(destino.codigo).toEqual({ hashCodigo: HASH_B, codigoVence: new Date("2026-10-20T04:30:00.000Z") });
+  });
+
+  it("Con administrador el hash no vuelve", async () => {
+    const { destino, correr } = armar();
+    destino.usuarios.push({
+      id: "ya",
+      correo: "admin@instalacion.local",
+      nombre: "Administrador",
+      rol: "administrador",
+      hashContrasena: "hash",
+    });
+    await correr({ MODO_INSTALACION: "autoalojado", HASH_CODIGO_CONFIGURACION: HASH_A, CODIGO_VENCE: "2026-10-20T03:30:00.000Z" });
+    expect(destino.codigo).toBeNull();
+    expect(destino.usuarios).toHaveLength(1);
+  });
+
+  it("Hash inválido no escribe nada", async () => {
+    const { destino, correr } = armar();
+    await expect(correr({ MODO_INSTALACION: "autoalojado", HASH_CODIGO_CONFIGURACION: "no-es-hash", CODIGO_VENCE: "ayer" })).rejects.toBeInstanceOf(
+      CodigoConfiguracionInvalido,
+    );
     expect(destino.planes).toHaveLength(0);
     expect(destino.usuarios).toHaveLength(0);
   });

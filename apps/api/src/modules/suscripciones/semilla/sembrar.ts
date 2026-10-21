@@ -5,7 +5,7 @@ import type { RepositorioPlanes } from "../puertos/repositorio-planes.puerto";
 import type { RepositorioSuscripciones } from "../puertos/repositorio-suscripciones.puerto";
 import type { SuscripcionesService } from "../suscripciones.service";
 import type { DestinoSemilla } from "./destino-semilla.puerto";
-import { cambioDemo, CODIGO_PLAN_DEMO, type EstadoDemo, planesSemilla, usuariosSemilla } from "./semilla";
+import { cambioDemo, codigoDesdeEntorno, CODIGO_PLAN_DEMO, type EstadoDemo, planesSemilla, usuariosSemilla } from "./semilla";
 
 export type Hashear = (clave: string) => Promise<string>;
 
@@ -24,16 +24,22 @@ export async function sembrar(
   entorno: NodeJS.ProcessEnv,
   demo: PuertosCuentasDemo,
 ): Promise<void> {
+  const codigo = codigoDesdeEntorno(entorno);
   const usuarios = usuariosSemilla(entorno);
-  for (const plan of planesSemilla()) {
-    await destino.guardarPlan(plan);
-  }
+  await guardarPlanes(destino);
   const planDemo = await demo.planes.porCodigo(CODIGO_PLAN_DEMO);
   if (!planDemo) throw new PlanNoEncontrado(CODIGO_PLAN_DEMO);
   for (const { clave, estadoDemo, ...usuario } of usuarios) {
     const id = await destino.guardarUsuario({ ...usuario, hashContrasena: await hashear(clave) });
     await suscripciones.asignarSandbox(id);
     if (estadoDemo) await llevarAEstadoDemo(id, estadoDemo, planDemo, demo);
+  }
+  if (codigo) await destino.guardarCodigo(codigo);
+}
+
+async function guardarPlanes(destino: DestinoSemilla): Promise<void> {
+  for (const plan of planesSemilla()) {
+    await destino.guardarPlan(plan);
   }
 }
 

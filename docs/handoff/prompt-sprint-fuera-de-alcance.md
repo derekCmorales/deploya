@@ -77,7 +77,7 @@ Día 1, antes que nada — chore-open-source (SP-09, parte urgente):
      de configuración (su hash va a ConfiguracionInstalacion de Javier). El día 5 Eddy lo
      necesita para el asistente 31.
    - scripts/respaldar.sh y scripts/actualizar.sh con el JSON de estado que lee la pantalla 32
-     (docs/contratos/instalacion.md § Scripts). shellcheck y bats en CI con Eddy.
+     (docs/contratos/instalacion.md § Scripts). shellcheck en CI (hecho por Derek).
    - Prueba la instalación limpia en un servidor aparte del VPS de la nube.
 
 Antes de cada PR: los escenarios del spec delta con su prueba, clases-unificado.mmd con los

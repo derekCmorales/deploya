@@ -53,6 +53,39 @@ export class ClaveAdminFaltante extends Error {
   }
 }
 
+export const MODO_AUTOALOJADO = "autoalojado";
+/** sha256 en hex: 32 bytes, dos caracteres por byte. */
+const LARGO_HASH_SHA256 = 64;
+const HASH_SHA256 = new RegExp(`^[0-9a-f]{${LARGO_HASH_SHA256}}$`);
+
+export class CodigoConfiguracionInvalido extends Error {
+  constructor() {
+    super("HASH_CODIGO_CONFIGURACION debe ser sha256 hex y CODIGO_VENCE una fecha ISO");
+    this.name = "CodigoConfiguracionInvalido";
+  }
+}
+
+/** Lo que el instalador deja en el entorno para que el seed lo copie a ConfiguracionInstalacion. */
+export interface CodigoSemilla {
+  hashCodigo: string;
+  codigoVence: Date;
+}
+
+export function esAutoalojado(entorno: NodeJS.ProcessEnv): boolean {
+  return entorno.MODO_INSTALACION === MODO_AUTOALOJADO;
+}
+
+/** Null en la nube o si el instalador todavía no escribió el hash. Lanza si el par viene a medias. */
+export function codigoDesdeEntorno(entorno: NodeJS.ProcessEnv): CodigoSemilla | null {
+  if (!esAutoalojado(entorno)) return null;
+  const hash = entorno.HASH_CODIGO_CONFIGURACION ?? "";
+  const vence = entorno.CODIGO_VENCE ?? "";
+  if (!hash && !vence) return null;
+  const fecha = new Date(vence);
+  if (!HASH_SHA256.test(hash) || Number.isNaN(fecha.getTime())) throw new CodigoConfiguracionInvalido();
+  return { hashCodigo: hash, codigoVence: fecha };
+}
+
 /** Planes v4.1 (docs/alcance.md). El precio de 365 días es 10 × el de 30: dos meses gratis. */
 export function planesSemilla(): PlanSemilla[] {
   return [
@@ -109,9 +142,12 @@ export function planesSemilla(): PlanSemilla[] {
 
 /**
  * Administrador, cliente de demostración, las cuentas Vencida y Suspendida de M5-03 y `demo@` para
- * suspenderla en M9-02; las de cliente con la misma contraseña. Sin `ADMIN_CLAVE` el seed no escribe nada.
+ * suspenderla en M9-02; las de cliente con la misma contraseña. Sin `ADMIN_CLAVE` el seed de la nube
+ * no escribe nada. En autoalojado no hay cuentas: el administrador lo crea el código de configuración.
  */
 export function usuariosSemilla(entorno: NodeJS.ProcessEnv): UsuarioSemilla[] {
+  // En autoalojado el primer administrador sale del código, no del seed. Si no, /configurar da 404.
+  if (esAutoalojado(entorno)) return [];
   const claveAdmin = entorno.ADMIN_CLAVE;
   if (!claveAdmin) throw new ClaveAdminFaltante();
   const claveCliente = entorno.CLIENTE_CLAVE || claveAdmin;

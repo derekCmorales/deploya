@@ -1,0 +1,11 @@
+# Estrategia --sin-comodin: Traefik con HTTP-01 en lugar del DNS-01 de Cloudflare.
+# Se suma después de docker-compose.vps.yml. El script de la nube no lo incluye.
+services:
+  traefik:
+    environment: !override
+      TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: ${ACME_CORREO:?Define ACME_CORREO en .env}
+    volumes: !override
+      - ./infra/traefik/traefik.http01.yml:/etc/traefik/traefik.yml:ro
+      - ./infra/traefik/plataforma.generada.yml:/traefik/dinamico/_plataforma.yml:ro
+      - traefik_dinamico:/traefik/dinamico
+      - traefik_acme:/acme

@@ -344,3 +344,22 @@ model MuestraMetrica {
   @@id([despliegueId, tomada])
   @@index([tomada])
 }
+
+// M2/M9 · Javier (SP-06, SP-18). Una sola fila. El instalador escribe hashCodigo y codigoVence;
+// el asistente borra el hash al crear el administrador. El resto de la fila es de Javier.
+enum PoliticaRegistro {
+  abierto
+  invitacion
+  cerrado
+}
+
+model ConfiguracionInstalacion {
+  id                   String           @id @default("instalacion")
+  hashCodigo           String?
+  codigoVence          DateTime?
+  politicaRegistro     PoliticaRegistro @default(invitacion)
+  cpuPorProyecto       Decimal          @db.Decimal(4, 2) @default(1)
+  memoriaMbPorProyecto Int              @default(1024)
+  proyectosPorUsuario  Int?
+  actualizado          DateTime         @updatedAt
+}

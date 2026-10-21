@@ -26,9 +26,10 @@ Autoalojar tiene que ser un comando que explique lo que hace. Hoy `scripts/despl
 ### Modified Capabilities
 
 - `instalacion`: «Instalador por etapas», «Actualizar y respaldar».
+- `suscripciones`: «Seed de autoalojado sin administrador».
 
 ## Impact
 
 - `scripts/instalar.sh`, `scripts/respaldar.sh`, `scripts/actualizar.sh`, `scripts/lib/*.sh`; reutiliza `desplegar-vps.sh`.
-- CI: `shellcheck` y pruebas con `bats` (con Eddy).
+- CI: `shellcheck` en el workflow y pruebas de shell con `node --test` (Derek, acordado con Eddy).
 - Contrato: `docs/contratos/instalacion.md`.

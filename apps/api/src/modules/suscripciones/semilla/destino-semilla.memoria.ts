@@ -1,6 +1,6 @@
 import type { Plan } from "../dominio/plan";
 import { DestinoSemilla, type UsuarioParaGuardar } from "./destino-semilla.puerto";
-import type { PlanSemilla } from "./semilla";
+import type { CodigoSemilla, PlanSemilla } from "./semilla";
 
 export interface UsuarioGuardado extends UsuarioParaGuardar {
   id: string;
@@ -10,6 +10,7 @@ export interface UsuarioGuardado extends UsuarioParaGuardar {
 export class DestinoSemillaMemoria extends DestinoSemilla {
   readonly planes: Plan[] = [];
   readonly usuarios: UsuarioGuardado[] = [];
+  codigo: CodigoSemilla | null = null;
 
   async guardarPlan(plan: PlanSemilla): Promise<void> {
     const i = this.planes.findIndex((p) => p.codigo === plan.codigo);
@@ -28,5 +29,11 @@ export class DestinoSemillaMemoria extends DestinoSemilla {
     const id = `usuario-${this.usuarios.length + 1}`;
     this.usuarios.push({ ...usuario, id });
     return id;
+  }
+
+  async guardarCodigo(codigo: CodigoSemilla): Promise<boolean> {
+    if (this.usuarios.some((usuario) => usuario.rol === "administrador")) return false;
+    this.codigo = { hashCodigo: codigo.hashCodigo, codigoVence: codigo.codigoVence };
+    return true;
   }
 }

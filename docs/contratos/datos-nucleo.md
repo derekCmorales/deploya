@@ -1,6 +1,6 @@
 # Contrato · Datos del núcleo v4.1 (schema Prisma)
 
-Versión 2 · 2026-10-20 (versión 1: 2026-09-27) · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
+Versión 2.1 · 2026-10-21 (versión 1: 2026-09-27) · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
 
 Este documento **firma** el modelo de datos del núcleo para que DB-01 salga el lunes sin idas y vueltas. Javier lo implementa en `apps/api/prisma/schema.prisma` y el seed; cualquier campo nuevo o renombrado pasa por aquí y se avisa a los consumidores antes de mergear (regla de [AGENTS.md](../../AGENTS.md)). Diagrama: [erd-unificado.mmd](../diagramas/compartido/erd-unificado.mmd).
 
@@ -473,6 +473,8 @@ model Invitacion {
 
 Seed en autoalojado: plan `autoalojado` (precio 0, sin vencimiento; sus columnas de límites no se usan porque `LimitesDeInstalacion` lee `ConfiguracionInstalacion`) y la fila de `ConfiguracionInstalacion`; no se siembran los cuatro planes de la nube ni el admin de demo.
 
+Hasta ese plan (SP-06), el seed con `MODO_INSTALACION=autoalojado` sigue creando los cuatro planes de la nube y **no** crea administrador ni cuentas de demo: si lo hiciera, `/configurar` respondería 404. `HASH_CODIGO_CONFIGURACION` (sha256 hex del código) y `CODIGO_VENCE` (ISO) los escribe `instalar.sh`; el seed los copia a `hashCodigo` y `codigoVence` solo si no hay un usuario administrador. El código en claro no se guarda.
+
 ## Cambios frente al schema de arranque
 
 | Antes | Ahora | Por qué |
@@ -492,3 +494,4 @@ Seed en autoalojado: plan `autoalojado` (precio 0, sin vencimiento; sus columnas
 | 1.2 | 2026-10-06 | Seed: las cuentas Vencida y Suspendida quedan en Starter de 30 días con `vence` en el pasado (gracia de 5 días); el hash del seed es scrypt, igual que M1. Sin cambios de tablas |
 | 1.3 | 2026-10-11 | Avance 3: sin cambios de tablas. M2-05 escribe `Suscripcion.estado` y `estadoDesde` desde la tarea diaria; M9-02 escribe `Usuario.estadoCuenta`, `motivoSuspension` y una `AccionAdministrativa` por suspensión |
 | 2 | 2026-10-20 | Sprint fuera de alcance: `Usuario.contrasenaCambiadaEn`, `MuestraMetrica`, `ConfiguracionInstalacion`, `Invitacion` y acciones administrativas nuevas. Solo agrega |
+| 2.1 | 2026-10-21 | El instalador escribe `hashCodigo` y `codigoVence`. En autoalojado el seed no crea administrador ni cuentas de demo |

@@ -530,7 +530,7 @@ Prompts para los agentes de cada persona: [handoff/prompt-sprint-fuera-de-alcanc
 |---|---|---|---|
 | `apps/web`, `apps/api` (npm) | **Ninguna** | Gráficas en SVG a mano; ilustraciones con `framer-motion` ^13.4 (ya instalado) | — |
 | CI (`.github/workflows`) | `shellcheck`, `bats-core` | Revisar y probar `instalar.sh`, `respaldar.sh`, `actualizar.sh` | Eddy con Derek (`feat-instalador-autoalojado`) |
-| CI (`.github/workflows`) | `gitleaks` | Historial y PRs sin secretos (el repo ya es público) | Eddy con Derek (`chore-open-source`) |
+| CI (`.github/workflows`) | `gitleaks` | Historial y PRs sin secretos (el repo ya es público) | Derek (`chore-open-source`) |
 | Servidor autoalojado | Docker 24+, Docker Compose v2, `curl`, `dig`, `openssl` | Requisitos que comprueba la etapa 1 del instalador | Documentado en el README (`chore-open-source`) |
 | Servicios externos | Proveedor DNS con API (Cloudflare u otro soportado por Traefik) o `--sin-comodin` | Certificado comodín por DNS-01 (ADR 0007) | Quien instala |
 

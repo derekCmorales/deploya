@@ -9,7 +9,7 @@
     "dev:api": "pnpm --filter @deploya/api dev",
     "dev:web": "pnpm --filter @deploya/web dev",
     "build": "pnpm --filter @deploya/api --filter @deploya/web build",
-    "test": "pnpm --filter @deploya/api --filter @deploya/web test",
+    "test": "pnpm --filter @deploya/api --filter @deploya/web test && node --test test/*.test.mjs",
     "test:cov": "pnpm --filter @deploya/api test:cov",
     "test:smoke": "pnpm --filter @deploya/e2e test",
     "validate:mermaid": "node scripts/validate-mermaid.mjs && node scripts/sync-diagramas.mjs --check",

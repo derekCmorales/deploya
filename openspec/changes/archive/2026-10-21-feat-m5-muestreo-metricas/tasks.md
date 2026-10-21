@@ -28,4 +28,4 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 - [x] 5.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro, si hay UI — sin UI en este change
 - [x] 5.2 `clases-unificado.mmd` si cambió un puerto o una clase; `pnpm check` en verde
-- [ ] 5.3 `/opsx-archive` después del merge — queda para la auditoría final del sprint; no se archiva en este PR
+- [x] 5.3 `/opsx-archive`: archivado en el PR #40 antes del merge

@@ -100,7 +100,7 @@ export function respuestaMetricas(entrada: EntradaRespuesta): RespuestaMetricas 
   const enVentana = corre ? muestrasEnVentana(entrada.muestras, entrada.rango, entrada.ahora) : [];
   return {
     limite: { cpu: entrada.recursos.cpus, memoriaMb: entrada.recursos.memoriaMb },
-    serie: promediosPorBloque(enVentana, tamanoDeBloque(entrada.rango)),
+    serie: serieDe(enVentana, entrada.rango, entrada.ahora),
     pico: picoDe(enVentana),
     aviso: corre ? null : AVISO_CONTENEDOR_NO_CORRE,
     despliegues: chipsDe(entrada.entradas, entrada.ahora),

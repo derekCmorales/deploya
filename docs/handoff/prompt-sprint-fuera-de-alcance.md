@@ -44,7 +44,7 @@ Día 1, antes que nada — chore-open-source (SP-09, parte urgente):
   aparezca ya está expuesto: rótalo de inmediato en el VPS (token del DNS, SMTP,
   CLAVE_CIFRADO_VARIABLES, secreto de sesión) y documenta el falso positivo o la rotación en
   .gitleaks.toml. No reescribas la historia de main.
-- Con Eddy (dueño de .github/workflows): paso de gitleaks en CI para cada PR.
+- Paso de gitleaks en CI para cada PR: lo agrega Derek en chore-open-source (acordado con Eddy, dueño de .github/workflows).
 
 1) openspec/changes/feat-m5-muestreo-metricas — SP-07 (3 pts). Rama feat/m5-muestreo-metricas.
    - MetricasContenedorPuerto + MetricasDockerStats (docker stats --no-stream --format json) en

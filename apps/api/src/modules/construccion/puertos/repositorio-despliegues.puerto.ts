@@ -1,6 +1,7 @@
 import type { Commit, Despliegue, LineaBitacora } from "../dominio/despliegue";
 import type { FiltroHistorial } from "../dominio/historial";
 import type { DisparadorDespliegue, EstadoDespliegue, EstadoEtapa, Etapa } from "../dominio/estados";
+import type { TiemposDespliegue } from "../dominio/tiempos-despliegue";
 
 export interface NuevoDespliegue {
   proyectoId: string;
@@ -31,6 +32,18 @@ export interface CambiosDespliegue {
 export interface MuestraDespliegue {
   creado: Date;
   estado: EstadoDespliegue;
+}
+
+/** Activo Saludable con contenedor: lo único que el muestreo mide. */
+export interface DespliegueMuestreable {
+  despliegueId: string;
+  contenedorId: string;
+}
+
+/** Número y hora de un despliegue que entró en la ventana de la gráfica. */
+export interface EntradaVentana {
+  numero: number;
+  creado: Date;
 }
 
 /**
@@ -70,4 +83,16 @@ export abstract class RepositorioDespliegues {
    * la actividad cuenta despliegues, no construcciones (pantalla 13).
    */
   abstract desplieguesDesde(proyectoId: string, desde: Date): Promise<MuestraDespliegue[]>;
+
+  /**
+   * Los últimos `ultimos` despliegues, del más antiguo al más reciente.
+   * Duración por etapa en ms; etapa omitida o posterior al fallo = 0.
+   */
+  abstract tiemposDe(proyectoId: string, ultimos: number): Promise<TiemposDespliegue[]>;
+
+  /** Un elemento por proyecto cuyo despliegue activo está Saludable y tiene contenedor. */
+  abstract activosSaludables(): Promise<DespliegueMuestreable[]>;
+
+  /** Despliegues creados desde `desde`, para los chips de la gráfica. */
+  abstract entraronDesde(proyectoId: string, desde: Date): Promise<EntradaVentana[]>;
 }

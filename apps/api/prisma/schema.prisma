@@ -304,6 +304,7 @@ model Despliegue {
   proyectoActivo Proyecto?         @relation("DespliegueActivo")
   etapas         EtapaDespliegue[]
   lineas         LineaBitacora[]
+  muestras       MuestraMetrica[]
 
   @@unique([proyectoId, numero])
   @@index([proyectoId, creado])
@@ -330,6 +331,18 @@ model LineaBitacora {
   texto        String
 
   @@id([despliegueId, n])
+}
+
+// M5 · SP-07 · una fila por contenedor Saludable y minuto; se purga lo de más de 24 h (datos-nucleo v2).
+model MuestraMetrica {
+  despliegueId String
+  despliegue   Despliegue @relation(fields: [despliegueId], references: [id], onDelete: Cascade)
+  tomada       DateTime
+  cpu          Decimal    @db.Decimal(6, 3)
+  memoriaMb    Int
+
+  @@id([despliegueId, tomada])
+  @@index([tomada])
 }
 
 // M2/M9 · Javier (SP-06, SP-18). Una sola fila. El instalador escribe hashCodigo y codigoVence;

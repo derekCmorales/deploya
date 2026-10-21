@@ -14,6 +14,8 @@ import { CertificadoPuerto } from "../modules/enrutamiento/puertos/certificado.p
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
 import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operacion.puerto";
 import { ContenedorPuerto } from "../modules/orquestacion/puertos/contenedor.puerto";
+import { MetricasContenedorPuerto } from "../modules/orquestacion/puertos/metricas-contenedor.puerto";
+import { MuestrasMetricas } from "../modules/orquestacion/puertos/muestras-metricas.puerto";
 import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verificacion-entorno.puerto";
 import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { RepositorioVariables } from "../modules/proyectos/puertos/repositorio-variables.puerto";
@@ -22,6 +24,7 @@ import { RecetaProyectoPrisma } from "./prisma/receta-proyecto.prisma";
 import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
+import { MuestrasMetricasPrisma } from "./prisma/muestras-metricas.prisma";
 import { RepositorioVariablesPrisma } from "./prisma/repositorio-variables.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
 import { CancelacionesRedis } from "./reales/cancelaciones-redis";
@@ -29,6 +32,7 @@ import { CertificadoAcmeArchivo } from "./reales/certificado-acme-archivo";
 import { ColaBullMq, ColaOperacionBullMq } from "./reales/cola-bullmq";
 import { ConstructorDocker } from "./reales/constructor-docker";
 import { ContenedorDocker } from "./reales/contenedor-docker";
+import { MetricasDockerStats } from "./reales/metricas-docker-stats";
 import { EnrutamientoTraefikArchivo } from "./reales/enrutamiento-traefik-archivo";
 import { VerificacionHttp } from "./reales/verificacion-http";
 import { CancelacionesMemoria } from "./stubs/cancelaciones.memoria";
@@ -38,6 +42,7 @@ import { ColaMemoria } from "./stubs/cola.memoria";
 import { ColaOperacionMemoria } from "./stubs/cola-operacion.memoria";
 import { ConstructorImagenStub } from "./stubs/constructor-imagen.stub";
 import { ContenedorStub } from "./stubs/contenedor.stub";
+import { MetricasContenedorStub } from "./stubs/metricas-contenedor.stub";
 import { EnrutamientoStub } from "./stubs/enrutamiento.stub";
 import { VerificacionEntornoStub } from "./stubs/verificacion-entorno.stub";
 
@@ -68,6 +73,7 @@ const PERSISTENCIA: Provider[] = [
   { provide: ProyectosLecturaPuerto, useExisting: RepositorioProyectos },
   { provide: DetalleProyectoPuerto, useExisting: RepositorioProyectos },
   { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
+  { provide: MuestrasMetricas, useClass: MuestrasMetricasPrisma },
 ];
 
 const COMUNES: Provider[] = [
@@ -91,6 +97,7 @@ const SOLO_TRABAJADOR: Provider[] = [
     stub: () => new ContenedorStub(),
   }),
   puerto(VerificacionEntornoPuerto, { docker: (_c, reloj) => new VerificacionHttp(reloj), stub: () => new VerificacionEntornoStub() }),
+  puerto(MetricasContenedorPuerto, { docker: () => new MetricasDockerStats(), stub: () => new MetricasContenedorStub() }),
   puerto(EnrutamientoPuerto, {
     docker: (c) =>
       new EnrutamientoTraefikArchivo({ directorio: c.traefikDinamico, ...c.enrutamiento }),

@@ -5,9 +5,12 @@ import type { Despliegue, LineaBitacora } from "../../modules/construccion/domin
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
 import { ESTADO_POR_FILTRO, type FiltroHistorial } from "../../modules/construccion/dominio/historial";
 import { DISPARADOR_SIN_CONSTRUCCION, ESTADOS_TERMINALES, ETAPAS, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
+import { tiemposDeDespliegue, type TiemposDespliegue } from "../../modules/construccion/dominio/tiempos-despliegue";
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
+  type DespliegueMuestreable,
+  type EntradaVentana,
   type MuestraDespliegue,
   type NuevoDespliegue,
 } from "../../modules/construccion/puertos/repositorio-despliegues.puerto";
@@ -163,6 +166,32 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
       select: { creado: true, estado: true },
     });
     return filas.map((f) => ({ creado: f.creado, estado: f.estado as EstadoDespliegue }));
+  }
+
+  async tiemposDe(proyectoId: string, ultimos: number): Promise<TiemposDespliegue[]> {
+    const filas = await this.prisma.despliegue.findMany({
+      where: { proyectoId },
+      orderBy: { numero: "desc" },
+      take: ultimos,
+      include: CON_ETAPAS,
+    });
+    return filas.map(despliegueDesdePrisma).map(tiemposDeDespliegue).sort((a, b) => a.numero - b.numero);
+  }
+
+  async activosSaludables(): Promise<DespliegueMuestreable[]> {
+    const filas = await this.prisma.despliegue.findMany({
+      where: { estado: "saludable", contenedorId: { not: null }, proyectoActivo: { isNot: null } },
+      select: { id: true, contenedorId: true },
+    });
+    return filas.flatMap((fila) => (fila.contenedorId ? [{ despliegueId: fila.id, contenedorId: fila.contenedorId }] : []));
+  }
+
+  async entraronDesde(proyectoId: string, desde: Date): Promise<EntradaVentana[]> {
+    return this.prisma.despliegue.findMany({
+      where: { proyectoId, creado: { gte: desde } },
+      select: { numero: true, creado: true },
+      orderBy: { creado: "asc" },
+    });
   }
 
   private async crearConSiguienteNumero(nuevo: NuevoDespliegue): Promise<Despliegue> {

@@ -1,6 +1,6 @@
 # Contrato · Modo de instalación y autoalojado (M2, M9 → M1, scripts)
 
-Versión 1.2 · 2026-10-21 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.3 · 2026-10-21 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Variables de entorno
 
@@ -67,8 +67,8 @@ PATCH /admin/instalacion/limites   { cpu, memoriaMb, proyectosPorUsuario: number
 | Script | Qué hace | Estado que deja |
 |---|---|---|
 | `scripts/instalar.sh [--continuar] [--sin-comodin] [--codigo-nuevo]` | 5 etapas: Requisitos → Dominio → Certificado → Servicios → Administrador. Comprueba antes de escribir; si falla, explica y `--continuar` retoma | `~/.deploya/estado`, `~/.deploya/instalacion.log` |
-| `scripts/respaldar.sh [--restaurar <fecha>]` | `pg_dump` + `.env` **sin** `CLAVE_CIFRADO_VARIABLES` + manifiesto; guarda 7 | `/var/backups/deploya/ultimo.json` |
-| `scripts/actualizar.sh [--volver]` | Respaldo previo → nueva versión → `prisma migrate deploy` → reinicia api, web y trabajador sin tocar los contenedores de los proyectos | `/var/backups/deploya/version.json` |
+| `scripts/respaldar.sh [--restaurar <fecha>]` | `pg_dump --clean --if-exists` dentro del contenedor de postgres + `.env` **sin** `CLAVE_CIFRADO_VARIABLES` + manifiesto; guarda 7. Restaurar detiene solo api, web y trabajador y carga con `ON_ERROR_STOP` en una transacción | `/var/backups/deploya/ultimo.json` |
+| `scripts/actualizar.sh [--volver]` | Sondeo de las apps por su URL pública → respaldo previo → checkout de la etiqueta `disponible` → `compose build` → `run --rm migracion` → `up -d --no-deps api web worker`, sin tocar los contenedores de los proyectos. `--volver`: checkout de `versionAnterior` → build → restaura `respaldoPrevio` → arriba | `/var/backups/deploya/version.json` |
 
 Todos pasan `shellcheck` en CI.
 
@@ -87,3 +87,4 @@ La etapa 2 comprueba la raíz `DOMINIO_BASE` (ahí vive la web; el comodín no l
 | 1 | 2026-10-20 | Sprint fuera de alcance (SP-06, SP-16, SP-17, SP-18, SP-19) |
 | 1.1 | 2026-10-20 | SP-16/SP-19: `SECRETO_SESION` y la forma de `ultimo.json` y `version.json` |
 | 1.2 | 2026-10-21 | El instalador escribe el hash en `ConfiguracionInstalacion`; el seed de autoalojado no crea cuentas; DNS, certificado, cron y la hora del respaldo |
+| 1.3 | 2026-10-21 | SP-19: actualizar reconstruye antes de migrar y va a la etiqueta `disponible`; sondeo por URL pública; respaldo y restauración siempre dentro del contenedor, con `--clean` y `ON_ERROR_STOP` |

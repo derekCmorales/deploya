@@ -26,6 +26,18 @@ El código en claro se imprime una vez y no se guarda. `sha256` hex y `codigoVen
 
 La etapa 2 mira la raíz y un nombre cubierto por el comodín, y de `dig` solo acepta IPv4 (un CNAME no es una IP). La etapa 3 valida el token con la API del proveedor; no dice que Let's Encrypt ya emitió. La etapa 4 reintenta HTTPS (sin `/configurar`, que es de Eddy) hasta leer el certificado. `version.json.disponible` sale de `git fetch --tags`. El respaldo se llama con la hora (`AAAA-MM-DDTHHMMSSZ`) y un cron diario a las 03:00 conserva 7.
 
+### 6. Actualizar es reconstruir, no reiniciar
+
+Las migraciones viajan dentro de la imagen de la API. `actualizar.sh` hace checkout de la etiqueta `disponible` (HEAD separado: la instalación sigue versiones, no una rama), `compose build` de api, web, trabajador y migración, `run --rm migracion` y `up -d --no-deps api web worker`. Un `restart` dejaría las imágenes viejas. Los contenedores de proyecto los crea el trabajador por la API de Docker, así que compose no los conoce y no los toca.
+
+### 7. Sondear como lo ve el usuario
+
+Desde el host, el nombre de un contenedor no resuelve. El sondeo lee la etiqueta `app.deploya.proyecto` (`deploya-p-<subdominio>`) y pide `https://<subdominio>.<DOMINIO_BASE>/`: cualquier respuesta HTTP cuenta; un timeout o un rechazo, no.
+
+### 8. Restaurar sin dejar la base a medias
+
+`pg_dump --clean --if-exists` y `psql -v ON_ERROR_STOP=1 --single-transaction`, siempre con `compose exec postgres` (en el servidor postgres no publica puertos). Restaurar detiene solo api, web y trabajador y los vuelve a subir; `--volver` reconstruye la versión anterior antes de cargar la base.
+
 ## Diseño: SOLID y patrones
 
 | Clase / puerto | Patrón | Principio | Por qué |

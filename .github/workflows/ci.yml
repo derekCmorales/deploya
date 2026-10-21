@@ -53,6 +53,18 @@ jobs:
           "${RUNNER_TEMP}/gitleaks" detect --source .
           --config .gitleaks.toml --log-opts=--all --redact --no-banner
 
+  scripts:
+    name: Scripts (shellcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # shellcheck viene en la imagen ubuntu-latest; las pruebas de los scripts corren en «Build y pruebas» (pnpm test).
+      - run: shellcheck --version
+      - name: Revisar instalar, respaldar y actualizar
+        run: >-
+          shellcheck -x scripts/instalar.sh scripts/respaldar.sh scripts/actualizar.sh
+          scripts/lib/*.sh scripts/lib/proveedores/*.sh
+
   smoke:
     name: Smoke compose
     runs-on: ubuntu-latest

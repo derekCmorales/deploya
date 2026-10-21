@@ -29,30 +29,22 @@ escribir_manifiesto() {
 EOF
 }
 
+# Siempre dentro del contenedor: en el servidor postgres no publica puertos (ports: !reset []).
+# --clean --if-exists: el volcado borra lo que encuentre antes de recrearlo, así restaura
+# aunque una migración haya quedado a medias.
 volcar_base() {
-  local salida="$1" user pass db
-  user="$(valor_env POSTGRES_USER)"
-  pass="$(valor_env POSTGRES_PASSWORD)"
-  db="$(valor_env POSTGRES_DB)"
-  if command -v pg_dump >/dev/null 2>&1; then
-    PGPASSWORD="$pass" pg_dump --file="$salida" --host=127.0.0.1 --username="$user" --dbname="$db"
-    return
-  fi
+  local salida="$1"
   preparar_compose
-  invocar_compose exec -T postgres pg_dump -U "$user" "$db" > "$salida"
+  invocar_compose exec -T postgres pg_dump --clean --if-exists --no-owner \
+    -U "$(valor_env POSTGRES_USER)" "$(valor_env POSTGRES_DB)" > "$salida"
 }
 
+# ON_ERROR_STOP y una sola transacción: un error deja la base como estaba, no a medias.
 cargar_base() {
-  local sql="$1" user pass db
-  user="$(valor_env POSTGRES_USER)"
-  pass="$(valor_env POSTGRES_PASSWORD)"
-  db="$(valor_env POSTGRES_DB)"
-  if command -v psql >/dev/null 2>&1; then
-    PGPASSWORD="$pass" psql --host=127.0.0.1 --username="$user" --dbname="$db" --file="$sql" >/dev/null
-    return
-  fi
+  local sql="$1"
   preparar_compose
-  invocar_compose exec -T postgres psql -U "$user" -d "$db" < "$sql"
+  invocar_compose exec -T postgres psql --quiet -v ON_ERROR_STOP=1 --single-transaction \
+    -U "$(valor_env POSTGRES_USER)" -d "$(valor_env POSTGRES_DB)" < "$sql" > /dev/null
 }
 
 empaquetar() {
@@ -174,8 +166,16 @@ restaurar_fecha() {
   fi
   trabajo="$(mktemp -d)"
   tar -xzf "$archivo" -C "$trabajo"
-  cargar_base "${trabajo}/base.sql"
+  # Solo la plataforma se detiene; las apps publicadas siguen sirviendo.
+  detener_plataforma
+  if ! cargar_base "${trabajo}/base.sql"; then
+    rm -rf "$trabajo"
+    levantar_plataforma
+    ui "✗ No se pudo restaurar ${pedido}: la base quedó como estaba."
+    return 1
+  fi
   restaurar_entorno "${trabajo}/entorno.env"
   rm -rf "$trabajo"
+  levantar_plataforma
   ui "✓ Restaurado ${pedido}."
 }

@@ -14,10 +14,10 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 3. CI
 
-- [ ] 3.1 `shellcheck` y `bats` en el workflow (con Eddy). Este PR no toca `.github/workflows`. `shellcheck -x` pasa en local (`scripts/.shellcheckrc`). Las seis pruebas corren con `node --test` dentro de `pnpm test`, sin bats ni Docker, para no exigir un cambio de CI.
+- [x] 3.1 `shellcheck` en el workflow: hecho por Derek (acordado con Eddy), job «Scripts (shellcheck)» en `ci.yml`. Las pruebas de shell corren con `node --test` dentro de `pnpm test` («Build y pruebas»), con dobles de `docker`, `git` y `curl`: no hace falta bats.
 
 ## 4. Cierre
 
 - [x] 4.1 Sin UI web: la salida es la terminal (ficha 30). No hay pantalla que revisar en claro y oscuro.
 - [x] 4.2 `clases-unificado.mmd` si cambió un puerto o una clase; `pnpm check` en verde. No hay puertos ni clases nuevas: el diagrama no cambia. `pnpm check` pasó.
-- [ ] 4.3 `/opsx-archive` después del merge
+- [x] 4.3 `/opsx-archive`: archivado en el PR #42 antes del merge

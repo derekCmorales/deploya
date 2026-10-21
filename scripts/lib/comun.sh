@@ -188,3 +188,14 @@ reemplazar_env() {
   install -m 600 "$tmp" "$ARCHIVO_ENTORNO"
   rm -f "$tmp"
 }
+
+# Solo api, web y trabajador: compose no conoce los contenedores de los proyectos.
+detener_plataforma() {
+  preparar_compose
+  invocar_compose stop api web worker
+}
+
+levantar_plataforma() {
+  preparar_compose
+  invocar_compose up -d --no-deps api web worker
+}

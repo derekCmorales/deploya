@@ -24,7 +24,13 @@ function dobles(dir) {
     '[[ -n "${DEPLOYA_TRAZA:-}" ]] && printf "%s\\n" "$*" >> "$DEPLOYA_TRAZA"',
     'if [[ "$1" == "version" ]]; then printf "%s\\n" "27.3"; exit 0; fi',
     'if [[ "$1" == "compose" && "$2" == "version" ]]; then printf "%s\\n" "2.29.1"; exit 0; fi',
-    'if [[ "$1" == "ps" ]]; then printf "%s\\n" "api-tienda"; exit 0; fi',
+    'if [[ "$1" == "ps" ]]; then printf "%s\\n" "deploya-p-api-tienda" "deploya-p-api-tienda"; exit 0; fi',
+    'if [[ "$*" == *" pg_dump "* ]]; then cat "$DEPLOYA_BASE_DATOS"; exit 0; fi',
+    'if [[ "$*" == *ON_ERROR_STOP* ]]; then cat > "$DEPLOYA_BASE_DATOS"; exit 0; fi',
+    'if [[ "$*" == *"run --rm migracion"* && "${DEPLOYA_MIGRACION_FALLA:-}" == "1" ]]; then',
+    '  printf "%s\\n" "migracion-fallida" > "$DEPLOYA_BASE_DATOS"',
+    "  exit 1",
+    "fi",
     'if [[ "${DEPLOYA_HAY_ADMIN:-}" == "1" && "$*" == *administrador* ]]; then printf "%s\\n" "1"; exit 0; fi',
     "exit 0",
   ]));
@@ -126,7 +132,7 @@ function dobles(dir) {
     'case "$1" in',
     '  describe) cat "$DEPLOYA_GIT_REF" ;;',
     '  pull) printf "%s\\n" "$DEPLOYA_VERSION_NUEVA" > "$DEPLOYA_GIT_REF" ;;',
-    '  checkout) printf "%s\\n" "$2" > "$DEPLOYA_GIT_REF" ;;',
+    '  checkout) printf "%s\\n" "${!#}" > "$DEPLOYA_GIT_REF" ;;',
     "  fetch) ;;",
     '  tag) cat "$DEPLOYA_GIT_TAGS" ;;',
     "esac",
@@ -234,6 +240,7 @@ function entornoPlano(ruta) {
     "POSTGRES_USER=deploya",
     "POSTGRES_PASSWORD=clave-db",
     "POSTGRES_DB=deploya",
+    "DOMINIO_BASE=apps.miempresa.com",
     `CLAVE_CIFRADO_VARIABLES="${CLAVE}"`,
     "",
   ].join("\n"));
@@ -305,6 +312,16 @@ it("Retomar", () => {
   rmSync(escena.raiz, { recursive: true, force: true });
 });
 
+function indice(lineas, prueba) {
+  const i = lineas.findIndex(prueba);
+  assert.notEqual(i, -1, lineas.join("\n"));
+  return i;
+}
+
+function sinBinariosDelHost(lineas) {
+  assert.equal(lineas.some((l) => /^(pg_dump|psql|prisma) /.test(l)), false, lineas.join("\n"));
+}
+
 it("Actualizar sin cortar", () => {
   const escena = escenario();
   entornoPlano(escena.entorno.DEPLOYA_ENV);
@@ -312,39 +329,81 @@ it("Actualizar sin cortar", () => {
   assert.equal(resultado.status, 0, detalle(resultado));
   assert.match(resultado.stdout, /api, web y trabajador reiniciados · las apps publicadas no se cortan/);
   const lineas = lineasTraza(escena.traza);
-  const curls = lineas.map((l, i) => ({ l, i })).filter(({ l }) => l.startsWith("curl ") && l.includes("api-tienda"));
-  const dump = lineas.findIndex((l) => l.startsWith("pg_dump "));
-  const migracion = lineas.findIndex((l) => l.startsWith("prisma "));
-  const reinicio = lineas.findIndex((l) => l.includes("restart") && l.includes("worker"));
-  assert.ok(curls.length >= 3);
-  assert.ok(curls[0].i < dump);
-  assert.ok(dump < migracion);
-  assert.ok(curls[curls.length - 1].i > reinicio);
-  assert.equal(lineas.some((l) => /\bstop\b/.test(l) || /\bdown\b/.test(l)), false);
+  const sondeos = lineas.map((l, i) => ({ l, i })).filter(({ l }) => l.startsWith("curl ") && l.includes("https://api-tienda.apps.miempresa.com/"));
+  const dump = indice(lineas, (l) => l.includes(" pg_dump --clean --if-exists"));
+  const checkout = indice(lineas, (l) => l === "git checkout --quiet --detach v1.1.0");
+  const build = indice(lineas, (l) => l.includes("build api web worker migracion"));
+  const migracion = indice(lineas, (l) => l.includes("run --rm migracion"));
+  const arriba = indice(lineas, (l) => l.includes("up -d --no-deps api web worker"));
+  assert.ok(sondeos.length >= 3);
+  assert.ok(sondeos[0].i < dump);
+  assert.ok(dump < checkout && checkout < build && build < migracion && migracion < arriba);
+  assert.ok(sondeos[sondeos.length - 1].i > arriba);
+  assert.equal(lineas.some((l) => /\b(stop|down|restart)\b/.test(l)), false);
   assert.equal(lineas.some((l) => l.includes("api-tienda") && /\b(stop|rm|down)\b/.test(l)), false);
+  sinBinariosDelHost(lineas);
   const version = JSON.parse(readFileSync(join(escena.respaldos, "version.json"), "utf8"));
   assert.equal(version.instalada, "v1.1.0");
   assert.equal(version.disponible, null);
+  assert.equal(version.versionAnterior, "v1.0.0");
   assert.equal(existsSync(join(escena.respaldos, "ultimo.json")), true);
+  rmSync(escena.raiz, { recursive: true, force: true });
+});
+
+it("Una app que no responde detiene la actualización antes de tocar nada", () => {
+  const escena = escenario();
+  entornoPlano(escena.entorno.DEPLOYA_ENV);
+  doble(escena.bin, "curl", sh([
+    'printf "curl %s\\n" "$*" >> "$DEPLOYA_TRAZA"',
+    'if [[ "$*" == *api-tienda* ]]; then exit 7; fi',
+    "exit 0",
+  ]));
+  const resultado = correr("actualizar.sh", [], escena.entorno);
+  assert.notEqual(resultado.status, 0);
+  assert.match(resultado.stdout, /✗ api-tienda\.apps\.miempresa\.com dejó de responder\./);
+  const lineas = lineasTraza(escena.traza);
+  assert.equal(lineas.some((l) => l.includes("pg_dump") || l.includes("checkout") || l.includes("build")), false);
+  rmSync(escena.raiz, { recursive: true, force: true });
+});
+
+it("Sin versión nueva no se toca nada", () => {
+  const escena = escenario();
+  entornoPlano(escena.entorno.DEPLOYA_ENV);
+  writeFileSync(escena.gitTags, "v1.0.0\n");
+  const resultado = correr("actualizar.sh", [], escena.entorno);
+  assert.equal(resultado.status, 0, detalle(resultado));
+  assert.match(resultado.stdout, /Ya estás en la última versión \(v1\.0\.0\)/);
+  const lineas = lineasTraza(escena.traza);
+  assert.equal(lineas.some((l) => l.includes("pg_dump") || l.includes("checkout") || l.includes("build")), false);
+  const version = JSON.parse(readFileSync(join(escena.respaldos, "version.json"), "utf8"));
+  assert.equal(version.instalada, "v1.0.0");
+  assert.equal(version.disponible, null);
   rmSync(escena.raiz, { recursive: true, force: true });
 });
 
 it("Volver", () => {
   const escena = escenario();
   entornoPlano(escena.entorno.DEPLOYA_ENV);
-  doble(escena.bin, "prisma", sh([
-    'printf "prisma %s\\n" "$*" >> "$DEPLOYA_TRAZA"',
-    'printf "%s\\n" "migracion-fallida" > "$DEPLOYA_BASE_DATOS"',
-    "exit 1",
-  ]));
-  const fallo = correr("actualizar.sh", [], escena.entorno);
+  const fallo = correr("actualizar.sh", [], { ...escena.entorno, DEPLOYA_MIGRACION_FALLA: "1" });
   assert.notEqual(fallo.status, 0);
+  assert.match(fallo.stdout, /La migración falló\./);
   assert.equal(readFileSync(escena.base, "utf8"), "migracion-fallida\n");
+  const tras = lineasTraza(escena.traza).length;
   const vuelta = correr("actualizar.sh", ["--volver"], escena.entorno);
   assert.equal(vuelta.status, 0, detalle(vuelta));
   assert.equal(readFileSync(escena.base, "utf8"), "estado-previo\n");
+  const lineas = lineasTraza(escena.traza).slice(tras);
+  const checkout = indice(lineas, (l) => l === "git checkout --quiet --detach v1.0.0");
+  const build = indice(lineas, (l) => l.includes("build api web worker migracion"));
+  const stop = indice(lineas, (l) => l.includes("stop api web worker"));
+  const psql = indice(lineas, (l) => l.includes("psql --quiet -v ON_ERROR_STOP=1 --single-transaction"));
+  const arriba = indice(lineas, (l) => l.includes("up -d --no-deps api web worker"));
+  assert.ok(checkout < build && build < stop && stop < psql && psql < arriba);
+  assert.equal(lineas.some((l) => l.includes("api-tienda") && /\b(stop|rm|down)\b/.test(l)), false);
+  sinBinariosDelHost(lineasTraza(escena.traza));
   const version = JSON.parse(readFileSync(join(escena.respaldos, "version.json"), "utf8"));
   assert.equal(version.instalada, "v1.0.0");
+  assert.equal(version.disponible, "v1.1.0");
   assert.equal(readFileSync(escena.gitRef, "utf8").trim(), "v1.0.0");
   rmSync(escena.raiz, { recursive: true, force: true });
 });
@@ -501,8 +560,14 @@ it("Versión disponible", () => {
   const actualizado = correr("actualizar.sh", [], escena.entorno);
   assert.equal(actualizado.status, 0, detalle(actualizado));
   const version = JSON.parse(readFileSync(join(escena.respaldos, "version.json"), "utf8"));
-  assert.equal(version.instalada, "v1.1.0");
-  assert.equal(version.disponible, "v1.2.0");
+  assert.equal(version.instalada, "v1.2.0");
+  assert.equal(version.disponible, null);
+  writeFileSync(escena.gitTags, "v1.0.0\nv1.1.0\nv1.2.0\nv1.3.0\n");
+  const respaldo = correr("respaldar.sh", [], escena.entorno);
+  assert.equal(respaldo.status, 0, detalle(respaldo));
+  const trasRespaldo = JSON.parse(readFileSync(join(escena.respaldos, "version.json"), "utf8"));
+  assert.equal(trasRespaldo.instalada, "v1.2.0");
+  assert.equal(trasRespaldo.disponible, "v1.3.0");
   const trazas = lineasTraza(escena.traza);
   assert.ok(trazas.some((l) => l.startsWith("git fetch")));
   rmSync(escena.raiz, { recursive: true, force: true });

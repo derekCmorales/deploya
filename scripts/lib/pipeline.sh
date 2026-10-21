@@ -21,9 +21,12 @@ etapa_ya_hecha() {
 }
 
 correr_una() {
-  local n="$1" id="$2" nombre="$3"
-  ui "[${n}/5]"
-  ui "$nombre"
+  local id="$2"
+  # marcar_ok / marcar_fallo (comun.sh) leen la etapa en curso.
+  # shellcheck disable=SC2034
+  ETAPA_N="$1"
+  # shellcheck disable=SC2034
+  ETAPA_NOMBRE="$3"
   "etapa_${id}_comprobar" || return 1
   "etapa_${id}_aplicar" || return 1
   estado_poner "$id" hecha

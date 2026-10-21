@@ -1683,6 +1683,15 @@ erDiagram
         NivelBitacora nivel "info | aviso | error"
         string texto
     }
+    CONFIGURACION_INSTALACION {
+        string id PK "una fila: instalacion"
+        string hashCodigo "sha256 del código; null si ya hay administrador"
+        datetime codigoVence "30 min"
+        PoliticaRegistro politicaRegistro "abierto | invitacion | cerrado"
+        decimal cpuPorProyecto
+        int memoriaMbPorProyecto
+        int proyectosPorUsuario "null = sin límite"
+    }
 ```
 
 ---
@@ -1943,6 +1952,14 @@ classDiagram
     }
     class RepositorioPlanesPrisma
     class RepositorioSuscripcionesPrisma
+    class DestinoSemilla {
+        <<abstract>>
+        +guardarPlan(plan) void
+        +guardarUsuario(usuario) String
+        +guardarCodigo(codigo) Boolean
+    }
+    class DestinoSemillaPrisma
+    class DestinoSemillaMemoria
     class PoliticaCiclo {
         <<State · tabla de transiciones pura>>
         +DIAS_POR_VENCER = 7
@@ -2586,6 +2603,8 @@ classDiagram
     SuscripcionesService --> RepositorioSuscripciones
     RepositorioPlanes <|-- RepositorioPlanesPrisma
     RepositorioSuscripciones <|-- RepositorioSuscripcionesPrisma
+    DestinoSemilla <|-- DestinoSemillaPrisma
+    DestinoSemilla <|-- DestinoSemillaMemoria
     PasarelaPago <|-- PasarelaSimulada
     UsuariosAdminController --> ConsultaUsuariosPuerto
     UsuariosAdminController --> SuspensionService

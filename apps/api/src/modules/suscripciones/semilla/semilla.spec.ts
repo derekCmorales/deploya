@@ -44,6 +44,10 @@ describe("usuariosSemilla", () => {
     ]);
   });
 
+  it("en autoalojado no arma administrador ni cuentas de demo", () => {
+    expect(usuariosSemilla({ MODO_INSTALACION: "autoalojado", ADMIN_CLAVE: "Clave-Admin-1" })).toEqual([]);
+  });
+
   it("usa admin@deploya.app por defecto y CLIENTE_CLAVE si está definida", () => {
     const [admin, cliente] = usuariosSemilla({ ADMIN_CLAVE: "a", CLIENTE_CLAVE: "c" });
     expect(admin.correo).toBe("admin@deploya.app");

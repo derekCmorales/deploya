@@ -1,6 +1,12 @@
 # Solo lo incluye scripts/instalar.sh. desplegar-vps.sh no lo usa: la nube sigue en modo nube.
 # Suma variables; no reemplaza el environment del VPS.
+# migracion recibe el modo y el hash: el seed no crea administrador y guarda el código.
 services:
+  migracion:
+    environment:
+      MODO_INSTALACION: autoalojado
+      HASH_CODIGO_CONFIGURACION: ${HASH_CODIGO_CONFIGURACION:?Define HASH_CODIGO_CONFIGURACION en .env}
+      CODIGO_VENCE: ${CODIGO_VENCE:?Define CODIGO_VENCE en .env}
   api:
     environment:
       MODO_INSTALACION: autoalojado

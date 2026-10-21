@@ -18,6 +18,5 @@ certificado_comprobar() {
 }
 
 certificado_aplicar() {
-  ui "✓"
-  ui "Certificados por proyecto (HTTP-01)"
+  marcar_ok "Certificados por proyecto (HTTP-01)"
 }

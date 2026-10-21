@@ -26,6 +26,7 @@ Autoalojar tiene que ser un comando que explique lo que hace. Hoy `scripts/despl
 ### Modified Capabilities
 
 - `instalacion`: «Instalador por etapas», «Actualizar y respaldar».
+- `suscripciones`: «Seed de autoalojado sin administrador».
 
 ## Impact
 

@@ -146,3 +146,12 @@ erDiagram
         NivelBitacora nivel "info | aviso | error"
         string texto
     }
+    CONFIGURACION_INSTALACION {
+        string id PK "una fila: instalacion"
+        string hashCodigo "sha256 del código; null si ya hay administrador"
+        datetime codigoVence "30 min"
+        PoliticaRegistro politicaRegistro "abierto | invitacion | cerrado"
+        decimal cpuPorProyecto
+        int memoriaMbPorProyecto
+        int proyectosPorUsuario "null = sin límite"
+    }

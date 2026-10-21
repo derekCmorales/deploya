@@ -39,6 +39,25 @@ version_descrita() {
   git describe --tags --always
 }
 
+traer_etiquetas() {
+  git fetch --tags --quiet origin
+}
+
+lista_etiquetas() {
+  git tag --list 'v*' 2>/dev/null || true
+}
+
+disponible_para() {
+  local actual="$1" ultima
+  ultima="$(lista_etiquetas | sed '/^$/d' | sort -V | tail -1)"
+  if [[ -z "$ultima" || "$ultima" == "$actual" ]]; then
+    return 0
+  fi
+  if [[ "$(printf '%s\n%s\n' "$actual" "$ultima" | sort -V | tail -1)" == "$ultima" ]]; then
+    printf '%s' "$ultima"
+  fi
+}
+
 traer_codigo() {
   git pull --ff-only origin "${DEPLOYA_RAMA:-main}"
 }
@@ -61,19 +80,36 @@ reiniciar_plataforma() {
   invocar_compose restart api web worker
 }
 
-escribir_version() {
-  local instalada="$1" disponible="$2" previo="$3" anterior="$4" disp="null"
-  if [[ -n "$disponible" && "$disponible" != "null" ]]; then
-    disp="\"${disponible}\""
+json_valor() {
+  if [[ -z "$1" || "$1" == "null" ]]; then
+    printf 'null'
+    return
   fi
+  printf '"%s"' "$1"
+}
+
+escribir_version() {
+  local instalada="$1" disponible="$2" previo="$3" anterior="$4"
+  asegurar_respaldos
   cat > "${DIR_RESPALDOS}/version.json" <<EOF
 {
-  "instalada": "${instalada}",
-  "disponible": ${disp},
-  "respaldoPrevio": "${previo}",
-  "versionAnterior": "${anterior}"
+  "instalada": $(json_valor "$instalada"),
+  "disponible": $(json_valor "$disponible"),
+  "respaldoPrevio": $(json_valor "$previo"),
+  "versionAnterior": $(json_valor "$anterior")
 }
 EOF
+}
+
+refrescar_disponible() {
+  local instalada disponible previo anterior archivo
+  traer_etiquetas || true
+  instalada="$(version_descrita || true)"
+  disponible="$(disponible_para "$instalada")"
+  archivo="${DIR_RESPALDOS}/version.json"
+  previo="$(leer_json "$archivo" respaldoPrevio || true)"
+  anterior="$(leer_json "$archivo" versionAnterior || true)"
+  escribir_version "$instalada" "$disponible" "$previo" "$anterior"
 }
 
 anunciar_volver() {
@@ -112,18 +148,19 @@ paso_respaldo() {
 
 actualizar() {
   local anterior nueva
+  traer_etiquetas || true
   sondear_proyectos || return 1
   anterior="$(version_descrita)"
   paso_respaldo || return 1
   traer_codigo
   nueva="$(version_descrita)"
-  escribir_version "$anterior" "$nueva" "$ULTIMO_TAR" "$anterior"
+  escribir_version "$anterior" "$(disponible_para "$anterior")" "$ULTIMO_TAR" "$anterior"
   sondear_proyectos || return 1
   aplicar_migracion || return 1
   sondear_proyectos || return 1
   reiniciar_plataforma
   sondear_proyectos || return 1
-  escribir_version "$nueva" "null" "$ULTIMO_TAR" "$anterior"
+  escribir_version "$nueva" "$(disponible_para "$nueva")" "$ULTIMO_TAR" "$anterior"
   anunciar_exito "$nueva"
 }
 
@@ -134,11 +171,12 @@ volver_actualizacion() {
     ui "No hay una actualización que volver."
     return 1
   fi
+  traer_etiquetas || true
   anterior="$(leer_json "$archivo" versionAnterior)"
   previo="$(leer_json "$archivo" respaldoPrevio)"
   fecha="$(basename "$previo" .tar.gz)"
   restaurar_fecha "$fecha"
   regresar_codigo "$anterior"
-  escribir_version "$anterior" "null" "$previo" "$anterior"
+  escribir_version "$anterior" "$(disponible_para "$anterior")" "$previo" "$anterior"
   ui "✓ Versión ${anterior} y la base anteriores."
 }

@@ -21,6 +21,48 @@
 - **WHEN** se corre `--continuar` después de corregir el DNS
 - **THEN** no repite la etapa 1 y sigue en la 2
 
+#### Scenario: Código que la API puede validar
+
+- **WHEN** la instalación termina
+- **THEN** `.env` guarda el sha256 del código y `CODIGO_VENCE` a 30 min, el código en claro no queda en `.env` ni en la bitácora, y el seed de autoalojado copia ese hash a `ConfiguracionInstalacion`
+
+#### Scenario: Código nuevo invalida el anterior
+
+- **WHEN** se corre `--codigo-nuevo` antes de que exista un administrador
+- **THEN** el hash anterior desaparece, el nuevo vence a los 30 min y se vuelve a sembrar
+- **WHEN** ya hay un administrador
+- **THEN** el comando no cambia el hash
+
+#### Scenario: HTTPS espera al certificado
+
+- **WHEN** el certificado tarda en responder
+- **THEN** la etapa 4 reintenta `https://<dominio>/` hasta que HTTPS y el certificado están listos, sin pedir `/configurar`
+
+#### Scenario: La raíz del dominio también se comprueba
+
+- **WHEN** el comodín apunta a esta máquina y la raíz no
+- **THEN** se detiene sin escribir `.env` y dice qué registro A crear para la raíz
+
+#### Scenario: Un CNAME no se toma por una IP
+
+- **WHEN** `dig` devuelve un CNAME y después la IPv4 de esta máquina
+- **THEN** la etapa 2 sigue
+
+#### Scenario: Token del proveedor inválido
+
+- **WHEN** el token DNS no está activo
+- **THEN** se detiene en la etapa 3 sin decir que el comodín ya fue emitido y sin escribir `.env`
+
+#### Scenario: Salida de etapa correcta
+
+- **WHEN** una comprobación pasa
+- **THEN** la línea es `[n/5] Nombre ✓ detalle`
+
+#### Scenario: Pasos de qué hacer en líneas distintas
+
+- **WHEN** el DNS no apunta
+- **THEN** el paso 2 y el paso 3 de «Qué hacer» van en líneas distintas
+
 ### Requirement: Actualizar y respaldar
 
 `actualizar.sh` SHALL respaldar antes de cambiar de versión, migrar la base y reiniciar api, web y trabajador sin detener los contenedores de los proyectos; `--volver` SHALL restaurar el respaldo previo. `respaldar.sh` SHALL guardar la base y la configuración sin la clave de cifrado y conservar 7.
@@ -39,3 +81,13 @@
 
 - **WHEN** se corre `respaldar.sh`
 - **THEN** el archivo no contiene `CLAVE_CIFRADO_VARIABLES` y quedan como mucho 7 respaldos
+
+#### Scenario: Versión disponible
+
+- **WHEN** `git fetch --tags` ve una etiqueta mayor que la instalada
+- **THEN** `version.json.disponible` es esa etiqueta
+
+#### Scenario: Dos respaldos del mismo día no se pisan
+
+- **WHEN** hay un respaldo a las 03:00 y otro el mismo día
+- **THEN** quedan los dos archivos y `ultimo.json.ultimo` trae la hora

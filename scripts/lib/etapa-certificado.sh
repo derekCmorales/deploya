@@ -5,8 +5,7 @@ exigir_correo_acme() {
   if [[ -n "${DEPLOYA_ACME_CORREO:-}" ]]; then
     return 0
   fi
-  ui "✗"
-  ui "Falta el correo de Let's Encrypt (DEPLOYA_ACME_CORREO)."
+  marcar_fallo "Falta el correo de Let's Encrypt (DEPLOYA_ACME_CORREO)."
   return 1
 }
 

@@ -25,3 +25,49 @@ codigo_configuracion() {
   done
   printf '%s-%s' "${crudo:0:4}" "${crudo:4:4}"
 }
+
+MINUTOS_VIGENCIA_CODIGO=30
+
+hash_codigo() {
+  printf '%s' "$1" | openssl dgst -sha256 | awk '{ print $NF }'
+}
+
+vence_codigo() {
+  local base="${DEPLOYA_AHORA:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+  date -u -d "${base} + ${MINUTOS_VIGENCIA_CODIGO} minutes" +%Y-%m-%dT%H:%M:%SZ
+}
+
+cargar_pendiente() {
+  local archivo="${DEPLOYA_HOME}/codigo.pendiente" hash vence
+  [[ -f "$archivo" ]] || return 1
+  hash="$(leer_par "$archivo" HASH_CODIGO_CONFIGURACION)" || return 1
+  vence="$(leer_par "$archivo" CODIGO_VENCE)" || return 1
+  HASH_CODIGO="$hash"
+  VENCE_CODIGO="$vence"
+  CODIGO_EN_CURSO=""
+  # shellcheck disable=SC2034
+  CODIGO_PENDIENTE=1
+  rm -f "$archivo"
+}
+
+preparar_codigo() {
+  if [[ "$FORZAR_CODIGO" != 1 && -n "$HASH_CODIGO" && -n "$VENCE_CODIGO" ]]; then
+    return 0
+  fi
+  if [[ "$FORZAR_CODIGO" != 1 ]] && cargar_pendiente; then
+    return 0
+  fi
+  CODIGO_EN_CURSO="$(codigo_configuracion)"
+  HASH_CODIGO="$(hash_codigo "$CODIGO_EN_CURSO")"
+  VENCE_CODIGO="$(vence_codigo)"
+  # etapa-administrador distingue un código recién generado de uno pendiente.
+  # shellcheck disable=SC2034
+  CODIGO_PENDIENTE=0
+}
+
+guardar_pendiente() {
+  local archivo="${DEPLOYA_HOME}/codigo.pendiente"
+  mkdir -p "$DEPLOYA_HOME"
+  printf 'HASH_CODIGO_CONFIGURACION="%s"\nCODIGO_VENCE="%s"\n' "$HASH_CODIGO" "$VENCE_CODIGO" > "$archivo"
+  chmod 600 "$archivo"
+}

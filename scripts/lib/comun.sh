@@ -19,6 +19,17 @@ REQ_RAM_MB=""
 REQ_DISCO_GB=""
 ULTIMO_TAR=""
 COMPOSE_ARCHIVOS=()
+CONSERVA_RESPALDOS=7
+HORA_RESPALDO=3
+ETAPA_N=0
+ETAPA_NOMBRE=""
+CODIGO_EN_CURSO=""
+HASH_CODIGO=""
+VENCE_CODIGO=""
+CODIGO_PENDIENTE=0
+FORZAR_CODIGO=0
+ZONA_DNS=""
+CERT_TEXTO=""
 
 init_rutas() {
   export LC_ALL=C
@@ -49,6 +60,20 @@ fecha_respaldo() {
   local marca
   marca="$(marca_tiempo)"
   printf '%s' "${marca:0:10}"
+}
+
+# 2026-10-20T03:00:00Z → 2026-10-20T030000Z. Dos respaldos del mismo día no comparten archivo.
+sello_respaldo() {
+  local marca="$1"
+  printf '%s' "${marca:0:13}${marca:14:2}${marca:17:2}Z"
+}
+
+marcar_ok() {
+  ui "[${ETAPA_N}/5] ${ETAPA_NOMBRE} ✓ $*"
+}
+
+marcar_fallo() {
+  ui "[${ETAPA_N}/5] ${ETAPA_NOMBRE} ✗ $*"
 }
 
 bitacora_visible() {
@@ -131,4 +156,35 @@ invocar_compose() {
     return
   fi
   docker compose --env-file "$ARCHIVO_ENTORNO" "${COMPOSE_ARCHIVOS[@]}" "$@"
+}
+
+leer_par() {
+  local archivo="$1" clave="$2" linea valor
+  [[ -f "$archivo" ]] || return 1
+  while IFS= read -r linea || [[ -n "$linea" ]]; do
+    if [[ "${linea%%=*}" == "$clave" ]]; then
+      valor="${linea#*=}"
+      valor="${valor%\"}"
+      valor="${valor#\"}"
+      printf '%s' "$valor"
+      return 0
+    fi
+  done < "$archivo"
+  return 1
+}
+
+reemplazar_env() {
+  local clave="$1" valor="$2" tmp linea
+  tmp="$(mktemp)"
+  if [[ -f "$ARCHIVO_ENTORNO" ]]; then
+    while IFS= read -r linea || [[ -n "$linea" ]]; do
+      if [[ "${linea%%=*}" == "$clave" ]]; then
+        continue
+      fi
+      printf '%s\n' "$linea" >> "$tmp"
+    done < "$ARCHIVO_ENTORNO"
+  fi
+  printf '%s="%s"\n' "$clave" "$valor" >> "$tmp"
+  install -m 600 "$tmp" "$ARCHIVO_ENTORNO"
+  rm -f "$tmp"
 }

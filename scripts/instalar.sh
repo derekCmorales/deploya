@@ -46,10 +46,15 @@ source "${LIB}/etapa-servicios.sh"
 source "${LIB}/etapa-administrador.sh"
 # shellcheck source=lib/pipeline.sh
 source "${LIB}/pipeline.sh"
+# shellcheck source=lib/programa.sh
+source "${LIB}/programa.sh"
+# shellcheck source=lib/actualizacion.sh
+source "${LIB}/actualizacion.sh"
 
 init_rutas
 cd "$RAIZ"
 if [[ "$CODIGO_NUEVO" == "1" ]]; then
+  cargar_estrategia_guardada
   emitir_codigo_nuevo
   exit 0
 fi

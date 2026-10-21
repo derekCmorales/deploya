@@ -10,6 +10,8 @@ source "${LIB}/comun.sh"
 source "${LIB}/estrategia.sh"
 # shellcheck source=lib/respaldo-comando.sh
 source "${LIB}/respaldo-comando.sh"
+# shellcheck source=lib/actualizacion.sh
+source "${LIB}/actualizacion.sh"
 
 init_rutas
 cargar_estrategia_guardada
@@ -32,3 +34,4 @@ if [[ $# -gt 0 ]]; then
   exit 2
 fi
 crear_respaldo
+refrescar_disponible || true

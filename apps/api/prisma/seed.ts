@@ -20,8 +20,11 @@ async function main(): Promise<void> {
       planes,
       reloj,
     });
+    const autoalojado = process.env.MODO_INSTALACION === "autoalojado";
     console.log(
-      "Seed listo: 4 planes, administrador, cliente@ y demo@ con Sandbox; vencida@ y suspendida@ en Starter (Vencida y Suspendida)",
+      autoalojado
+        ? "Seed listo: 4 planes; sin administrador ni cuentas de demo (autoalojado)"
+        : "Seed listo: 4 planes, administrador, cliente@ y demo@ con Sandbox; vencida@ y suspendida@ en Starter (Vencida y Suspendida)",
     );
   } finally {
     await prisma.$disconnect();

@@ -4,25 +4,25 @@ minVersion = "8.30.1"
 [extend]
 useDefault = true
 
-# Falsos positivos ya vistos en todo el historial. No son secretos: la regla
-# generic-api-key toma la ruta del módulo que sigue a «API:». condition = AND
-# (commit + ruta + texto) para no saltarse el commit ni el archivo entero.
-# Commit 2eed9d6d0a26d119df17dc5b5ce4bc966cf9b0dc. No se rotó nada.
+# Falsos positivos. No son secretos: generic-api-key toma la ruta del módulo
+# que sigue a «API:». condition = AND (ruta + texto exacto) y targetRules solo
+# esa regla: no se ignora el archivo entero ni la regla en el resto del repo.
+# Sin anclar el commit: un checkout superficial atribuye las mismas líneas al
+# único commit del clon, no a 2eed9d6d0a26d119df17dc5b5ce4bc966cf9b0dc (donde
+# entraron). No se rotó nada.
 
 [[allowlists]]
-description = "Falso positivo: ruta de módulo observabilidad/tiempos/, no es una clave. Regla generic-api-key, openspec/changes/feat-m7-tiempo-por-etapa/proposal.md línea 31, commit 2eed9d6d0a26d119df17dc5b5ce4bc966cf9b0dc."
+description = "Falso positivo: ruta de módulo observabilidad/tiempos/, no es una clave. Regla generic-api-key, openspec/changes/feat-m7-tiempo-por-etapa/proposal.md línea 31."
 targetRules = ["generic-api-key"]
 condition = "AND"
-commits = ["2eed9d6d0a26d119df17dc5b5ce4bc966cf9b0dc"]
 paths = ['''openspec/changes/feat-m7-tiempo-por-etapa/proposal\.md''']
 regexTarget = "secret"
 regexes = ['''^observabilidad/tiempos/$''']
 
 [[allowlists]]
-description = "Falso positivo: ruta de módulo observabilidad/consumo/, no es una clave. Regla generic-api-key, openspec/changes/feat-m7-ritmo-construcciones/proposal.md línea 31, commit 2eed9d6d0a26d119df17dc5b5ce4bc966cf9b0dc."
+description = "Falso positivo: ruta de módulo observabilidad/consumo/, no es una clave. Regla generic-api-key, openspec/changes/feat-m7-ritmo-construcciones/proposal.md línea 31."
 targetRules = ["generic-api-key"]
 condition = "AND"
-commits = ["2eed9d6d0a26d119df17dc5b5ce4bc966cf9b0dc"]
 paths = ['''openspec/changes/feat-m7-ritmo-construcciones/proposal\.md''']
 regexTarget = "secret"
 regexes = ['''^observabilidad/consumo/$''']

@@ -52,6 +52,39 @@ async function asegurarGitleaks() {
   return binario;
 }
 
+function clonSuperficial() {
+  const marca = execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
+    cwd: repo,
+    encoding: "utf8",
+  });
+  return marca.trim() === "true";
+}
+
+function detalleFallo(error) {
+  const stderr = error.stderr?.toString?.().trim();
+  if (stderr) return stderr;
+  return error.message;
+}
+
+/** actions/checkout deja un solo commit; sin esto el escaneo no ve el historial. */
+function completarHistorial() {
+  if (!clonSuperficial()) return;
+  try {
+    execFileSync("git", ["fetch", "--unshallow"], {
+      cwd: repo,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+    });
+  } catch (error) {
+    const detalle = detalleFallo(error);
+    throw new Error(`el clon es superficial y git fetch --unshallow falló: ${detalle}`);
+  }
+  if (clonSuperficial()) {
+    throw new Error("el clon sigue siendo superficial después de git fetch --unshallow");
+  }
+}
+
 function argumentos(informe) {
   return [
     "detect",
@@ -66,6 +99,7 @@ function argumentos(informe) {
 }
 
 it("Historial sin secretos", { timeout: ESPERA_ESCANEO_MS }, async () => {
+  completarHistorial();
   const bin = await asegurarGitleaks();
   const informe = join(cache, "informe.json");
   execFileSync(bin, argumentos(informe), { cwd: repo, stdio: "pipe" });

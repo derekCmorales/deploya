@@ -4,9 +4,12 @@ import type { Despliegue, LineaBitacora } from "../../modules/construccion/domin
 import { DespliegueNoEncontrado } from "../../modules/construccion/dominio/errores";
 import { ESTADO_POR_FILTRO, type FiltroHistorial } from "../../modules/construccion/dominio/historial";
 import { DISPARADOR_SIN_CONSTRUCCION, ETAPAS, estaTerminado, type EstadoDespliegue, type EstadoEtapa, type Etapa } from "../../modules/construccion/dominio/estados";
+import { tiemposDeDespliegue, type TiemposDespliegue } from "../../modules/construccion/dominio/tiempos-despliegue";
 import {
   RepositorioDespliegues,
   type CambiosDespliegue,
+  type DespliegueMuestreable,
+  type EntradaVentana,
   type MuestraDespliegue,
   type NuevoDespliegue,
 } from "../../modules/construccion/puertos/repositorio-despliegues.puerto";
@@ -144,6 +147,32 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return [...this.despliegues.values()]
       .filter((d) => d.proyectoId === proyectoId && d.creado >= desde)
       .map((d) => ({ creado: d.creado, estado: d.estado }));
+  }
+
+  async tiemposDe(proyectoId: string, ultimos: number): Promise<TiemposDespliegue[]> {
+    const recientes = this.delProyecto(proyectoId).sort((a, b) => b.numero - a.numero).slice(0, ultimos);
+    return structuredClone(recientes.sort((a, b) => a.numero - b.numero).map(tiemposDeDespliegue));
+  }
+
+  async activosSaludables(): Promise<DespliegueMuestreable[]> {
+    return [...this.activos.values()].flatMap((id) => this.muestreable(id));
+  }
+
+  async entraronDesde(proyectoId: string, desde: Date): Promise<EntradaVentana[]> {
+    return this.delProyecto(proyectoId)
+      .filter((despliegue) => despliegue.creado >= desde)
+      .map((despliegue) => ({ numero: despliegue.numero, creado: despliegue.creado }))
+      .sort((a, b) => a.creado.getTime() - b.creado.getTime());
+  }
+
+  private delProyecto(proyectoId: string): Despliegue[] {
+    return [...this.despliegues.values()].filter((despliegue) => despliegue.proyectoId === proyectoId);
+  }
+
+  private muestreable(id: string): DespliegueMuestreable[] {
+    const despliegue = this.despliegues.get(id);
+    if (despliegue?.estado !== "saludable" || !despliegue.contenedorId) return [];
+    return [{ despliegueId: despliegue.id, contenedorId: despliegue.contenedorId }];
   }
 
   private obtener(id: string): Despliegue {

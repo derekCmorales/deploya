@@ -4,7 +4,7 @@
 
 ### Requirement: Métricas de contenedor
 
-El trabajador SHALL tomar una muestra de CPU y memoria por minuto del contenedor activo Saludable de cada proyecto y SHALL purgar las muestras de más de 24 h. La API SHALL devolver la serie de 1 h (por minuto) o 24 h (promedio cada 30 min) con el límite aplicado y los despliegues que entraron en la ventana.
+El trabajador SHALL tomar una muestra de CPU y memoria por minuto del contenedor activo Saludable de cada proyecto y SHALL purgar las muestras de más de 24 h. La API SHALL devolver la serie de 1 h (por minuto) o 24 h (promedio de cada cubo de 30 min alineado a :00/:30 UTC) con el límite aplicado, el pico de CPU y memoria de las muestras crudas de la ventana, un aviso cuando el contenedor no corre y los despliegues que entraron en la ventana.
 
 #### Scenario: Muestra de un contenedor Saludable
 
@@ -25,6 +25,11 @@ El trabajador SHALL tomar una muestra de CPU y memoria por minuto del contenedor
 
 - **WHEN** se piden 24 h
 - **THEN** la serie trae 48 puntos promediados
+
+#### Scenario: Pico de la ventana
+
+- **WHEN** se piden 24 h y la memoria llegó a 452 MB a las 14:00
+- **THEN** `pico.memoriaMb` es `{ valor: 452, en: 14:00 }` aunque el promedio de ese cubo sea menor
 
 #### Scenario: Despliegues en la ventana
 

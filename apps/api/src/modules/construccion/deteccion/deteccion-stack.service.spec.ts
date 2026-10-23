@@ -1,10 +1,13 @@
 import { LectorFuenteMemoria } from "../../../adapters/stubs/clonador.stub";
 import { StackNoReconocido } from "../dominio/errores";
-import { DeteccionStackService } from "./deteccion-stack.service";
+import { DeteccionStackService, type ResultadoDeteccion } from "./deteccion-stack.service";
+import { textoDockerfile } from "./dockerfile-receta";
 import { recetasEnOrden } from "./recetas-stack";
 import { RecetaStack } from "./receta-stack";
 
 const paquete = (scripts: Record<string, string>) => JSON.stringify({ name: "app", scripts });
+const texto = (resultado: ResultadoDeteccion): string => (resultado.dockerfile ? textoDockerfile(resultado.dockerfile) : "");
+const lineasCon = (dockerfile: string, prefijo: string): string[] => dockerfile.split("\n").filter((linea) => linea.startsWith(prefijo));
 
 function detectarEn(archivos: Record<string, string>, rutaDockerfile?: string) {
   const servicio = new DeteccionStackService(recetasEnOrden());
@@ -40,15 +43,15 @@ describe("DeteccionStackService (M4-03)", () => {
     expect(resultado.descripcion).toBe("Node.js 22 · npm start");
     expect(resultado.evidencia).toContain("package.json");
     expect(resultado.puertoSugerido).toBe(8080);
-    expect(resultado.dockerfile).toContain("RUN npm install");
+    expect(texto(resultado)).toContain("RUN npm install");
   });
 
   it("Node con lockfile y script build usa npm ci y npm run build", async () => {
     const resultado = await detectarEn({ "package.json": paquete({ start: "node dist", build: "tsc" }), "package-lock.json": "{}" });
 
     expect(resultado.evidencia).toEqual(["package.json", "package-lock.json"]);
-    expect(resultado.dockerfile).toContain("RUN npm ci");
-    expect(resultado.dockerfile).toContain("RUN npm run build");
+    expect(texto(resultado)).toContain("RUN npm ci");
+    expect(texto(resultado)).toContain("RUN npm run build");
   });
 
   it("Proyecto Python sin Dockerfile", async () => {
@@ -56,26 +59,26 @@ describe("DeteccionStackService (M4-03)", () => {
 
     expect(resultado.receta).toBe("python");
     expect(resultado.descripcion).toBe("Python 3.12 · python main.py");
-    expect(resultado.dockerfile).toContain('CMD ["python", "main.py"]');
+    expect(texto(resultado)).toContain('CMD ["python", "main.py"]');
   });
 
   it("Python con gunicorn en requisitos arranca con gunicorn sobre app.py", async () => {
     const resultado = await detectarEn({ "requirements.txt": "flask\ngunicorn==22.0\n", "app.py": "app = None" });
 
-    expect(resultado.dockerfile).toContain('CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]');
+    expect(texto(resultado)).toContain('CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]');
   });
 
   it("Python con pyproject.toml instala el paquete", async () => {
     const resultado = await detectarEn({ "pyproject.toml": "[project]\nname='x'\n", "main.py": "" });
 
-    expect(resultado.dockerfile).toContain("RUN pip install --no-cache-dir .");
+    expect(texto(resultado)).toContain("RUN pip install --no-cache-dir .");
   });
 
   it("Proyecto Go sin Dockerfile", async () => {
     const resultado = await detectarEn({ "go.mod": "module ejemplo\n\ngo 1.23\n" });
 
     expect(resultado.receta).toBe("go");
-    expect(resultado.dockerfile).toContain("CGO_ENABLED=0 go build");
+    expect(texto(resultado)).toContain("CGO_ENABLED=0 go build");
   });
 
   it("Sitio estático", async () => {
@@ -83,7 +86,7 @@ describe("DeteccionStackService (M4-03)", () => {
 
     expect(resultado.receta).toBe("estatica");
     expect(resultado.puertoSugerido).toBe(8080);
-    expect(resultado.dockerfile).toContain("FROM nginxinc/nginx-unprivileged:alpine");
+    expect(texto(resultado)).toContain("FROM nginxinc/nginx-unprivileged:alpine");
   });
 
   it("Stack no reconocido", async () => {
@@ -130,6 +133,35 @@ describe("DeteccionStackService (M4-03)", () => {
   });
 });
 
+describe("Capas del Dockerfile generado", () => {
+  it("Capas comunes en una receta", async () => {
+    const dockerfile = texto(await detectarEn({ "go.mod": "module x" }));
+
+    expect(lineasCon(dockerfile, "ENV PORT=")).toEqual(["ENV PORT=8080"]);
+    expect(lineasCon(dockerfile, "EXPOSE")).toEqual(["EXPOSE 8080"]);
+    expect(lineasCon(dockerfile, "USER ").at(-1)).toBe("USER nonroot:nonroot");
+  });
+
+  it("El sitio estático no termina como root", async () => {
+    const dockerfile = texto(await detectarEn({ "index.html": "" }));
+
+    expect(lineasCon(dockerfile, "USER ")).toEqual(["USER root", "USER 101"]);
+  });
+
+  it("Node no recibe un usuario extra", async () => {
+    const lineas = texto(await detectarEn({ "package.json": paquete({ start: "node ." }) })).split("\n");
+
+    expect(lineas.filter((linea) => linea.startsWith("USER "))).toEqual(["USER node"]);
+    expect(lineas.indexOf("USER node")).toBeLessThan(lineas.indexOf("RUN npm install"));
+  });
+
+  it("la descripción lista las capas comunes en orden", async () => {
+    const resultado = await detectarEn({ "requirements.txt": "flask", "main.py": "" });
+
+    expect(resultado.dockerfile?.descripcion()).toBe("Python 3.12 · puerto 8080 · usuario 10001");
+  });
+});
+
 describe("Plantillas de las recetas", () => {
   const archivosQueActivan: Record<string, Record<string, string>> = {
     node: { "package.json": paquete({ start: "node ." }) },
@@ -139,11 +171,19 @@ describe("Plantillas de las recetas", () => {
   };
   const conPlantilla = recetasEnOrden().filter((receta: RecetaStack) => receta.receta !== "dockerfile");
 
-  it.each(conPlantilla.map((r) => [r.receta, r] as const))("%s escucha en PORT=8080 y corre con un USER sin privilegios", (receta, estrategia) => {
-    const dockerfile = estrategia.dockerfile(archivosQueActivan[receta]) ?? "";
+  it.each(conPlantilla.map((r) => [r.receta] as const))("%s escucha en PORT=8080 una sola vez y termina con un USER sin privilegios", async (receta) => {
+    const dockerfile = texto(await detectarEn(archivosQueActivan[receta]));
 
-    expect(dockerfile).toContain("ENV PORT=8080");
-    expect(dockerfile).toMatch(/^USER (node|10001|101|nonroot:nonroot)$/m);
-    expect(dockerfile.trimEnd().split("\n").reverse().find((l) => l.startsWith("USER "))).not.toBe("USER root");
+    expect(lineasCon(dockerfile, "ENV PORT=")).toEqual(["ENV PORT=8080"]);
+    expect(lineasCon(dockerfile, "EXPOSE ")).toEqual(["EXPOSE 8080"]);
+    expect(lineasCon(dockerfile, "USER ").at(-1)).toMatch(/^USER (node|10001|101|nonroot:nonroot)$/);
+  });
+
+  it("ninguna base repite las capas comunes", () => {
+    for (const receta of conPlantilla) {
+      const base = receta.dockerfile(archivosQueActivan[receta.receta]);
+
+      expect(base?.instrucciones().some((linea) => linea.startsWith("ENV PORT=") || linea.startsWith("EXPOSE "))).toBe(false);
+    }
   });
 });

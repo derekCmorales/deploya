@@ -1,5 +1,6 @@
 import { PUERTO_RECETAS, VERSION_NODE } from "../deteccion.constantes";
 import { existe, presentes, type MapaArchivos } from "../mapa-archivos";
+import { DockerfileBase } from "../dockerfile-receta";
 import { plantillaNode } from "../plantillas";
 import { RecetaStack, type DescripcionReceta } from "../receta-stack";
 
@@ -15,6 +16,8 @@ export class RecetaNode extends RecetaStack {
   readonly receta = "node" as const;
   readonly nombre = `Node.js ${VERSION_NODE}`;
   readonly archivosQueLee = [PACKAGE_JSON, LOCKFILE];
+  /** Su base ya fija `USER node` antes de `npm ci`. */
+  readonly usuarioFinal = null;
 
   reconoce(archivos: MapaArchivos): boolean {
     return tieneScript(archivos, "start");
@@ -24,8 +27,8 @@ export class RecetaNode extends RecetaStack {
     return { descripcion: `${this.nombre} · npm start`, evidencia: presentes(archivos, this.archivosQueLee) };
   }
 
-  dockerfile(archivos: MapaArchivos): string {
-    return plantillaNode({ conLockfile: existe(archivos, LOCKFILE), conBuild: tieneScript(archivos, "build") });
+  dockerfile(archivos: MapaArchivos): DockerfileBase {
+    return new DockerfileBase(this.nombre, plantillaNode({ conLockfile: existe(archivos, LOCKFILE), conBuild: tieneScript(archivos, "build") }));
   }
 
   puertoSugerido(): number {

@@ -79,6 +79,7 @@ Cada change de OpenSpec **nombra** en su `design.md` qué patrones usa y por qu�
 | M2 Suscripciones | **Facade** | `SuscripcionesService.asignarSandbox`, `cuotaDe` | Una sola puerta para los demás módulos |
 | M3 Proyectos | **Adapter** detrás de `ProveedorFuente` | Validación contra la API pública de GitHub | El controlador no sabe que existe GitHub |
 | M4 Construcción | **Productor / consumidor** + **Command** | Cola BullMQ detrás de un puerto de cola; el trabajo es un comando serializable | Construir fuera del ciclo HTTP |
+| M4 Construcción | **Decorator** (GoF) + **Strategy** | `DockerfileReceta` ← `DockerfileBase` (la receta la elige) envuelta por `ConPuertoDeploya`, `ConUsuarioSinPrivilegios` y `ConEtiqueta` (`deteccion/capas/`) | Capas comunes y del despliegue sin repetirlas en cada plantilla ni crear una subclase por combinación |
 | M4–M6 Motor | **Máquina de estados** (State) | `TransicionesDespliegue`: Encolado → Construyendo → Aprovisionando → Publicando → Saludable / Fallido / Cancelado | Una sola fuente de verdad para transiciones válidas |
 | M5 Orquestación | **Adapter** | `ContenedorPuerto` → dockerode | La API nunca llama a Docker |
 | M6 Enrutamiento | **Adapter** | `EnrutamientoPuerto` → etiquetas de Traefik | Cambiar de enrutador sin tocar M5 |

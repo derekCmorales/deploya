@@ -35,7 +35,7 @@ export interface ResultadoDeteccion {
   puertoSugerido: number;     // EXPOSE del Dockerfile o el de la receta (8080)
   evidencia: string[];        // archivos que decidieron: ["package.json", "package-lock.json"]
   nombre: string;             // v2.1 · «Node.js 22» (bitácora: «Stack detectado: Node.js 22 · receta Deploya»)
-  dockerfile: string | null;  // v2.1 · el Dockerfile.deploya de la receta; null si manda el del repo (M3 lo ignora)
+  dockerfile: DockerfileReceta | null;  // v3.4 · base + capas comunes (Decorator); el trabajador agrega etiquetas y lo escribe como Dockerfile.deploya; null si manda el del repo (M3 lo ignora)
 }
 // Sin Dockerfile ni stack reconocido: lanza StackNoReconocido → 11e «falta Dockerfile y no se reconoce el stack»
 // StackNoReconocido.pista: «agrega un script start o un Dockerfile» (Node sin start), etc. M3 la muestra en 11e.
@@ -223,3 +223,4 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 3.1 | 2026-10-14 | Solo aclara: `ContenedoresClientePuerto` y su adaptador `ContenedoresClienteM5` viven en M5 (`orquestacion/`) y `OrquestacionModule` exporta el token; `ProyectosLecturaPuerto.deUsuario` (interno de M4/M5) |
 | 3.2 | 2026-10-14 | Solo aclara `PATCH /proyectos/:id`: los códigos de error son los de M3 en kebab-case (`nombre-repetido`, `ruta-invalida`, `puerto-invalido`, `repositorio-no-accesible`, `rama-no-encontrada`), no los nombres de clase; el único consumidor es la pantalla 19 |
 | 3.3 | 2026-10-14 | Solo precisa `GET /despliegues/:id`: `certificado` es `{ vence }` (ISO 8601) solo si la `url` es https y Traefik ya emitió el certificado; en cualquier otro caso, `null` |
+| 3.4 | 2026-10-23 | Solo cambia un tipo que M3 no lee: `ResultadoDeteccion.dockerfile` pasa de `string \| null` a `DockerfileReceta \| null` (capas del Dockerfile generado, `feat-m4-capas-dockerfile`) |

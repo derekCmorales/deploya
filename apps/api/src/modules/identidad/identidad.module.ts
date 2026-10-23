@@ -11,6 +11,7 @@ import { CONFIGURACION_COOKIE, configuracionCookieDesde } from "./cookie-sesion"
 import { CONFIGURACION_IDENTIDAD, configuracionIdentidadDesde } from "./configuracion-identidad";
 import { CuentaController } from "./cuenta.controller";
 import { CuentaService } from "./cuenta.service";
+import { DirectorioCuentas } from "./directorio-cuentas.service";
 import { IdentidadController } from "./identidad.controller";
 import { IdentidadService } from "./identidad.service";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
@@ -39,6 +40,7 @@ import { SesionService } from "./sesion.service";
     SesionService,
     RecuperacionService,
     CuentaService,
+    DirectorioCuentas,
     SesionGuard,
     RolGuard,
     { provide: CONFIGURACION_IDENTIDAD, useFactory: () => configuracionIdentidadDesde(process.env) },
@@ -50,6 +52,6 @@ import { SesionService } from "./sesion.service";
     { provide: GeneradorToken, useClass: GeneradorTokenCripto },
     { provide: AsignacionSandboxPuerto, useClass: AsignacionSandboxSuscripciones },
   ],
-  exports: [IdentidadService, SesionService, SesionGuard, RolGuard],
+  exports: [IdentidadService, SesionService, SesionGuard, RolGuard, DirectorioCuentas],
 })
 export class IdentidadModule {}

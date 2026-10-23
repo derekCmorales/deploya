@@ -1,10 +1,12 @@
 # Contrato · Avisos por correo (M10 ← M4, M2)
 
-Versión 1 · 2026-10-20 · dueño: Eddy (M10) · consumidores: Derek (M4, pipeline), Javier (M2, ciclo §4.4). Cambiarlo exige avisar antes de mergear. Change: `feat-m10-avisos-correo`. Spec: [notificaciones](../../openspec/specs/notificaciones/spec.md). Pantalla: 24b del canvas.
+Versión 1.1 · 2026-10-22 · dueño: Eddy (M10) · consumidores: Derek (M4, pipeline), Javier (M2, ciclo §4.4). Cambiarlo exige avisar antes de mergear. Change: `feat-m10-avisos-correo`. Spec: [notificaciones](../../openspec/specs/notificaciones/spec.md). Pantalla: 24b del canvas.
 
 ## Puerto
 
-`NotificacionesModule` exporta `AvisosPuerto`. Quien lo llama no sabe de SMTP ni de plantillas (Observer + Adapter). Implementación: `AvisosCorreo` (busca el correo del titular, arma la plantilla y la manda por `CorreoPuerto`).
+`AvisosModule` (`apps/api/src/modules/notificaciones/avisos/avisos.module.ts`) exporta `AvisosPuerto`; el puerto y sus tipos se importan de `modules/notificaciones` (`index.ts`). Quien lo llama no sabe de SMTP ni de plantillas (Observer + Adapter). Implementación: `AvisosCorreo` (busca al titular por `DirectorioCuentas`, que exporta `IdentidadModule`, arma la plantilla y la manda por `CorreoPuerto`).
+
+Va en un módulo aparte de `NotificacionesModule` porque necesita a identidad, que ya importa `NotificacionesModule` para el correo de verificación: así no hay ciclo de módulos. Lo importan el trabajador de despliegues (M4) y el módulo del ciclo (M2).
 
 ```ts
 export abstract class AvisosPuerto {
@@ -16,7 +18,7 @@ export abstract class AvisosPuerto {
 
 export interface AvisoDespliegue {
   usuarioId: string;
-  proyecto: { nombre: string; subdominio: string };
+  proyecto: { id: string; nombre: string; subdominio: string }; // id: enlace «Ver bitácora» (/projects/:id/despliegues/:n)
   despliegue: { numero: number; commit: string; estado: "saludable" | "fallido"; duracionMs: number };
   url?: string;                                   // solo Saludable
   fallo?: { etapa: string; versionActiva: number | null; ultimasLineas: string[] }; // solo Fallido, máx. 2 líneas
@@ -28,6 +30,7 @@ export interface AvisoSuscripcion {
   plan: string;              // "Starter"
   venceEl?: string;          // ISO, solo Por vencer
   precio?: string;           // "USD 5.00", solo Por vencer
+  vigenciaDias?: number;     // 30 o 365, solo Por vencer: «Starter · 30 días»
   contenedoresDetenidos?: number; // solo Suspendida
 }
 ```
@@ -45,3 +48,4 @@ export interface AvisoSuscripcion {
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1 | 2026-10-20 | Sprint fuera de alcance (SP-02, SP-04, SP-08) |
+| 1.1 | 2026-10-22 | `AvisosModule` exporta el puerto (sin ciclo con identidad); `proyecto.id` en `AvisoDespliegue` para el enlace a la bitácora; `vigenciaDias` opcional en `AvisoSuscripcion` |

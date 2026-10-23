@@ -1847,6 +1847,24 @@ classDiagram
     }
     class PlantillaVerificacion
     class PlantillaRecuperacion
+    class PlantillaDespliegueSaludable
+    class PlantillaDespliegueFallido
+    class PlantillaPlanPorVencer
+    class PlantillaSuscripcionSuspendida
+    class AvisosPuerto {
+        <<abstract>>
+        +despliegueTerminado(aviso) void
+        +suscripcionCambio(aviso) void
+    }
+    class AvisosCorreo
+    class DestinatariosPuerto {
+        <<abstract>>
+        +destinatarioDe(usuarioId) Destinatario
+    }
+    class DestinatariosDeIdentidad
+    class DirectorioCuentas {
+        +contactoDe(usuarioId) ContactoCuenta
+    }
     class CorreoNoEnviado {
         <<error>>
     }
@@ -2606,6 +2624,16 @@ classDiagram
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
     PlantillaCorreo <|-- PlantillaRecuperacion
+    PlantillaCorreo <|-- PlantillaDespliegueSaludable
+    PlantillaCorreo <|-- PlantillaDespliegueFallido
+    PlantillaCorreo <|-- PlantillaPlanPorVencer
+    PlantillaCorreo <|-- PlantillaSuscripcionSuspendida
+    AvisosPuerto <|-- AvisosCorreo
+    AvisosCorreo --> CorreoPuerto
+    AvisosCorreo --> DestinatariosPuerto
+    DestinatariosPuerto <|-- DestinatariosDeIdentidad
+    DestinatariosDeIdentidad --> DirectorioCuentas
+    DirectorioCuentas --> RepositorioUsuarios
     PagosController --> HistorialPagosService
     HistorialPagosService --> RepositorioPagos
     HistorialPagosService --> ComprobantePdfPuerto

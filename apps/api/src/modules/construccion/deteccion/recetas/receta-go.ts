@@ -1,4 +1,5 @@
-import { PUERTO_RECETAS, VERSION_GO } from "../deteccion.constantes";
+import { PUERTO_RECETAS, USUARIO_DISTROLESS, VERSION_GO } from "../deteccion.constantes";
+import { DockerfileBase } from "../dockerfile-receta";
 import { existe, type MapaArchivos } from "../mapa-archivos";
 import { plantillaGo } from "../plantillas";
 import { RecetaStack, SIN_OPCIONES, type DescripcionReceta, type OpcionesReceta } from "../receta-stack";
@@ -11,6 +12,7 @@ export class RecetaGo extends RecetaStack {
   readonly nombre = `Go ${VERSION_GO}`;
   readonly archivosQueLee = [GO_MOD];
   override readonly aplicaComandoConstruccion = true;
+  readonly usuarioFinal = USUARIO_DISTROLESS;
 
   reconoce(archivos: MapaArchivos): boolean {
     return existe(archivos, GO_MOD);
@@ -20,8 +22,8 @@ export class RecetaGo extends RecetaStack {
     return { descripcion: `${this.nombre} · binario estático`, evidencia: [GO_MOD] };
   }
 
-  dockerfile(_archivos: MapaArchivos, opciones: OpcionesReceta = SIN_OPCIONES): string {
-    return plantillaGo(opciones.comandoConstruccion);
+  dockerfile(_archivos: MapaArchivos, opciones: OpcionesReceta = SIN_OPCIONES): DockerfileBase {
+    return new DockerfileBase(this.nombre, plantillaGo(opciones.comandoConstruccion));
   }
 
   puertoSugerido(): number {

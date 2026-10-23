@@ -94,7 +94,34 @@ describe("PipelineDespliegue (plan construcción, puertos en stub)", () => {
     expect(textos).toContain("Stack detectado: Node.js 22 · receta Deploya");
   });
 
-  it("El Dockerfile manda: no escribe Dockerfile.deploya y construye con el del repositorio", async () => {
+  it("Etiquetas del despliegue: el Dockerfile.deploya lleva revisión, fuente y proyecto", async () => {
+    const motor = motorDePrueba();
+    motor.clonador.archivos = new Map([["go.mod", "module hola"]]);
+
+    await motor.desplegar();
+
+    const lineas = motor.clonador.escritos[0].contenido.split("\n");
+    expect(lineas).toEqual(
+      expect.arrayContaining([
+        `LABEL org.opencontainers.image.revision="${motor.clonador.commit.sha}"`,
+        'LABEL org.opencontainers.image.source="https://github.com/derekCmorales/hola-deploya"',
+        'LABEL deploya.proyecto="hola-deploya"',
+      ]),
+    );
+    expect(lineas.filter((linea) => linea.startsWith("USER ")).at(-1)).toBe("USER nonroot:nonroot");
+  });
+
+  it("Las capas en la bitácora: Recepción registra la pila en el orden en que se aplicó", async () => {
+    const motor = motorDePrueba();
+    motor.clonador.archivos = new Map([["requirements.txt", "flask"], ["main.py", ""]]);
+
+    const despliegue = await motor.desplegar();
+
+    const textos = (await motor.despliegues.lineasDesde(despliegue.id, 0, 500)).map((l) => l.texto);
+    expect(textos).toContain("Capas: Python 3.12 · puerto 8080 · usuario 10001 · etiqueta revision · etiqueta source · etiqueta proyecto");
+  });
+
+  it("El Dockerfile propio no se decora: no escribe Dockerfile.deploya, construye con el del repositorio y no registra capas", async () => {
     const motor = motorDePrueba();
     motor.clonador.archivos.set("package.json", JSON.stringify({ scripts: { start: "node server.js" } }));
 
@@ -105,6 +132,7 @@ describe("PipelineDespliegue (plan construcción, puertos en stub)", () => {
     expect(motor.artefactos.artefactos[0].receta).toBe("dockerfile");
     const textos = (await motor.despliegues.lineasDesde(despliegue.id, 0, 500)).map((l) => l.texto);
     expect(textos).toContain("Dockerfile detectado (Dockerfile)");
+    expect(textos.some((texto) => texto.startsWith("Capas:"))).toBe(false);
   });
 
   it("Contenedor saludable: publica, detiene el anterior y el nuevo pasa a ser el activo", async () => {

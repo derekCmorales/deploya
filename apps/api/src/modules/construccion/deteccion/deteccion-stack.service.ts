@@ -2,13 +2,15 @@ import { Inject, Injectable, type Provider } from "@nestjs/common";
 import { StackNoReconocido } from "../dominio/errores";
 import type { RecetaConstruccion } from "../dominio/estados";
 import type { LectorFuente } from "../puertos/lector-fuente.puerto";
+import { capasComunes } from "./capas/capas-comunes";
 import { PISTA_GENERAL, RUTA_DOCKERFILE } from "./deteccion.constantes";
+import type { DockerfileReceta } from "./dockerfile-receta";
 import { LectorDockerfileEn } from "./lector-dockerfile-en";
 import type { MapaArchivos } from "./mapa-archivos";
 import type { RecetaStack } from "./receta-stack";
 import { RECETAS_STACK, recetasEnOrden } from "./recetas-stack";
 
-/** Contrato de despliegues v2 (`ResultadoDeteccion`); `nombre` y `dockerfile` los agrega v2.1 para el trabajador. */
+/** Contrato de despliegues v2 (`ResultadoDeteccion`); `nombre` y `dockerfile` los agrega v2.1 y v3.4 tipa `dockerfile`. */
 export interface ResultadoDeteccion {
   receta: RecetaConstruccion;
   /** «Node.js 22», para «Stack detectado: Node.js 22 · receta Deploya». */
@@ -16,13 +18,14 @@ export interface ResultadoDeteccion {
   descripcion: string;
   puertoSugerido: number;
   evidencia: string[];
-  /** El `Dockerfile.deploya` que hay que escribir; `null` si se usa el del repositorio. */
-  dockerfile: string | null;
+  /** El `Dockerfile.deploya` con las capas comunes; el trabajador le suma las suyas. `null` si se usa el del repositorio. */
+  dockerfile: DockerfileReceta | null;
 }
 
 /**
  * M4-03: la primera receta que reconoce la rama decide cómo se construye (Chain of
- * Responsibility sobre Strategy). Solo orquesta la lectura y el orden.
+ * Responsibility sobre Strategy). Solo orquesta la lectura y el orden; las capas comunes del
+ * Dockerfile generado las arma `capasComunes` (Decorator).
  */
 @Injectable()
 export class DeteccionStackService {
@@ -38,8 +41,13 @@ export class DeteccionStackService {
       nombre: receta.nombre,
       ...receta.describir(archivos),
       puertoSugerido: receta.puertoSugerido(archivos),
-      dockerfile: receta.dockerfile(archivos),
+      dockerfile: this.conCapasComunes(receta, archivos),
     };
+  }
+
+  private conCapasComunes(receta: RecetaStack, archivos: MapaArchivos): DockerfileReceta | null {
+    const base = receta.dockerfile(archivos);
+    return base && capasComunes(base, receta.usuarioFinal);
   }
 
   private async leer(fuente: LectorFuente): Promise<MapaArchivos> {

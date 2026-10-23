@@ -9,4 +9,6 @@ export const VERSION_GO = "1.23";
 export const UID_SIN_PRIVILEGIOS = 10001;
 /** Usuario de `nginxinc/nginx-unprivileged`. */
 export const UID_NGINX = 101;
+/** Usuario de `gcr.io/distroless/static:nonroot`. */
+export const USUARIO_DISTROLESS = "nonroot:nonroot";
 export const PISTA_GENERAL = "agrega un Dockerfile en la raíz del repositorio";

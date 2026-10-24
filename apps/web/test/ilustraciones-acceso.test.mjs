@@ -93,6 +93,10 @@ test("SP-01 · el halo y la flotación no se cortan en el borde del dibujo", () 
   }
 });
 
+test("SP-01 · el halo no se ve antes de su retraso", () => {
+  assert.match(reglaDe("dy-respira"), /^\s*opacity: 0;/m);
+});
+
 test("SP-01 · las utilidades nuevas solo animan transform y opacity", () => {
   for (const nombre of ["dy-aparece", "dy-crece-x", "dy-respira", "dy-oscila"]) {
     const propiedades = [...keyframesDe(nombre).matchAll(/^\s*([a-z-]+):/gm)].map((m) => m[1]);

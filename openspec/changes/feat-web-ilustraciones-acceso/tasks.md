@@ -10,7 +10,7 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 - [x] 2.1 Ilustraciones de 01 y 03 con el movimiento nuevo; utilidades `dy-aparece`, `dy-crece-x`, `dy-crece-centro`, `dy-respira` y `dy-oscila` en `globals.css` y en la tabla Movimiento del README de diseño
 - [x] 2.2 Pruebas: «Movimiento reducido», «Ilustración decorativa», «Solo tokens» (`node --test` en `test/ilustraciones-acceso.test.mjs`) y que las utilidades nuevas solo animen `transform` y `opacity`
-- [ ] 2.3 Capturas en claro y oscuro en el PR
+- [x] 2.3 Capturas en claro y oscuro en el PR
 
 ## 3. Cierre
 

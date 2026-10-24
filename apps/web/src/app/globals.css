@@ -222,8 +222,9 @@
     animation-delay: var(--retraso, 0ms);
   }
 
-  /* Halo del punto de Señal: se abre y se apaga. */
+  /* Halo del punto de Señal: se abre y se apaga. Oculto mientras espera su `--retraso`. */
   .dy-respira {
+    opacity: 0;
     transform-box: fill-box;
     transform-origin: center;
     animation: dy-respira 3.2s ease-out infinite;

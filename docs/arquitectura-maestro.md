@@ -1873,13 +1873,49 @@ classDiagram
     %% ───────── M2 Suscripciones · M9 Administración (Javier) ─────────
     class SuscripcionesService {
         <<Facade>>
-        -planes RepositorioPlanes
+        -catalogoPlanes CatalogoPlanes
         -suscripciones RepositorioSuscripciones
+        -cuotas PoliticaCuotas
         -reloj Reloj
         +catalogo() PlanCatalogo[]
         +asignarSandbox(usuarioId) void
         +cuotaDe(usuarioId) Cuota
     }
+    class CatalogoPlanes {
+        <<abstract · Strategy SP-06>>
+        +enVenta() PlanCatalogo[]
+        +planInicial() Plan
+        +exigirCobro() void
+    }
+    class CatalogoNube
+    class CatalogoAutoalojado
+    class PoliticaCuotas {
+        <<abstract · Strategy SP-06>>
+        +cuotaDe(suscripcion) Cuota
+    }
+    class CuotasDelPlan
+    class LimitesDeInstalacion
+    class AltaPrimerUsuario {
+        <<abstract · Strategy SP-06>>
+        +configurada() boolean
+        +validarCodigo(codigo) void
+        +consumirCodigo() void
+    }
+    class ComoCliente
+    class ConCodigoDeConfiguracion
+    class RepositorioConfiguracionInstalacion {
+        <<abstract · Repository>>
+        +limites() LimitesInstalacion
+        +codigo() CodigoConfiguracion
+        +borrarCodigo() void
+        +hayAdministrador() boolean
+    }
+    class RepositorioConfiguracionInstalacionPrisma
+    class CobroDisponibleGuard
+    class InstalacionController {
+        +estado() EstadoModo
+    }
+    class ColaCicloApagada
     class ContratacionService {
         -planes RepositorioPlanes
         -suscripciones RepositorioSuscripciones
@@ -2676,7 +2712,22 @@ classDiagram
     PasarelaSimulada --> Espera
     Espera <|-- EsperaTemporizador
     SuscripcionesService ..> Cuota
-    SuscripcionesService --> RepositorioPlanes
+    SuscripcionesService --> CatalogoPlanes
+    SuscripcionesService --> PoliticaCuotas
+    CatalogoPlanes <|-- CatalogoNube
+    CatalogoPlanes <|-- CatalogoAutoalojado
+    CatalogoNube --> RepositorioPlanes
+    CatalogoAutoalojado --> RepositorioPlanes
+    PoliticaCuotas <|-- CuotasDelPlan
+    PoliticaCuotas <|-- LimitesDeInstalacion
+    LimitesDeInstalacion --> RepositorioConfiguracionInstalacion
+    AltaPrimerUsuario <|-- ComoCliente
+    AltaPrimerUsuario <|-- ConCodigoDeConfiguracion
+    ConCodigoDeConfiguracion --> RepositorioConfiguracionInstalacion
+    RepositorioConfiguracionInstalacion <|-- RepositorioConfiguracionInstalacionPrisma
+    CobroDisponibleGuard --> CatalogoPlanes : exigirCobro
+    InstalacionController --> AltaPrimerUsuario
+    ColaCicloPuerto <|-- ColaCicloApagada
     SuscripcionesService --> RepositorioSuscripciones
     RepositorioPlanes <|-- RepositorioPlanesPrisma
     RepositorioSuscripciones <|-- RepositorioSuscripcionesPrisma

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { IdentidadModule } from "../../identidad/identidad.module";
+import { AvisosModule } from "../../notificaciones/avisos/avisos.module";
 import { OrquestacionModule } from "../../orquestacion/orquestacion.module";
 import { SuscripcionesModule } from "../suscripciones.module";
 import { CicloController } from "./ciclo.controller";
@@ -12,7 +13,7 @@ import { ReactivacionService } from "./reactivacion.service";
  * Exporta `ReactivacionService` para que `CobroModule` reanude al renovar una Suspendida.
  */
 @Module({
-  imports: [SuscripcionesModule, OrquestacionModule, IdentidadModule],
+  imports: [SuscripcionesModule, OrquestacionModule, IdentidadModule, AvisosModule],
   controllers: [CicloController],
   providers: [CicloSuscripcionService, ReactivacionService],
   exports: [ReactivacionService],

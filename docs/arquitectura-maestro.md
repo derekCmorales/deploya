@@ -1990,6 +1990,7 @@ classDiagram
     class CicloSuscripcionService {
         -suscripciones RepositorioSuscripciones
         -contenedores ContenedoresClientePuerto
+        -avisos AvisosPuerto
         -reloj Reloj
         +ejecutar() ResultadoCiclo
     }
@@ -2644,6 +2645,7 @@ classDiagram
     CicloSuscripcionService --> PoliticaCiclo
     CicloSuscripcionService --> RepositorioSuscripciones
     CicloSuscripcionService --> ContenedoresClientePuerto : detenerTodos
+    CicloSuscripcionService --> AvisosPuerto : suscripcionCambio (SP-04)
     ReactivacionService --> ContratacionService : decora contratar
     ReactivacionService --> ContenedoresClientePuerto : reanudarTodos
     CobroController --> ReactivacionService

@@ -4,6 +4,7 @@ import { RepositorioSuscripcionesMemoria } from "../adaptadores/repositorio-susc
 import { CicloSuscripcionService } from "./ciclo-suscripcion.service";
 import { PATRON_CICLO, ZONA_CICLO } from "./ciclo.constantes";
 import { ColaCicloMemoria } from "./cola-ciclo.memoria";
+import { AvisosFalso } from "./avisos.falso";
 import { ContenedoresClienteFalso } from "./contenedores-cliente.falso";
 import { TareaCicloDiaria } from "./tarea-ciclo-diaria";
 
@@ -18,7 +19,7 @@ describe("M2-05 · TareaCicloDiaria", () => {
       inicio: new Date("2026-10-01T00:05:00.000Z"),
       vence: new Date("2026-10-31T00:05:00.000Z"),
     });
-    const ciclo = new CicloSuscripcionService(suscripciones, new ContenedoresClienteFalso(), new RelojFijo(new Date("2026-10-24T00:05:00.000Z")));
+    const ciclo = new CicloSuscripcionService(suscripciones, new ContenedoresClienteFalso(), new AvisosFalso(), new RelojFijo(new Date("2026-10-24T00:05:00.000Z")));
     const cola = new ColaCicloMemoria();
     return { tarea: new TareaCicloDiaria(cola, ciclo), cola, suscripciones };
   }

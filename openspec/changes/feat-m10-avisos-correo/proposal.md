@@ -8,7 +8,7 @@ Hoy Deploya solo manda verificación y recuperación. El cliente no se entera de
 
 ## What Changes
 
-- `AvisosPuerto` exportado por `NotificacionesModule` con `despliegueTerminado` y `suscripcionCambio` (contrato `docs/contratos/avisos.md`).
+- `AvisosPuerto` con `despliegueTerminado` y `suscripcionCambio` (contrato `docs/contratos/avisos.md` v1.1), exportado por `AvisosModule`, que importa notificaciones e identidad.
 - Plantillas `PlantillaDespliegueSaludable`, `PlantillaDespliegueFallido`, `PlantillaPlanPorVencer`, `PlantillaSuscripcionSuspendida` (24b).
 - M4: `AvisoDespliegueOyente` registrado en `OYENTES_DESPLIEGUE`.
 - M2: el ciclo llama a `suscripcionCambio` en la transición a Por vencer y a Suspendida.
@@ -32,5 +32,5 @@ Hoy Deploya solo manda verificación y recuperación. El cliente no se entera de
 
 ## Impact
 
-- API: `notificaciones/puertos/avisos.puerto.ts`, `notificaciones/avisos/avisos-correo.ts`, `notificaciones/dominio/plantilla-*.ts`; `construccion/avisos/aviso-despliegue.oyente.ts`; `suscripciones/ciclo/ciclo-suscripcion.service.ts`.
+- API: `notificaciones/puertos/avisos.puerto.ts` y `destinatarios.puerto.ts`, `notificaciones/avisos/` (`AvisosCorreo`, `AvisosModule`), `notificaciones/dominio/plantillas-avisos.ts` y `formato-aviso.ts`; `identidad/directorio-cuentas.service.ts` (exportado); `construccion/avisos/aviso-despliegue.oyente.ts`; `suscripciones/ciclo/ciclo-suscripcion.service.ts`.
 - Contrato nuevo: `docs/contratos/avisos.md`. Sin tablas.

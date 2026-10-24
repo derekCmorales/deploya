@@ -4,9 +4,9 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 1. Plantillas y puerto (Eddy)
 
-- [ ] 1.1 Cuatro plantillas sobre `PlantillaCorreo` con los textos de 24b
-- [ ] 1.2 `AvisosPuerto` y `AvisosCorreo`; exportar en `NotificacionesModule`; `docs/contratos/avisos.md`
-- [ ] 1.3 Pruebas: «Despliegue saludable», «Despliegue fallido», «Error del SMTP»
+- [x] 1.1 Cuatro plantillas sobre `PlantillaCorreo` con los textos de 24b (ganchos opcionales en el esqueleto; verificación y recuperación sin cambios)
+- [x] 1.2 `AvisosPuerto` y `AvisosCorreo`; exportados por `AvisosModule` (sin ciclo con identidad); `DirectorioCuentas` exportado por identidad; `docs/contratos/avisos.md` v1.1
+- [x] 1.3 Pruebas: «Despliegue saludable», «Despliegue fallido», «Error del SMTP»; plantillas, formatos y textos de Por vencer y Suspendida para SP-04
 
 ## 2. Gancho del pipeline (Derek, SP-08)
 

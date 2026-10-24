@@ -9,3 +9,5 @@ Dueño: Eddy. Spec: [`openspec/specs/notificaciones/spec.md`](../../../../../ope
 **Fuera de alcance (solo si da el tiempo):** Correos de resultado de despliegue, de vencimiento de plan y de cuota.
 
 Hecho (M10-01, change `feat-m10-correo-verificacion`): `CorreoPuerto`, `CorreoSmtpAdaptador`, `CorreoConsolaAdaptador` y `PlantillaVerificacion`. Otros módulos importan solo de `index.ts`. M10-02 (change `feat-m1-recuperacion`): `PlantillaRecuperacion` sobre el mismo esqueleto (botón «Crear contraseña nueva», enlace en texto plano, 30 minutos y un solo uso).
+
+Sprint fuera de alcance (SP-02, change `feat-m10-avisos-correo`): `AvisosPuerto` (contrato `docs/contratos/avisos.md`) con `AvisosCorreo` y las cuatro plantillas de 24b (despliegue saludable y fallido, plan por vencer, suscripción suspendida). Lo exporta `AvisosModule` (`avisos/avisos.module.ts`), que importa este módulo e identidad; lo usan el trabajador de despliegues (M4) y el ciclo (M2). Un fallo de envío se registra y no llega a quien avisa.

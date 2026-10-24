@@ -1,3 +1,8 @@
+/** Quién puede crear una cuenta en una instalación autoalojada (SP-18). */
+export type PoliticaRegistro = "abierto" | "invitacion" | "cerrado";
+
+export const POLITICA_POR_DEFECTO: PoliticaRegistro = "invitacion";
+
 /** Una sola fila (`id = instalacion`), datos-nucleo.md v2. Solo existe en autoalojado. */
 export interface LimitesInstalacion {
   cpuPorProyecto: number;

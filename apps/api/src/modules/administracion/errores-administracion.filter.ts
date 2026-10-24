@@ -11,6 +11,12 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   MotivoInvalido: HttpStatus.BAD_REQUEST,
   DetalleInvalido: HttpStatus.BAD_REQUEST,
   ConsultaInvalida: HttpStatus.BAD_REQUEST,
+  InstalacionSoloAutoalojada: HttpStatus.NOT_FOUND,
+  AjusteInvalido: HttpStatus.BAD_REQUEST,
+  InvitacionNoEncontrada: HttpStatus.NOT_FOUND,
+  RegistroCerrado: HttpStatus.FORBIDDEN,
+  InvitacionRequerida: HttpStatus.FORBIDDEN,
+  InvitacionNoValida: HttpStatus.GONE,
 };
 
 /** Traduce los errores de dominio de M9 a `{ codigo, mensaje }` en el borde. */

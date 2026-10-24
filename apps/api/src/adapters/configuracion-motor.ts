@@ -16,6 +16,8 @@ export interface ConfiguracionMotor {
   trabajadorContenedor: string;
   trabajadorConcurrencia: number;
   directorioTrabajo: string;
+  /** Proyecto de compose de deploya: cuenta sus contenedores en Admin · Instalación (SP-18). */
+  proyectoCompose: string;
 }
 
 export const CONFIGURACION_MOTOR = Symbol("CONFIGURACION_MOTOR");
@@ -31,5 +33,6 @@ export function configuracionDesde(entorno: NodeJS.ProcessEnv): ConfiguracionMot
     trabajadorContenedor: entorno.TRABAJADOR_CONTENEDOR ?? "deploya-worker",
     trabajadorConcurrencia: Number(entorno.TRABAJADOR_CONCURRENCIA ?? 1),
     directorioTrabajo: entorno.DIRECTORIO_TRABAJO ?? join(tmpdir(), "deploya"),
+    proyectoCompose: entorno.COMPOSE_PROJECT_NAME ?? "deploya",
   };
 }

@@ -364,3 +364,17 @@ model ConfiguracionInstalacion {
   proyectosPorUsuario  Int?
   actualizado          DateTime         @updatedAt
 }
+
+// M9 · Javier (SP-18). Un solo uso, vence a los 7 días; solo se guarda el hash del token.
+model Invitacion {
+  id        String    @id @default(uuid())
+  correo    String
+  hashToken String    @unique
+  vence     DateTime
+  usada     DateTime?
+  revocada  DateTime?
+  creadaPor String // adminId
+  creado    DateTime  @default(now())
+
+  @@index([vence])
+}

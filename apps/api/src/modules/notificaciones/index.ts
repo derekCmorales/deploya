@@ -7,3 +7,4 @@ export { PLANTILLA_RECUPERACION, type DatosRecuperacion } from "./dominio/planti
 export { PLANTILLA_VERIFICACION, type DatosVerificacion } from "./dominio/plantilla-verificacion";
 export { CorreoPuerto } from "./puertos/correo.puerto";
 export { AvisosPuerto, type AvisoDespliegue, type AvisoSuscripcion } from "./puertos/avisos.puerto";
+export { RegistroEnviosCorreo, type EnvioCorreo } from "./puertos/registro-envios.puerto";

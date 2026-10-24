@@ -1,6 +1,6 @@
 # Contrato · Modo de instalación y autoalojado (M2, M9 → M1, scripts)
 
-Versión 1.4 · 2026-10-24 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.5 · 2026-10-24 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Variables de entorno
 
@@ -66,6 +66,12 @@ PATCH /admin/instalacion/limites   { cpu, memoriaMb, proyectosPorUsuario: number
 
 `SaludInstalacion` (Composite) junta comprobaciones independientes: Docker, DNS comodín, certificado (`CertificadoPuerto` de M6), disco y último envío de correo. Cada una es una clase.
 
+**Cómo se arma (SP-18).** La API no llama a Docker: el trabajador mide Docker, disco y memoria al arrancar y cada 10 min (`TareaReporteServidor` → `ReporteServidorPuerto`, Redis `instalacion:servidor:reporte`) y la API lee el último. Un reporte de más de 30 min se muestra como error. El último envío de correo lo anota `CorreoConRegistro` (Decorator de `CorreoPuerto`, M10) en `RegistroEnviosCorreo` (Redis `instalacion:correo:ultimo`). La respuesta suma `dominio` y `comprobado`; `limites` trae `capacidad` y `memoriaLibreMb` para «caben unos 3 proyectos». `respaldo` y `version` salen de los JSON de los scripts: `docker-compose.autoalojado.yml` monta `DEPLOYA_RESPALDOS` de solo lectura en `/respaldos` de la API (`DIR_RESPALDOS`).
+
+**Invitaciones.** El token viaja solo en el enlace (`URL_WEB/registro?invitacion=<token>`); la base guarda su sha256. Por eso «Copiar enlace» solo existe al crearla. Cada invitación es del correo al que se mandó.
+
+**Registro (M1 ← M9).** `RegistroInstalacionModule` exporta `PoliticaRegistroPuerto` (`RegistroAbierto` en la nube, `RegistroDeInstalacion` en autoalojado): `exigirPermitido(correo, invitacion?)` antes de crear la cuenta y `consumir(correo, invitacion?)` después. Errores: 403 `RegistroCerrado` · 403 `InvitacionRequerida` · 410 `InvitacionNoValida`. Módulo aparte para que `IdentidadModule` lo importe sin ciclo.
+
 ## Scripts (Derek)
 
 | Script | Qué hace | Estado que deja |
@@ -93,3 +99,4 @@ La etapa 2 comprueba la raíz `DOMINIO_BASE` (ahí vive la web; el comodín no l
 | 1.2 | 2026-10-21 | El instalador escribe el hash en `ConfiguracionInstalacion`; el seed de autoalojado no crea cuentas; DNS, certificado, cron y la hora del respaldo |
 | 1.3 | 2026-10-21 | SP-19: actualizar reconstruye antes de migrar y va a la etiqueta `disponible`; sondeo por URL pública; respaldo y restauración siempre dentro del contenedor, con `--clean` y `ON_ERROR_STOP` |
 | 1.4 | 2026-10-24 | SP-06: seed de autoalojado solo con el plan «Autoalojado»; `null` = sin límite en `maximo` y `limite`; `AltaPrimerUsuario` exportado para el asistente (SP-17) |
+| 1.5 | 2026-10-24 | SP-18: reporte del servidor desde el trabajador, último envío de correo, `dominio`/`comprobado`/`capacidad` en `GET /admin/instalacion`, montaje de respaldos en la API y `PoliticaRegistroPuerto` en `RegistroInstalacionModule` |

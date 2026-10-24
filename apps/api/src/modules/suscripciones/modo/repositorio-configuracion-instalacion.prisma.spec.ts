@@ -41,3 +41,32 @@ describe("RepositorioConfiguracionInstalacionPrisma", () => {
     expect(count).toHaveBeenCalledWith({ where: { rol: "administrador" } });
   });
 });
+
+describe("RepositorioConfiguracionInstalacionPrisma · SP-18", () => {
+  it("política de registro: la de la fila o «invitacion» sin fila", async () => {
+    const conFila = jest.fn().mockResolvedValue({ politicaRegistro: "cerrado" });
+    const sinFila = jest.fn().mockResolvedValue(null);
+
+    await expect(repositorio({ configuracionInstalacion: { findUnique: conFila } }).politicaRegistro()).resolves.toBe("cerrado");
+    await expect(repositorio({ configuracionInstalacion: { findUnique: sinFila } }).politicaRegistro()).resolves.toBe("invitacion");
+  });
+
+  it("guardar política y límites crea la fila si no existe", async () => {
+    const upsert = jest.fn().mockResolvedValue({});
+    const repo = repositorio({ configuracionInstalacion: { upsert } });
+
+    await repo.guardarPoliticaRegistro("abierto");
+    await repo.guardarLimites({ cpuPorProyecto: 0.5, memoriaMbPorProyecto: 512, proyectosPorUsuario: 3 });
+
+    expect(upsert.mock.calls).toEqual([
+      [{ where: { id: "instalacion" }, create: { politicaRegistro: "abierto", id: "instalacion" }, update: { politicaRegistro: "abierto" } }],
+      [
+        {
+          where: { id: "instalacion" },
+          create: { cpuPorProyecto: 0.5, memoriaMbPorProyecto: 512, proyectosPorUsuario: 3, id: "instalacion" },
+          update: { cpuPorProyecto: 0.5, memoriaMbPorProyecto: 512, proyectosPorUsuario: 3 },
+        },
+      ],
+    ]);
+  });
+});

@@ -4,9 +4,9 @@ Dueño: Javier. Spec: [`openspec/specs/administracion/spec.md`](../../../../../o
 
 **Núcleo v4.1:** Usuarios (buscar, filtrar, detalle) y suspender cuenta con motivo.
 
-**Sprint fuera de alcance:** reactivar cuenta (SP-05): `POST /admin/usuarios/:id/reactivacion`.
+**Sprint fuera de alcance:** reactivar cuenta (SP-05): `POST /admin/usuarios/:id/reactivacion`. Admin · Instalación (SP-18, solo autoalojado): `GET /admin/instalacion`, `PATCH /admin/instalacion/registro` y `/limites`, `POST` y `DELETE /admin/invitaciones`; la salud la arma `SaludInstalacion` (Composite) y la política de registro para M1 sale de `RegistroInstalacionModule`.
 
-**Pantallas:** 25, 25b, 25c.
+**Pantallas:** 25, 25b, 25c, 32.
 
 **Fuera de alcance (solo si da el tiempo):** CRUD de planes, estado de infraestructura.
 

@@ -377,6 +377,72 @@ classDiagram
         -reloj Reloj
         +suspender(adminId, usuarioId, solicitud) void
     }
+    class InstalacionService {
+        <<Facade · SP-18>>
+        -configuracion RepositorioConfiguracionInstalacion
+        -salud SaludInstalacion
+        -scripts EstadoScriptsPuerto
+        -reportes ReporteServidorPuerto
+        -acciones RegistroAccionesPuerto
+        +estado() EstadoInstalacion
+        +cambiarRegistro(adminId, cuerpo) PoliticaRegistro
+        +cambiarLimites(adminId, cuerpo) LimitesVista
+    }
+    class InvitacionesService {
+        <<Service Layer · SP-18>>
+        +activas() InvitacionActiva[]
+        +crear(adminId, cuerpo) InvitacionCreada
+        +revocar(adminId, id) void
+    }
+    class SaludInstalacion {
+        <<Composite>>
+        +comprobar() ResultadoComprobacion[]
+    }
+    class ComprobacionInstalacion {
+        <<abstract>>
+        +id string
+        +comprobar() ResultadoComprobacion
+    }
+    class ComprobacionDocker
+    class ComprobacionDnsComodin
+    class ComprobacionCertificado
+    class ComprobacionDisco
+    class ComprobacionCorreo
+    class PoliticaRegistroPuerto {
+        <<abstract · Strategy M1 ← M9>>
+        +exigirPermitido(correo, invitacion) void
+        +consumir(correo, invitacion) void
+    }
+    class RegistroAbierto
+    class RegistroDeInstalacion
+    class RepositorioInvitaciones {
+        <<abstract · Repository>>
+    }
+    class ReporteServidorPuerto {
+        <<abstract>>
+        +publicar(reporte) void
+        +ultimo() ReporteServidor
+    }
+    class LecturaServidorPuerto {
+        <<abstract · solo trabajador>>
+        +medir() ReporteServidor
+    }
+    class TareaReporteServidor
+    class EstadoScriptsPuerto {
+        <<abstract>>
+        +respaldo() EstadoRespaldo
+        +version() EstadoVersion
+    }
+    class RegistroEnviosCorreo {
+        <<abstract · M10>>
+        +registrar(envio) void
+        +ultimo() EnvioCorreo
+    }
+    class CorreoConRegistro {
+        <<Decorator>>
+    }
+    class SoloAutoalojadaGuard
+    class InstalacionAdminController
     class ReactivacionCuentaService {
         <<Service Layer · SP-05>>
         -cuentas CuentasSuspensionPuerto
@@ -1039,6 +1105,32 @@ classDiagram
     UsuariosAdminController --> ReactivacionCuentaService
     ReactivacionCuentaService --> CuentasSuspensionPuerto
     ReactivacionCuentaService --> ContenedoresClientePuerto : reanudarTodos si la suscripción está vigente
+    InstalacionAdminController --> InstalacionService
+    InstalacionAdminController --> InvitacionesService
+    InstalacionAdminController ..> SoloAutoalojadaGuard
+    InstalacionService --> SaludInstalacion
+    InstalacionService --> RepositorioConfiguracionInstalacion
+    InstalacionService --> EstadoScriptsPuerto
+    InstalacionService --> ReporteServidorPuerto
+    InvitacionesService --> RepositorioInvitaciones
+    SaludInstalacion o-- ComprobacionInstalacion
+    ComprobacionInstalacion <|-- ComprobacionDocker
+    ComprobacionInstalacion <|-- ComprobacionDnsComodin
+    ComprobacionInstalacion <|-- ComprobacionCertificado
+    ComprobacionInstalacion <|-- ComprobacionDisco
+    ComprobacionInstalacion <|-- ComprobacionCorreo
+    ComprobacionDocker --> ReporteServidorPuerto
+    ComprobacionDisco --> ReporteServidorPuerto
+    ComprobacionCertificado --> CertificadoPuerto
+    ComprobacionCorreo --> RegistroEnviosCorreo
+    PoliticaRegistroPuerto <|-- RegistroAbierto
+    PoliticaRegistroPuerto <|-- RegistroDeInstalacion
+    RegistroDeInstalacion --> RepositorioInvitaciones
+    RegistroDeInstalacion --> RepositorioConfiguracionInstalacion
+    TareaReporteServidor --> LecturaServidorPuerto
+    TareaReporteServidor --> ReporteServidorPuerto : cada 10 min
+    CorreoPuerto <|-- CorreoConRegistro
+    CorreoConRegistro --> RegistroEnviosCorreo
     ProyectosService --> ProveedorFuente
     ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos

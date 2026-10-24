@@ -7,6 +7,7 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   UsuarioNoEncontrado: HttpStatus.NOT_FOUND,
   NoSePuedeSuspenderAdministrador: HttpStatus.FORBIDDEN,
   CuentaYaSuspendida: HttpStatus.CONFLICT,
+  CuentaNoSuspendida: HttpStatus.CONFLICT,
   MotivoInvalido: HttpStatus.BAD_REQUEST,
   DetalleInvalido: HttpStatus.BAD_REQUEST,
   ConsultaInvalida: HttpStatus.BAD_REQUEST,

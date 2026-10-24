@@ -321,10 +321,12 @@ classDiagram
     class UsuariosAdminController {
         -consulta ConsultaUsuariosPuerto
         -suspension SuspensionService
+        -reactivacion ReactivacionCuentaService
         +buscar(consulta) PaginaUsuarios
         +detalle(id) DetalleUsuario
         +motivos() MotivoSuspension[]
         +suspender(adminId, id, cuerpo) void
+        +reactivar(adminId, id, cuerpo) ResultadoReactivacion
     }
     class ConsultaUsuariosPuerto {
         <<abstract · Repository de lectura>>
@@ -339,10 +341,18 @@ classDiagram
         -reloj Reloj
         +suspender(adminId, usuarioId, solicitud) void
     }
+    class ReactivacionCuentaService {
+        <<Service Layer · SP-05>>
+        -cuentas CuentasSuspensionPuerto
+        -contenedores ContenedoresClientePuerto
+        -reloj Reloj
+        +reactivar(adminId, usuarioId, solicitud) ResultadoReactivacion
+    }
     class CuentasSuspensionPuerto {
         <<abstract · Unit of Work>>
         +cuenta(usuarioId) CuentaObjetivo
         +suspender(suspension) void
+        +reactivar(reactivacion) void
     }
     class CuentasSuspensionPrisma
     class MOTIVOS_SUSPENSION {
@@ -975,6 +985,9 @@ classDiagram
     SuspensionService --> CuentasSuspensionPuerto
     SuspensionService ..> MOTIVOS_SUSPENSION
     SuspensionService --> ContenedoresClientePuerto : detenerTodos
+    UsuariosAdminController --> ReactivacionCuentaService
+    ReactivacionCuentaService --> CuentasSuspensionPuerto
+    ReactivacionCuentaService --> ContenedoresClientePuerto : reanudarTodos si la suscripción está vigente
     ProyectosService --> ProveedorFuente
     ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos

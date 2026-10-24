@@ -4,13 +4,13 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 1. API
 
-- [ ] 1.1 Servicio, endpoint y acción administrativa
-- [ ] 1.2 Pruebas: «Reactivar con suscripción vigente», «Reactivar con suscripción suspendida», «Cuenta no suspendida», «Cliente no puede»
+- [x] 1.1 Servicio, endpoint y acción administrativa
+- [x] 1.2 Pruebas: «Reactivar con suscripción vigente», «Reactivar con suscripción suspendida», «Cuenta no suspendida», «Cliente no puede»
 
 ## 2. Web
 
-- [ ] 2.1 Botón y diálogo de 25c
-- [ ] 2.2 Prueba `node --test` del texto del aviso según la suscripción
+- [x] 2.1 Botón y diálogo de 25c
+- [x] 2.2 Prueba `node --test` del texto del aviso según la suscripción
 
 ## 3. Cierre
 

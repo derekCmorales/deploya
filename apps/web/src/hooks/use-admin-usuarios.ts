@@ -31,3 +31,8 @@ export function useMotivosSuspension(): Sondeo<{ motivos: MotivoSuspension[] }> 
 export function suspenderCuenta(id: string, cuerpo: { motivo: string; detalle: string | null }): Promise<unknown> {
   return pedirApi(`/admin/usuarios/${encodeURIComponent(id)}/suspension`, { metodo: "POST", cuerpo });
 }
+
+/** `POST /admin/usuarios/:id/reactivacion` (25c). */
+export function reactivarCuenta(id: string, cuerpo: { detalle: string | null }): Promise<unknown> {
+  return pedirApi(`/admin/usuarios/${encodeURIComponent(id)}/reactivacion`, { metodo: "POST", cuerpo });
+}

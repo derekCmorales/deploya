@@ -35,6 +35,14 @@ export class CuentaYaSuspendida extends ErrorAdministracion {
   }
 }
 
+export class CuentaNoSuspendida extends ErrorAdministracion {
+  readonly codigo = "CuentaNoSuspendida";
+
+  constructor() {
+    super("Solo se reactiva una cuenta suspendida.");
+  }
+}
+
 export class MotivoInvalido extends ErrorAdministracion {
   readonly codigo = "MotivoInvalido";
 

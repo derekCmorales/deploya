@@ -162,7 +162,7 @@ model AccionAdministrativa {
   admin             Usuario  @relation("AdminEjecuta", fields: [adminId], references: [id])
   usuarioAfectadoId String
   usuarioAfectado   Usuario  @relation("UsuarioAfectado", fields: [usuarioAfectadoId], references: [id], onDelete: Cascade)
-  accion            String // "suspender-cuenta" (única acción del núcleo)
+  accion            String // "suspender-cuenta" (núcleo); "reactivar-cuenta" (SP-05)
   motivo            String
   detalle           String?
   creado            DateTime @default(now())

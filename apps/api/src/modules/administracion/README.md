@@ -4,8 +4,10 @@ Dueño: Javier. Spec: [`openspec/specs/administracion/spec.md`](../../../../../o
 
 **Núcleo v4.1:** Usuarios (buscar, filtrar, detalle) y suspender cuenta con motivo.
 
-**Pantallas:** 25, 25b.
+**Sprint fuera de alcance:** reactivar cuenta (SP-05): `POST /admin/usuarios/:id/reactivacion`.
 
-**Fuera de alcance (solo si da el tiempo):** Reactivar cuenta, CRUD de planes, estado de infraestructura.
+**Pantallas:** 25, 25b, 25c.
+
+**Fuera de alcance (solo si da el tiempo):** CRUD de planes, estado de infraestructura.
 
 Hoy: stub con `GET /administracion/health`. Cada historia entra con su change de OpenSpec.

@@ -111,6 +111,15 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     return filas.map(lineaDesdePrisma);
   }
 
+  async ultimasLineas(id: string, cantidad: number): Promise<LineaBitacora[]> {
+    const filas = await this.prisma.lineaBitacora.findMany({
+      where: { despliegueId: id },
+      orderBy: { n: "desc" },
+      take: cantidad,
+    });
+    return filas.reverse().map(lineaDesdePrisma);
+  }
+
   async ultimosDe(proyectoIds: string[]): Promise<Despliegue[]> {
     if (proyectoIds.length === 0) return [];
     const filas = await this.prisma.despliegue.findMany({

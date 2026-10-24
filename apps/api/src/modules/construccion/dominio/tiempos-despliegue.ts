@@ -30,7 +30,8 @@ export function tiemposDeDespliegue(despliegue: Despliegue): TiemposDespliegue {
   };
 }
 
-function etapaFallida(despliegue: Despliegue): Etapa | null {
+/** Etapa donde terminó un Fallido; `null` si no falló o no quedó marcada. */
+export function etapaFallida(despliegue: Despliegue): Etapa | null {
   if (despliegue.estado !== "fallido") return null;
   return despliegue.etapas.find((etapa) => etapa.estado === "fallida")?.etapa ?? null;
 }

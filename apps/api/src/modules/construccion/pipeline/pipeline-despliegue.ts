@@ -71,8 +71,13 @@ export class PipelineDespliegue {
       await this.anunciar({ proyectoId: contexto.proyecto.id, despliegueId: id, estado: "saludable" });
     } catch (error) {
       const etapa = ejecutados.at(-1)?.etapa ?? "recepcion";
-      if (error instanceof DespliegueCancelado) await this.cancelar(contexto, estado, ejecutados);
-      else await this.fallar(contexto, estado, this.falloDe(error, etapa), ejecutados);
+      const final =
+        error instanceof DespliegueCancelado
+          ? await this.cancelar(contexto, estado, ejecutados)
+          : await this.fallar(contexto, estado, this.falloDe(error, etapa), ejecutados);
+      // Los oyentes leen la bitácora (el aviso de un Fallido cita sus últimas líneas): el motivo ya debe estar guardado.
+      await bitacora.vaciar();
+      await this.anunciar({ proyectoId: contexto.proyecto.id, despliegueId: id, estado: final });
     } finally {
       await Promise.all(ejecutados.map((paso) => paso.liberar(contexto)));
     }
@@ -95,14 +100,15 @@ export class PipelineDespliegue {
   }
 
   /** El trabajador, no la API, escribe Cancelado: la etapa en curso queda fallida y la bitácora lo dice. */
-  private async cancelar(contexto: ContextoDespliegue, estado: EstadoDespliegue, ejecutados: PasoPipeline[]): Promise<void> {
+  private async cancelar(contexto: ContextoDespliegue, estado: EstadoDespliegue, ejecutados: PasoPipeline[]): Promise<EstadoDespliegue> {
     const { despliegue, bitacora } = contexto;
     const etapa = ejecutados.at(-1)?.etapa;
     bitacora.escribir(etapa ?? "recepcion", new DespliegueCancelado().message, "aviso");
     for (const paso of [...ejecutados].reverse()) await paso.compensar(contexto);
     if (etapa) await this.despliegues.marcarEtapa(despliegue.id, etapa, "fallida", this.reloj.ahora());
-    await this.despliegues.cambiarEstado(despliegue.id, transicionar(estado, "cancelado"), { terminado: this.reloj.ahora() });
-    await this.anunciar({ proyectoId: despliegue.proyectoId, despliegueId: despliegue.id, estado: "cancelado" });
+    const cancelado = transicionar(estado, "cancelado");
+    await this.despliegues.cambiarEstado(despliegue.id, cancelado, { terminado: this.reloj.ahora() });
+    return cancelado;
   }
 
   private async fallar(
@@ -110,17 +116,18 @@ export class PipelineDespliegue {
     estado: EstadoDespliegue,
     fallo: FalloDespliegue,
     ejecutados: PasoPipeline[],
-  ): Promise<void> {
+  ): Promise<EstadoDespliegue> {
     const { despliegue, bitacora } = contexto;
     bitacora.escribir(fallo.etapa, fallo.motivo, "error");
     for (const paso of [...ejecutados].reverse()) await paso.compensar(contexto);
     await this.despliegues.marcarEtapa(despliegue.id, fallo.etapa, "fallida", this.reloj.ahora());
-    await this.despliegues.cambiarEstado(despliegue.id, transicionar(estado, "fallido"), {
+    const fallido = transicionar(estado, "fallido");
+    await this.despliegues.cambiarEstado(despliegue.id, fallido, {
       codigoSalida: fallo.codigoSalida,
       motivoFallo: fallo.motivo,
       terminado: this.reloj.ahora(),
     });
-    await this.anunciar({ proyectoId: despliegue.proyectoId, despliegueId: despliegue.id, estado: "fallido" });
+    return fallido;
   }
 
   /** Un oyente que falla se registra y no cambia el resultado del despliegue. */

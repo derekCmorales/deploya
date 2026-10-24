@@ -2344,6 +2344,13 @@ classDiagram
         -orquestacion OrquestacionService
         +alTerminar(evento DespliegueTerminado) void
     }
+    class AvisoDespliegueOyente {
+        <<Observer>>
+        -despliegues RepositorioDespliegues
+        -proyectos ProyectosLecturaPuerto
+        -avisos AvisosPuerto
+        +alTerminar(evento DespliegueTerminado) void
+    }
     class PoliticaRetencion {
         +aRetirar(disponibles, artefactoActivoId, retenidos) List~Artefacto~
     }
@@ -2417,6 +2424,7 @@ classDiagram
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
         +lineasDesde(id, desde, limite) List~LineaBitacora~
+        +ultimasLineas(id, cantidad) List~LineaBitacora~
         +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
         +enCursoDe(proyectoId) Despliegue
@@ -2761,6 +2769,10 @@ classDiagram
     RetencionArtefactos --> OrquestacionService : eliminarImagen
     RetencionArtefactos --> RepositorioArtefactos
     RetencionArtefactos --> RepositorioDespliegues
+    OyenteDespliegue <|-- AvisoDespliegueOyente
+    AvisoDespliegueOyente --> AvisosPuerto : despliegueTerminado
+    AvisoDespliegueOyente --> RepositorioDespliegues
+    AvisoDespliegueOyente --> ProyectosLecturaPuerto
     PipelineDespliegue --> OyenteDespliegue : DespliegueTerminado
     EnrutamientoService --> EnrutamientoPuerto
 

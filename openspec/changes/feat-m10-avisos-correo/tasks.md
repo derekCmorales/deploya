@@ -10,8 +10,8 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 2. Gancho del pipeline (Derek, SP-08)
 
-- [ ] 2.1 `AvisoDespliegueOyente` en `OYENTES_DESPLIEGUE`
-- [ ] 2.2 Pruebas: «Cancelado no avisa», el aviso de Saludable y Fallido llega al puerto
+- [x] 2.1 `AvisoDespliegueOyente` en `OYENTES_DESPLIEGUE` (`ConstruccionTrabajadorModule` importa `AvisosModule`); el pipeline guarda la bitácora antes de anunciar un Fallido o un Cancelado
+- [x] 2.2 Pruebas: «Cancelado no avisa», el aviso de Saludable y Fallido llega al puerto, «Error del SMTP» no cambia el estado
 
 ## 3. Gancho del ciclo (Javier, SP-04)
 

@@ -99,6 +99,11 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return structuredClone(todas.filter((l) => l.n > desde).slice(0, limite));
   }
 
+  async ultimasLineas(id: string, cantidad: number): Promise<LineaBitacora[]> {
+    const todas = this.lineas.get(id) ?? [];
+    return structuredClone(todas.slice(-cantidad));
+  }
+
   async ultimosDe(proyectoIds: string[]): Promise<Despliegue[]> {
     const ultimos = new Map<string, Despliegue>();
     for (const despliegue of this.despliegues.values()) {

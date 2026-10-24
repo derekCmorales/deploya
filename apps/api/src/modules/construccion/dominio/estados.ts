@@ -19,6 +19,15 @@ export type EstadoDespliegue = (typeof ESTADOS_DESPLIEGUE)[number];
 export const ETAPAS = ["recepcion", "construccion", "ejecucion", "enrutamiento", "operacion"] as const;
 export type Etapa = (typeof ETAPAS)[number];
 
+/** Nombre visible de cada etapa, el mismo del riel de la web (correos de 24b). */
+export const ETIQUETAS_ETAPA: Readonly<Record<Etapa, string>> = {
+  recepcion: "Recepción",
+  construccion: "Construcción",
+  ejecucion: "Ejecución",
+  enrutamiento: "Enrutamiento",
+  operacion: "Operación",
+};
+
 export type EstadoEtapa = "pendiente" | "en-curso" | "completada" | "fallida" | "omitida";
 
 export type NivelBitacora = "info" | "aviso" | "error";

@@ -4,6 +4,7 @@ import { ProyectosLecturaMemoria } from "../adapters/memoria/proyectos-lectura.m
 import { RecetaProyectoMemoria } from "../adapters/memoria/receta-proyecto.memoria";
 import { RepositorioArtefactosMemoria } from "../adapters/memoria/repositorio-artefactos.memoria";
 import { RepositorioDesplieguesMemoria } from "../adapters/memoria/repositorio-despliegues.memoria";
+import { AvisosStub } from "../adapters/stubs/avisos.stub";
 import { CancelacionesMemoria } from "../adapters/stubs/cancelaciones.memoria";
 import { ClonadorStub } from "../adapters/stubs/clonador.stub";
 import { ColaMemoria } from "../adapters/stubs/cola.memoria";
@@ -15,6 +16,7 @@ import { CuotaPlanStub } from "../adapters/stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "../adapters/stubs/enrutamiento.stub";
 import { VariablesEntornoStub } from "../adapters/stubs/variables-entorno.stub";
 import { VerificacionEntornoStub } from "../adapters/stubs/verificacion-entorno.stub";
+import { AvisoDespliegueOyente } from "../modules/construccion/avisos/aviso-despliegue.oyente";
 import { ConstruccionService } from "../modules/construccion/construccion.service";
 import { AccionesContenedorService } from "../modules/orquestacion/acciones/acciones-contenedor.service";
 import { AccionesProyectoService } from "../modules/orquestacion/acciones/acciones-proyecto.service";
@@ -44,6 +46,7 @@ export function proyectoDemo(cambios: Partial<ProyectoDesplegable> = {}): Proyec
   return {
     id: "proyecto-1",
     usuarioId: "usuario-1",
+    nombre: "hola-deploya",
     subdominio: "hola-deploya",
     urlRepositorio: "https://github.com/derekCmorales/hola-deploya",
     rama: "main",
@@ -92,7 +95,9 @@ export function motorDePrueba() {
   const servicio = new ConstruccionService(despliegues, artefactos, proyectos, cola, bloqueos, reloj, certificado);
   const cancelaciones = new CancelacionesMemoria();
   const vigia = new VigiaCancelacion(cancelaciones, 0);
-  const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, planes, [retencion], vigia);
+  const avisos = new AvisosStub();
+  const avisoDespliegue = new AvisoDespliegueOyente(despliegues, proyectos, avisos);
+  const pipeline = new PipelineDespliegue(despliegues, proyectos, reloj, planes, [retencion, avisoDespliegue], vigia);
   const accionesDespliegue = new AccionesDespliegueService(despliegues, proyectos, cola, cancelaciones, servicio, reloj);
   const reversion = new ReversionService(proyectos, artefactos, despliegues, cola, reloj);
   const detalleProyectos = new DetalleProyectoMemoria();
@@ -112,6 +117,7 @@ export function motorDePrueba() {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
     contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
     colaOperacion, accionesProyecto, accionesContenedor, variables, reversion, retencion, planes, cancelaciones, vigia, certificado, accionesDespliegue, detalleProyectos, resumen,
+    avisos, avisoDespliegue,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);

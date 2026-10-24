@@ -19,6 +19,6 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 4. Cierre
 
-- [ ] 4.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro, si hay UI
-- [ ] 4.2 `clases-unificado.mmd` si cambió un puerto o una clase; `pnpm check` en verde
-- [ ] 4.3 `/opsx-archive` después del merge
+- [x] 4.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro, si hay UI
+- [x] 4.2 `clases-unificado.mmd` si cambió un puerto o una clase; `pnpm check` en verde
+- [x] 4.3 `/opsx-archive` después del merge

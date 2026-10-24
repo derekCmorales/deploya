@@ -4,7 +4,7 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 1. Datos (Javier)
 
-- [ ] 1.1 Migración `contrasenaCambiadaEn` y `datos-nucleo.md` v2
+- [x] 1.1 Migración `contrasenaCambiadaEn` y `datos-nucleo.md` v2
 
 ## 2. API y web (Eddy)
 

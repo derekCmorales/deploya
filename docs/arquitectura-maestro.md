@@ -1566,6 +1566,7 @@ erDiagram
         Rol rol "cliente | administrador"
         EstadoCuenta estadoCuenta "pendiente | activa | suspendida"
         string motivoSuspension
+        datetime contrasenaCambiadaEn "null = nunca (SP-03)"
         datetime creado
     }
     TOKEN_CUENTA {

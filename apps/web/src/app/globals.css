@@ -197,6 +197,45 @@
     transform-origin: center;
     animation: dy-giro 18s linear infinite;
   }
+
+  /* Entrada de las ilustraciones de acceso, una sola vez; `--retraso` escalona las piezas. */
+  .dy-aparece {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dy-aparece 0.7s var(--ease-out-dy) both;
+    animation-delay: var(--retraso, 0ms);
+  }
+
+  /* Crece en horizontal desde el borde izquierdo y se queda. */
+  .dy-crece-x {
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: dy-crece-x 0.9s var(--ease-out-dy) both;
+    animation-delay: var(--retraso, 0ms);
+  }
+
+  /* Igual que `dy-crece-x`, desde el centro. */
+  .dy-crece-centro {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dy-crece-x 0.9s var(--ease-out-dy) both;
+    animation-delay: var(--retraso, 0ms);
+  }
+
+  /* Halo del punto de Señal: se abre y se apaga. */
+  .dy-respira {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dy-respira 3.2s ease-out infinite;
+    animation-delay: var(--retraso, 0ms);
+  }
+
+  /* Balanceo lento de ±5° con el pivote en el borde de arriba. */
+  .dy-oscila {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    animation: dy-oscila 14s ease-in-out infinite;
+  }
 }
 
 @keyframes dy-barrido {
@@ -259,6 +298,48 @@
   }
 }
 
+@keyframes dy-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dy-crece-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes dy-respira {
+  0% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.75);
+  }
+}
+
+@keyframes dy-oscila {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dy-barrido,
   .dy-vivo,
@@ -267,7 +348,17 @@
   .dy-esqueleto,
   .dy-flota,
   .dy-giro-lento,
+  .dy-aparece,
+  .dy-crece-x,
+  .dy-crece-centro,
+  .dy-respira,
+  .dy-oscila,
   .animate-spin {
     animation: none;
+  }
+
+  /* Quieto, el halo no se ve: el punto queda como en el canvas. */
+  .dy-respira {
+    opacity: 0;
   }
 }

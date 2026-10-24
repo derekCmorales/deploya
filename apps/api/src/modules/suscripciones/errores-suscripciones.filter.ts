@@ -12,6 +12,10 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   "plan-sin-cobro": HttpStatus.CONFLICT,
   "es-descenso": HttpStatus.CONFLICT,
   "descenso-no-permitido": HttpStatus.CONFLICT,
+  "sin-cobro-en-autoalojado": HttpStatus.NOT_FOUND,
+  PrimeraConfiguracionNoDisponible: HttpStatus.NOT_FOUND,
+  CodigoInvalido: HttpStatus.UNAUTHORIZED,
+  CodigoVencido: HttpStatus.GONE,
 };
 
 /** Traduce los errores de dominio de M2 a `{ codigo, mensaje, ...detalle }` en el borde. */

@@ -4,17 +4,17 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 1. Datos
 
-- [ ] 1.1 Migración `ConfiguracionInstalacion` + `PoliticaRegistro`; seed por modo; `datos-nucleo.md` v2
+- [x] 1.1 Migración `ConfiguracionInstalacion` + `PoliticaRegistro`; seed por modo; `datos-nucleo.md` v2
 
 ## 2. Estrategias
 
-- [ ] 2.1 Puertos y sus dos implementaciones; registro por modo en los módulos
-- [ ] 2.2 Pruebas: «Nube por defecto», «Límites de la instalación», «Sin límite de proyectos», «El ciclo no corre»
+- [x] 2.1 Puertos y sus dos implementaciones; registro por modo en los módulos
+- [x] 2.2 Pruebas: «Nube por defecto», «Límites de la instalación», «Sin límite de proyectos», «El ciclo no corre»
 
 ## 3. Primer administrador y web
 
-- [ ] 3.1 `ConCodigoDeConfiguracion` y `GET /instalacion/modo`; navegación sin Suscripción
-- [ ] 3.2 Pruebas: «Sin cobro en autoalojado», «Sin código no hay administrador»
+- [x] 3.1 `ConCodigoDeConfiguracion` y `GET /instalacion/modo`; navegación sin Suscripción
+- [x] 3.2 Pruebas: «Sin cobro en autoalojado», «Sin código no hay administrador»
 
 ## 4. Cierre
 

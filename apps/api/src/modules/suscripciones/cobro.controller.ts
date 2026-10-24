@@ -6,6 +6,7 @@ import { ContratacionService, type ResultadoContratacion } from "./contratacion.
 import type { Cotizacion, VistaSuscripcion } from "./dominio/mi-suscripcion";
 import { validarSolicitudContratacion, validarSolicitudCotizacion, validarSolicitudDescenso } from "./dominio/tarjeta";
 import { ErroresSuscripcionesFilter } from "./errores-suscripciones.filter";
+import { CobroDisponibleGuard } from "./modo/cobro-disponible.guard";
 
 /**
  * Borde HTTP de la suscripción del cliente (07, 07b, 08). Todo con sesión: el usuario sale
@@ -13,7 +14,7 @@ import { ErroresSuscripcionesFilter } from "./errores-suscripciones.filter";
  * con `resultado: "rechazado"`: es un resultado del negocio, no un error.
  */
 @Controller("suscripciones")
-@UseGuards(SesionGuard)
+@UseGuards(SesionGuard, CobroDisponibleGuard)
 @UseFilters(ErroresSuscripcionesFilter)
 export class CobroController {
   constructor(

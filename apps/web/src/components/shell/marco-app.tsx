@@ -8,9 +8,22 @@ import { AppShell } from "@/components/shell/app-shell";
 import { MenuUsuario, RUTA_INGRESAR } from "@/components/shell/menu-usuario";
 import { NavPanel, RUTA_PLANES } from "@/components/shell/nav-panel";
 import { Button } from "@/components/ui/button";
+import { useModoInstalacion } from "@/hooks/use-modo-instalacion";
+import { hayCobro } from "@/lib/instalacion";
 
 /** Grupo de rutas de las pantallas de acceso (01–05): llevan el header público, sin navegación del panel. */
 const GRUPO_ACCESO = "(auth)";
+
+/** «Planes» del header público; en autoalojado no hay planes (SP-06). */
+function EnlacePlanes() {
+  const { modo } = useModoInstalacion();
+  if (!hayCobro(modo)) return null;
+  return (
+    <Button asChild variant="ghost" size="sm">
+      <Link href={RUTA_PLANES}>Planes</Link>
+    </Button>
+  );
+}
 
 /**
  * Elige el marco según el grupo de rutas activo, no según la URL: toda pantalla nueva
@@ -23,11 +36,7 @@ export function MarcoApp({ children }: { children: ReactNode }) {
   if (grupo === GRUPO_ACCESO) {
     return (
       <AppShell
-        acciones={
-          <Button asChild variant="ghost" size="sm">
-            <Link href={RUTA_PLANES}>Planes</Link>
-          </Button>
-        }
+        acciones={<EnlacePlanes />}
         usuario={
           <Button asChild variant="outline" size="sm">
             <Link href={RUTA_INGRESAR}>Iniciar sesión</Link>

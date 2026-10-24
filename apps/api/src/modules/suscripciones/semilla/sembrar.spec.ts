@@ -1,6 +1,8 @@
 import { RelojFijo } from "../../../compartido/reloj";
 import { RepositorioPlanesMemoria } from "../adaptadores/repositorio-planes.memoria";
 import { RepositorioSuscripcionesMemoria } from "../adaptadores/repositorio-suscripciones.memoria";
+import { CatalogoNube } from "../modo/catalogos";
+import { CuotasDelPlan } from "../modo/cuotas";
 import { SuscripcionesService } from "../suscripciones.service";
 import { DestinoSemillaMemoria } from "./destino-semilla.memoria";
 import { sembrar, type Hashear } from "./sembrar";
@@ -18,7 +20,7 @@ function armar(hashear?: Hashear) {
   const planes = new RepositorioPlanesMemoria(destino.planes);
   const repositorio = new RepositorioSuscripcionesMemoria(destino.planes);
   const reloj = new RelojFijo(AHORA);
-  const servicio = new SuscripcionesService(planes, repositorio, reloj);
+  const servicio = new SuscripcionesService(new CatalogoNube(planes), repositorio, new CuotasDelPlan(), reloj);
   let llamadas = 0;
   const hashearPorDefecto: Hashear = async (clave) => `hash-${clave}-${++llamadas}`;
   const demo = { suscripciones: repositorio, planes, reloj };
@@ -140,7 +142,7 @@ describe("sembrar", () => {
   it("Autoalojado sin administrador ni cuentas de demo", async () => {
     const { destino, correr } = armar();
     await correr({ MODO_INSTALACION: "autoalojado" });
-    expect(destino.planes).toHaveLength(4);
+    expect(destino.planes.map((p) => p.codigo)).toEqual(["autoalojado"]);
     expect(destino.usuarios).toHaveLength(0);
     expect(destino.codigo).toBeNull();
   });

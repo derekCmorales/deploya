@@ -34,7 +34,7 @@ export function UsuariosContenedor() {
   }, [usuarios, seleccion]);
 
   const paginas = lista.datos ? totalPaginas(lista.datos) : 1;
-  const alSuspender = () => {
+  const alCambiarCuenta = () => {
     lista.recargar();
     detalle.recargar();
   };
@@ -120,7 +120,7 @@ export function UsuariosContenedor() {
           ) : null}
         </div>
         <div className="min-w-0 border-t border-border lg:border-t-0 lg:border-l">
-          <PanelDetalleUsuario detalle={detalle} ahora={ahora} alSuspender={alSuspender} />
+          <PanelDetalleUsuario detalle={detalle} ahora={ahora} alCambiarCuenta={alCambiarCuenta} />
         </div>
       </div>
     </main>

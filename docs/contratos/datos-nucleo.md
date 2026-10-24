@@ -459,6 +459,7 @@ model Invitacion {
   hashToken String    @unique
   vence     DateTime  // 7 días
   usada     DateTime?
+  revocada  DateTime? // «Revocar» en la 32
   creadaPor String    // adminId
   creado    DateTime  @default(now())
 }
@@ -469,11 +470,11 @@ model Invitacion {
 | `Usuario.contrasenaCambiadaEn` | M1 · Eddy | `GET /identidad/cuenta` |
 | `MuestraMetrica` | M5 · Derek | `MuestrasMetricas` y `GET /proyectos/:id/metricas` ([metricas.md](metricas.md)) |
 | `ConfiguracionInstalacion`, `Invitacion` | M9 · Javier | `InstalacionService`, `PoliticaRegistroPuerto` ([instalacion.md](instalacion.md)) |
-| `AccionAdministrativa.accion` | M9 · Javier | Valores nuevos: `reactivar-cuenta`, `cambiar-registro`, `cambiar-limites`, `crear-invitacion` |
+| `AccionAdministrativa.accion` | M9 · Javier | Valores nuevos: `reactivar-cuenta`, `cambiar-registro`, `cambiar-limites`, `crear-invitacion`, `revocar-invitacion`. Las de la instalación llevan `motivo = instalacion` y al mismo administrador como afectado |
 
 Seed en autoalojado: plan `autoalojado` (precio 0, sin vencimiento; sus columnas de límites no se usan porque `LimitesDeInstalacion` lee `ConfiguracionInstalacion`) y la fila de `ConfiguracionInstalacion`; no se siembran los cuatro planes de la nube ni el admin de demo.
 
-Hasta ese plan (SP-06), el seed con `MODO_INSTALACION=autoalojado` sigue creando los cuatro planes de la nube y **no** crea administrador ni cuentas de demo: si lo hiciera, `/configurar` respondería 404. `HASH_CODIGO_CONFIGURACION` (sha256 hex del código) y `CODIGO_VENCE` (ISO) los escribe `instalar.sh`; el seed los copia a `hashCodigo` y `codigoVence` solo si no hay un usuario administrador. El código en claro no se guarda.
+Desde SP-06 (versión 2.2), el seed con `MODO_INSTALACION=autoalojado` crea solo el plan `autoalojado` y **no** crea administrador ni cuentas de demo: si lo hiciera, `/configurar` respondería 404. `HASH_CODIGO_CONFIGURACION` (sha256 hex del código) y `CODIGO_VENCE` (ISO) los escribe `instalar.sh`; el seed los copia a `hashCodigo` y `codigoVence` solo si no hay un usuario administrador. El código en claro no se guarda.
 
 ## Cambios frente al schema de arranque
 
@@ -495,3 +496,4 @@ Hasta ese plan (SP-06), el seed con `MODO_INSTALACION=autoalojado` sigue creando
 | 1.3 | 2026-10-11 | Avance 3: sin cambios de tablas. M2-05 escribe `Suscripcion.estado` y `estadoDesde` desde la tarea diaria; M9-02 escribe `Usuario.estadoCuenta`, `motivoSuspension` y una `AccionAdministrativa` por suspensión |
 | 2 | 2026-10-20 | Sprint fuera de alcance: `Usuario.contrasenaCambiadaEn`, `MuestraMetrica`, `ConfiguracionInstalacion`, `Invitacion` y acciones administrativas nuevas. Solo agrega |
 | 2.1 | 2026-10-21 | El instalador escribe `hashCodigo` y `codigoVence`. En autoalojado el seed no crea administrador ni cuentas de demo |
+| 2.2 | 2026-10-24 | SP-03: migración de `Usuario.contrasenaCambiadaEn`. SP-05: `reactivar-cuenta` en `AccionAdministrativa` (motivo `reactivacion`). SP-06: en autoalojado el seed crea solo el plan `autoalojado`. SP-18: migración de `Invitacion` (con `revocada`) y `revocar-invitacion` |

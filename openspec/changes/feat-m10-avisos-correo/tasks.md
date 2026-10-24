@@ -15,8 +15,8 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 3. Gancho del ciclo (Javier, SP-04)
 
-- [ ] 3.1 Llamar a `suscripcionCambio` en la transición
-- [ ] 3.2 Pruebas: «Por vencer avisa una vez», «Suspendida avisa una vez»
+- [x] 3.1 Llamar a `suscripcionCambio` en la transición
+- [x] 3.2 Pruebas: «Por vencer avisa una vez», «Suspendida avisa una vez»
 
 ## 4. Demo
 

@@ -6,6 +6,8 @@ import {
   LIMITES_POR_DEFECTO,
   POLITICA_POR_DEFECTO,
   type CodigoConfiguracion,
+  type CorreoGuardable,
+  type CorreoInstalacion,
   type LimitesInstalacion,
   type PoliticaRegistro,
 } from "./configuracion-instalacion";
@@ -54,7 +56,33 @@ export class RepositorioConfiguracionInstalacionPrisma extends RepositorioConfig
     await this.guardar({ cpuPorProyecto, memoriaMbPorProyecto, proyectosPorUsuario });
   }
 
+  async correo(): Promise<CorreoInstalacion> {
+    const fila = await this.prisma.configuracionInstalacion.findUnique({
+      where: { id: ID_INSTALACION },
+      select: { smtpHost: true, smtpPuerto: true, smtpUsuario: true, smtpClaveCifrada: true, smtpRemitente: true, sinCorreo: true },
+    });
+    if (fila?.sinCorreo) return { tipo: "sin-correo" };
+    if (!fila?.smtpHost || fila.smtpPuerto === null || fila.smtpClaveCifrada === null || !fila.smtpRemitente) return { tipo: "entorno" };
+    return {
+      tipo: "smtp",
+      smtp: { host: fila.smtpHost, puerto: fila.smtpPuerto, usuario: fila.smtpUsuario ?? "", claveCifrada: fila.smtpClaveCifrada, remitente: fila.smtpRemitente },
+    };
+  }
+
+  async guardarCorreo(correo: CorreoGuardable): Promise<void> {
+    await this.guardar(columnasCorreo(correo));
+  }
+
   private async guardar(datos: Prisma.ConfiguracionInstalacionUpdateInput & Prisma.ConfiguracionInstalacionCreateInput): Promise<void> {
     await this.prisma.configuracionInstalacion.upsert({ where: { id: ID_INSTALACION }, create: { ...datos, id: ID_INSTALACION }, update: datos });
   }
+}
+
+/** Las seis columnas siempre juntas: un SMTP nuevo apaga «sin correo» y «sin correo» borra el SMTP. */
+function columnasCorreo(correo: CorreoGuardable): Prisma.ConfiguracionInstalacionUpdateInput & Prisma.ConfiguracionInstalacionCreateInput {
+  if (correo.tipo === "sin-correo") {
+    return { smtpHost: null, smtpPuerto: null, smtpUsuario: null, smtpClaveCifrada: null, smtpRemitente: null, sinCorreo: true };
+  }
+  const { host, puerto, usuario, claveCifrada, remitente } = correo.smtp;
+  return { smtpHost: host, smtpPuerto: puerto, smtpUsuario: usuario, smtpClaveCifrada: claveCifrada, smtpRemitente: remitente, sinCorreo: false };
 }

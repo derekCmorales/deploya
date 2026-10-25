@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { RegistroInstalacionModule } from "../administracion/instalacion/registro-instalacion.module";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
 import { SuscripcionesModule } from "../suscripciones/suscripciones.module";
 import { AsignacionSandboxSuscripciones } from "./adaptadores/asignacion-sandbox.suscripciones";
@@ -33,7 +34,7 @@ import { SesionService } from "./sesion.service";
  * para las rutas de administración (M9).
  */
 @Module({
-  imports: [NotificacionesModule, SuscripcionesModule],
+  imports: [NotificacionesModule, SuscripcionesModule, RegistroInstalacionModule],
   controllers: [IdentidadController, SesionController, RecuperacionController, CuentaController],
   providers: [
     IdentidadService,

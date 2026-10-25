@@ -69,4 +69,32 @@ describe("RepositorioConfiguracionInstalacionPrisma · SP-18", () => {
       ],
     ]);
   });
+
+  describe("correo de la instalación (SP-17)", () => {
+    const SMTP = { host: "smtp.miempresa.com", puerto: 587, usuario: "deploya@miempresa.com", claveCifrada: "v1:iv:dato:tag", remitente: "deploya <no-responder@miempresa.com>" };
+    const FILA_SMTP = { smtpHost: SMTP.host, smtpPuerto: 587, smtpUsuario: SMTP.usuario, smtpClaveCifrada: SMTP.claveCifrada, smtpRemitente: SMTP.remitente, sinCorreo: false };
+    const leer = (fila: unknown) => repositorio({ configuracionInstalacion: { findUnique: jest.fn().mockResolvedValue(fila) } }).correo();
+
+    it("sin fila o sin SMTP completo valen las SMTP_* del .env", async () => {
+      await expect(leer(null)).resolves.toEqual({ tipo: "entorno" });
+      await expect(leer({ ...FILA_SMTP, smtpClaveCifrada: null })).resolves.toEqual({ tipo: "entorno" });
+    });
+
+    it("lee el SMTP guardado (la clave sigue cifrada) y «sin correo» manda sobre lo demás", async () => {
+      await expect(leer(FILA_SMTP)).resolves.toEqual({ tipo: "smtp", smtp: SMTP });
+      await expect(leer({ ...FILA_SMTP, sinCorreo: true })).resolves.toEqual({ tipo: "sin-correo" });
+    });
+
+    it("guardar un SMTP apaga «sin correo» y «sin correo» borra el SMTP, creando la fila si no existe", async () => {
+      const upsert = jest.fn().mockResolvedValue({});
+      const repo = repositorio({ configuracionInstalacion: { upsert } });
+
+      await repo.guardarCorreo({ tipo: "smtp", smtp: SMTP });
+      await repo.guardarCorreo({ tipo: "sin-correo" });
+
+      expect(upsert.mock.calls[0][0]).toEqual({ where: { id: "instalacion" }, create: { ...FILA_SMTP, id: "instalacion" }, update: FILA_SMTP });
+      const sinCorreo = { smtpHost: null, smtpPuerto: null, smtpUsuario: null, smtpClaveCifrada: null, smtpRemitente: null, sinCorreo: true };
+      expect(upsert.mock.calls[1][0]).toEqual({ where: { id: "instalacion" }, create: { ...sinCorreo, id: "instalacion" }, update: sinCorreo });
+    });
+  });
 });

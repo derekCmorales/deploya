@@ -1724,8 +1724,9 @@ classDiagram
         -generador GeneradorToken
         -correo CorreoPuerto
         -sandbox AsignacionSandboxPuerto
+        -registroPermitido PoliticaRegistroPuerto
         -reloj Reloj
-        +registrar(correo, clave) CuentaRegistrada
+        +registrar(correo, clave, invitacion) CuentaRegistrada
         +verificar(token) CuentaVerificada
         +reenviarVerificacion(solicitud) void
     }
@@ -1909,6 +1910,11 @@ classDiagram
         +codigo() CodigoConfiguracion
         +borrarCodigo() void
         +hayAdministrador() boolean
+        +politicaRegistro() PoliticaRegistro
+        +guardarPoliticaRegistro(politica) void
+        +guardarLimites(limites) void
+        +correo() CorreoInstalacion
+        +guardarCorreo(correo) void
     }
     class RepositorioConfiguracionInstalacionPrisma
     class CobroDisponibleGuard
@@ -2700,6 +2706,7 @@ classDiagram
     IdentidadService --> RepositorioTokensCuenta
     IdentidadService --> GeneradorToken
     IdentidadService --> AsignacionSandboxPuerto
+    IdentidadService --> PoliticaRegistroPuerto : SP-18
     AsignacionSandboxPuerto <|-- AsignacionSandboxSuscripciones
     AsignacionSandboxSuscripciones ..> SuscripcionesService : asignarSandbox
     SesionService --> RepositorioUsuarios

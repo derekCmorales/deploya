@@ -19,5 +19,26 @@ export interface CodigoConfiguracion {
   codigoVence: Date;
 }
 
+/**
+ * SMTP que guarda el asistente (SP-17). La clave llega ya cifrada con `CLAVE_CIFRADO_VARIABLES`:
+ * el repositorio no la ve en claro.
+ */
+export interface SmtpInstalacion {
+  host: string;
+  puerto: number;
+  usuario: string;
+  claveCifrada: string;
+  remitente: string;
+}
+
+/**
+ * Cómo manda correos la instalación (contrato instalacion.md § Correo):
+ * `entorno` = nadie lo configuró en la web y valen las `SMTP_*` del `.env`.
+ */
+export type CorreoInstalacion = { tipo: "entorno" } | { tipo: "smtp"; smtp: SmtpInstalacion } | { tipo: "sin-correo" };
+
+/** Lo que se puede guardar: volver a `entorno` no es una opción de la web. */
+export type CorreoGuardable = Exclude<CorreoInstalacion, { tipo: "entorno" }>;
+
 /** La clave de la fila única. */
 export const ID_INSTALACION = "instalacion";

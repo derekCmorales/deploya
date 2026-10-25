@@ -8,6 +8,7 @@ import {
   ESTADOS_SUSCRIPCION,
   EstadoDespliegue,
   EstadoSuscripcion,
+  GraficaUso,
   LineaTiempo,
   MapaActividad,
   Pasos,
@@ -69,6 +70,25 @@ const dias = Array.from({ length: 84 }, (_, i) => ({
   total: [0, 1, 0, 2, 0, 0, 4, 1, 0, 3][i % 10],
   fallidos: i === 40 || i === 71 ? 1 : 0,
 }));
+
+/** Datos de ejemplo solo para el catálogo: la pantalla 16 siempre lee la API. */
+const ventanaGrafica = { inicio: "2026-10-19T18:30:00Z", fin: "2026-10-20T18:00:00Z" };
+const tiempoDeEjemplo = (indice: number) =>
+  new Date(Date.parse(ventanaGrafica.inicio) + indice * 30 * 60_000).toISOString();
+const serieMemoria = Array.from({ length: 48 }, (_, indice) => {
+  const avance = indice / 47;
+  const valor = 318 + avance * 112 + Math.sin(indice / 5) * 8;
+  return { tiempo: tiempoDeEjemplo(indice), valor: Math.round(valor) };
+});
+const serieCpu = Array.from({ length: 48 }, (_, indice) => {
+  const avance = indice / 47;
+  const valor = 0.06 + avance * 0.06 + Math.sin(indice / 5) * 0.04;
+  return { tiempo: tiempoDeEjemplo(indice), valor: Math.round(valor * 100) / 100 };
+});
+const eventosGrafica = [
+  { en: "2026-10-19T20:12:00Z", version: 13 },
+  { en: "2026-10-20T12:06:23Z", version: 14 },
+];
 
 export default function SistemaPage() {
   return (
@@ -288,6 +308,75 @@ export default function SistemaPage() {
               <Skeleton className="h-4 w-24" />
             </div>
           </div>
+        </div>
+      </Seccion>
+
+      <Seccion
+        titulo="Gráficas"
+        nota="SVG a mano, una escala por gráfica. Tinta para la serie, warn solo en la zona de aviso, Señal solo en el punto «ahora» y los despliegues como chips. Datos de ejemplo: en las pantallas salen de la API."
+      >
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Card>
+            <CardContent className="pt-4">
+              <GraficaUso
+                titulo="Memoria"
+                muestras={serieMemoria}
+                limite={512}
+                unidad="MB"
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+                despliegues={eventosGrafica}
+              />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <GraficaUso
+                titulo="CPU"
+                muestras={serieCpu}
+                limite={0.5}
+                unidad="vCPU"
+                divisiones={2}
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+                despliegues={eventosGrafica}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="grid items-start gap-6 xl:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Memoria compacta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GraficaUso
+                compacta
+                titulo="Memoria compacta"
+                muestras={serieMemoria}
+                limite={512}
+                unidad="MB"
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+              />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <GraficaUso
+                titulo="Sin datos"
+                muestras={[]}
+                limite={512}
+                unidad="MB"
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+              />
+            </CardContent>
+          </Card>
         </div>
       </Seccion>
 

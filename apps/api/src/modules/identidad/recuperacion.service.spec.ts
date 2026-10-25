@@ -197,3 +197,26 @@ describe("M1-05 · Recuperación de contraseña", () => {
     await expect(servicio.restablecer({ token: "inventado", contrasena: CLAVE_NUEVA })).rejects.toMatchObject({ motivo: "inexistente" });
   });
 });
+
+describe("SP-03 · Último cambio de contraseña al restablecer", () => {
+  it("Fecha después de restablecerla", async () => {
+    const { servicio, correo, usuarios, usuario, reloj } = await armar();
+    await servicio.solicitar(usuario.correo);
+    reloj.avanzar(10 * MS_POR_MINUTO);
+
+    await servicio.restablecer({ token: tokenDelEnlace(correo.enviados[0].enlace), contrasena: CLAVE_NUEVA });
+
+    expect((await usuarios.porId(usuario.id))?.contrasenaCambiadaEn).toEqual(reloj.ahora());
+  });
+
+  it("un enlace vencido no toca la fecha", async () => {
+    const { servicio, correo, usuarios, usuario, reloj } = await armar();
+    await servicio.solicitar(usuario.correo);
+    reloj.avanzar(31 * MS_POR_MINUTO);
+
+    await expect(servicio.restablecer({ token: tokenDelEnlace(correo.enviados[0].enlace), contrasena: CLAVE_NUEVA })).rejects.toBeInstanceOf(
+      TokenNoValido,
+    );
+    expect((await usuarios.porId(usuario.id))?.contrasenaCambiadaEn).toBeNull();
+  });
+});

@@ -72,7 +72,7 @@ export class RecuperacionService {
     const usuario = await this.usuarios.porId(guardado.usuarioId);
     if (usuario?.estadoCuenta !== "activa") throw new TokenNoValido("inexistente");
 
-    await this.usuarios.cambiarHash(guardado.usuarioId, await this.hash.calcular(solicitud.contrasena));
+    await this.usuarios.cambiarHash(guardado.usuarioId, await this.hash.calcular(solicitud.contrasena), ahora);
     await this.tokens.marcarUsado(guardado.id, ahora);
     await this.sesiones.revocarTodasDe(guardado.usuarioId, ahora);
   }

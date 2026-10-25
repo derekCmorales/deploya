@@ -32,7 +32,7 @@ describe("M1-05 · repositorios en memoria", () => {
     expect((await tokens.porHuella("d"))?.usadoEn).toBeNull();
   });
 
-  it("cambiarHash reemplaza solo el hash de esa cuenta", async () => {
+  it("cambiarHash reemplaza el hash y la fecha del cambio solo de esa cuenta", async () => {
     const usuarios = new RepositorioUsuariosMemoria();
     const usuario = await usuarios.crear({
       correo: "a@b.co",
@@ -43,10 +43,11 @@ describe("M1-05 · repositorios en memoria", () => {
       creado: AHORA,
     });
 
-    await usuarios.cambiarHash(usuario.id, "nuevo");
-    await usuarios.cambiarHash("inexistente", "x");
+    expect(usuario.contrasenaCambiadaEn).toBeNull();
+    await usuarios.cambiarHash(usuario.id, "nuevo", AHORA);
+    await usuarios.cambiarHash("inexistente", "x", AHORA);
 
-    expect(await usuarios.porId(usuario.id)).toEqual({ ...usuario, hashContrasena: "nuevo" });
+    expect(await usuarios.porId(usuario.id)).toEqual({ ...usuario, hashContrasena: "nuevo", contrasenaCambiadaEn: AHORA });
   });
 
   it("revocarTodasDe cierra las sesiones abiertas de la cuenta y respeta las ya cerradas y las ajenas", async () => {
@@ -75,12 +76,14 @@ describe("M1-05 · repositorios Prisma", () => {
     expect(updateMany).toHaveBeenCalledWith({ where: { usuarioId: "u-1", tipo: "recuperacion", usadoEn: null }, data: { usadoEn: LUEGO } });
   });
 
-  it("cambiarHash escribe solo el hash", async () => {
+  it("cambiarHash escribe el hash y la fecha del cambio en una sola escritura", async () => {
     const update = jest.fn().mockResolvedValue({});
+    const cambiadaEn = new Date("2026-09-22T15:00:00.000Z");
 
-    await new RepositorioUsuariosPrisma(prismaDoble({ usuario: { update } })).cambiarHash("u-1", "nuevo");
+    await new RepositorioUsuariosPrisma(prismaDoble({ usuario: { update } })).cambiarHash("u-1", "nuevo", cambiadaEn);
 
-    expect(update).toHaveBeenCalledWith({ where: { id: "u-1" }, data: { hashContrasena: "nuevo" } });
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({ where: { id: "u-1" }, data: { hashContrasena: "nuevo", contrasenaCambiadaEn: cambiadaEn } });
   });
 
   it("revocarTodasDe marca las sesiones abiertas de la cuenta", async () => {

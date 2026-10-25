@@ -16,6 +16,8 @@ export interface PerfilCuenta {
   rol: Rol;
   verificado: boolean;
   creado: Date;
+  /** 05b «Último cambio»; `null` = «Nunca la has cambiado» (SP-03). */
+  contrasenaCambiadaEn: Date | null;
 }
 
 export interface CambioContrasena {
@@ -69,7 +71,7 @@ export class CuentaService {
     const actual = await this.sesiones.porHuella(this.generador.huella(tokenSesion));
     if (actual) await this.sesiones.revocarTodasMenos(usuario.id, actual.id, ahora);
     else await this.sesiones.revocarTodasDe(usuario.id, ahora);
-    await this.usuarios.cambiarHash(usuario.id, hashNuevo);
+    await this.usuarios.cambiarHash(usuario.id, hashNuevo, ahora);
   }
 
   /** «Cerrar todas» (05b): todas las sesiones, incluida la actual; la cookie la borra el controlador. */
@@ -92,5 +94,6 @@ function perfilDe(usuario: Usuario): PerfilCuenta {
     rol: usuario.rol,
     verificado: usuario.estadoCuenta !== "pendiente",
     creado: usuario.creado,
+    contrasenaCambiadaEn: usuario.contrasenaCambiadaEn,
   };
 }

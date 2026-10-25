@@ -189,3 +189,35 @@ export function cuerpoSuspension(motivo: string, detalle: string): { motivo: str
   const texto = detalle.trim();
   return { motivo, detalle: texto ? texto.slice(0, DETALLE_MAXIMO) : null };
 }
+
+/** Reactivar solo se ofrece a cuentas suspendidas (25c; la API lo vuelve a validar). */
+export function sePuedeReactivar(u: Pick<FilaUsuario, "estadoCuenta">): boolean {
+  return u.estadoCuenta === "suspendida";
+}
+
+/** Lo que 25c manda a `POST /admin/usuarios/:id/reactivacion`. */
+export function cuerpoReactivacion(detalle: string): { detalle: string | null } {
+  const texto = detalle.trim();
+  return { detalle: texto ? texto.slice(0, DETALLE_MAXIMO) : null };
+}
+
+/** Suscripciones que dejan los contenedores detenidos aunque la cuenta vuelva (la misma regla que la API). */
+const SUSCRIPCION_ESPERA_RENOVACION: Partial<Record<EstadoSuscripcion, string>> = { suspendida: "Suspendida", cancelada: "Cancelada" };
+
+/**
+ * Banner de 25c: «Su suscripción Pro sigue Suspendida» y cuántos contenedores siguen detenidos;
+ * `null` si la suscripción está vigente (los contenedores arrancan al reactivar).
+ */
+export function avisoReactivacion(
+  d: Pick<DetalleUsuario, "plan" | "suscripcion" | "suspension">,
+): { titulo: string; texto: string } | null {
+  const estado = d.suscripcion ? SUSCRIPCION_ESPERA_RENOVACION[d.suscripcion] : undefined;
+  if (!estado) return null;
+  const n = d.suspension?.contenedoresDetenidos ?? 0;
+  const contenedores = n === 1 ? "Su contenedor sigue detenido" : `Sus ${n} contenedores siguen detenidos`;
+  const plan = d.plan ? ` ${d.plan}` : "";
+  return {
+    titulo: `Su suscripción${plan} sigue ${estado}`,
+    texto: `${contenedores} hasta que renueve. Si la suscripción estuviera vigente, arrancarían ahora.`,
+  };
+}

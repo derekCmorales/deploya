@@ -26,15 +26,16 @@ enum TipoTokenCuenta {
 }
 
 model Usuario {
-  id               String       @id @default(uuid())
-  correo           String       @unique // normalizado en minúsculas
-  nombre           String       @db.VarChar(64)
-  hashContrasena   String
-  rol              Rol          @default(cliente)
-  estadoCuenta     EstadoCuenta @default(pendiente)
-  motivoSuspension String? // lo muestra 03b; lo escribe M9
-  creado           DateTime     @default(now())
-  actualizado      DateTime     @updatedAt
+  id                   String       @id @default(uuid())
+  correo               String       @unique // normalizado en minúsculas
+  nombre               String       @db.VarChar(64)
+  hashContrasena       String
+  rol                  Rol          @default(cliente)
+  estadoCuenta         EstadoCuenta @default(pendiente)
+  motivoSuspension     String? // lo muestra 03b; lo escribe M9
+  contrasenaCambiadaEn DateTime? // SP-03 · M1 la escribe al cambiar (M1-07) y al restablecer (M1-05); null = nunca
+  creado               DateTime     @default(now())
+  actualizado          DateTime     @updatedAt
 
   tokens             TokenCuenta[]
   sesiones           Sesion[]
@@ -161,7 +162,7 @@ model AccionAdministrativa {
   admin             Usuario  @relation("AdminEjecuta", fields: [adminId], references: [id])
   usuarioAfectadoId String
   usuarioAfectado   Usuario  @relation("UsuarioAfectado", fields: [usuarioAfectadoId], references: [id], onDelete: Cascade)
-  accion            String // "suspender-cuenta" (única acción del núcleo)
+  accion            String // "suspender-cuenta" (núcleo); "reactivar-cuenta" (SP-05)
   motivo            String
   detalle           String?
   creado            DateTime @default(now())
@@ -361,5 +362,26 @@ model ConfiguracionInstalacion {
   cpuPorProyecto       Decimal          @db.Decimal(4, 2) @default(1)
   memoriaMbPorProyecto Int              @default(1024)
   proyectosPorUsuario  Int?
+  // SP-17 · correo de la instalación (asistente 31). Con datos aquí, mandan sobre SMTP_* del .env.
+  smtpHost             String?
+  smtpPuerto           Int?
+  smtpUsuario          String?
+  smtpClaveCifrada     String? // AES-GCM con CLAVE_CIFRADO_VARIABLES; nunca en claro
+  smtpRemitente        String?
+  sinCorreo            Boolean          @default(false)
   actualizado          DateTime         @updatedAt
+}
+
+// M9 · Javier (SP-18). Un solo uso, vence a los 7 días; solo se guarda el hash del token.
+model Invitacion {
+  id        String    @id @default(uuid())
+  correo    String
+  hashToken String    @unique
+  vence     DateTime
+  usada     DateTime?
+  revocada  DateTime?
+  creadaPor String // adminId
+  creado    DateTime  @default(now())
+
+  @@index([vence])
 }

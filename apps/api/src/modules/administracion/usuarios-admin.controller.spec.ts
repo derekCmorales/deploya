@@ -10,6 +10,7 @@ import { AdministracionMemoria } from "./adaptadores/administracion.memoria";
 import { cuentaDePrueba } from "./adaptadores/cuentas.fixture";
 import { UsuarioNoEncontrado } from "./dominio/errores";
 import { USUARIOS_POR_PAGINA } from "./dominio/usuarios";
+import { ReactivacionCuentaService } from "./reactivacion-cuenta.service";
 import { SuspensionService } from "./suspension.service";
 import { UsuariosAdminController } from "./usuarios-admin.controller";
 
@@ -33,8 +34,10 @@ function armar() {
         ],
       }),
     );
-  const servicio = new SuspensionService(almacen.escritura, new ContenedoresClienteFalso(), new RelojFijo());
-  return { controlador: new UsuariosAdminController(almacen.consulta, servicio), almacen };
+  const contenedores = new ContenedoresClienteFalso();
+  const servicio = new SuspensionService(almacen.escritura, contenedores, new RelojFijo());
+  const reactivacion = new ReactivacionCuentaService(almacen.escritura, contenedores, new RelojFijo());
+  return { controlador: new UsuariosAdminController(almacen.consulta, servicio, reactivacion), almacen };
 }
 
 function contexto(metodo: (...argumentos: never[]) => unknown, usuario: UsuarioSesion): ExecutionContext {
@@ -124,5 +127,30 @@ describe("M9-02 · POST /admin/usuarios/:id/suspension", () => {
     const { controlador } = armar();
 
     expect(controlador.motivos().motivos[0]).toEqual({ clave: "terminos", texto: "Uso que incumple los términos de servicio." });
+  });
+});
+
+describe("SP-05 · POST /admin/usuarios/:id/reactivacion", () => {
+  it("reactiva con el administrador de la sesión y el detalle", async () => {
+    const { controlador, almacen } = armar();
+    await controlador.suspender("u-admin", "u-maria", { motivo: "terminos" });
+
+    const resultado = await controlador.reactivar("u-admin", "u-maria", { detalle: "  Eran pruebas de carga.  " });
+
+    expect(resultado).toEqual({ contenedores: "reanudados" });
+    expect(almacen.acciones[1]).toMatchObject({ adminId: "u-admin", usuarioAfectadoId: "u-maria", accion: "reactivar-cuenta", detalle: "Eran pruebas de carga." });
+  });
+
+  it("Cliente no puede", () => {
+    const guard = new RolGuard(new Reflector());
+
+    let error: unknown = null;
+    try {
+      guard.canActivate(contexto(UsuariosAdminController.prototype.reactivar, CLIENTE));
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(ForbiddenException);
   });
 });

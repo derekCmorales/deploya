@@ -1,5 +1,5 @@
 import type { ArgumentsHost } from "@nestjs/common";
-import { ConsultaInvalida, CuentaYaSuspendida, MotivoInvalido, NoSePuedeSuspenderAdministrador, UsuarioNoEncontrado, type ErrorAdministracion } from "./dominio/errores";
+import { ConsultaInvalida, CuentaNoSuspendida, CuentaYaSuspendida, MotivoInvalido, NoSePuedeSuspenderAdministrador, UsuarioNoEncontrado, type ErrorAdministracion } from "./dominio/errores";
 import { ErroresAdministracionFilter } from "./errores-administracion.filter";
 
 function responder(error: ErrorAdministracion) {
@@ -23,6 +23,7 @@ describe("ErroresAdministracionFilter", () => {
     [new UsuarioNoEncontrado("u1"), 404],
     [new NoSePuedeSuspenderAdministrador(), 403],
     [new CuentaYaSuspendida(), 409],
+    [new CuentaNoSuspendida(), 409],
     [new MotivoInvalido(), 400],
     [new ConsultaInvalida("página"), 400],
   ])("%s → %i con { codigo, mensaje }", (error, estado) => {

@@ -44,6 +44,7 @@ export function proyectoDemo(cambios: Partial<ProyectoDesplegable> = {}): Proyec
   return {
     id: "proyecto-1",
     usuarioId: "usuario-1",
+    nombre: "hola-deploya",
     subdominio: "hola-deploya",
     urlRepositorio: "https://github.com/derekCmorales/hola-deploya",
     rama: "main",

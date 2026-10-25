@@ -92,6 +92,10 @@ Utilidades en `globals.css`, todas se apagan con `prefers-reduced-motion`:
 | `dy-esqueleto` | Brillo de carga (`Skeleton`) |
 | `dy-flota` | Punto de Señal de las ilustraciones de acceso (01, 03): sube 9 px y vuelve, 4,2 s |
 | `dy-giro-lento` | Órbita de la ilustración de 01: una vuelta en 18 s |
+| `dy-aparece` | Entrada de las piezas de las ilustraciones de acceso: sube 8 px y aparece, 0,7 s, una vez; `--retraso` las escalona |
+| `dy-crece-x` · `dy-crece-centro` | Barra de Señal de 01 y horizonte de 03: crecen en horizontal desde el borde o el centro, 0,9 s, una vez |
+| `dy-respira` | Halo del punto de Señal de 01 y 03: se abre y se apaga, 3,2 s; quieto no se ve |
+| `dy-oscila` | Arco de rayas de 03: ±5° con el pivote arriba, 14 s |
 | `animate-spin` | Solo `loader-circle` en estados en curso |
 
 Un efecto de borde (`BorderBeam`) por pantalla como máximo.

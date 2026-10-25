@@ -1,6 +1,7 @@
 import { BadRequestException, type ArgumentsHost } from "@nestjs/common";
-import { HTTP_CODE_METADATA } from "@nestjs/common/constants";
+import { EXCEPTION_FILTERS_METADATA, HTTP_CODE_METADATA } from "@nestjs/common/constants";
 import { Test } from "@nestjs/testing";
+import { ErroresAdministracionFilter } from "../administracion/errores-administracion.filter";
 import { ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
 import { textoDe } from "./cuerpo-solicitud";
 import { ErroresIdentidadFilter } from "./errores-identidad.filter";
@@ -43,6 +44,21 @@ describe("IdentidadController", () => {
 
     expect(cuenta).toEqual(CUENTA);
     expect(servicio.registrar).toHaveBeenCalledWith({ correo: "derek@tiendademo.com", contrasena: "Deploya#2026seguro" });
+  });
+
+  it("POST /identidad/registro pasa la invitación del enlace (SP-18) y la omite si viene vacía", async () => {
+    const { controller, servicio } = await armar();
+    const cuerpo = { correo: "ana@miempresa.com", contrasena: "Deploya#2026seguro", confirmacion: "Deploya#2026seguro" };
+
+    await controller.registrar({ ...cuerpo, invitacion: "tok-1" });
+    await controller.registrar({ ...cuerpo, invitacion: "" });
+
+    expect(servicio.registrar).toHaveBeenNthCalledWith(1, { correo: cuerpo.correo, contrasena: cuerpo.contrasena, invitacion: "tok-1" });
+    expect(servicio.registrar.mock.calls[1][0].invitacion).toBeUndefined();
+  });
+
+  it("POST /identidad/registro traduce los rechazos de la política con el filtro de M9 (403/410)", () => {
+    expect(Reflect.getMetadata(EXCEPTION_FILTERS_METADATA, IdentidadController.prototype.registrar)).toContain(ErroresAdministracionFilter);
   });
 
   it("POST /identidad/registro rechaza si la confirmación no coincide", async () => {

@@ -61,6 +61,7 @@ describe("M1-06 · Mi cuenta · Perfil", () => {
       rol: "cliente",
       verificado: true,
       creado: new Date("2026-09-03T12:00:00.000Z"),
+      contrasenaCambiadaEn: null,
     });
   });
 
@@ -171,5 +172,32 @@ describe("M1-07 · Mi cuenta · Seguridad", () => {
     await servicio.cerrarTodas(usuario.id);
 
     expect([...sesiones.sesiones.values()].map((s) => s.revocadaEn)).toEqual([reloj.ahora(), reloj.ahora()]);
+  });
+});
+
+describe("SP-03 · Último cambio de contraseña (05b)", () => {
+  it("Fecha después de cambiarla", async () => {
+    const { servicio, usuario, reloj, abrir } = await armar();
+    await abrir("actual");
+
+    await servicio.cambiarContrasena(usuario.id, "actual", { actual: CLAVE_ACTUAL, nueva: CLAVE_NUEVA });
+
+    expect((await servicio.perfil(usuario.id)).contrasenaCambiadaEn).toEqual(reloj.ahora());
+  });
+
+  it("Nunca cambiada", async () => {
+    const { servicio, usuario } = await armar();
+
+    expect((await servicio.perfil(usuario.id)).contrasenaCambiadaEn).toBeNull();
+  });
+
+  it("si el cambio se rechaza, la fecha no cambia", async () => {
+    const { servicio, usuario } = await armar();
+
+    await expect(servicio.cambiarContrasena(usuario.id, "actual", { actual: "otra", nueva: CLAVE_NUEVA })).rejects.toBeInstanceOf(
+      ContrasenaActualIncorrecta,
+    );
+
+    expect((await servicio.perfil(usuario.id)).contrasenaCambiadaEn).toBeNull();
   });
 });

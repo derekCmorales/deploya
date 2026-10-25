@@ -15,7 +15,7 @@ export class RepositorioUsuariosMemoria extends RepositorioUsuarios {
   }
 
   async crear(usuario: NuevoUsuario): Promise<Usuario> {
-    const creado = { ...usuario, id: randomUUID(), motivoSuspension: null, suspendidaDesde: null };
+    const creado = { ...usuario, id: randomUUID(), motivoSuspension: null, suspendidaDesde: null, contrasenaCambiadaEn: null };
     this.usuarios.set(creado.id, creado);
     return creado;
   }
@@ -25,9 +25,9 @@ export class RepositorioUsuariosMemoria extends RepositorioUsuarios {
     if (usuario) this.usuarios.set(id, { ...usuario, estadoCuenta: estado });
   }
 
-  async cambiarHash(id: string, hashContrasena: string): Promise<void> {
+  async cambiarHash(id: string, hashContrasena: string, cambiadaEn: Date): Promise<void> {
     const usuario = this.usuarios.get(id);
-    if (usuario) this.usuarios.set(id, { ...usuario, hashContrasena });
+    if (usuario) this.usuarios.set(id, { ...usuario, hashContrasena, contrasenaCambiadaEn: cambiadaEn });
   }
 
   async cambiarNombre(id: string, nombre: string): Promise<void> {

@@ -33,6 +33,8 @@ import {
   type ResumenProyecto,
 } from "@/lib/resumen";
 
+import { TarjetaUltimas24h } from "./tarjeta-ultimas-24h";
+
 const ICONO_HITO: Record<string, LucideIcon> = {
   recepcion: GitCommitHorizontal,
   construccion: Package,
@@ -66,6 +68,7 @@ export function PanelResumen({ proyectoId }: { proyectoId: string }) {
       <div className="flex flex-wrap items-stretch gap-6">
         <UltimoDespliegue resumen={datos} />
       </div>
+      <TarjetaUltimas24h proyectoId={proyectoId} />
     </div>
   );
 }

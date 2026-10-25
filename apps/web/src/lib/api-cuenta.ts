@@ -8,6 +8,8 @@ export interface PerfilCuenta {
   rol: "cliente" | "administrador";
   verificado: boolean;
   creado: string;
+  /** 05b «Último cambio» (SP-03); `null` si nunca se cambió. */
+  contrasenaCambiadaEn: string | null;
 }
 
 const HTTP_SIN_CONTENIDO = 204;

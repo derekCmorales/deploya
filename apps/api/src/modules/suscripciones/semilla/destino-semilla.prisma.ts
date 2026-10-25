@@ -1,8 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
+import { ID_INSTALACION } from "../modo/configuracion-instalacion";
 import { DestinoSemilla, type UsuarioParaGuardar } from "./destino-semilla.puerto";
 import type { CodigoSemilla, PlanSemilla } from "./semilla";
 
-const ID_INSTALACION = "instalacion";
 
 export class DestinoSemillaPrisma extends DestinoSemilla {
   constructor(private readonly prisma: PrismaClient) {

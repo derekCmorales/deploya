@@ -6,6 +6,7 @@ import { ComprobanteTextoFalso } from "./adaptadores/comprobante-texto.falso";
 import { planesDePrueba } from "./adaptadores/planes.fixture";
 import { RepositorioPagosMemoria } from "./adaptadores/repositorio-pagos.memoria";
 import { HistorialPagosService } from "./historial-pagos.service";
+import { CobroDisponibleGuard } from "./modo/cobro-disponible.guard";
 import { PagosController } from "./pagos.controller";
 
 async function armar() {
@@ -44,7 +45,7 @@ describe("M2-06 · PagosController", () => {
     const guard = new SesionGuard({} as SesionService);
     const contexto = { switchToHttp: () => ({ getRequest: () => ({ headers: {} }) }) } as unknown as ExecutionContext;
 
-    expect(Reflect.getMetadata(GUARDS_METADATA, PagosController)).toEqual([SesionGuard]);
+    expect(Reflect.getMetadata(GUARDS_METADATA, PagosController)).toEqual([SesionGuard, CobroDisponibleGuard]);
     await expect(guard.canActivate(contexto)).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

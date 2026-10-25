@@ -16,10 +16,12 @@ export interface Usuario {
   motivoSuspension: string | null;
   /** Fecha de la suspensión vigente (la `AccionAdministrativa` más reciente de M9); `null` si no consta. */
   suspendidaDesde: Date | null;
+  /** 05b «Último cambio» (SP-03): la escribe M1 al cambiar o restablecer; `null` si nunca se cambió. */
+  contrasenaCambiadaEn: Date | null;
   creado: Date;
 }
 
-export type NuevoUsuario = Omit<Usuario, "id" | "motivoSuspension" | "suspendidaDesde">;
+export type NuevoUsuario = Omit<Usuario, "id" | "motivoSuspension" | "suspendidaDesde" | "contrasenaCambiadaEn">;
 
 export interface TokenCuenta {
   id: string;

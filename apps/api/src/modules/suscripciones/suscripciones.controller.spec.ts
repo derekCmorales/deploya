@@ -3,6 +3,10 @@ import { Reloj, RelojFijo } from "../../compartido/reloj";
 import { planesDePrueba } from "./adaptadores/planes.fixture";
 import { RepositorioPlanesMemoria } from "./adaptadores/repositorio-planes.memoria";
 import { RepositorioSuscripcionesMemoria } from "./adaptadores/repositorio-suscripciones.memoria";
+import { CatalogoPlanes } from "./modo/catalogo-planes.puerto";
+import { CatalogoNube } from "./modo/catalogos";
+import { CuotasDelPlan } from "./modo/cuotas";
+import { PoliticaCuotas } from "./modo/politica-cuotas.puerto";
 import { RepositorioPlanes } from "./puertos/repositorio-planes.puerto";
 import { RepositorioSuscripciones } from "./puertos/repositorio-suscripciones.puerto";
 import { SuscripcionesController } from "./suscripciones.controller";
@@ -16,6 +20,8 @@ async function controlador(): Promise<SuscripcionesController> {
       SuscripcionesService,
       { provide: RepositorioPlanes, useValue: new RepositorioPlanesMemoria(planes) },
       { provide: RepositorioSuscripciones, useValue: new RepositorioSuscripcionesMemoria(planes) },
+      { provide: CatalogoPlanes, useClass: CatalogoNube },
+      { provide: PoliticaCuotas, useClass: CuotasDelPlan },
       { provide: Reloj, useValue: new RelojFijo() },
     ],
   }).compile();

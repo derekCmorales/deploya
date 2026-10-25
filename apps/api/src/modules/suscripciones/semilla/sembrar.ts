@@ -26,21 +26,26 @@ export async function sembrar(
 ): Promise<void> {
   const codigo = codigoDesdeEntorno(entorno);
   const usuarios = usuariosSemilla(entorno);
-  await guardarPlanes(destino);
-  const planDemo = await demo.planes.porCodigo(CODIGO_PLAN_DEMO);
-  if (!planDemo) throw new PlanNoEncontrado(CODIGO_PLAN_DEMO);
+  await guardarPlanes(destino, entorno);
   for (const { clave, estadoDemo, ...usuario } of usuarios) {
     const id = await destino.guardarUsuario({ ...usuario, hashContrasena: await hashear(clave) });
     await suscripciones.asignarSandbox(id);
-    if (estadoDemo) await llevarAEstadoDemo(id, estadoDemo, planDemo, demo);
+    if (estadoDemo) await llevarAEstadoDemo(id, estadoDemo, await planDemo(demo), demo);
   }
   if (codigo) await destino.guardarCodigo(codigo);
 }
 
-async function guardarPlanes(destino: DestinoSemilla): Promise<void> {
-  for (const plan of planesSemilla()) {
+async function guardarPlanes(destino: DestinoSemilla, entorno: NodeJS.ProcessEnv): Promise<void> {
+  for (const plan of planesSemilla(entorno)) {
     await destino.guardarPlan(plan);
   }
+}
+
+/** Starter, solo para las cuentas de demo de la nube (en autoalojado no existe). */
+async function planDemo(demo: PuertosCuentasDemo): Promise<Plan> {
+  const plan = await demo.planes.porCodigo(CODIGO_PLAN_DEMO);
+  if (!plan) throw new PlanNoEncontrado(CODIGO_PLAN_DEMO);
+  return plan;
 }
 
 /**

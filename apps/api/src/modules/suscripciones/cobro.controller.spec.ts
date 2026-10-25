@@ -26,6 +26,9 @@ import {
 import { ErroresSuscripcionesFilter } from "./errores-suscripciones.filter";
 import { PasarelaPago } from "./puertos/pasarela-pago.puerto";
 import { RepositorioPagos } from "./puertos/repositorio-pagos.puerto";
+import { CatalogoPlanes } from "./modo/catalogo-planes.puerto";
+import { CatalogoNube } from "./modo/catalogos";
+import { CobroDisponibleGuard } from "./modo/cobro-disponible.guard";
 import { RepositorioPlanes } from "./puertos/repositorio-planes.puerto";
 import { RepositorioSuscripciones } from "./puertos/repositorio-suscripciones.puerto";
 
@@ -47,6 +50,8 @@ async function controlador(): Promise<CobroController> {
       { provide: RepositorioPagos, useValue: new RepositorioPagosMemoria() },
       { provide: PasarelaPago, useValue: new PasarelaSimulada(new EsperaInstantanea()) },
       { provide: Reloj, useValue: new RelojFijo() },
+      { provide: CatalogoPlanes, useClass: CatalogoNube },
+      CobroDisponibleGuard,
     ],
   })
     .overrideGuard(SesionGuard)
@@ -72,8 +77,8 @@ function respuestaFalsa() {
 }
 
 describe("CobroController", () => {
-  it("Sin sesión: todas las rutas del cliente pasan por SesionGuard", () => {
-    expect(Reflect.getMetadata("__guards__", CobroController)).toEqual([SesionGuard]);
+  it("Sin sesión: todas las rutas del cliente pasan por SesionGuard, y en autoalojado no hay cobro", () => {
+    expect(Reflect.getMetadata("__guards__", CobroController)).toEqual([SesionGuard, CobroDisponibleGuard]);
   });
 
   it("GET /suscripciones/mia devuelve la del usuario de la sesión", async () => {

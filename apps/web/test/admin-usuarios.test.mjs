@@ -5,8 +5,10 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
+  avisoReactivacion,
   conceptoPagoAdmin,
   consultaUsuarios,
+  cuerpoReactivacion,
   cuerpoSuspension,
   DETALLE_MAXIMO,
   fechaAdmin,
@@ -14,6 +16,7 @@ import {
   haceCuanto,
   inicialesDe,
   OPCIONES_SUSCRIPCION,
+  sePuedeReactivar,
   sePuedeSuspender,
   textoAlta,
   textoSuspension,
@@ -113,4 +116,37 @@ test("25 · texto de la suscripción en el panel", () => {
   assert.equal(textoSuscripcionAdmin({ suscripcion: "vencida", suscripcionDesde: "2026-10-15T00:05:00.000Z", vence: null, proyectos: [] }), "desde 15 oct");
   assert.equal(textoSuscripcionAdmin({ suscripcion: "activa", suscripcionDesde: null, vence: "2026-11-03T10:00:00.000Z", proyectos }), "vence 03 nov 2026");
   assert.equal(textoSuscripcionAdmin({ suscripcion: "activa", suscripcionDesde: null, vence: null, proyectos: [] }), "sin vencimiento");
+});
+
+test("25c · solo se ofrece reactivar a cuentas suspendidas", () => {
+  assert.equal(sePuedeReactivar({ estadoCuenta: "suspendida" }), true);
+  assert.equal(sePuedeReactivar({ estadoCuenta: "activa" }), false);
+  assert.equal(sePuedeReactivar({ estadoCuenta: "pendiente" }), false);
+});
+
+test("25c · el cuerpo recorta el detalle y lo deja nulo si está vacío", () => {
+  assert.deepEqual(cuerpoReactivacion("  Aclarado con la clienta.  "), { detalle: "Aclarado con la clienta." });
+  assert.deepEqual(cuerpoReactivacion("   "), { detalle: null });
+  assert.equal(cuerpoReactivacion("x".repeat(DETALLE_MAXIMO + 20)).detalle.length, DETALLE_MAXIMO);
+});
+
+test("25c · el aviso dice que los contenedores esperan a la renovación si la suscripción sigue Suspendida", () => {
+  const suspension = { desde: "2026-09-21T10:00:00.000Z", motivo: null, contenedoresDetenidos: 3 };
+
+  assert.deepEqual(avisoReactivacion({ plan: "Pro", suscripcion: "suspendida", suspension }), {
+    titulo: "Su suscripción Pro sigue Suspendida",
+    texto: "Sus 3 contenedores siguen detenidos hasta que renueve. Si la suscripción estuviera vigente, arrancarían ahora.",
+  });
+  assert.equal(
+    avisoReactivacion({ plan: "Starter", suscripcion: "cancelada", suspension: { ...suspension, contenedoresDetenidos: 1 } }).texto,
+    "Su contenedor sigue detenido hasta que renueve. Si la suscripción estuviera vigente, arrancarían ahora.",
+  );
+});
+
+test("25c · sin aviso cuando la suscripción está vigente: los contenedores arrancan al reactivar", () => {
+  const suspension = { desde: null, motivo: null, contenedoresDetenidos: 2 };
+
+  assert.equal(avisoReactivacion({ plan: "Pro", suscripcion: "activa", suspension }), null);
+  assert.equal(avisoReactivacion({ plan: "Pro", suscripcion: "vencida", suspension }), null);
+  assert.equal(avisoReactivacion({ plan: null, suscripcion: null, suspension }), null);
 });

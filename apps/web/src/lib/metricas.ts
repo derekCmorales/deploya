@@ -3,6 +3,8 @@
  * Sin React, DOM ni red para poder probarla con `node --test`.
  */
 
+import type { ErrorApi } from "./api";
+
 export const UMBRAL_AVISO = 0.8;
 export const PORCENTAJE = 100;
 
@@ -54,6 +56,46 @@ export interface RespuestaMetricas {
   aviso: string | null;
   despliegues: ChipDespliegue[];
   promedioPorVersion: PromedioVersion[];
+}
+
+/** Estado de la lectura: los datos viejos sobreviven a un fallo de red. */
+export interface EstadoMetricas {
+  datos: RespuestaMetricas | null;
+  error: ErrorApi | null;
+  leidoEn: string | null;
+}
+
+export type EventoMetricas =
+  | { tipo: "exito"; datos: RespuestaMetricas; leidoEn: string }
+  | { tipo: "fallo"; error: ErrorApi }
+  | { tipo: "reintento" }
+  | { tipo: "limpiar" };
+
+export const ESTADO_METRICAS_INICIAL: EstadoMetricas = {
+  datos: null,
+  error: null,
+  leidoEn: null,
+};
+
+export function reducirMetricas(estado: EstadoMetricas, evento: EventoMetricas): EstadoMetricas {
+  switch (evento.tipo) {
+    case "exito":
+      return { datos: evento.datos, error: null, leidoEn: evento.leidoEn };
+    case "fallo":
+      return { ...estado, error: evento.error };
+    case "reintento":
+      return { ...estado, error: null };
+    case "limpiar":
+      return ESTADO_METRICAS_INICIAL;
+  }
+}
+
+/** El error ocupa la pantalla solo si no hay datos que conservar. */
+export function mostrarErrorDeMetricas(
+  datos: RespuestaMetricas | null,
+  error: ErrorApi | null,
+): error is ErrorApi {
+  return datos === null && error !== null;
 }
 
 /** Punto que consume `GraficaUso`, independiente del recurso. */

@@ -4,7 +4,10 @@ import assert from "node:assert";
 import {
   cuerpoBanner,
   corriendoONo,
+  ESTADO_METRICAS_INICIAL,
   estadoEnPalabra,
+  mostrarErrorDeMetricas,
+  reducirMetricas,
   textoBanner,
   tonoDeUso,
   ventanaDe,
@@ -108,4 +111,43 @@ test("Resumen de 24 h", () => {
   assert.strictEqual(vista.memoria.estado, "Cerca del límite");
   assert.strictEqual(vista.memoria.delta.texto, "▲ 90 MB desde #13");
   assert.strictEqual(vista.limiteMemoria, 512);
+});
+
+test("Un fallo conserva los datos y el error solo ocupa la pantalla sin datos", () => {
+  const conDatos = reducirMetricas(ESTADO_METRICAS_INICIAL, {
+    tipo: "exito",
+    datos: respuesta(),
+    leidoEn: AHORA.toISOString(),
+  });
+  const conFallo = reducirMetricas(conDatos, { tipo: "fallo", error: new Error("sin conexión") });
+
+  assert.strictEqual(conFallo.datos, conDatos.datos);
+  assert.strictEqual(conFallo.leidoEn, conDatos.leidoEn);
+  assert.ok(conFallo.error);
+  assert.strictEqual(mostrarErrorDeMetricas(conFallo.datos, conFallo.error), false);
+
+  const sinDatos = reducirMetricas(ESTADO_METRICAS_INICIAL, {
+    tipo: "fallo",
+    error: new Error("sin conexión"),
+  });
+  assert.strictEqual(mostrarErrorDeMetricas(sinDatos.datos, sinDatos.error), true);
+  assert.strictEqual(mostrarErrorDeMetricas(conDatos.datos, conDatos.error), false);
+});
+
+test("Reintentar conserva los datos; cambiar de rango los limpia", () => {
+  const conDatos = reducirMetricas(ESTADO_METRICAS_INICIAL, {
+    tipo: "exito",
+    datos: respuesta(),
+    leidoEn: AHORA.toISOString(),
+  });
+  const conFallo = reducirMetricas(conDatos, { tipo: "fallo", error: new Error("sin conexión") });
+  const reintento = reducirMetricas(conFallo, { tipo: "reintento" });
+
+  assert.strictEqual(reintento.datos, conDatos.datos);
+  assert.strictEqual(reintento.error, null);
+
+  const limpiar = reducirMetricas(reintento, { tipo: "limpiar" });
+  assert.strictEqual(limpiar.datos, null);
+  assert.strictEqual(limpiar.error, null);
+  assert.strictEqual(limpiar.leidoEn, null);
 });

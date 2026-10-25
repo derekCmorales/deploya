@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMetricas } from "@/hooks/use-metricas";
-import { vistaResumen, type UsoRecurso } from "@/lib/metricas";
+import { mostrarErrorDeMetricas, vistaResumen, type UsoRecurso } from "@/lib/metricas";
 
 const DIVISIONES_CPU = 2;
 const DIVISIONES_MEMORIA = 4;
@@ -23,7 +23,7 @@ export function TarjetaUltimas24h({ proyectoId }: { proyectoId: string }) {
     return <Skeleton className="h-72 w-full rounded-xl" />;
   }
 
-  if (error) {
+  if (mostrarErrorDeMetricas(datos, error)) {
     return (
       <Card>
         <CardHeader>
@@ -47,10 +47,12 @@ export function TarjetaUltimas24h({ proyectoId }: { proyectoId: string }) {
     <Card>
       <CardHeader className="flex-wrap">
         <CardTitle className="grow">Últimas 24 h</CardTitle>
-        <Badge variant="signal">
-          <PuntoVivo />
-          En vivo
-        </Badge>
+        {!error ? (
+          <Badge variant="signal">
+            <PuntoVivo />
+            En vivo
+          </Badge>
+        ) : null}
         <Button asChild variant="ghost" size="xs">
           <Link href={`/projects/${proyectoId}/metricas`}>Ver métricas</Link>
         </Button>

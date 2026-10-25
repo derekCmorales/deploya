@@ -15,7 +15,14 @@ import { Segmented } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMetricas } from "@/hooks/use-metricas";
 import { useMiSuscripcion } from "@/hooks/use-suscripcion";
-import { corriendoONo, vistaMetricas, type RangoMetricas, type UsoRecurso, type VistaMetricas } from "@/lib/metricas";
+import {
+  corriendoONo,
+  mostrarErrorDeMetricas,
+  vistaMetricas,
+  type RangoMetricas,
+  type UsoRecurso,
+  type VistaMetricas,
+} from "@/lib/metricas";
 import { esFalloDeConexion } from "@/lib/reintento";
 
 const DIVISIONES_CPU = 2;
@@ -29,7 +36,7 @@ export function PanelMetricas({ proyectoId }: { proyectoId: string }) {
   const enVivo = !error && (datos === null || corriendoONo(datos) === null);
 
   let contenido: ReactNode;
-  if (error) {
+  if (mostrarErrorDeMetricas(datos, error)) {
     contenido = esFalloDeConexion(error.estado) ? (
       <ErrorConexionApi error={error} ruta={`/proyectos/${proyectoId}/metricas?rango=${rango}`} onReintentar={recargar} />
     ) : (

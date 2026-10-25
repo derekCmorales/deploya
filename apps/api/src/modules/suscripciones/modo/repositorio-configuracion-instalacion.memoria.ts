@@ -1,4 +1,12 @@
-import { LIMITES_POR_DEFECTO, POLITICA_POR_DEFECTO, type CodigoConfiguracion, type LimitesInstalacion, type PoliticaRegistro } from "./configuracion-instalacion";
+import {
+  LIMITES_POR_DEFECTO,
+  POLITICA_POR_DEFECTO,
+  type CodigoConfiguracion,
+  type CorreoGuardable,
+  type CorreoInstalacion,
+  type LimitesInstalacion,
+  type PoliticaRegistro,
+} from "./configuracion-instalacion";
 import { RepositorioConfiguracionInstalacion } from "./repositorio-configuracion-instalacion.puerto";
 
 /** Doble en memoria para las pruebas: la misma fila única que en la base. */
@@ -7,6 +15,7 @@ export class RepositorioConfiguracionInstalacionMemoria extends RepositorioConfi
   codigoGuardado: CodigoConfiguracion | null = null;
   administradores = 0;
   politica: PoliticaRegistro = POLITICA_POR_DEFECTO;
+  correoGuardado: CorreoInstalacion = { tipo: "entorno" };
 
   async limites(): Promise<LimitesInstalacion> {
     return { ...this.limitesGuardados };
@@ -34,5 +43,13 @@ export class RepositorioConfiguracionInstalacionMemoria extends RepositorioConfi
 
   async guardarLimites(limites: LimitesInstalacion): Promise<void> {
     this.limitesGuardados = { ...limites };
+  }
+
+  async correo(): Promise<CorreoInstalacion> {
+    return this.correoGuardado;
+  }
+
+  async guardarCorreo(correo: CorreoGuardable): Promise<void> {
+    this.correoGuardado = correo;
   }
 }

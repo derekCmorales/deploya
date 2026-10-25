@@ -362,6 +362,13 @@ model ConfiguracionInstalacion {
   cpuPorProyecto       Decimal          @db.Decimal(4, 2) @default(1)
   memoriaMbPorProyecto Int              @default(1024)
   proyectosPorUsuario  Int?
+  // SP-17 · correo de la instalación (asistente 31). Con datos aquí, mandan sobre SMTP_* del .env.
+  smtpHost             String?
+  smtpPuerto           Int?
+  smtpUsuario          String?
+  smtpClaveCifrada     String? // AES-GCM con CLAVE_CIFRADO_VARIABLES; nunca en claro
+  smtpRemitente        String?
+  sinCorreo            Boolean          @default(false)
   actualizado          DateTime         @updatedAt
 }
 

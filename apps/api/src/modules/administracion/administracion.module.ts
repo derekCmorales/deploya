@@ -4,6 +4,7 @@ import { CertificadoPuerto } from "../enrutamiento/puertos/certificado.puerto";
 import { IdentidadModule } from "../identidad/identidad.module";
 import { RegistroEnviosCorreo } from "../notificaciones/puertos/registro-envios.puerto";
 import { OrquestacionModule } from "../orquestacion/orquestacion.module";
+import { RepositorioConfiguracionInstalacion } from "../suscripciones/modo/repositorio-configuracion-instalacion.puerto";
 import { SuscripcionesModule } from "../suscripciones/suscripciones.module";
 import { AdministracionController } from "./administracion.controller";
 import { ConsultaUsuariosPrisma } from "./adaptadores/consulta-usuarios.prisma";
@@ -55,6 +56,7 @@ const DIRECTORIO_RESPALDOS = process.env.DIR_RESPALDOS ?? "/var/backups/deploya"
     {
       provide: SALUD_INSTALACION,
       useFactory: (
+        configuracion: RepositorioConfiguracionInstalacion,
         reportes: ReporteServidorPuerto,
         envios: RegistroEnviosCorreo,
         certificado: CertificadoPuerto,
@@ -67,9 +69,9 @@ const DIRECTORIO_RESPALDOS = process.env.DIR_RESPALDOS ?? "/var/backups/deploya"
           new ComprobacionDnsComodin(dns, dominio),
           new ComprobacionCertificado(certificado, dominio, reloj),
           new ComprobacionDisco(reportes, reloj),
-          new ComprobacionCorreo(envios, reloj),
+          new ComprobacionCorreo(configuracion, envios, reloj),
         ]),
-      inject: [ReporteServidorPuerto, RegistroEnviosCorreo, CertificadoPuerto, ResolutorDnsPuerto, Reloj, DOMINIO_INSTALACION],
+      inject: [RepositorioConfiguracionInstalacion, ReporteServidorPuerto, RegistroEnviosCorreo, CertificadoPuerto, ResolutorDnsPuerto, Reloj, DOMINIO_INSTALACION],
     },
     SuspensionService,
     ReactivacionCuentaService,

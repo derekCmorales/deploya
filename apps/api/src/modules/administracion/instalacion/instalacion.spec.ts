@@ -53,7 +53,7 @@ function armar() {
   const reportes = new ReporteServidorMemoria();
   const envios = new RegistroEnviosMemoria();
   const servicioInvitaciones = new InvitacionesService(invitaciones, tokens, acciones, reloj, "https://apps.miempresa.com");
-  const salud = new SaludInstalacion([new ComprobacionCorreo(envios, reloj)]);
+  const salud = new SaludInstalacion([new ComprobacionCorreo(configuracion, envios, reloj)]);
   const instalacion = new InstalacionService(configuracion, servicioInvitaciones, SCRIPTS, reportes, acciones, reloj, salud, "apps.miempresa.com");
   const registro = new RegistroDeInstalacion(configuracion, invitaciones, tokens, reloj);
   return { reloj, configuracion, invitaciones, acciones, reportes, envios, servicioInvitaciones, instalacion, registro };

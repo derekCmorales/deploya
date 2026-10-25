@@ -2844,6 +2844,7 @@ classDiagram
     ComprobacionDisco --> ReporteServidorPuerto
     ComprobacionCertificado --> CertificadoPuerto
     ComprobacionCorreo --> RegistroEnviosCorreo
+    ComprobacionCorreo --> RepositorioConfiguracionInstalacion
     PoliticaRegistroPuerto <|-- RegistroAbierto
     PoliticaRegistroPuerto <|-- RegistroDeInstalacion
     RegistroDeInstalacion --> RepositorioInvitaciones

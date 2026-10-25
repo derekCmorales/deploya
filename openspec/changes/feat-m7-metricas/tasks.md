@@ -13,7 +13,7 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 - [x] 2.1 `lib/metricas.ts`: tipo de la respuesta de `GET /proyectos/:id/metricas` y `vistaMetricas` (puro)
 - [x] 2.2 Pestaña Métricas (16) contra la API: `Segmented`, banner desde el 80 %, leyenda, dos `Card`, «Ver tabla», `Skeleton`, error y «El contenedor no está corriendo»
 - [x] 2.3 Tarjeta 13c en el Resumen contra la API
-- [x] 2.4 Pruebas: «Memoria cerca del límite», «Despliegue en la ventana», «Sin datos», «Hover y teclado», «Resumen de 24 h»
+- [x] 2.4 Pruebas: «Memoria cerca del límite», «Despliegue en la ventana», «Sin datos», «Hover y teclado», «Resumen de 24 h», «Resumen sin muestras»
 
 ## 3. Cierre
 

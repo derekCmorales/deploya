@@ -3,13 +3,13 @@ import assert from "node:assert";
 
 import { escalaLineal, ticks } from "../src/components/deploya/graficas/escalas.ts";
 import {
-  detallePunto,
   eventoEnX,
   indiceAlMover,
   indiceMasCercano,
+  intervaloMaximo,
   puntosDeSerie,
 } from "../src/components/deploya/graficas/series.ts";
-import { etiquetaMomento, etiquetasDeTiempo, tonoDeUso } from "../src/lib/metricas.ts";
+import { detallePunto, etiquetaMomento, etiquetasDeTiempo, tonoDeUso } from "../src/lib/metricas.ts";
 
 test("escalaLineal en los extremos", () => {
   const escala = escalaLineal([0, 100], [0, 200]);
@@ -41,6 +41,29 @@ test("Un hueco corta la línea", () => {
   );
 });
 
+test("Un cubo de 30 min o un minuto ausente corta la línea", () => {
+  assert.strictEqual(intervaloMaximo("1h"), 90_000);
+  assert.strictEqual(intervaloMaximo("24h"), 2_700_000);
+
+  const sinUnMinuto = puntosDeSerie(
+    [
+      { tiempo: "2026-10-23T10:00:00Z", valor: 10 },
+      { tiempo: "2026-10-23T10:02:00Z", valor: 15 },
+    ],
+    intervaloMaximo("1h"),
+  );
+  assert.strictEqual(sinUnMinuto.length, 2);
+
+  const sinUnCubo = puntosDeSerie(
+    [
+      { tiempo: "2026-10-23T10:00:00Z", valor: 10 },
+      { tiempo: "2026-10-23T11:00:00Z", valor: 15 },
+    ],
+    intervaloMaximo("24h"),
+  );
+  assert.strictEqual(sinUnCubo.length, 2);
+});
+
 test("Tono de aviso desde el 80 %", () => {
   const limite = 100;
   assert.strictEqual(tonoDeUso(79, limite), "normal");
@@ -61,8 +84,11 @@ test("Hover y teclado", () => {
   const ahora = new Date("2026-10-20T18:00:00Z");
 
   assert.strictEqual(indiceAlMover(null, "ArrowRight", 3), 0);
-  assert.strictEqual(indiceAlMover(2, "ArrowRight", 3), 0);
-  assert.strictEqual(indiceAlMover(0, "ArrowLeft", 3), 2);
+  assert.strictEqual(indiceAlMover(2, "ArrowRight", 3), 2);
+  assert.strictEqual(indiceAlMover(0, "ArrowLeft", 3), 0);
+  assert.strictEqual(indiceAlMover(null, "ArrowLeft", 3), 2);
+  assert.strictEqual(indiceAlMover(1, "Home", 3), 0);
+  assert.strictEqual(indiceAlMover(1, "End", 3), 2);
   assert.strictEqual(indiceAlMover(1, "Escape", 3), null);
 
   assert.strictEqual(indiceMasCercano(muestras, 0.5, "2026-10-20T16:00:00Z", "2026-10-20T18:00:00Z"), 1);

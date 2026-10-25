@@ -1,40 +1,53 @@
 "use client";
 
-import { useId, useState, type KeyboardEvent as TecladoReact, type PointerEvent as PunteroReact } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent as TecladoReact, type PointerEvent as PunteroReact } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PORCENTAJE, UMBRAL_AVISO, etiquetaMomento, etiquetasDeTiempo, type RangoMetricas } from "@/lib/metricas";
+import {
+  PORCENTAJE,
+  UMBRAL_AVISO,
+  detallePunto,
+  etiquetaMomento,
+  etiquetasDeTiempo,
+  type ChipDespliegue,
+  type PuntoGrafica,
+  type RangoMetricas,
+} from "@/lib/metricas";
 
 import { ChipEvento } from "./chip-evento";
 import { Ejes } from "./ejes";
 import { escalaLineal, ticks } from "./escalas";
 import { PuntoVivoSvg } from "./punto-vivo-svg";
-import { detallePunto, eventoEnX, indiceAlMover, indiceMasCercano, intervaloMaximo, puntosDeSerie, type EventoDespliegue, type MuestraSerie } from "./series";
+import { eventoEnX, indiceAlMover, indiceMasCercano, intervaloMaximo, puntosDeSerie } from "./series";
 import { TooltipGrafica } from "./tooltip";
 
 export interface GraficaUsoProps {
   titulo: string;
-  muestras: MuestraSerie[];
+  muestras: PuntoGrafica[];
   limite: number;
   unidad: string;
   divisiones?: number;
   inicio: string;
   fin: string;
   rango: RangoMetricas;
-  despliegues?: EventoDespliegue[];
+  despliegues?: ChipDespliegue[];
   compacta?: boolean;
   /** La Card que la contiene ya pinta el título; la gráfica lo deja solo para lectores. */
   mostrarTitulo?: boolean;
 }
 
-const ANCHO = 640;
+const ANCHO_INICIAL = 640;
 const ALTO_NORMAL = 240;
 const ALTO_COMPACTA = 96;
 const MARGEN_NORMAL = { top: 16, right: 52, bottom: 26, left: 44 };
 const MARGEN_COMPACTA = { top: 8, right: 8, bottom: 8, left: 8 };
 const DIVISIONES_NORMAL = 4;
 const DIVISIONES_COMPACTA = 2;
+
+function esTeclaDeNavegacion(tecla: string): boolean {
+  return tecla === "ArrowRight" || tecla === "ArrowLeft" || tecla === "Home" || tecla === "End" || tecla === "Escape";
+}
 
 /** Gráfica de un recurso contra el límite del plan (memoria o CPU), en SVG a mano. */
 export function GraficaUso({
@@ -52,10 +65,23 @@ export function GraficaUso({
 }: GraficaUsoProps) {
   const [mostrarTabla, setMostrarTabla] = useState(false);
   const [indiceActivo, setIndiceActivo] = useState<number | null>(null);
+  const [ancho, setAncho] = useState(ANCHO_INICIAL);
+  const contenedorRef = useRef<HTMLDivElement>(null);
   const idAviso = `aviso-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const idZona = `zona-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
-  const ancho = ANCHO;
+  // El viewBox sigue al ancho real: así un texto de 10 px mide 10 px también en dos columnas.
+  useEffect(() => {
+    const contenedor = contenedorRef.current;
+    if (!contenedor || typeof ResizeObserver === "undefined") return;
+    const observador = new ResizeObserver((entradas) => {
+      const medida = entradas[0]?.contentRect.width ?? 0;
+      if (medida > 0) setAncho(Math.round(medida));
+    });
+    observador.observe(contenedor);
+    return () => observador.disconnect();
+  }, []);
+
   const alto = compacta ? ALTO_COMPACTA : ALTO_NORMAL;
   const margen = compacta ? MARGEN_COMPACTA : MARGEN_NORMAL;
   const wGrafica = ancho - margen.left - margen.right;
@@ -73,7 +99,7 @@ export function GraficaUso({
   const segmentos = puntosDeSerie(muestras, intervaloMaximo(rango));
 
   const posicionX = (iso: string) => escalaTiempo(Date.parse(iso));
-  const camino = (segmento: { muestra: MuestraSerie }[]) =>
+  const camino = (segmento: { muestra: PuntoGrafica }[]) =>
     segmento.map((punto, indice) => `${indice === 0 ? "M" : "L"} ${posicionX(punto.muestra.tiempo)} ${escalaY(punto.muestra.valor)}`).join(" ");
 
   const ultimo = muestras[muestras.length - 1] ?? null;
@@ -100,14 +126,13 @@ export function GraficaUso({
   };
 
   const moverTeclado = (evento: TecladoReact<HTMLDivElement>) => {
-    if (!muestras.length) return;
-    if (evento.key !== "ArrowRight" && evento.key !== "ArrowLeft" && evento.key !== "Escape") return;
+    if (!muestras.length || !esTeclaDeNavegacion(evento.key)) return;
     evento.preventDefault();
     setIndiceActivo(indiceAlMover(indiceActivo, evento.key, muestras.length));
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={contenedorRef} className="flex flex-col gap-2">
       <div className={compacta || !mostrarTitulo ? "flex justify-end" : "flex items-center justify-between gap-3"}>
         {compacta || !mostrarTitulo ? <span className="sr-only">{titulo}</span> : <h4 className="text-sm font-semibold">{titulo}</h4>}
         <div className="flex items-center gap-2">
@@ -159,13 +184,15 @@ export function GraficaUso({
         </div>
       ) : (
         <div
-          role="img"
+          role="group"
+          aria-roledescription="gráfica"
           aria-label={resumenAria}
           tabIndex={0}
           onKeyDown={moverTeclado}
           onFocus={() => {
             if (indiceActivo === null && muestras.length) setIndiceActivo(muestras.length - 1);
           }}
+          onBlur={() => setIndiceActivo(null)}
           className="rounded outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <svg

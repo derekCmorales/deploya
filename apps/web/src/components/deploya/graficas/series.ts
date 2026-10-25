@@ -3,36 +3,24 @@
  * puntos. Sin React ni DOM para poder probarla con `node --test`.
  */
 
-export interface MuestraSerie {
-  tiempo: string;
-  valor: number;
-}
-
-/** Evento de despliegue tal como lo devuelve `GET /proyectos/:id/metricas`. */
-export interface EventoDespliegue {
-  en: string;
-  version: number;
-}
+import type { ChipDespliegue, PuntoGrafica } from "@/lib/metricas";
 
 export interface PuntoConIndice {
   indice: number;
-  muestra: MuestraSerie;
-}
-
-export interface DetallePunto {
-  valor: number;
-  porcentaje: number;
-  version: string | null;
+  muestra: PuntoGrafica;
 }
 
 const MS_POR_MINUTO = 60_000;
-const MINUTOS_DE_HUECO_1H = 2;
-const MINUTOS_DE_HUECO_24H = 60;
-const PORCENTAJE = 100;
+const INTERVALO_1H_MS = MS_POR_MINUTO;
+const INTERVALO_24H_MS = 30 * MS_POR_MINUTO;
+const FACTOR_DE_HUECO = 1.5;
 
-/** Un hueco mayor que este intervalo corta la línea. */
+/**
+ * Un hueco mayor que 1,5 veces el intervalo esperado corta la línea.
+ * Así un solo cubo de 30 min (24 h) o un minuto (1 h) ausente no se une por encima.
+ */
 export function intervaloMaximo(rango: "1h" | "24h"): number {
-  return (rango === "1h" ? MINUTOS_DE_HUECO_1H : MINUTOS_DE_HUECO_24H) * MS_POR_MINUTO;
+  return (rango === "1h" ? INTERVALO_1H_MS : INTERVALO_24H_MS) * FACTOR_DE_HUECO;
 }
 
 /**
@@ -40,7 +28,7 @@ export function intervaloMaximo(rango: "1h" | "24h"): number {
  * reiniciado, sin muestras) corta la línea en vez de unir los extremos.
  * Cada punto conserva su índice original para no buscarlo después.
  */
-export function puntosDeSerie(muestras: MuestraSerie[], maxIntervaloMs: number = intervaloMaximo("1h")): PuntoConIndice[][] {
+export function puntosDeSerie(muestras: PuntoGrafica[], maxIntervaloMs: number = intervaloMaximo("1h")): PuntoConIndice[][] {
   if (!muestras.length) return [];
   const segmentos: PuntoConIndice[][] = [];
   let segmentoActual: PuntoConIndice[] = [{ indice: 0, muestra: muestras[0] }];
@@ -60,7 +48,7 @@ export function puntosDeSerie(muestras: MuestraSerie[], maxIntervaloMs: number =
 }
 
 /** Posición X de un despliegue dentro de la ventana, o `null` si cae fuera. */
-export function eventoEnX(evento: EventoDespliegue, ventanaInicio: string, ventanaFin: string, ancho: number): number | null {
+export function eventoEnX(evento: ChipDespliegue, ventanaInicio: string, ventanaFin: string, ancho: number): number | null {
   const tEvento = Date.parse(evento.en);
   const tInicio = Date.parse(ventanaInicio);
   const tFin = Date.parse(ventanaFin);
@@ -70,7 +58,7 @@ export function eventoEnX(evento: EventoDespliegue, ventanaInicio: string, venta
 }
 
 /** Punto más cercano a una fracción de la ventana (hover con zona ancha). */
-export function indiceMasCercano(muestras: MuestraSerie[], fraccion: number, inicio: string, fin: string): number | null {
+export function indiceMasCercano(muestras: PuntoGrafica[], fraccion: number, inicio: string, fin: string): number | null {
   if (!muestras.length) return null;
   const tInicio = Date.parse(inicio);
   const tFin = Date.parse(fin);
@@ -91,40 +79,16 @@ export function indiceMasCercano(muestras: MuestraSerie[], fraccion: number, ini
   return mejor;
 }
 
-/** Flechas sobre la gráfica enfocada; `Escape` quita el punto activo. */
+/**
+ * Teclado sobre la gráfica enfocada: las flechas se detienen en los extremos,
+ * `Home`/`End` saltan al primero/último y `Escape` quita el punto activo.
+ */
 export function indiceAlMover(actual: number | null, tecla: string, total: number): number | null {
   if (total <= 0) return null;
   if (tecla === "Escape") return null;
-  if (tecla === "ArrowRight") return actual === null || actual >= total - 1 ? 0 : actual + 1;
-  if (tecla === "ArrowLeft") return actual === null || actual <= 0 ? total - 1 : actual - 1;
+  if (tecla === "Home") return 0;
+  if (tecla === "End") return total - 1;
+  if (tecla === "ArrowRight") return actual === null ? 0 : Math.min(total - 1, actual + 1);
+  if (tecla === "ArrowLeft") return actual === null ? total - 1 : Math.max(0, actual - 1);
   return actual;
-}
-
-/** Versión vigente en un instante: el último despliegue que ya había ocurrido. */
-export function versionEnPunto(despliegues: EventoDespliegue[], en: string): string | null {
-  const tPunto = Date.parse(en);
-  if (!Number.isFinite(tPunto)) return null;
-  let vigente: EventoDespliegue | null = null;
-  for (const despliegue of despliegues) {
-    const tEvento = Date.parse(despliegue.en);
-    if (!Number.isFinite(tEvento) || tEvento > tPunto) continue;
-    if (!vigente || tEvento >= Date.parse(vigente.en)) vigente = despliegue;
-  }
-  return vigente ? `#${vigente.version}` : null;
-}
-
-/** Lo que pinta el tooltip de un punto: valor, % del límite y versión vigente. */
-export function detallePunto(
-  muestras: MuestraSerie[],
-  indice: number,
-  limite: number,
-  despliegues: EventoDespliegue[],
-): DetallePunto | null {
-  const muestra = muestras[indice];
-  if (!muestra) return null;
-  return {
-    valor: muestra.valor,
-    porcentaje: limite > 0 ? Math.round((muestra.valor / limite) * PORCENTAJE) : 0,
-    version: versionEnPunto(despliegues, muestra.tiempo),
-  };
 }

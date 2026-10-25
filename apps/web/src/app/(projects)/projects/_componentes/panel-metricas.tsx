@@ -15,7 +15,14 @@ import { Segmented } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMetricas } from "@/hooks/use-metricas";
 import { useMiSuscripcion } from "@/hooks/use-suscripcion";
-import { corriendoONo, vistaMetricas, type RangoMetricas, type UsoRecurso, type VistaMetricas } from "@/lib/metricas";
+import { rutaDespliegue } from "@/lib/despliegues";
+import {
+  mostrarErrorDeMetricas,
+  vistaMetricas,
+  type RangoMetricas,
+  type UsoRecurso,
+  type VistaMetricas,
+} from "@/lib/metricas";
 import { esFalloDeConexion } from "@/lib/reintento";
 
 const DIVISIONES_CPU = 2;
@@ -26,10 +33,10 @@ export function PanelMetricas({ proyectoId }: { proyectoId: string }) {
   const [rango, setRango] = useState<RangoMetricas>("24h");
   const { datos, error, cargando, leidoEn, recargar } = useMetricas(proyectoId, rango);
   const suscripcion = useMiSuscripcion();
-  const enVivo = !error && (datos === null || corriendoONo(datos) === null);
+  const enVivo = !error && (datos === null || datos.aviso === null);
 
   let contenido: ReactNode;
-  if (error) {
+  if (mostrarErrorDeMetricas(datos, error)) {
     contenido = esFalloDeConexion(error.estado) ? (
       <ErrorConexionApi error={error} ruta={`/proyectos/${proyectoId}/metricas?rango=${rango}`} onReintentar={recargar} />
     ) : (
@@ -47,10 +54,11 @@ export function PanelMetricas({ proyectoId }: { proyectoId: string }) {
     );
   } else if (cargando || !datos || !leidoEn) {
     contenido = <Cargando />;
+  } else if (datos.aviso !== null) {
+    contenido = <SinDatos mensaje={datos.aviso} />;
   } else {
     const vista = vistaMetricas(datos, suscripcion.datos?.plan.nombre ?? null, rango, new Date(leidoEn));
-    const aviso = corriendoONo(datos);
-    contenido = aviso ? <SinDatos mensaje={aviso} /> : <Contenido vista={vista} proyectoId={proyectoId} rango={rango} />;
+    contenido = <Contenido vista={vista} proyectoId={proyectoId} rango={rango} esperandoPlan={suscripcion.cargando} />;
   }
 
   return (
@@ -77,7 +85,18 @@ export function PanelMetricas({ proyectoId }: { proyectoId: string }) {
   );
 }
 
-function Contenido({ vista, proyectoId, rango }: { vista: VistaMetricas; proyectoId: string; rango: RangoMetricas }) {
+function Contenido({
+  vista,
+  proyectoId,
+  rango,
+  esperandoPlan,
+}: {
+  vista: VistaMetricas;
+  proyectoId: string;
+  rango: RangoMetricas;
+  /** El nombre del plan llega después: esperar evita «del plan» y luego «de Starter». */
+  esperandoPlan: boolean;
+}) {
   if (!vista.memoria || !vista.cpu) {
     return (
       <Card>
@@ -88,7 +107,7 @@ function Contenido({ vista, proyectoId, rango }: { vista: VistaMetricas; proyect
 
   return (
     <>
-      {vista.banner ? (
+      {vista.banner && !esperandoPlan ? (
         <Banner
           variant="warn"
           title={vista.banner.titulo}
@@ -96,7 +115,7 @@ function Contenido({ vista, proyectoId, rango }: { vista: VistaMetricas; proyect
             <div className="flex flex-wrap items-center gap-2">
               {vista.comparacion ? (
                 <Button asChild variant="outline" size="sm">
-                  <Link href={`/projects/${proyectoId}/despliegues`}>{vista.comparacion.etiqueta}</Link>
+                  <Link href={rutaDespliegue(proyectoId, vista.comparacion.actual)}>{vista.comparacion.etiqueta}</Link>
                 </Button>
               ) : null}
               <Button asChild size="sm">

@@ -1,38 +1,37 @@
-import React from "react";
+interface MarcaY {
+  y: number;
+  texto: string;
+}
+
+interface MarcaX {
+  x: number;
+  texto: string;
+}
 
 interface EjesProps {
   ancho: number;
   alto: number;
-  ticksY: number[];
-  etiquetasX: string[];
+  marcasY: MarcaY[];
+  marcasX: MarcaX[];
 }
 
-export function Ejes({ ancho, alto, ticksY, etiquetasX }: EjesProps) {
+/** Ejes de `GraficaUso`: rejilla suave en Y, valores en mono y horas en X. */
+export function Ejes({ ancho, alto, marcasY, marcasX }: EjesProps) {
   return (
-    <g className="text-muted-foreground select-none" aria-hidden="true">
-      {ticksY.map((tick, i) => {
-        const y = alto - (i / (ticksY.length - 1 || 1)) * alto;
-        return (
-          <g key={`tick-y-${i}`}>
-            <line
-              x1="0"
-              y1={y}
-              x2={ancho}
-              y2={y}
-              stroke="currentColor"
-              strokeOpacity="0.15"
-              strokeDasharray="2 2"
-            />
-            <text
-              x="0"
-              y={y - 4}
-              className="font-mono text-[10px] tnum fill-muted-foreground"
-            >
-              {tick}
-            </text>
-          </g>
-        );
-      })}
+    <g className="select-none text-muted-foreground" aria-hidden="true">
+      {marcasY.map((marca) => (
+        <g key={`y-${marca.y}`}>
+          <line x1="0" y1={marca.y} x2={ancho} y2={marca.y} stroke="currentColor" strokeOpacity="0.12" strokeDasharray="2 4" />
+          <text x="-8" y={marca.y + 3} textAnchor="end" className="fill-muted-foreground font-mono text-[10px] tnum">
+            {marca.texto}
+          </text>
+        </g>
+      ))}
+      {marcasX.map((marca) => (
+        <text key={`x-${marca.x}`} x={marca.x} y={alto + 15} textAnchor="middle" className="fill-muted-foreground font-mono text-[10px] tnum">
+          {marca.texto}
+        </text>
+      ))}
     </g>
   );
 }

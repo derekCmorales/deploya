@@ -1,31 +1,36 @@
-import React from "react";
-
-interface TooltipProps {
+interface TooltipGraficaProps {
   x: number;
   y: number;
   hora: string;
-  valor: number | string;
-  porcentaje?: number;
-  version?: string;
+  valor: string;
+  porcentaje: number;
+  version: string | null;
   anchoContenedor: number;
+  altoContenedor: number;
 }
 
-export function TooltipGrafica({ x, y, hora, valor, porcentaje, version, anchoContenedor }: TooltipProps) {
-  const alignRight = x > anchoContenedor - 120;
-  const transformX = alignRight ? x - 110 : x + 10;
+const ANCHO_TOOLTIP = 132;
+const ALTO_TOOLTIP = 78;
+const MARGEN = 8;
+
+/** Tooltip de un punto: hora, valor, % del límite y versión vigente. */
+export function TooltipGrafica({ x, y, hora, valor, porcentaje, version, anchoContenedor, altoContenedor }: TooltipGraficaProps) {
+  const aLaDerecha = x < anchoContenedor - ANCHO_TOOLTIP - MARGEN;
+  const izquierda = aLaDerecha ? x + MARGEN : x - ANCHO_TOOLTIP - MARGEN;
+  const arriba = Math.max(0, Math.min(y - ALTO_TOOLTIP / 2, altoContenedor - ALTO_TOOLTIP));
 
   return (
-    <g transform={`translate(${transformX}, ${Math.max(10, y - 40)})`} className="pointer-events-none transition-transform duration-75">
-      <foreignObject width="110" height="65">
-        <div className="bg-foreground text-background dark:bg-card dark:text-card-foreground border border-border rounded p-1.5 text-[10px] font-mono tnum shadow-md">
-          <div className="font-semibold text-muted-foreground">{hora}</div>
-          <div>Valor: <span className="font-bold">{valor}</span></div>
-          {porcentaje !== undefined && (
-            <div>Uso: <span className="font-bold">{porcentaje}%</span></div>
-          )}
-          {version && (
-            <div className="text-muted-foreground text-[9px]">Ref: {version}</div>
-          )}
+    <g transform={`translate(${Math.max(0, izquierda)}, ${arriba})`} className="pointer-events-none">
+      <foreignObject width={ANCHO_TOOLTIP} height={ALTO_TOOLTIP}>
+        <div className="flex flex-col gap-0.5 rounded-md border border-border-strong bg-popover p-2 font-mono text-[10px] text-popover-foreground shadow-elev">
+          <span className="font-medium text-muted-foreground">{hora}</span>
+          <span>
+            Valor: <span className="font-semibold">{valor}</span>
+          </span>
+          <span>
+            Uso: <span className="font-semibold tnum">{porcentaje} % del límite</span>
+          </span>
+          {version ? <span className="text-muted-foreground">Versión {version}</span> : null}
         </div>
       </foreignObject>
     </g>

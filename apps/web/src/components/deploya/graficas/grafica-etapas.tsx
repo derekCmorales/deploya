@@ -140,7 +140,7 @@ export function GraficaEtapas({ despliegues, numeroActivo }: GraficaEtapasProps)
               {despliegues.map((despliegue, indice) => {
                 const centro = anchoColumna * (indice + 0.5);
                 const izquierda = centro - anchoBarra / 2;
-                const tramos = segmentosDeEtapas(despliegue).filter((tramo) => tramo.ms > 0);
+                const tramos = segmentosDeEtapas(despliegue).filter((tramo) => tramo.ms > 0 || tramo.fallo);
                 let base = altoGrafica;
                 return (
                   <g key={despliegue.numero}>

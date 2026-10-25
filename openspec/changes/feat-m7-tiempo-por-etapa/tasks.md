@@ -1,6 +1,6 @@
 # Tasks
 
-Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` del spec delta tiene su prueba con el mismo nombre, que importa código de producción. Cero datos fijos en pantalla y cero `any`. Guía paso a paso: [C2 en docs/handoff/prompt-eduardo-correcciones-m7.md](../../../docs/handoff/prompt-eduardo-correcciones-m7.md#c2--pr-49--tiempo-por-etapa-14c--rama-featm7-tiempo-por-etapa).
+Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` del spec delta tiene su prueba con el mismo nombre, que importa código de producción. Cero datos fijos en pantalla y sin el tipo comodín de TypeScript. Guía paso a paso: [C2 en docs/handoff/prompt-eduardo-correcciones-m7.md](../../../docs/handoff/prompt-eduardo-correcciones-m7.md#c2--pr-49--tiempo-por-etapa-14c--rama-featm7-tiempo-por-etapa).
 
 ## 1. API
 
@@ -16,6 +16,6 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 3. Cierre
 
-- [ ] 3.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro
+- [x] 3.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro
 - [ ] 3.2 Contrato `metricas.md` con la respuesta final; `pnpm check` en verde
 - [ ] 3.3 `/opsx-archive` después del merge

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 
 import { ErrorConexionApi } from "@/components/estados/error-conexion-api";
 import { GraficaEtapas } from "@/components/deploya";
@@ -27,6 +27,8 @@ export function TarjetaTiempos({ proyectoId }: { proyectoId: string }) {
     recargarTiempos();
     recargarResumen();
   }, [recargarTiempos, recargarResumen]);
+
+  if (tiempos.datos?.despliegues.length === 0) return null;
 
   if (error && (!tiempos.datos || !resumen.datos)) {
     return (
@@ -74,8 +76,6 @@ export function TarjetaTiempos({ proyectoId }: { proyectoId: string }) {
     );
   }
 
-  if (tiempos.datos.despliegues.length === 0) return null;
-
   const indicadores = indicadoresTiempos(tiempos.datos.resumen);
   const nombre = resumen.datos.proyecto.nombre;
 
@@ -92,17 +92,13 @@ export function TarjetaTiempos({ proyectoId }: { proyectoId: string }) {
             despliegues={tiempos.datos.despliegues}
             numeroActivo={resumen.datos.activo?.numero ?? null}
           />
-          <p className="font-mono text-[11px] text-muted-foreground">
-            Pasa el cursor por una columna para ver cada etapa. La construcción es lo que más pesa: un Dockerfile con
-            caché de dependencias la acorta.
-          </p>
         </CardContent>
       </Card>
     </Marco>
   );
 }
 
-function Marco({ children }: { children: React.ReactNode }) {
+function Marco({ children }: { children: ReactNode }) {
   return <div className="px-8 pt-6">{children}</div>;
 }
 

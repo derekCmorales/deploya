@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { errorNombre, erroresContrasena, nombreDeRol, resultadoCambioContrasena } from "../src/lib/mi-cuenta.ts";
+import { fechaCorta } from "../src/lib/fechas.ts";
+import { errorNombre, erroresContrasena, nombreDeRol, resultadoCambioContrasena, textoUltimoCambio } from "../src/lib/mi-cuenta.ts";
 
 const leer = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
 
@@ -93,7 +94,7 @@ test("05 y 05b · textos de las fichas y pestañas Perfil · Seguridad", () => {
   ]) {
     assert.ok(seguridad.includes(texto), `falta «${texto}» en 05b`);
   }
-  assert.doesNotMatch(seguridad, /Último cambio:/, "«Último cambio» no se muestra (design.md, decisión 5)");
+  assert.match(seguridad, /textoUltimoCambio\(/, "05b muestra «Último cambio» o «Nunca la has cambiado» (SP-03)");
 });
 
 test("Mi cuenta exige sesión, va con el panel y «Cuenta» del menú lleva a /cuenta", () => {
@@ -110,4 +111,20 @@ test("05 y 05b · sin fetch, sin colores de Tailwind, sin hex ni any", () => {
     assert.doesNotMatch(codigo, /#[0-9a-fA-F]{3,8}\b/, `hex en ${ruta}`);
     assert.doesNotMatch(codigo, /:\s*any\b|<any>/, `any en ${ruta}`);
   }
+});
+
+test("Fecha después de cambiarla", () => {
+  assert.equal(textoUltimoCambio(fechaCorta("2026-09-22T15:00:00.000Z", "America/Guatemala")), "Último cambio: 22 sep 2026");
+});
+
+test("Nunca cambiada", () => {
+  assert.equal(textoUltimoCambio(null), "Nunca la has cambiado");
+});
+
+test("05b · «Último cambio» va junto a «Cambiar contraseña» y se relee después de cambiarla", () => {
+  const seguridad = leer("src/app/(cuenta)/cuenta/_componentes/seguridad.tsx");
+  assert.match(seguridad, /leerPerfil\(\)/);
+  assert.match(seguridad, /setCambiada\(true\);\s*void ultimoCambio\.recargar\(\);/);
+  const fecha = seguridad.indexOf("{ultimoCambio.texto}");
+  assert.ok(fecha > 0 && fecha < seguridad.lastIndexOf("Cambiar contraseña"), "la fecha va antes del botón, como en el canvas");
 });

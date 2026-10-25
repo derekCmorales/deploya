@@ -8,9 +8,9 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 2. API y web (Eddy)
 
-- [ ] 2.1 Escribir la fecha al cambiar y al restablecer; `GET /identidad/cuenta` la devuelve
-- [ ] 2.2 05b con la fecha o «Nunca la has cambiado»
-- [ ] 2.3 Pruebas: «Fecha después de cambiarla», «Fecha después de restablecerla», «Nunca cambiada»
+- [x] 2.1 Escribir la fecha al cambiar y al restablecer; `GET /identidad/cuenta` la devuelve
+- [x] 2.2 05b con la fecha o «Nunca la has cambiado»
+- [x] 2.3 Pruebas: «Fecha después de cambiarla», «Fecha después de restablecerla», «Nunca cambiada» (API y web)
 
 ## 3. Cierre
 

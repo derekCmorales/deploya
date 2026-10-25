@@ -10,8 +10,8 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 2. Gancho del pipeline (Derek, SP-08)
 
-- [ ] 2.1 `AvisoDespliegueOyente` en `OYENTES_DESPLIEGUE`
-- [ ] 2.2 Pruebas: «Cancelado no avisa», el aviso de Saludable y Fallido llega al puerto
+- [x] 2.1 `AvisoDespliegueOyente` en `OYENTES_DESPLIEGUE` (el pipeline guarda la bitácora antes de anunciar un Fallido)
+- [x] 2.2 Pruebas: «Cancelado no avisa», el aviso de Saludable y Fallido llega al puerto
 
 ## 3. Gancho del ciclo (Javier, SP-04)
 
@@ -20,10 +20,10 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 4. Demo
 
-- [ ] 4.1 Los cuatro correos llegan a un buzón real desde el VPS
+- [ ] 4.1 Los cuatro correos llegan a un buzón real desde el VPS — verificación manual de la demo (plan-avances § Qué se demuestra); no se puede probar desde CI
 
 ## 5. Cierre
 
-- [ ] 5.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro, si hay UI
-- [ ] 5.2 `clases-unificado.mmd` si cambió un puerto o una clase; `pnpm check` en verde
-- [ ] 5.3 `/opsx-archive` después del merge
+- [x] 5.1 Revisión contra la ficha 24b: los textos de las cuatro plantillas los fijan sus pruebas (sin UI en la web)
+- [x] 5.2 `clases-unificado.mmd` si cambió un puerto o una clase; `pnpm check` en verde
+- [x] 5.3 `/opsx-archive` (se archiva en el PR que cierra SP-08)

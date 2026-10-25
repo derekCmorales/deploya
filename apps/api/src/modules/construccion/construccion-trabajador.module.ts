@@ -1,9 +1,11 @@
 import { Module } from "@nestjs/common";
+import { AvisosModule } from "../notificaciones/avisos/avisos.module";
 import { EnrutamientoTrabajadorModule } from "../enrutamiento/enrutamiento-trabajador.module";
 import { PasoEnrutamiento } from "../enrutamiento/paso-enrutamiento";
 import { OrquestacionTrabajadorModule } from "../orquestacion/orquestacion-trabajador.module";
 import { PasoEjecucion } from "../orquestacion/paso-ejecucion";
 import { PasoOperacion } from "../orquestacion/paso-operacion";
+import { AvisoDespliegueOyente } from "./avisos/aviso-despliegue.oyente";
 import { PROVEEDORES_DETECCION } from "./deteccion/deteccion-stack.service";
 import { PLANES_PIPELINE, type PlanesPipeline } from "./pipeline/paso-pipeline";
 import { PasoConstruccion } from "./pipeline/paso-construccion";
@@ -16,10 +18,11 @@ import { RetencionArtefactos } from "../orquestacion/retencion/retencion-artefac
 
 /**
  * Arma los planes del pipeline: `construccion` (Recepción → Construcción → Ejecución → Enrutamiento → Operación)
- * y `reversion` (los tres últimos pasos, sobre la imagen de un artefacto).
+ * y `reversion` (los tres últimos pasos, sobre la imagen de un artefacto). Oyentes de un despliegue
+ * terminado: la retención de artefactos (M5-04) y los avisos por correo (SP-08).
  */
 @Module({
-  imports: [OrquestacionTrabajadorModule, EnrutamientoTrabajadorModule],
+  imports: [OrquestacionTrabajadorModule, EnrutamientoTrabajadorModule, AvisosModule],
   providers: [
     ...PROVEEDORES_DETECCION,
     PasoRecepcion,
@@ -32,10 +35,11 @@ import { RetencionArtefactos } from "../orquestacion/retencion/retencion-artefac
       }),
       inject: [PasoRecepcion, PasoConstruccion, PasoEjecucion, PasoEnrutamiento, PasoOperacion],
     },
+    AvisoDespliegueOyente,
     {
       provide: OYENTES_DESPLIEGUE,
       useFactory: (...oyentes: unknown[]) => oyentes,
-      inject: [RetencionArtefactos],
+      inject: [RetencionArtefactos, AvisoDespliegueOyente],
     },
     { provide: VigiaCancelacion, useFactory: (cancelaciones: CancelacionesPuerto) => new VigiaCancelacion(cancelaciones), inject: [CancelacionesPuerto] },
     PipelineDespliegue,

@@ -1,6 +1,6 @@
 # Contrato · Modo de instalación y autoalojado (M2, M9 → M1, scripts)
 
-Versión 1.6 · 2026-10-25 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.7 · 2026-10-25 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Variables de entorno
 
@@ -68,7 +68,7 @@ La API no puede escribir el `.env` (vive en el host, permisos 600, no se monta) 
 
 `RepositorioConfiguracionInstalacion` (exportado por `SuscripcionesModule`) da `correo()` → `{ tipo: "entorno" } | { tipo: "smtp", smtp } | { tipo: "sin-correo" }` y `guardarCorreo(...)`. Guardar un SMTP apaga `sinCorreo` y al revés. `entorno` = nadie lo configuró en la web: valen las `SMTP_*` del `.env` (la nube sigue igual).
 
-**En M10 (Eddy).** Un adaptador de `CorreoPuerto` que lee `correo()` en **cada** envío (cambiar el SMTP no exige reiniciar): `smtp` → descifra y manda por ese servidor; `sin-correo` → no manda (como `CorreoConsolaAdaptador`); `entorno` → el adaptador actual de `SMTP_*`. Va **dentro** de `CorreoConRegistro` (SP-18) para que la salud siga viendo el último envío. Cifrar y descifrar va por un puerto: el `CifradorVariables` de M3 (`CifradorAesGcm`, misma clave) hoy no se exporta; o M3 lo exporta en `ProyectosModule` (avisar a Eduardo) o M10 declara su propio puerto con un adaptador AES-GCM. Nunca `new` de `crypto` en el servicio.
+**En M10 (Eddy).** Un adaptador de `CorreoPuerto` que lee `correo()` en **cada** envío (cambiar el SMTP no exige reiniciar): `smtp` → descifra y manda por ese servidor; `sin-correo` → no manda (como `CorreoConsolaAdaptador`); `entorno` → el adaptador actual de `SMTP_*`. Va **dentro** de `CorreoConRegistro` (SP-18) para que la salud siga viendo el último envío. Cifrar y descifrar va por el puerto `CifradorVariables` (AES-GCM con la misma `CLAVE_CIFRADO_VARIABLES`), que `VariablesModule` exporta desde v1.7: M1 cifra al guardar (`PATCH /instalacion/correo`) y M10 descifra al enviar. Nunca `new` de `crypto` en el servicio.
 
 ### Paso del código (script → `ConfiguracionInstalacion`)
 
@@ -130,3 +130,4 @@ La etapa 2 comprueba la raíz `DOMINIO_BASE` (ahí vive la web; el comodín no l
 | 1.4 | 2026-10-24 | SP-06: seed de autoalojado solo con el plan «Autoalojado»; `null` = sin límite en `maximo` y `limite`; `AltaPrimerUsuario` exportado para el asistente (SP-17) |
 | 1.5 | 2026-10-24 | SP-18: reporte del servidor desde el trabajador, último envío de correo, `dominio`/`comprobado`/`capacidad` en `GET /admin/instalacion`, montaje de respaldos en la API y `PoliticaRegistroPuerto` en `RegistroInstalacionModule` |
 | 1.6 | 2026-10-25 | SP-17: el correo del asistente se guarda en `ConfiguracionInstalacion` (no en el `.env`); `POST /instalacion/administrador` deja la sesión iniciada y los endpoints de correo piden sesión de administrador en lugar de 404 por haber administrador. SP-18: `PoliticaRegistroPuerto` conectado al registro de M1 |
+| 1.7 | 2026-10-25 | `VariablesModule` exporta `CifradorVariables` para la clave del SMTP (SP-17) |

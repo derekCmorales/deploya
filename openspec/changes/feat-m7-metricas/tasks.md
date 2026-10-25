@@ -18,5 +18,5 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 ## 3. Cierre
 
 - [x] 3.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro
-- [ ] 3.2 `pnpm check` en verde; PR con la plantilla llena
+- [x] 3.2 `pnpm check` en verde; PR con la plantilla llena
 - [ ] 3.3 `/opsx-archive` después del merge

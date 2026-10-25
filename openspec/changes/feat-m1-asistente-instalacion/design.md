@@ -2,13 +2,13 @@
 
 ## Context
 
-`AltaPrimerUsuario` y `ConfiguracionInstalacion` vienen de `feat-m2-modo-autoalojado`; el código lo imprime `instalar.sh` (`feat-instalador-autoalojado`). Desde el contrato `instalacion.md` v1.6–1.7 ya existen: las columnas `smtp*` y `sinCorreo`, `RepositorioConfiguracionInstalacion.correo()` / `guardarCorreo()` y `CifradorVariables` exportado por `VariablesModule`.
+`AltaPrimerUsuario` y `ConfiguracionInstalacion` vienen de `feat-m2-modo-autoalojado`; el código lo imprime `instalar.sh` (`feat-instalador-autoalojado`). Desde el contrato `instalacion.md` v1.6–1.8 ya existen: las columnas `smtp*` y `sinCorreo`, `RepositorioConfiguracionInstalacion.correo()` / `guardarCorreo()` y `CifradorVariables` exportado por `VariablesModule`.
 
 ## Decisions
 
 ### 1. Código de un solo uso
 
-Se guarda solo su hash y su vencimiento; al crear el administrador se borra (`AltaPrimerUsuario.consumirCodigo`). Evita que otro reclame la cuenta en un servidor recién expuesto.
+Se guarda solo su hash y su vencimiento; al crear el administrador se borra (`AltaPrimerUsuario.consumirCodigo`). Evita que otro reclame la cuenta en un servidor recién expuesto. `POST /instalacion/administrador` recibe `{ codigo, correo, contrasena }` y vuelve a llamar a `validarCodigo` antes de crear la cuenta (contrato v1.8): sin eso, el endpoint abierto permite saltarse el paso 1. La web guarda el código solo en memoria entre el paso 1 y el 2.
 
 ### 2. La sesión queda iniciada al crear el administrador
 

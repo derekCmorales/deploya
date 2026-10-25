@@ -15,7 +15,7 @@ En autoalojado no hay administrador por seed. Quien instala necesita crear el pr
 - La raíz redirige a `/configurar` mientras `GET /instalacion/modo` diga `configurada: false`.
 - El paso 5 usa la API de Javier tal cual (`PATCH /admin/instalacion/registro` y `/limites`).
 
-Contrato: [instalacion.md](../../../docs/contratos/instalacion.md) v1.7.
+Contrato: [instalacion.md](../../../docs/contratos/instalacion.md) v1.8.
 
 ## Non-goals
 

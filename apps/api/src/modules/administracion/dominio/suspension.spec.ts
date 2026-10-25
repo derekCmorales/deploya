@@ -28,8 +28,8 @@ describe("M9-02 · reglas de la suspensión", () => {
   });
 
   it("no se suspende a un administrador ni dos veces la misma cuenta", () => {
-    expect(() => exigirSuspendible({ id: "a", rol: "administrador", estadoCuenta: "activa" })).toThrow(NoSePuedeSuspenderAdministrador);
-    expect(() => exigirSuspendible({ id: "c", rol: "cliente", estadoCuenta: "suspendida" })).toThrow(CuentaYaSuspendida);
-    expect(() => exigirSuspendible({ id: "c", rol: "cliente", estadoCuenta: "activa" })).not.toThrow();
+    expect(() => exigirSuspendible({ id: "a", rol: "administrador", estadoCuenta: "activa", suscripcion: null })).toThrow(NoSePuedeSuspenderAdministrador);
+    expect(() => exigirSuspendible({ id: "c", rol: "cliente", estadoCuenta: "suspendida", suscripcion: "activa" })).toThrow(CuentaYaSuspendida);
+    expect(() => exigirSuspendible({ id: "c", rol: "cliente", estadoCuenta: "activa", suscripcion: "activa" })).not.toThrow();
   });
 });

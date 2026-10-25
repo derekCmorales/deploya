@@ -33,10 +33,15 @@ async function llamar(
   return { estado: respuesta.status, json };
 }
 
-/** `POST /identidad/registro` (pantallas 01 y 01b). */
-export async function registrarCuenta(correo: string, contrasena: string, confirmacion: string): Promise<ResultadoRegistro> {
+/** `POST /identidad/registro` (pantallas 01 y 01b); `invitacion` sale de `/registro?invitacion=` (SP-18). */
+export async function registrarCuenta(
+  correo: string,
+  contrasena: string,
+  confirmacion: string,
+  invitacion?: string,
+): Promise<ResultadoRegistro> {
   try {
-    const { estado, json } = await llamar("/identidad/registro", "POST", { correo, contrasena, confirmacion });
+    const { estado, json } = await llamar("/identidad/registro", "POST", { correo, contrasena, confirmacion, invitacion });
     return resultadoRegistro(estado, json);
   } catch {
     return resultadoRegistro(0, {});

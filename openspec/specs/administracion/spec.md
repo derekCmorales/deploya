@@ -56,6 +56,64 @@ El administrador SHALL suspender una cuenta indicando motivo y detalle. La suspe
 - **WHEN** el motivo no es uno de los de la lista de 25b
 - **THEN** se rechaza con `MotivoInvalido`
 
+### Requirement: Reactivar cuenta
+
+Un administrador SHALL poder reactivar una cuenta suspendida con un detalle para el registro. La cuenta SHALL volver a iniciar sesión; sus contenedores SHALL reanudarse solo si la suscripción está vigente.
+
+#### Scenario: Reactivar con suscripción vigente
+
+- **WHEN** el admin reactiva una cuenta suspendida con suscripción Activa y 2 proyectos detenidos
+- **THEN** la cuenta entra, sus 2 proyectos vuelven a Saludable y queda una acción «reactivar-cuenta»
+
+#### Scenario: Reactivar con suscripción suspendida
+
+- **WHEN** la suscripción de la cuenta también está Suspendida
+- **THEN** la cuenta entra pero sus contenedores siguen detenidos y 25c lo avisa
+
+#### Scenario: Cuenta no suspendida
+
+- **WHEN** el admin intenta reactivar una cuenta Activa
+- **THEN** responde 409 CuentaNoSuspendida
+
+#### Scenario: Cliente no puede
+
+- **WHEN** un Cliente llama al endpoint
+- **THEN** responde 403
+
+### Requirement: Ajustes de la instalación
+
+En autoalojado, un administrador SHALL ver el estado de la instalación y SHALL poder cambiar la política de registro, crear y revocar invitaciones y fijar los límites por proyecto. Cada cambio SHALL dejar una acción administrativa. Los límites SHALL aplicar en el próximo despliegue de cada proyecto.
+
+#### Scenario: Registro con invitación
+
+- **WHEN** la política es «Con invitación» y alguien se registra con un enlace válido
+- **THEN** se crea su cuenta de Cliente y el enlace queda usado
+
+#### Scenario: Invitación vencida o reusada
+
+- **WHEN** alguien usa un enlace de hace 8 días o ya usado
+- **THEN** el registro responde 410 y no crea la cuenta
+
+#### Scenario: Registro cerrado
+
+- **WHEN** la política es «Cerrado» y alguien intenta registrarse
+- **THEN** responde 403 y las cuentas existentes siguen entrando
+
+#### Scenario: Límites en el próximo despliegue
+
+- **WHEN** el admin baja la memoria a 512 MB con un despliegue en curso
+- **THEN** el despliegue en curso conserva su límite y el siguiente usa 512 MB
+
+#### Scenario: Estado con aviso
+
+- **WHEN** el último envío de correo falló
+- **THEN** Estado muestra Correo con aviso y el error del servidor
+
+#### Scenario: Solo en autoalojado
+
+- **WHEN** un admin de la nube abre /admin/instalacion
+- **THEN** responde 404
+
 ## Fuera de alcance · solo si da el tiempo
 
 - Reactivar una cuenta suspendida desde el panel.

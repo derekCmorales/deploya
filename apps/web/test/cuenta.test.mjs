@@ -43,6 +43,21 @@ test("01 · un fallo de red o 500 muestra un mensaje genérico", () => {
   assert.equal(resultadoRegistro(500, { mensaje: "Internal server error" }).mensaje.startsWith("No pudimos"), true);
 });
 
+test("01 · SP-18: registro cerrado o sin invitación válida muestra el mensaje de la API", () => {
+  const cerrado = "Esta instalación no admite cuentas nuevas. Pide acceso a quien la administra.";
+  assert.deepEqual(resultadoRegistro(403, { codigo: "RegistroCerrado", mensaje: cerrado }), { tipo: "error", mensaje: cerrado });
+  assert.equal(resultadoRegistro(403, { codigo: "InvitacionRequerida", mensaje: "Solo con invitación." }).mensaje, "Solo con invitación.");
+  assert.equal(resultadoRegistro(410, { codigo: "InvitacionNoValida", mensaje: "Pide uno nuevo." }).mensaje, "Pide uno nuevo.");
+});
+
+test("01 · SP-18: el formulario manda el token de `?invitacion=` al registrar", () => {
+  const formulario = readFileSync(new URL("../src/app/(auth)/registro/formulario-registro.tsx", import.meta.url), "utf8");
+  assert.match(formulario, /useSearchParams\(\)\.get\("invitacion"\)/);
+  assert.match(formulario, /registrarCuenta\(correo, contrasena, confirmacion, invitacion\)/);
+  const pagina = readFileSync(new URL("../src/app/(auth)/registro/page.tsx", import.meta.url), "utf8");
+  assert.match(pagina, /<Suspense/);
+});
+
 test("02 · un 200 con la cuenta suspendida no se muestra como activada", () => {
   assert.equal(resultadoVerificacion(200, { estadoCuenta: "suspendida" }), "no-activada");
 });

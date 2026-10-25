@@ -3,11 +3,12 @@ import { SesionGuard } from "../identidad/sesion.guard";
 import { UsuarioActual } from "../identidad/usuario-actual.decorator";
 import type { FilaPago } from "./dominio/comprobante";
 import { ErroresSuscripcionesFilter } from "./errores-suscripciones.filter";
+import { CobroDisponibleGuard } from "./modo/cobro-disponible.guard";
 import { HistorialPagosService } from "./historial-pagos.service";
 
 /** Pantallas 09 y 09b: historial del cliente y descarga del comprobante. Todo con sesión. */
 @Controller("suscripciones/pagos")
-@UseGuards(SesionGuard)
+@UseGuards(SesionGuard, CobroDisponibleGuard)
 @UseFilters(ErroresSuscripcionesFilter)
 export class PagosController {
   constructor(private readonly historial: HistorialPagosService) {}

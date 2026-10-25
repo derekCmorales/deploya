@@ -1,4 +1,5 @@
 import { CuentaYaSuspendida, DetalleInvalido, MotivoInvalido, NoSePuedeSuspenderAdministrador } from "./errores";
+import type { EstadoSuscripcionAdmin } from "./usuarios";
 
 /** La única acción administrativa del núcleo (datos-nucleo.md). */
 export const ACCION_SUSPENDER_CUENTA = "suspender-cuenta";
@@ -18,11 +19,13 @@ export const MOTIVOS_SUSPENSION = {
 
 export type MotivoSuspension = keyof typeof MOTIVOS_SUSPENSION;
 
-/** Lo que M9 sabe de la cuenta a suspender. */
+/** Lo que M9 sabe de la cuenta a suspender o reactivar. */
 export interface CuentaObjetivo {
   id: string;
   rol: "cliente" | "administrador";
   estadoCuenta: "pendiente" | "activa" | "suspendida";
+  /** Estado de su suscripción: al reactivar decide si los contenedores arrancan (SP-05). */
+  suscripcion: EstadoSuscripcionAdmin | null;
 }
 
 export interface SolicitudSuspension {
@@ -48,12 +51,17 @@ function esMotivo(valor: unknown): valor is MotivoSuspension {
 export function validarSolicitudSuspension(cuerpo: unknown): SolicitudSuspension {
   const { motivo, detalle } = (cuerpo ?? {}) as Record<string, unknown>;
   if (!esMotivo(motivo)) throw new MotivoInvalido();
+  return { motivo, detalle: validarDetalle(detalle) };
+}
+
+/** Detalle opcional para el registro (≤ 500); lo comparten suspender (25b) y reactivar (25c). */
+export function validarDetalle(detalle: unknown): string | null {
   if (detalle !== undefined && detalle !== null && typeof detalle !== "string") {
     throw new DetalleInvalido("El detalle debe ser texto.");
   }
   const texto = typeof detalle === "string" ? detalle.trim() : "";
   if (texto.length > DETALLE_MAXIMO) throw new DetalleInvalido(`El detalle admite hasta ${DETALLE_MAXIMO} caracteres.`);
-  return { motivo, detalle: texto || null };
+  return texto || null;
 }
 
 /** Reglas de M9-02: no se suspende a un administrador ni dos veces la misma cuenta. */

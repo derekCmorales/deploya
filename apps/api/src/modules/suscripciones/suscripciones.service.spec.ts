@@ -4,13 +4,15 @@ import { RepositorioPlanesMemoria } from "./adaptadores/repositorio-planes.memor
 import { RepositorioSuscripcionesMemoria } from "./adaptadores/repositorio-suscripciones.memoria";
 import { PlanNoEncontrado, SuscripcionNoEncontrada } from "./dominio/errores";
 import type { Plan } from "./dominio/plan";
+import { CatalogoNube } from "./modo/catalogos";
+import { CuotasDelPlan } from "./modo/cuotas";
 import { SuscripcionesService } from "./suscripciones.service";
 
 const AHORA = new Date("2026-09-30T12:00:00.000Z");
 
 function armar(planes: Plan[] = planesDePrueba()) {
   const suscripciones = new RepositorioSuscripcionesMemoria(planes);
-  const servicio = new SuscripcionesService(new RepositorioPlanesMemoria(planes), suscripciones, new RelojFijo(AHORA));
+  const servicio = new SuscripcionesService(new CatalogoNube(new RepositorioPlanesMemoria(planes)), suscripciones, new CuotasDelPlan(), new RelojFijo(AHORA));
   return { servicio, suscripciones };
 }
 
@@ -55,7 +57,7 @@ describe("SuscripcionesService", () => {
         inicio: AHORA,
         vence: null,
       });
-      const servicio = new SuscripcionesService(new RepositorioPlanesMemoria(planes), suscripciones, new RelojFijo(AHORA));
+      const servicio = new SuscripcionesService(new CatalogoNube(new RepositorioPlanesMemoria(planes)), suscripciones, new CuotasDelPlan(), new RelojFijo(AHORA));
       await expect(servicio.cuotaDe("u1")).resolves.toMatchObject({
         plan: { codigo },
         estado: "activa",

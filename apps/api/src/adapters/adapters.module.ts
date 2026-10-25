@@ -19,7 +19,13 @@ import { MuestrasMetricas } from "../modules/orquestacion/puertos/muestras-metri
 import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verificacion-entorno.puerto";
 import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { RepositorioVariables } from "../modules/proyectos/puertos/repositorio-variables.puerto";
+import { LecturaServidorPuerto, ReporteServidorPuerto } from "../modules/administracion/instalacion/puertos/reporte-servidor.puerto";
+import { RegistroEnviosCorreo } from "../modules/notificaciones/puertos/registro-envios.puerto";
 import { CONFIGURACION_MOTOR, configuracionDesde, type ConfiguracionMotor } from "./configuracion-motor";
+import { RegistroEnviosRedis, ReporteServidorRedis } from "./reales/estado-compartido-redis";
+import { LecturaServidorDocker } from "./reales/lectura-servidor-docker";
+import { RegistroEnviosMemoria, ReporteServidorMemoria } from "./stubs/estado-compartido.memoria";
+import { LecturaServidorStub } from "./stubs/lectura-servidor.stub";
 import { RecetaProyectoPrisma } from "./prisma/receta-proyecto.prisma";
 import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
@@ -87,6 +93,8 @@ const COMUNES: Provider[] = [
   }),
   puerto(CancelacionesPuerto, { docker: (c) => new CancelacionesRedis(c.redisUrl), stub: () => new CancelacionesMemoria() }),
   puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
+  puerto(RegistroEnviosCorreo, { docker: (c) => new RegistroEnviosRedis(c.redisUrl), stub: () => new RegistroEnviosMemoria() }),
+  puerto(ReporteServidorPuerto, { docker: (c) => new ReporteServidorRedis(c.redisUrl), stub: () => new ReporteServidorMemoria() }),
 ];
 
 const SOLO_TRABAJADOR: Provider[] = [
@@ -98,6 +106,10 @@ const SOLO_TRABAJADOR: Provider[] = [
   }),
   puerto(VerificacionEntornoPuerto, { docker: (_c, reloj) => new VerificacionHttp(reloj), stub: () => new VerificacionEntornoStub() }),
   puerto(MetricasContenedorPuerto, { docker: () => new MetricasDockerStats(), stub: () => new MetricasContenedorStub() }),
+  puerto(LecturaServidorPuerto, {
+    docker: (c) => new LecturaServidorDocker(socketDocker(), c.directorioTrabajo, c.proyectoCompose),
+    stub: () => new LecturaServidorStub(),
+  }),
   puerto(EnrutamientoPuerto, {
     docker: (c) =>
       new EnrutamientoTraefikArchivo({ directorio: c.traefikDinamico, ...c.enrutamiento }),

@@ -31,6 +31,7 @@ function usuarioDesdePrisma(fila: FilaUsuario): Usuario {
     estadoCuenta: fila.estadoCuenta,
     motivoSuspension: fila.motivoSuspension,
     suspendidaDesde: fila.accionesRecibidas?.[0]?.creado ?? null,
+    contrasenaCambiadaEn: fila.contrasenaCambiadaEn,
     creado: fila.creado,
   };
 }
@@ -71,8 +72,8 @@ export class RepositorioUsuariosPrisma extends RepositorioUsuarios {
     await this.prisma.usuario.update({ where: { id }, data: { estadoCuenta: estado } });
   }
 
-  async cambiarHash(id: string, hashContrasena: string): Promise<void> {
-    await this.prisma.usuario.update({ where: { id }, data: { hashContrasena } });
+  async cambiarHash(id: string, hashContrasena: string, cambiadaEn: Date): Promise<void> {
+    await this.prisma.usuario.update({ where: { id }, data: { hashContrasena, contrasenaCambiadaEn: cambiadaEn } });
   }
 
   async cambiarNombre(id: string, nombre: string): Promise<void> {

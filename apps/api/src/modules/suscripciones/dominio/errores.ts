@@ -78,3 +78,37 @@ export class PagoNoEncontrado extends ErrorSuscripciones {
     super("No encontramos ese comprobante.");
   }
 }
+
+/** En autoalojado no hay planes en venta ni cobro (SP-06): `/planes` y el cobro dan 404. */
+export class SinCobroEnAutoalojado extends ErrorSuscripciones {
+  readonly codigo = "sin-cobro-en-autoalojado";
+
+  constructor() {
+    super("Esta instalación de Deploya es autoalojada: no hay planes ni cobro.");
+  }
+}
+
+/** Errores del primer administrador con el código de configuración (contrato instalacion.md). */
+export class PrimeraConfiguracionNoDisponible extends ErrorSuscripciones {
+  readonly codigo = "PrimeraConfiguracionNoDisponible";
+
+  constructor() {
+    super("La instalación ya tiene administrador o no es autoalojada.");
+  }
+}
+
+export class CodigoInvalido extends ErrorSuscripciones {
+  readonly codigo = "CodigoInvalido";
+
+  constructor() {
+    super("El código de configuración no es válido.");
+  }
+}
+
+export class CodigoVencido extends ErrorSuscripciones {
+  readonly codigo = "CodigoVencido";
+
+  constructor() {
+    super("El código de configuración venció; genera otro con ./scripts/instalar.sh --codigo-nuevo.");
+  }
+}

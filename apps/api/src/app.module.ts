@@ -9,6 +9,7 @@ import { SuscripcionesModule } from "./modules/suscripciones/suscripciones.modul
 import { AdministracionModule } from "./modules/administracion/administracion.module";
 import { ProyectosModule } from "./modules/proyectos/proyectos.module";
 import { ObservabilidadModule } from "./modules/observabilidad/observabilidad.module";
+import { TiemposModule } from "./modules/observabilidad/tiempos/tiempos.module";
 import { ConstruccionModule } from "./modules/construccion/construccion.module";
 import { OrquestacionModule } from "./modules/orquestacion/orquestacion.module";
 import { EnrutamientoModule } from "./modules/enrutamiento/enrutamiento.module";
@@ -23,6 +24,8 @@ import { HerramientasModule } from "./modules/herramientas/herramientas.module";
     SuscripcionesModule,
     CobroModule,
     AdministracionModule,
+    // Antes de ProyectosModule: /despliegues/tiempos debe registrarse antes que /despliegues/:numero.
+    TiemposModule,
     ProyectosModule,
     ObservabilidadModule,
     ConstruccionModule,

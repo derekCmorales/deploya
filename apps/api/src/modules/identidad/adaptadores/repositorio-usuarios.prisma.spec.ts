@@ -10,6 +10,7 @@ const FILA: UsuarioFila = {
   rol: "cliente",
   estadoCuenta: "suspendida",
   motivoSuspension: "Uso que incumple los términos de servicio (§7.2).",
+  contrasenaCambiadaEn: null,
   creado: new Date("2026-09-01T12:00:00.000Z"),
   actualizado: new Date("2026-09-22T15:00:00.000Z"),
 };

@@ -61,6 +61,8 @@ export abstract class RepositorioDespliegues {
   abstract marcarEtapa(id: string, etapa: Etapa, estado: EstadoEtapa, marca: Date): Promise<void>;
   abstract agregarLineas(id: string, lineas: LineaBitacora[]): Promise<void>;
   abstract lineasDesde(id: string, desde: number, limite: number): Promise<LineaBitacora[]>;
+  /** Las `cuantas` últimas líneas, en orden de `n` (el correo de un despliegue fallido, SP-08). */
+  abstract ultimasLineas(id: string, cuantas: number): Promise<LineaBitacora[]>;
   /** El despliegue más reciente de cada proyecto pedido (para la lista de M3). */
   abstract ultimosDe(proyectoIds: string[]): Promise<Despliegue[]>;
   abstract activoDe(proyectoId: string): Promise<Despliegue | null>;

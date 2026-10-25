@@ -11,6 +11,11 @@ services:
     environment:
       MODO_INSTALACION: autoalojado
       SECRETO_SESION: ${SECRETO_SESION:?Define SECRETO_SESION en .env}
+      # Admin · Instalación (32, SP-18): el comodín que comprueba y el estado que dejan los scripts.
+      DOMINIO_BASE: ${DOMINIO_BASE:-localhost}
+      DIR_RESPALDOS: /respaldos
+    volumes:
+      - ${DEPLOYA_RESPALDOS:-/var/backups/deploya}:/respaldos:ro
   worker:
     environment:
       MODO_INSTALACION: autoalojado

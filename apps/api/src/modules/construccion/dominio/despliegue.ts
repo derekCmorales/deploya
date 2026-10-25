@@ -68,6 +68,8 @@ export interface LineaBitacora {
 export interface ProyectoDesplegable {
   id: string;
   usuarioId: string;
+  /** Para los avisos por correo (SP-08): «api-tienda está en línea». */
+  nombre: string;
   subdominio: string;
   urlRepositorio: string;
   rama: string;

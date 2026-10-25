@@ -9,6 +9,7 @@ import { planesDePrueba } from "../adaptadores/planes.fixture";
 import { RepositorioSuscripcionesMemoria } from "../adaptadores/repositorio-suscripciones.memoria";
 import { CicloController } from "./ciclo.controller";
 import { CicloSuscripcionService } from "./ciclo-suscripcion.service";
+import { AvisosFalso } from "./avisos.falso";
 import { ContenedoresClienteFalso } from "./contenedores-cliente.falso";
 
 const CLIENTE: UsuarioSesion = { id: "u-cliente", correo: "cliente@deploya.app", nombre: "Cliente Demo", rol: "cliente" };
@@ -56,7 +57,7 @@ describe("M2-05 · POST /admin/ciclo/ejecutar", () => {
       vence: new Date("2026-10-31T00:05:00.000Z"),
     });
     const controlador = new CicloController(
-      new CicloSuscripcionService(suscripciones, new ContenedoresClienteFalso(), new RelojFijo(new Date("2026-11-05T00:05:00.000Z"))),
+      new CicloSuscripcionService(suscripciones, new ContenedoresClienteFalso(), new AvisosFalso(), new RelojFijo(new Date("2026-11-05T00:05:00.000Z"))),
     );
 
     expect(guard.canActivate(contextoEjecutar(ADMINISTRADOR))).toBe(true);

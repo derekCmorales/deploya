@@ -30,3 +30,8 @@ El cliente SHALL ver la CPU y la memoria de su contenedor de la última hora o d
 
 - **WHEN** el cliente abre el Resumen
 - **THEN** ve la tarjeta «Últimas 24 h» con CPU y memoria y su estado en palabra
+
+#### Scenario: Resumen sin muestras
+
+- **WHEN** el proyecto acaba de desplegar y aún no hay muestras
+- **THEN** la tarjeta «Últimas 24 h» sigue visible con «Sin muestras todavía»

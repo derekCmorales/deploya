@@ -8,7 +8,7 @@
 
 ### 1. Sin librería de gráficas
 
-Tres gráficas con pocas variantes; a mano quedan con los tokens exactos y sin dependencias (regla del sprint).
+Una gráfica con pocas variantes; a mano queda con los tokens exactos y sin dependencias (regla del sprint). Las otras dos gráficas de la familia llegan con sus propios changes.
 
 ### 2. Los despliegues como eventos
 
@@ -22,13 +22,13 @@ Es dato en vivo: cumple la regla de Señal = en curso.
 
 | Clase / puerto | Patrón | Principio | Por qué |
 |---|---|---|---|
-| `GraficaUso`, `GraficaEtapas`, `GraficaRitmo` | Componente de presentación + composición | S, O | Dibujan; comparten piezas en vez de copiarlas |
-| `escalaLineal`, `puntosDeSerie`, `tonoDeUso` | Funciones puras | S | Se prueban sin DOM |
+| `GraficaUso` | Componente de presentación + composición | S, O | Dibuja; comparte piezas en vez de copiarlas |
+| `escalaLineal`, `puntosDeSerie`, `detallePunto`, `tonoDeUso` | Funciones puras | S | Se prueban sin DOM |
 | `MetricasProyecto` (página) | Container | S | Pide datos y se los pasa a las gráficas |
 
-Cambios de clases y puertos: ninguno en la API (la lectura es de `feat-m5-muestreo-metricas`); componentes web nuevos → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
+Cambios de clases y puertos: ninguno. La lectura de la API es de `feat-m5-muestreo-metricas` y `clases-unificado.mmd` solo modela la API, así que los componentes web nuevos no lo tocan.
 
 ## Risks / Trade-offs
 
-- **Accesibilidad de SVG:** se cubre con `role="img"`, resumen, tabla y teclado.
+- **Accesibilidad de SVG:** se cubre con `role="group"` y `aria-roledescription="gráfica"`, resumen, tabla, teclado y `aria-live`.
 - **Dependencia del día 3:** hasta tener la API, se trabaja con datos del canvas.

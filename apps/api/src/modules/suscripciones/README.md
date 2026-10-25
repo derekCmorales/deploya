@@ -6,6 +6,8 @@ Dueño: Javier. Spec: [`openspec/specs/suscripciones/spec.md`](../../../../../op
 
 **Pantallas:** 06–09.
 
+**Modo de instalación (SP-06):** `MODO_INSTALACION=nube|autoalojado` (por defecto `nube`). `porModo` registra la estrategia de cada puerto en `suscripciones.module.ts`: `CatalogoPlanes` (`CatalogoNube` | `CatalogoAutoalojado`), `PoliticaCuotas` (`CuotasDelPlan` | `LimitesDeInstalacion`) y `AltaPrimerUsuario` (`ComoCliente` | `ConCodigoDeConfiguracion`). En autoalojado: plan «Autoalojado» sin cobro, `/suscripciones/planes` y el cobro dan 404 (`CobroDisponibleGuard`), la tarea del ciclo no se programa (`ColaCicloApagada`) y los límites salen de `ConfiguracionInstalacion`. `GET /instalacion/modo` → `{ modo, configurada }`.
+
 **Fuera de alcance (solo si da el tiempo):** Renovación automática, prorrateo, complementos, cancelación por el cliente.
 
 **Exporta** `SuscripcionesService`: `asignarSandbox(usuarioId)` (idempotente, lo llama M1 al registrar) y `cuotaDe(usuarioId)` (M3, M4, M5; lanza `SuscripcionNoEncontrada`).

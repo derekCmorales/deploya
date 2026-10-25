@@ -8,7 +8,7 @@ El cliente ve el estado y la bitácora de construcción, pero no cuánto usa su 
 
 ## What Changes
 
-- Familia de gráficas en `components/deploya` (SVG a mano, sin librerías): `GraficaUso`, `GraficaEtapas`, `GraficaRitmo`, con piezas compartidas (escalas, ejes, chip de evento, punto en vivo, tooltip). Al catálogo `/sistema` y a `docs/diseno/README.md § Gráficas`.
+- `GraficaUso` en `components/deploya` (SVG a mano, sin librerías), con piezas compartidas (escalas, ejes, chip de evento, punto en vivo, tooltip). Al catálogo `/sistema` y a `docs/diseno/README.md § Gráficas`. `GraficaEtapas` y `GraficaRitmo` quedan para sus changes (`feat-m7-tiempo-por-etapa` y `feat-m7-ritmo-construcciones`).
 - Pestaña Métricas (16): `Segmented` 1 h / 24 h, banner desde el 80 %, chips de despliegue, promedios por versión, «Ver tabla».
 - Tarjeta «Últimas 24 h» en 13 (13c).
 
@@ -30,5 +30,5 @@ El cliente ve el estado y la bitácora de construcción, pero no cuánto usa su 
 
 ## Impact
 
-- Web: `components/deploya/graficas/` (`grafica-uso.tsx`, `grafica-etapas.tsx`, `grafica-ritmo.tsx`, `escalas.ts`, `tooltip.tsx`), `/sistema`, `projects/[proyecto]/metricas/page.tsx`, tarjeta de 13; `MarcoProyecto` gana la pestaña Métricas.
+- Web: `components/deploya/graficas/` (`grafica-uso.tsx`, `escalas.ts`, `tooltip.tsx`), `/sistema`, `projects/[proyecto]/metricas/page.tsx`, tarjeta de 13; `MarcoProyecto` gana la pestaña Métricas.
 - Docs: `docs/diseno/README.md § Gráficas` (ya en el PR 0).

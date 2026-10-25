@@ -8,6 +8,8 @@ import {
   ESTADOS_SUSCRIPCION,
   EstadoDespliegue,
   EstadoSuscripcion,
+  GraficaEtapas,
+  GraficaUso,
   LineaTiempo,
   MapaActividad,
   Pasos,
@@ -25,6 +27,7 @@ import { Meter } from "@/components/ui/meter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { TiemposDespliegue } from "@/lib/tiempos";
 
 import { Interactivos } from "./interactivos";
 
@@ -69,6 +72,77 @@ const dias = Array.from({ length: 84 }, (_, i) => ({
   total: [0, 1, 0, 2, 0, 0, 4, 1, 0, 3][i % 10],
   fallidos: i === 40 || i === 71 ? 1 : 0,
 }));
+
+/** Datos de ejemplo solo para el catálogo: la pantalla 16 siempre lee la API. */
+const ventanaGrafica = { inicio: "2026-10-19T18:30:00Z", fin: "2026-10-20T18:00:00Z" };
+const tiempoDeEjemplo = (indice: number) =>
+  new Date(Date.parse(ventanaGrafica.inicio) + indice * 30 * 60_000).toISOString();
+const serieMemoria = Array.from({ length: 48 }, (_, indice) => {
+  const avance = indice / 47;
+  const valor = 318 + avance * 112 + Math.sin(indice / 5) * 8;
+  return { tiempo: tiempoDeEjemplo(indice), valor: Math.round(valor) };
+});
+const serieCpu = Array.from({ length: 48 }, (_, indice) => {
+  const avance = indice / 47;
+  const valor = 0.06 + avance * 0.06 + Math.sin(indice / 5) * 0.04;
+  return { tiempo: tiempoDeEjemplo(indice), valor: Math.round(valor * 100) / 100 };
+});
+const eventosGrafica = [
+  { en: "2026-10-19T20:12:00Z", version: 13 },
+  { en: "2026-10-20T12:06:23Z", version: 14 },
+];
+
+/** Ejemplo de 14c: una columna por despliegue; #3 falló y #5 es una reversión. */
+const desplieguesEtapas: TiemposDespliegue[] = [
+  {
+    numero: 1,
+    creado: "2026-10-18T10:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 8000, construccion: 90000, ejecucion: 25000, enrutamiento: 12000, operacion: 15000 },
+    falloEn: null,
+  },
+  {
+    numero: 2,
+    creado: "2026-10-18T18:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 7000, construccion: 98000, ejecucion: 26000, enrutamiento: 13000, operacion: 16000 },
+    falloEn: null,
+  },
+  {
+    numero: 3,
+    creado: "2026-10-19T09:00:00Z",
+    estado: "fallido",
+    reversion: false,
+    etapas: { recepcion: 7000, construccion: 60000, ejecucion: 0, enrutamiento: 0, operacion: 0 },
+    falloEn: "construccion",
+  },
+  {
+    numero: 4,
+    creado: "2026-10-19T15:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 9000, construccion: 104000, ejecucion: 27000, enrutamiento: 14000, operacion: 16000 },
+    falloEn: null,
+  },
+  {
+    numero: 5,
+    creado: "2026-10-20T08:00:00Z",
+    estado: "saludable",
+    reversion: true,
+    etapas: { recepcion: 0, construccion: 0, ejecucion: 28000, enrutamiento: 9000, operacion: 12000 },
+    falloEn: null,
+  },
+  {
+    numero: 6,
+    creado: "2026-10-20T12:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 8000, construccion: 92000, ejecucion: 24000, enrutamiento: 10000, operacion: 12000 },
+    falloEn: null,
+  },
+];
 
 export default function SistemaPage() {
   return (
@@ -289,6 +363,84 @@ export default function SistemaPage() {
             </div>
           </div>
         </div>
+      </Seccion>
+
+      <Seccion
+        titulo="Gráficas"
+        nota="SVG a mano, una escala por gráfica. Tinta para la serie, warn solo en la zona de aviso, Señal solo en el punto «ahora» y los despliegues como chips. Datos de ejemplo: en las pantallas salen de la API."
+      >
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Card>
+            <CardContent className="pt-4">
+              <GraficaUso
+                titulo="Memoria"
+                muestras={serieMemoria}
+                limite={512}
+                unidad="MB"
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+                despliegues={eventosGrafica}
+              />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <GraficaUso
+                titulo="CPU"
+                muestras={serieCpu}
+                limite={0.5}
+                unidad="vCPU"
+                divisiones={2}
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+                despliegues={eventosGrafica}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="grid items-start gap-6 xl:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Memoria compacta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GraficaUso
+                compacta
+                titulo="Memoria compacta"
+                muestras={serieMemoria}
+                limite={512}
+                unidad="MB"
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+              />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <GraficaUso
+                titulo="Sin datos"
+                muestras={[]}
+                limite={512}
+                unidad="MB"
+                inicio={ventanaGrafica.inicio}
+                fin={ventanaGrafica.fin}
+                rango="24h"
+              />
+            </CardContent>
+          </Card>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Tiempo por etapa</CardTitle>
+            <CardDescription>Una columna por despliegue; #3 falló y #5 es una reversión.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GraficaEtapas despliegues={desplieguesEtapas} numeroActivo={6} />
+          </CardContent>
+        </Card>
       </Seccion>
 
       <Seccion titulo="Pestañas">

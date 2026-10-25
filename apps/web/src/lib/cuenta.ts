@@ -28,13 +28,17 @@ export type ResultadoRegistro =
   | { tipo: "error"; mensaje: string };
 
 const MENSAJE_GENERICO = "No pudimos crear la cuenta. Intenta de nuevo en unos segundos.";
+/** Rechazos de la política de registro de una instalación autoalojada (SP-18, 403/410): su mensaje se muestra tal cual. */
+const CODIGOS_POLITICA_REGISTRO = new Set(["RegistroCerrado", "InvitacionRequerida", "InvitacionNoValida"]);
 
 export function resultadoRegistro(estado: number, cuerpo: Record<string, unknown>): ResultadoRegistro {
   if (estado === 201 && typeof cuerpo.correoEnmascarado === "string") {
     return { tipo: "creada", correoEnmascarado: cuerpo.correoEnmascarado, correoEnviado: cuerpo.correoEnviado !== false };
   }
   if (cuerpo.codigo === "CorreoYaRegistrado") return { tipo: "correo-registrado" };
-  if (typeof cuerpo.mensaje === "string" && estado === 400) return { tipo: "error", mensaje: cuerpo.mensaje };
+  if (typeof cuerpo.mensaje === "string" && (estado === 400 || CODIGOS_POLITICA_REGISTRO.has(String(cuerpo.codigo)))) {
+    return { tipo: "error", mensaje: cuerpo.mensaje };
+  }
   return { tipo: "error", mensaje: MENSAJE_GENERICO };
 }
 

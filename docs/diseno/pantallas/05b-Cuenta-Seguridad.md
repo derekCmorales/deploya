@@ -58,7 +58,7 @@ Cerrar todas
 
 ## Nota de implementación
 
-«Último cambio: 22 sep 2026» no se muestra (change `feat-m1-cuenta`, `design.md` decisión 5): no hay columna con la fecha del último cambio de contraseña y no se agregan migraciones. `Usuario.actualizado` no sirve como sustituto porque cambia con cualquier edición.
+«Último cambio: 22 sep 2026» va a la izquierda de «Cambiar contraseña», en el pie de la tarjeta (SP-03, change `feat-m1-ultimo-cambio-contrasena`). Sale de `contrasenaCambiadaEn` de `GET /identidad/cuenta`; si es nula, «Nunca la has cambiado». Se vuelve a leer después de cambiarla. Si la lectura falla, la línea no aparece y el formulario funciona igual.
 
 Textos de los estados que no salen en el canvas (change `feat-m1-cuenta`):
 

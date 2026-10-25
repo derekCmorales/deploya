@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Reloj } from "../../compartido/reloj";
+import { PoliticaRegistroPuerto } from "../administracion/instalacion/puertos/politica-registro.puerto";
 import { CorreoNoEnviado, CorreoPuerto, PLANTILLA_VERIFICACION } from "../notificaciones";
 import { CONFIGURACION_IDENTIDAD, type ConfiguracionIdentidad } from "./configuracion-identidad";
 import {
@@ -25,6 +26,8 @@ import { RepositorioUsuarios } from "./puertos/repositorio-usuarios.puerto";
 export interface SolicitudRegistro {
   correo: string;
   contrasena: string;
+  /** Token del enlace `/registro?invitacion=…` (SP-18); solo lo pide la política «Con invitación». */
+  invitacion?: string;
 }
 
 /** Respuesta de `POST /identidad/registro` (pantalla 01b · Cuenta creada). */
@@ -59,6 +62,7 @@ export class IdentidadService {
     private readonly generador: GeneradorToken,
     private readonly correo: CorreoPuerto,
     private readonly sandbox: AsignacionSandboxPuerto,
+    private readonly registroPermitido: PoliticaRegistroPuerto,
     private readonly reloj: Reloj,
     @Inject(CONFIGURACION_IDENTIDAD) private readonly configuracion: ConfiguracionIdentidad,
   ) {}
@@ -67,6 +71,8 @@ export class IdentidadService {
     const correo = normalizarCorreo(solicitud.correo);
     const politica = this.politica.validar(solicitud.contrasena);
     if (!politica.valida) throw new ContrasenaDebil(politica.incumplidas);
+    // Antes de mirar si el correo existe: con el registro cerrado no se revela quién tiene cuenta.
+    await this.registroPermitido.exigirPermitido(correo, solicitud.invitacion);
     if (await this.usuarios.porCorreo(correo)) throw new CorreoYaRegistrado(correo);
 
     const usuario = await this.usuarios.crear({
@@ -77,6 +83,7 @@ export class IdentidadService {
       estadoCuenta: "pendiente",
       creado: this.reloj.ahora(),
     });
+    await this.registroPermitido.consumir(correo, solicitud.invitacion);
     await this.sandbox.asignarSandbox(usuario.id);
     const correoEnviado = await this.enviarVerificacion(usuario);
     return {

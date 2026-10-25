@@ -42,9 +42,9 @@ function despliegue(cambios: Partial<Despliegue> = {}): Despliegue {
     creado: marca("12:00:00"),
     terminado: marca("12:06:23"),
     etapas: [
-      etapa("recepcion", "completada", "12:04:00", "12:04:01"),
+      etapa("recepcion", "completada", "12:04:01", "12:04:01"),
       etapa("construccion", "completada", "12:04:01", "12:05:53"),
-      etapa("ejecucion", "completada", "12:05:53", "12:05:54"),
+      etapa("ejecucion", "completada", "12:05:54", "12:05:54"),
       etapa("enrutamiento", "completada", "12:05:54", "12:06:23"),
       etapa("operacion", "completada", "12:06:23", "12:06:23"),
     ],
@@ -99,7 +99,7 @@ describe("LineaTiempoDespliegue (M7-02)", () => {
       etapas: [
         etapa("recepcion", "omitida"),
         etapa("construccion", "omitida"),
-        etapa("ejecucion", "completada", "12:05:53", "12:05:54"),
+        etapa("ejecucion", "completada", "12:05:54", "12:05:54"),
         etapa("enrutamiento", "completada", "12:05:54", "12:06:23"),
         etapa("operacion", "completada", "12:06:23", "12:06:23"),
       ],

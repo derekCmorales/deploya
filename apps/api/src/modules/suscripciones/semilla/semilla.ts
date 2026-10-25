@@ -1,4 +1,5 @@
 import { sumarDias } from "../dominio/cambio-plan";
+import { CODIGO_AUTOALOJADO } from "../dominio/plan-autoalojado";
 import { DIAS_GRACIA } from "../dominio/politica-ciclo";
 import type { CambioSuscripcion, EstadoSuscripcionValor } from "../dominio/suscripcion";
 
@@ -86,8 +87,30 @@ export function codigoDesdeEntorno(entorno: NodeJS.ProcessEnv): CodigoSemilla | 
   return { hashCodigo: hash, codigoVence: fecha };
 }
 
+/**
+ * El único plan de autoalojado (SP-06): precio 0 y sin vencimiento. Sus columnas de límites no se
+ * usan: `LimitesDeInstalacion` lee `ConfiguracionInstalacion`.
+ */
+const PLAN_AUTOALOJADO: PlanSemilla = {
+  codigo: CODIGO_AUTOALOJADO,
+  nombre: "Autoalojado",
+  descripcion: "Instalación propia de deploya: sin cobro; los límites los fija el administrador.",
+  precio30: 0,
+  precio365: null,
+  maxProyectos: 0,
+  cpus: 0,
+  memoriaMb: 0,
+  construccionesMes: 0,
+  orden: 1,
+};
+
+/** Nube: los cuatro planes v4.1; autoalojado: solo el plan «Autoalojado». */
+export function planesSemilla(entorno: NodeJS.ProcessEnv = {}): PlanSemilla[] {
+  return esAutoalojado(entorno) ? [PLAN_AUTOALOJADO] : planesNube();
+}
+
 /** Planes v4.1 (docs/alcance.md). El precio de 365 días es 10 × el de 30: dos meses gratis. */
-export function planesSemilla(): PlanSemilla[] {
+function planesNube(): PlanSemilla[] {
   return [
     {
       codigo: "sandbox",

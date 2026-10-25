@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff, KeyRound, Loader2, LogOut, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import { contrasenaValida } from "@/components/deploya/requisitos-contrasena";
 import { RUTA_INGRESAR } from "@/components/shell/menu-usuario";
@@ -13,14 +13,15 @@ import { Dialog } from "@/components/ui/dialog";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useSesion } from "@/hooks/use-sesion";
-import { cambiarContrasena, cerrarTodasLasSesiones } from "@/lib/api-cuenta";
-import { erroresContrasena, type ErroresContrasena } from "@/lib/mi-cuenta";
+import { cambiarContrasena, cerrarTodasLasSesiones, leerPerfil } from "@/lib/api-cuenta";
+import { fechaCorta } from "@/lib/fechas";
+import { erroresContrasena, textoUltimoCambio, type ErroresContrasena } from "@/lib/mi-cuenta";
 
 import { FilaCuenta } from "./fila-cuenta";
 
 /**
- * Pantalla 05b · Mi cuenta · Seguridad (M1-07). «Último cambio» no se muestra: no hay
- * columna para esa fecha (change feat-m1-cuenta, design.md decisión 5).
+ * Pantalla 05b · Mi cuenta · Seguridad (M1-07). Junto al botón, «Último cambio» o «Nunca la has
+ * cambiado» (SP-03), leído de `GET /identidad/cuenta`.
  */
 export function Seguridad() {
   return (
@@ -53,6 +54,7 @@ function FormularioContrasena() {
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [cambiada, setCambiada] = useState(false);
+  const ultimoCambio = useUltimoCambio();
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -70,6 +72,7 @@ function FormularioContrasena() {
       setNueva("");
       setConfirmacion("");
       setCambiada(true);
+      void ultimoCambio.recargar();
       return;
     }
     if (resultado?.tipo === "actual-incorrecta") setErrores({ actual: "La contraseña actual no es correcta." });
@@ -145,7 +148,9 @@ function FormularioContrasena() {
             </Field>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-3 border-t border-border px-4 py-3">
+        <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3">
+          {/* Si la cuenta no se pudo leer, la línea no aparece: el formulario funciona igual. */}
+          <span className="text-xs text-muted-foreground">{ultimoCambio.texto}</span>
           <Button type="submit" size="sm" disabled={enviando}>
             {enviando ? <Loader2 className="animate-spin" aria-hidden /> : null}
             Cambiar contraseña
@@ -154,6 +159,26 @@ function FormularioContrasena() {
       </form>
     </Card>
   );
+}
+
+/** «Último cambio: 22 sep 2026» o «Nunca la has cambiado»; vacío mientras carga o si falla la lectura. */
+function useUltimoCambio() {
+  const [texto, setTexto] = useState("");
+
+  const recargar = useCallback(async () => {
+    try {
+      const { contrasenaCambiadaEn } = await leerPerfil();
+      setTexto(textoUltimoCambio(contrasenaCambiadaEn ? fechaCorta(contrasenaCambiadaEn) : null));
+    } catch {
+      setTexto("");
+    }
+  }, []);
+
+  useEffect(() => {
+    void recargar();
+  }, [recargar]);
+
+  return { texto, recargar };
 }
 
 /**

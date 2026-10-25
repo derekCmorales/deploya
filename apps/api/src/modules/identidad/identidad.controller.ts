@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, Post, UseFilters } from "@nestjs/common";
+import { ErroresAdministracionFilter } from "../administracion/errores-administracion.filter";
 import { textoDe } from "./cuerpo-solicitud";
 import { ContrasenasNoCoinciden } from "./dominio/errores";
 import { ESPERA_REENVIO_MS } from "./dominio/politica-reenvio";
@@ -29,13 +30,17 @@ export class IdentidadController {
     return { status: "ok", module: "identidad" };
   }
 
-  /** Pantallas 01 y 01b. La web trata solo el 201 como «Cuenta creada». */
+  /**
+   * Pantallas 01 y 01b. La web trata solo el 201 como «Cuenta creada». `invitacion` es opcional;
+   * los rechazos de la política de registro (SP-18) salen como 403/410 con el filtro de M9.
+   */
   @Post("registro")
   @HttpCode(HTTP_CREADO)
+  @UseFilters(ErroresAdministracionFilter)
   registrar(@Body() cuerpo: unknown): Promise<CuentaRegistrada> {
     const contrasena = textoDe(cuerpo, "contrasena");
     if (textoDe(cuerpo, "confirmacion") !== contrasena) throw new ContrasenasNoCoinciden();
-    return this.identidad.registrar({ correo: textoDe(cuerpo, "correo"), contrasena });
+    return this.identidad.registrar({ correo: textoDe(cuerpo, "correo"), contrasena, invitacion: invitacionDe(cuerpo) });
   }
 
   /** Pantalla 02: POST y no GET, porque consume el token (abrir el enlace no debe tener efectos). */
@@ -59,4 +64,10 @@ function solicitudDeReenvio(cuerpo: unknown): SolicitudReenvio {
   const campos = typeof cuerpo === "object" && cuerpo !== null ? (cuerpo as Record<string, unknown>) : {};
   if (typeof campos.token === "string" && campos.token !== "") return { token: campos.token };
   return { correo: textoDe(cuerpo, "correo") };
+}
+
+/** Campo opcional: sin invitación (o vacía) la política decide si hace falta. */
+function invitacionDe(cuerpo: unknown): string | undefined {
+  const valor = typeof cuerpo === "object" && cuerpo !== null ? (cuerpo as Record<string, unknown>).invitacion : undefined;
+  return typeof valor === "string" && valor !== "" ? valor : undefined;
 }

@@ -1,4 +1,6 @@
 import { RelojFijo } from "../../compartido/reloj";
+import { InvitacionRequerida, RegistroCerrado } from "../administracion/dominio/errores";
+import { PoliticaRegistroPuerto } from "../administracion/instalacion/puertos/politica-registro.puerto";
 import { CorreoNoEnviado, CorreoPuerto } from "../notificaciones";
 import type { PlantillaCorreo } from "../notificaciones/dominio/plantilla-correo";
 import { RepositorioTokensCuentaMemoria } from "./adaptadores/repositorio-tokens-cuenta.memoria";
@@ -53,11 +55,25 @@ class SandboxEspia extends AsignacionSandboxPuerto {
   }
 }
 
+class PoliticaRegistroEspia extends PoliticaRegistroPuerto {
+  rechazo: Error | null = null;
+  readonly exigidas: Array<[string, string | undefined]> = [];
+  readonly consumidas: Array<[string, string | undefined]> = [];
+  async exigirPermitido(correo: string, invitacion?: string): Promise<void> {
+    this.exigidas.push([correo, invitacion]);
+    if (this.rechazo) throw this.rechazo;
+  }
+  async consumir(correo: string, invitacion?: string): Promise<void> {
+    this.consumidas.push([correo, invitacion]);
+  }
+}
+
 function armar() {
   const usuarios = new RepositorioUsuariosMemoria();
   const tokens = new RepositorioTokensCuentaMemoria();
   const correo = new CorreoEspia();
   const sandbox = new SandboxEspia();
+  const registro = new PoliticaRegistroEspia();
   const reloj = new RelojFijo(new Date("2026-09-28T12:00:00.000Z"));
   const servicio = new IdentidadService(
     usuarios,
@@ -66,10 +82,11 @@ function armar() {
     new GeneradorSecuencial(),
     correo,
     sandbox,
+    registro,
     reloj,
     { urlWeb: "http://localhost:3000" },
   );
-  return { servicio, usuarios, tokens, correo, sandbox, reloj };
+  return { servicio, usuarios, tokens, correo, sandbox, registro, reloj };
 }
 
 const registrarValido = (servicio: IdentidadService, correo = "Derek@TiendaDemo.com") =>
@@ -305,5 +322,37 @@ describe("M1-04 · Reenviar verificación", () => {
     correo.falla = true;
 
     await expect(servicio.reenviarVerificacion({ correo: "derek@tiendademo.com" })).resolves.toBeUndefined();
+  });
+});
+
+describe("SP-18 · El registro respeta la política de la instalación", () => {
+  it("Registro con invitación: pasa el token a la política y la consume después de crear la cuenta", async () => {
+    const { servicio, registro, usuarios } = armar();
+
+    await servicio.registrar({ correo: "Ana@MiEmpresa.com", contrasena: CLAVE_VALIDA, invitacion: "tok-1" });
+
+    expect(registro.exigidas).toEqual([["ana@miempresa.com", "tok-1"]]);
+    expect(registro.consumidas).toEqual([["ana@miempresa.com", "tok-1"]]);
+    expect(await usuarios.porCorreo("ana@miempresa.com")).not.toBeNull();
+  });
+
+  it("Invitación requerida: sin enlace no se crea la cuenta ni se manda correo", async () => {
+    const { servicio, registro, usuarios, correo, sandbox } = armar();
+    registro.rechazo = new InvitacionRequerida();
+
+    await expect(servicio.registrar({ correo: "ana@miempresa.com", contrasena: CLAVE_VALIDA })).rejects.toBeInstanceOf(InvitacionRequerida);
+
+    expect(await usuarios.porCorreo("ana@miempresa.com")).toBeNull();
+    expect(registro.consumidas).toEqual([]);
+    expect(correo.enviados).toEqual([]);
+    expect(sandbox.usuarios).toEqual([]);
+  });
+
+  it("Registro cerrado: rechaza antes de revelar si el correo ya tiene cuenta", async () => {
+    const { servicio, registro } = armar();
+    await servicio.registrar({ correo: "ana@miempresa.com", contrasena: CLAVE_VALIDA });
+    registro.rechazo = new RegistroCerrado();
+
+    await expect(servicio.registrar({ correo: "ana@miempresa.com", contrasena: CLAVE_VALIDA })).rejects.toBeInstanceOf(RegistroCerrado);
   });
 });

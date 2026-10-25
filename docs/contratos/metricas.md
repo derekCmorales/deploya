@@ -66,6 +66,13 @@ GET /observabilidad/consumo/diario
 
 La proyección (`acumulado / díasTranscurridos × díasDelMes`) se calcula en la web con una función pura; la reversión no cuenta.
 
+```ts
+// M4 · lo implementa Eduardo con revisión de Derek: mismo criterio que contarConstruccionesDesde (I7)
+RepositorioDespliegues.fechasDeConstruccionDesde(usuarioId: string, desde: Date): Promise<Date[]>
+```
+
+`ConsumoService.diario` agrupa esas fechas por día UTC (`diariosDe`, puro). Así `sum(diarios)` es igual a `construcciones.usadas` de `GET /observabilidad/consumo`. El día 1 la web no dibuja proyección.
+
 ## Infraestructura (si da tiempo, M9)
 
 ```ts
@@ -80,3 +87,4 @@ export abstract class MetricasNodoPuerto { abstract nodo(): Promise<{ cpu: { usa
 |---|---|---|
 | 1 | 2026-10-20 | Sprint fuera de alcance (SP-07, SP-10, SP-11, SP-13, SP-14, SP-15) |
 | 1.1 | 2026-10-21 | SP-07: pico, aviso y cubos alineados a :00/:30; aditivo, Eduardo avisado |
+| 1.2 | 2026-10-25 | SP-15: `fechasDeConstruccionDesde` en `RepositorioDespliegues` para el ritmo diario; aditivo |

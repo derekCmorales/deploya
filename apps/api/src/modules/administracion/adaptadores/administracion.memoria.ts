@@ -1,3 +1,4 @@
+import { ACCION_REACTIVAR_CUENTA, MOTIVO_REACTIVACION, type Reactivacion } from "../dominio/reactivacion";
 import { ACCION_SUSPENDER_CUENTA, type CuentaObjetivo, type Suspension } from "../dominio/suspension";
 import {
   contenedoresDetenidos,
@@ -79,7 +80,7 @@ class SuspensionMemoria extends CuentasSuspensionPuerto {
 
   async cuenta(usuarioId: string): Promise<CuentaObjetivo | null> {
     const cuenta = this.cuentas.get(usuarioId);
-    return cuenta ? { id: cuenta.id, rol: cuenta.rol, estadoCuenta: cuenta.estadoCuenta } : null;
+    return cuenta ? { id: cuenta.id, rol: cuenta.rol, estadoCuenta: cuenta.estadoCuenta, suscripcion: cuenta.suscripcion } : null;
   }
 
   async suspender(s: Suspension): Promise<void> {
@@ -95,6 +96,21 @@ class SuspensionMemoria extends CuentasSuspensionPuerto {
       motivo: s.motivo,
       detalle: s.detalle,
       creado: s.marca,
+    });
+  }
+
+  async reactivar(r: Reactivacion): Promise<void> {
+    const cuenta = this.cuentas.get(r.usuarioId);
+    if (!cuenta) throw new Error(`Cuenta ${r.usuarioId} fuera del doble`);
+    cuenta.estadoCuenta = "activa";
+    cuenta.suspension = null;
+    this.acciones.push({
+      adminId: r.adminId,
+      usuarioAfectadoId: r.usuarioId,
+      accion: ACCION_REACTIVAR_CUENTA,
+      motivo: MOTIVO_REACTIVACION,
+      detalle: r.detalle,
+      creado: r.marca,
     });
   }
 }

@@ -18,8 +18,9 @@ classDiagram
         -generador GeneradorToken
         -correo CorreoPuerto
         -sandbox AsignacionSandboxPuerto
+        -registroPermitido PoliticaRegistroPuerto
         -reloj Reloj
-        +registrar(correo, clave) CuentaRegistrada
+        +registrar(correo, clave, invitacion) CuentaRegistrada
         +verificar(token) CuentaVerificada
         +reenviarVerificacion(solicitud) void
     }
@@ -84,7 +85,7 @@ classDiagram
         +porId(id) Usuario
         +crear(usuario) Usuario
         +cambiarEstado(id, estado) void
-        +cambiarHash(id, hashContrasena) void
+        +cambiarHash(id, hashContrasena, cambiadaEn) void
         +cambiarNombre(id, nombre) void
     }
     class RepositorioTokensCuenta {
@@ -142,6 +143,24 @@ classDiagram
     }
     class PlantillaVerificacion
     class PlantillaRecuperacion
+    class PlantillaDespliegueSaludable
+    class PlantillaDespliegueFallido
+    class PlantillaPlanPorVencer
+    class PlantillaSuscripcionSuspendida
+    class AvisosPuerto {
+        <<abstract>>
+        +despliegueTerminado(aviso) void
+        +suscripcionCambio(aviso) void
+    }
+    class AvisosCorreo
+    class DestinatariosPuerto {
+        <<abstract>>
+        +destinatarioDe(usuarioId) Destinatario
+    }
+    class DestinatariosDeIdentidad
+    class DirectorioCuentas {
+        +contactoDe(usuarioId) ContactoCuenta
+    }
     class CorreoNoEnviado {
         <<error>>
     }
@@ -149,13 +168,54 @@ classDiagram
     %% ───────── M2 Suscripciones · M9 Administración (Javier) ─────────
     class SuscripcionesService {
         <<Facade>>
-        -planes RepositorioPlanes
+        -catalogoPlanes CatalogoPlanes
         -suscripciones RepositorioSuscripciones
+        -cuotas PoliticaCuotas
         -reloj Reloj
         +catalogo() PlanCatalogo[]
         +asignarSandbox(usuarioId) void
         +cuotaDe(usuarioId) Cuota
     }
+    class CatalogoPlanes {
+        <<abstract · Strategy SP-06>>
+        +enVenta() PlanCatalogo[]
+        +planInicial() Plan
+        +exigirCobro() void
+    }
+    class CatalogoNube
+    class CatalogoAutoalojado
+    class PoliticaCuotas {
+        <<abstract · Strategy SP-06>>
+        +cuotaDe(suscripcion) Cuota
+    }
+    class CuotasDelPlan
+    class LimitesDeInstalacion
+    class AltaPrimerUsuario {
+        <<abstract · Strategy SP-06>>
+        +configurada() boolean
+        +validarCodigo(codigo) void
+        +consumirCodigo() void
+    }
+    class ComoCliente
+    class ConCodigoDeConfiguracion
+    class RepositorioConfiguracionInstalacion {
+        <<abstract · Repository>>
+        +limites() LimitesInstalacion
+        +codigo() CodigoConfiguracion
+        +borrarCodigo() void
+        +hayAdministrador() boolean
+        +politicaRegistro() PoliticaRegistro
+        +guardarPoliticaRegistro(politica) void
+        +guardarLimites(limites) void
+        +correo() CorreoInstalacion
+        +guardarCorreo(correo) void
+    }
+    class RepositorioConfiguracionInstalacionPrisma
+    class CobroDisponibleGuard
+    class InstalacionController {
+        +estado() EstadoModo
+    }
+    class ColaCicloApagada
     class ContratacionService {
         -planes RepositorioPlanes
         -suscripciones RepositorioSuscripciones
@@ -266,6 +326,7 @@ classDiagram
     class CicloSuscripcionService {
         -suscripciones RepositorioSuscripciones
         -contenedores ContenedoresClientePuerto
+        -avisos AvisosPuerto
         -reloj Reloj
         +ejecutar() ResultadoCiclo
     }
@@ -302,10 +363,12 @@ classDiagram
     class UsuariosAdminController {
         -consulta ConsultaUsuariosPuerto
         -suspension SuspensionService
+        -reactivacion ReactivacionCuentaService
         +buscar(consulta) PaginaUsuarios
         +detalle(id) DetalleUsuario
         +motivos() MotivoSuspension[]
         +suspender(adminId, id, cuerpo) void
+        +reactivar(adminId, id, cuerpo) ResultadoReactivacion
     }
     class ConsultaUsuariosPuerto {
         <<abstract · Repository de lectura>>
@@ -320,10 +383,84 @@ classDiagram
         -reloj Reloj
         +suspender(adminId, usuarioId, solicitud) void
     }
+    class InstalacionService {
+        <<Facade · SP-18>>
+        -configuracion RepositorioConfiguracionInstalacion
+        -salud SaludInstalacion
+        -scripts EstadoScriptsPuerto
+        -reportes ReporteServidorPuerto
+        -acciones RegistroAccionesPuerto
+        +estado() EstadoInstalacion
+        +cambiarRegistro(adminId, cuerpo) PoliticaRegistro
+        +cambiarLimites(adminId, cuerpo) LimitesVista
+    }
+    class InvitacionesService {
+        <<Service Layer · SP-18>>
+        +activas() InvitacionActiva[]
+        +crear(adminId, cuerpo) InvitacionCreada
+        +revocar(adminId, id) void
+    }
+    class SaludInstalacion {
+        <<Composite>>
+        +comprobar() ResultadoComprobacion[]
+    }
+    class ComprobacionInstalacion {
+        <<abstract>>
+        +id string
+        +comprobar() ResultadoComprobacion
+    }
+    class ComprobacionDocker
+    class ComprobacionDnsComodin
+    class ComprobacionCertificado
+    class ComprobacionDisco
+    class ComprobacionCorreo
+    class PoliticaRegistroPuerto {
+        <<abstract · Strategy M1 ← M9>>
+        +exigirPermitido(correo, invitacion) void
+        +consumir(correo, invitacion) void
+    }
+    class RegistroAbierto
+    class RegistroDeInstalacion
+    class RepositorioInvitaciones {
+        <<abstract · Repository>>
+    }
+    class ReporteServidorPuerto {
+        <<abstract>>
+        +publicar(reporte) void
+        +ultimo() ReporteServidor
+    }
+    class LecturaServidorPuerto {
+        <<abstract · solo trabajador>>
+        +medir() ReporteServidor
+    }
+    class TareaReporteServidor
+    class EstadoScriptsPuerto {
+        <<abstract>>
+        +respaldo() EstadoRespaldo
+        +version() EstadoVersion
+    }
+    class RegistroEnviosCorreo {
+        <<abstract · M10>>
+        +registrar(envio) void
+        +ultimo() EnvioCorreo
+    }
+    class CorreoConRegistro {
+        <<Decorator>>
+    }
+    class SoloAutoalojadaGuard
+    class InstalacionAdminController
+    class ReactivacionCuentaService {
+        <<Service Layer · SP-05>>
+        -cuentas CuentasSuspensionPuerto
+        -contenedores ContenedoresClientePuerto
+        -reloj Reloj
+        +reactivar(adminId, usuarioId, solicitud) ResultadoReactivacion
+    }
     class CuentasSuspensionPuerto {
         <<abstract · Unit of Work>>
         +cuenta(usuarioId) CuentaObjetivo
         +suspender(suspension) void
+        +reactivar(reactivacion) void
     }
     class CuentasSuspensionPrisma
     class MOTIVOS_SUSPENSION {
@@ -506,6 +643,13 @@ classDiagram
     class OyenteDespliegue {
         <<abstract>>
         +alTerminar(evento DespliegueTerminado) void
+    }
+    class AvisoDespliegueOyente {
+        <<Observer · SP-08>>
+        -despliegues RepositorioDespliegues
+        -proyectos ProyectosLecturaPuerto
+        -avisos AvisosPuerto
+        +alTerminar(evento) void
     }
     class PasoPipeline {
         <<abstract>>
@@ -694,6 +838,7 @@ classDiagram
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
         +lineasDesde(id, desde, limite) List~LineaBitacora~
+        +ultimasLineas(id, cuantas) List~LineaBitacora~
         +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
         +enCursoDe(proyectoId) Despliegue
@@ -863,6 +1008,7 @@ classDiagram
     IdentidadService --> RepositorioTokensCuenta
     IdentidadService --> GeneradorToken
     IdentidadService --> AsignacionSandboxPuerto
+    IdentidadService --> PoliticaRegistroPuerto : SP-18
     AsignacionSandboxPuerto <|-- AsignacionSandboxSuscripciones
     AsignacionSandboxSuscripciones ..> SuscripcionesService : asignarSandbox
     SesionService --> RepositorioUsuarios
@@ -901,6 +1047,16 @@ classDiagram
     CorreoPuerto ..> CorreoNoEnviado : lanza
     PlantillaCorreo <|-- PlantillaVerificacion
     PlantillaCorreo <|-- PlantillaRecuperacion
+    PlantillaCorreo <|-- PlantillaDespliegueSaludable
+    PlantillaCorreo <|-- PlantillaDespliegueFallido
+    PlantillaCorreo <|-- PlantillaPlanPorVencer
+    PlantillaCorreo <|-- PlantillaSuscripcionSuspendida
+    AvisosPuerto <|-- AvisosCorreo
+    AvisosCorreo --> CorreoPuerto
+    AvisosCorreo --> DestinatariosPuerto
+    DestinatariosPuerto <|-- DestinatariosDeIdentidad
+    DestinatariosDeIdentidad --> DirectorioCuentas
+    DirectorioCuentas --> RepositorioUsuarios
     PagosController --> HistorialPagosService
     HistorialPagosService --> RepositorioPagos
     HistorialPagosService --> ComprobantePdfPuerto
@@ -910,6 +1066,7 @@ classDiagram
     CicloSuscripcionService --> PoliticaCiclo
     CicloSuscripcionService --> RepositorioSuscripciones
     CicloSuscripcionService --> ContenedoresClientePuerto : detenerTodos
+    CicloSuscripcionService --> AvisosPuerto : suscripcionCambio (SP-04)
     ReactivacionService --> ContratacionService : decora contratar
     ReactivacionService --> ContenedoresClientePuerto : reanudarTodos
     CobroController --> ReactivacionService
@@ -930,7 +1087,22 @@ classDiagram
     PasarelaSimulada --> Espera
     Espera <|-- EsperaTemporizador
     SuscripcionesService ..> Cuota
-    SuscripcionesService --> RepositorioPlanes
+    SuscripcionesService --> CatalogoPlanes
+    SuscripcionesService --> PoliticaCuotas
+    CatalogoPlanes <|-- CatalogoNube
+    CatalogoPlanes <|-- CatalogoAutoalojado
+    CatalogoNube --> RepositorioPlanes
+    CatalogoAutoalojado --> RepositorioPlanes
+    PoliticaCuotas <|-- CuotasDelPlan
+    PoliticaCuotas <|-- LimitesDeInstalacion
+    LimitesDeInstalacion --> RepositorioConfiguracionInstalacion
+    AltaPrimerUsuario <|-- ComoCliente
+    AltaPrimerUsuario <|-- ConCodigoDeConfiguracion
+    ConCodigoDeConfiguracion --> RepositorioConfiguracionInstalacion
+    RepositorioConfiguracionInstalacion <|-- RepositorioConfiguracionInstalacionPrisma
+    CobroDisponibleGuard --> CatalogoPlanes : exigirCobro
+    InstalacionController --> AltaPrimerUsuario
+    ColaCicloPuerto <|-- ColaCicloApagada
     SuscripcionesService --> RepositorioSuscripciones
     RepositorioPlanes <|-- RepositorioPlanesPrisma
     RepositorioSuscripciones <|-- RepositorioSuscripcionesPrisma
@@ -945,6 +1117,35 @@ classDiagram
     SuspensionService --> CuentasSuspensionPuerto
     SuspensionService ..> MOTIVOS_SUSPENSION
     SuspensionService --> ContenedoresClientePuerto : detenerTodos
+    UsuariosAdminController --> ReactivacionCuentaService
+    ReactivacionCuentaService --> CuentasSuspensionPuerto
+    ReactivacionCuentaService --> ContenedoresClientePuerto : reanudarTodos si la suscripción está vigente
+    InstalacionAdminController --> InstalacionService
+    InstalacionAdminController --> InvitacionesService
+    InstalacionAdminController ..> SoloAutoalojadaGuard
+    InstalacionService --> SaludInstalacion
+    InstalacionService --> RepositorioConfiguracionInstalacion
+    InstalacionService --> EstadoScriptsPuerto
+    InstalacionService --> ReporteServidorPuerto
+    InvitacionesService --> RepositorioInvitaciones
+    SaludInstalacion o-- ComprobacionInstalacion
+    ComprobacionInstalacion <|-- ComprobacionDocker
+    ComprobacionInstalacion <|-- ComprobacionDnsComodin
+    ComprobacionInstalacion <|-- ComprobacionCertificado
+    ComprobacionInstalacion <|-- ComprobacionDisco
+    ComprobacionInstalacion <|-- ComprobacionCorreo
+    ComprobacionDocker --> ReporteServidorPuerto
+    ComprobacionDisco --> ReporteServidorPuerto
+    ComprobacionCertificado --> CertificadoPuerto
+    ComprobacionCorreo --> RegistroEnviosCorreo
+    PoliticaRegistroPuerto <|-- RegistroAbierto
+    PoliticaRegistroPuerto <|-- RegistroDeInstalacion
+    RegistroDeInstalacion --> RepositorioInvitaciones
+    RegistroDeInstalacion --> RepositorioConfiguracionInstalacion
+    TareaReporteServidor --> LecturaServidorPuerto
+    TareaReporteServidor --> ReporteServidorPuerto : cada 10 min
+    CorreoPuerto <|-- CorreoConRegistro
+    CorreoConRegistro --> RegistroEnviosCorreo
     ProyectosService --> ProveedorFuente
     ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos
@@ -1025,6 +1226,8 @@ classDiagram
     ReversionService --> ColaConstruccionPuerto
     RetencionArtefactos --> PoliticaRetencion
     OyenteDespliegue <|-- RetencionArtefactos
+    OyenteDespliegue <|-- AvisoDespliegueOyente
+    AvisoDespliegueOyente --> AvisosPuerto : Saludable · Fallido
     RetencionArtefactos --> OrquestacionService : eliminarImagen
     RetencionArtefactos --> RepositorioArtefactos
     RetencionArtefactos --> RepositorioDespliegues

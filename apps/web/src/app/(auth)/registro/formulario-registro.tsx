@@ -2,6 +2,7 @@
 
 import { ArrowRight, Loader2, MailCheck } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { contrasenaValida, RequisitosContrasena } from "@/components/deploya/requisitos-contrasena";
@@ -22,6 +23,8 @@ type Estado =
 
 /** Pantalla 01 y sus estados 01b: correo ya registrado, enviando y cuenta creada. */
 export function FormularioRegistro() {
+  // Enlace de Admin · Instalación (SP-18): el token viaja tal cual a la API, que decide si hace falta.
+  const invitacion = useSearchParams().get("invitacion") ?? undefined;
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [confirmacion, setConfirmacion] = useState("");
@@ -45,7 +48,7 @@ export function FormularioRegistro() {
     if (Object.keys(nuevos).length > 0) return;
 
     setEstado({ fase: "enviando" });
-    const resultado = await registrarCuenta(correo, contrasena, confirmacion);
+    const resultado = await registrarCuenta(correo, contrasena, confirmacion, invitacion);
     if (resultado.tipo === "creada") {
       guardarCorreoPendiente(correo);
       setEstado({ fase: "creada", correoEnmascarado: resultado.correoEnmascarado, correoEnviado: resultado.correoEnviado });

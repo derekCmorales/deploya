@@ -72,7 +72,7 @@ export class PipelineDespliegue {
     } catch (error) {
       const etapa = ejecutados.at(-1)?.etapa ?? "recepcion";
       if (error instanceof DespliegueCancelado) await this.cancelar(contexto, estado, ejecutados);
-      else await this.fallar(contexto, estado, this.falloDe(error, etapa), ejecutados);
+      else await this.fallar(contexto, estado, this.falloDe(error, etapa), ejecutados, bitacora);
     } finally {
       await Promise.all(ejecutados.map((paso) => paso.liberar(contexto)));
     }
@@ -110,6 +110,7 @@ export class PipelineDespliegue {
     estado: EstadoDespliegue,
     fallo: FalloDespliegue,
     ejecutados: PasoPipeline[],
+    lotes: BitacoraEnLotes,
   ): Promise<void> {
     const { despliegue, bitacora } = contexto;
     bitacora.escribir(fallo.etapa, fallo.motivo, "error");
@@ -120,6 +121,8 @@ export class PipelineDespliegue {
       motivoFallo: fallo.motivo,
       terminado: this.reloj.ahora(),
     });
+    // Los oyentes leen la bitácora (el correo de 24b muestra sus últimas líneas): se guarda antes de anunciar.
+    await lotes.vaciar();
     await this.anunciar({ proyectoId: despliegue.proyectoId, despliegueId: despliegue.id, estado: "fallido" });
   }
 

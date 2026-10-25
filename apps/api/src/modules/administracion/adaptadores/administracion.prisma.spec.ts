@@ -91,12 +91,49 @@ describe("ConsultaUsuariosPrisma", () => {
 });
 
 describe("CuentasSuspensionPrisma", () => {
-  it("cuenta lee solo rol y estado", async () => {
-    const findUnique = jest.fn().mockResolvedValue({ id: "u1", rol: "cliente", estadoCuenta: "activa" });
+  it("cuenta lee rol, estado y el estado de la suscripción", async () => {
+    const findUnique = jest.fn().mockResolvedValue({ id: "u1", rol: "cliente", estadoCuenta: "suspendida", suscripcion: { estado: "por_vencer" } });
 
-    await new CuentasSuspensionPrisma(prismaDoble({ usuario: { findUnique } })).cuenta("u1");
+    const cuenta = await new CuentasSuspensionPrisma(prismaDoble({ usuario: { findUnique } })).cuenta("u1");
 
-    expect(findUnique).toHaveBeenCalledWith({ where: { id: "u1" }, select: { id: true, rol: true, estadoCuenta: true } });
+    expect(findUnique).toHaveBeenCalledWith({
+      where: { id: "u1" },
+      select: { id: true, rol: true, estadoCuenta: true, suscripcion: { select: { estado: true } } },
+    });
+    expect(cuenta).toEqual({ id: "u1", rol: "cliente", estadoCuenta: "suspendida", suscripcion: "por-vencer" });
+  });
+
+  it("cuenta sin fila ni suscripción", async () => {
+    const sinFila = jest.fn().mockResolvedValue(null);
+    const sinSuscripcion = jest.fn().mockResolvedValue({ id: "u2", rol: "administrador", estadoCuenta: "activa", suscripcion: null });
+
+    await expect(new CuentasSuspensionPrisma(prismaDoble({ usuario: { findUnique: sinFila } })).cuenta("u1")).resolves.toBeNull();
+    await expect(new CuentasSuspensionPrisma(prismaDoble({ usuario: { findUnique: sinSuscripcion } })).cuenta("u2")).resolves.toMatchObject({
+      suscripcion: null,
+    });
+  });
+
+  it("reactivar escribe cuenta y acción en una sola transacción (SP-05)", async () => {
+    const marca = new Date("2026-10-24T16:20:00.000Z");
+    const update = jest.fn().mockReturnValue("cuenta");
+    const create = jest.fn().mockReturnValue("accion");
+    const $transaction = jest.fn().mockResolvedValue([]);
+    const prisma = prismaDoble({ usuario: { update }, accionAdministrativa: { create }, $transaction });
+
+    await new CuentasSuspensionPrisma(prisma).reactivar({ adminId: "u-admin", usuarioId: "u-maria", detalle: "Eran pruebas de carga.", marca });
+
+    expect($transaction).toHaveBeenCalledWith(["cuenta", "accion"]);
+    expect(update).toHaveBeenCalledWith({ where: { id: "u-maria" }, data: { estadoCuenta: "activa", motivoSuspension: null } });
+    expect(create).toHaveBeenCalledWith({
+      data: {
+        adminId: "u-admin",
+        usuarioAfectadoId: "u-maria",
+        accion: "reactivar-cuenta",
+        motivo: "reactivacion",
+        detalle: "Eran pruebas de carga.",
+        creado: marca,
+      },
+    });
   });
 
   it("suspender escribe cuenta, sesiones y acción en una sola transacción", async () => {

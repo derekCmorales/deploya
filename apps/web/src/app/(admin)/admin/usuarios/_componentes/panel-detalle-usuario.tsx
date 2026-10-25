@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CirclePause, ShieldAlert, UserRound, X } from "lucide-react";
+import { Check, CirclePause, ShieldAlert, UserCheck, UserRound, X } from "lucide-react";
 import { useState } from "react";
 
 import { EstadoDespliegue } from "@/components/deploya/estado-despliegue";
@@ -14,6 +14,7 @@ import {
   conceptoPagoAdmin,
   fechaAdmin,
   inicialesDe,
+  sePuedeReactivar,
   sePuedeSuspender,
   textoAlta,
   textoRol,
@@ -23,13 +24,27 @@ import {
 } from "@/lib/admin-usuarios";
 import { textoMonto } from "@/lib/suscripcion";
 
+import { DialogoReactivar } from "./dialogo-reactivar";
 import { DialogoSuspender } from "./dialogo-suspender";
 
 const SECCION = "flex flex-col gap-3 border-b border-border px-6 py-5";
 
-/** Panel derecho de 25: cuenta, suscripción, proyectos con su despliegue activo y pagos, por secciones. */
-export function PanelDetalleUsuario({ detalle, ahora, alSuspender }: { detalle: Sondeo<DetalleUsuario>; ahora: Date; alSuspender: () => void }) {
+/**
+ * Panel derecho de 25: cuenta, suscripción, proyectos con su despliegue activo y pagos, por
+ * secciones. Suspender (25b) o reactivar (25c) según el estado de la cuenta; `alCambiarCuenta`
+ * vuelve a leer la tabla y el detalle.
+ */
+export function PanelDetalleUsuario({
+  detalle,
+  ahora,
+  alCambiarCuenta,
+}: {
+  detalle: Sondeo<DetalleUsuario>;
+  ahora: Date;
+  alCambiarCuenta: () => void;
+}) {
   const [suspendiendo, setSuspendiendo] = useState(false);
+  const [reactivando, setReactivando] = useState(false);
   if (detalle.error) {
     return (
       <div className="p-6">
@@ -81,6 +96,12 @@ export function PanelDetalleUsuario({ detalle, ahora, alSuspender }: { detalle: 
             <p className="text-[13px] text-muted-foreground">{textoSuspension(d.suspension)}</p>
             {d.suspension.motivo ? <p className="text-[13px]">{d.suspension.motivo}</p> : null}
           </div>
+        ) : null}
+        {sePuedeReactivar(d) ? (
+          <Button size="sm" className="self-end" onClick={() => setReactivando(true)}>
+            <UserCheck />
+            Reactivar cuenta
+          </Button>
         ) : sePuedeSuspender(d) ? (
           <Button variant="destructive-outline" className="self-end" onClick={() => setSuspendiendo(true)}>
             <ShieldAlert />
@@ -156,7 +177,17 @@ export function PanelDetalleUsuario({ detalle, ahora, alSuspender }: { detalle: 
         alCambiar={setSuspendiendo}
         alSuspender={() => {
           setSuspendiendo(false);
-          alSuspender();
+          alCambiarCuenta();
+        }}
+      />
+      <DialogoReactivar
+        key={`reactivar-${d.id}`}
+        usuario={d}
+        abierto={reactivando}
+        alCambiar={setReactivando}
+        alReactivar={() => {
+          setReactivando(false);
+          alCambiarCuenta();
         }}
       />
     </div>

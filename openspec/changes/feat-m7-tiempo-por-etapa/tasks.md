@@ -4,15 +4,15 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 1. API
 
-- [ ] 1.1 Dominio puro sobre `TiemposDespliegue`: mediana de Saludables, % de Construcción, fallos, última reversión
-- [ ] 1.2 `TiemposService` (proyecto ajeno → 404) y `GET /proyectos/:id/despliegues/tiempos?ultimos=14` en `ObservabilidadModule`
-- [ ] 1.3 Pruebas: «Mediana», «Dónde falló», «Reversión» y proyecto ajeno
+- [x] 1.1 Dominio puro sobre `TiemposDespliegue`: mediana de Saludables, % de Construcción, fallos, última reversión
+- [x] 1.2 `TiemposService` (proyecto ajeno → 404) y `GET /proyectos/:id/despliegues/tiempos?ultimos=14` en `TiemposModule`, registrado antes de `ProyectosModule` para no chocar con `/despliegues/:numero`
+- [x] 1.3 Pruebas: «Mediana», «Dónde falló», «Reversión» y proyecto ajeno
 
 ## 2. Web
 
-- [ ] 2.1 `GraficaEtapas` rehecha: una columna apilada por despliegue, fallo en `bad`, reversión ↺, mediana punteada, tooltip, teclado y «Ver tabla»
-- [ ] 2.2 Tarjeta 14c encima de la tabla de 14, contra la API
-- [ ] 2.3 Prueba `node --test` de `lib/tiempos.ts` (indicadores de la cabecera)
+- [x] 2.1 `GraficaEtapas` rehecha: una columna apilada por despliegue, fallo en `bad`, reversión ↺, mediana punteada, tooltip, teclado y «Ver tabla»
+- [x] 2.2 Tarjeta 14c encima de la tabla de 14, contra la API
+- [x] 2.3 Prueba `node --test` de `lib/tiempos.ts` (indicadores de la cabecera)
 
 ## 3. Cierre
 

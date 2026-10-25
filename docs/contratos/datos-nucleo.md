@@ -1,6 +1,6 @@
 # Contrato · Datos del núcleo v4.1 (schema Prisma)
 
-Versión 2.1 · 2026-10-21 (versión 1: 2026-09-27) · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
+Versión 2.3 · 2026-10-25 (versión 1: 2026-09-27) · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
 
 Este documento **firma** el modelo de datos del núcleo para que DB-01 salga el lunes sin idas y vueltas. Javier lo implementa en `apps/api/prisma/schema.prisma` y el seed; cualquier campo nuevo o renombrado pasa por aquí y se avisa a los consumidores antes de mergear (regla de [AGENTS.md](../../AGENTS.md)). Diagrama: [erd-unificado.mmd](../diagramas/compartido/erd-unificado.mmd).
 
@@ -443,6 +443,13 @@ model ConfiguracionInstalacion {
   cpuPorProyecto       Decimal   @db.Decimal(4, 2) @default(1)
   memoriaMbPorProyecto Int       @default(1024)
   proyectosPorUsuario  Int?      // null = sin límite
+  // SP-17 · correo de la instalación (asistente 31, Admin · Instalación). Con datos, mandan sobre SMTP_* del .env
+  smtpHost             String?
+  smtpPuerto           Int?
+  smtpUsuario          String?
+  smtpClaveCifrada     String?   // AES-GCM con CLAVE_CIFRADO_VARIABLES; nunca en claro
+  smtpRemitente        String?
+  sinCorreo            Boolean   @default(false)
   actualizado          DateTime  @updatedAt
 }
 
@@ -497,3 +504,4 @@ Desde SP-06 (versión 2.2), el seed con `MODO_INSTALACION=autoalojado` crea solo
 | 2 | 2026-10-20 | Sprint fuera de alcance: `Usuario.contrasenaCambiadaEn`, `MuestraMetrica`, `ConfiguracionInstalacion`, `Invitacion` y acciones administrativas nuevas. Solo agrega |
 | 2.1 | 2026-10-21 | El instalador escribe `hashCodigo` y `codigoVence`. En autoalojado el seed no crea administrador ni cuentas de demo |
 | 2.2 | 2026-10-24 | SP-03: migración de `Usuario.contrasenaCambiadaEn`. SP-05: `reactivar-cuenta` en `AccionAdministrativa` (motivo `reactivacion`). SP-06: en autoalojado el seed crea solo el plan `autoalojado`. SP-18: migración de `Invitacion` (con `revocada`) y `revocar-invitacion` |
+| 2.3 | 2026-10-25 | SP-17: columnas `smtp*` y `sinCorreo` en `ConfiguracionInstalacion` (migración `20261025120000_correo_instalacion`). Solo agrega |

@@ -54,6 +54,8 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
         iniciada: null,
         terminada: null,
       })),
+      fecha: undefined,
+      creadoEn: undefined
     };
     this.despliegues.set(despliegue.id, despliegue);
     this.lineas.set(despliegue.id, []);

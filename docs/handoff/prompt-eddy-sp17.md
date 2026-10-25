@@ -6,7 +6,7 @@
 Tu tarea: SP-17, change openspec/changes/feat-m1-asistente-instalacion (ya actualizado con las
 decisiones; revísalo con /opsx-update solo si algo no cuadra y luego /opsx-apply).
 Rama: feat/m1-asistente-instalacion. Pantalla: docs/diseno/pantallas/31-Autoalojado-asistente.md.
-Contrato: docs/contratos/instalacion.md v1.7 (§ Primera configuración y § Correo de la instalación).
+Contrato: docs/contratos/instalacion.md v1.8 (§ Primera configuración y § Correo de la instalación).
 
 Ya existe en main (úsalo, no lo dupliques):
 - AltaPrimerUsuario (SuscripcionesModule): validarCodigo(codigo), consumirCodigo(), configurada().
@@ -18,7 +18,8 @@ Ya existe en main (úsalo, no lo dupliques):
 - CorreoConRegistro (M10) anota el último envío para Admin · Instalación.
 
 Decisiones tomadas (no las reabras sin hablar con Derek):
-1. POST /instalacion/administrador crea el Administrador activo, consume el código y deja la
+1. POST /instalacion/administrador { codigo, correo, contrasena } vuelve a validar el código
+   (validarCodigo), crea el Administrador activo, consume el código y deja la
    sesión iniciada (Set-Cookie como SesionController). No se pide login a mitad del asistente.
 2. /instalacion/codigo y /administrador: abiertos sin administrador, 404 con administrador.
    /instalacion/correo/prueba y PATCH /instalacion/correo: SesionGuard + RolGuard("administrador").

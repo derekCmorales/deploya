@@ -1,6 +1,7 @@
 import { Reloj } from "../../../../compartido/reloj";
 import { CertificadoPuerto } from "../../../enrutamiento/puertos/certificado.puerto";
 import type { RegistroEnviosCorreo } from "../../../notificaciones/puertos/registro-envios.puerto";
+import type { RepositorioConfiguracionInstalacion } from "../../../suscripciones/modo/repositorio-configuracion-instalacion.puerto";
 import type { ReporteServidor, ReporteServidorPuerto } from "../puertos/reporte-servidor.puerto";
 import type { ResolutorDnsPuerto } from "../puertos/resolutor-dns.puerto";
 import { ComprobacionInstalacion, type ResultadoComprobacion } from "./comprobacion";
@@ -98,10 +99,14 @@ export class ComprobacionCertificado extends ComprobacionInstalacion {
   }
 }
 
+/** «Sin correo por ahora» (asistente 31): no se manda nada, así que el último envío no dice nada. */
+export const DETALLE_SIN_CORREO = "Sin correo: no se envían avisos ni enlaces de recuperación";
+
 export class ComprobacionCorreo extends ComprobacionInstalacion {
   readonly id = "correo";
 
   constructor(
+    private readonly configuracion: RepositorioConfiguracionInstalacion,
     private readonly envios: RegistroEnviosCorreo,
     private readonly reloj: Reloj,
   ) {
@@ -109,6 +114,7 @@ export class ComprobacionCorreo extends ComprobacionInstalacion {
   }
 
   async comprobar(): Promise<ResultadoComprobacion> {
+    if ((await this.configuracion.correo()).tipo === "sin-correo") return { id: this.id, estado: "aviso", detalle: DETALLE_SIN_CORREO };
     const ultimo = await this.envios.ultimo();
     if (!ultimo) return { id: this.id, estado: "ok", detalle: "Todavía no se ha enviado ningún correo" };
     const cuando = haceCuanto(ultimo.en, this.reloj.ahora());

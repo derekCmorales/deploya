@@ -109,6 +109,16 @@ En autoalojado, un administrador SHALL ver el estado de la instalación y SHALL 
 - **WHEN** el último envío de correo falló
 - **THEN** Estado muestra Correo con aviso y el error del servidor
 
+#### Scenario: Estado sin correo
+
+- **WHEN** en el asistente se eligió «Sin correo por ahora»
+- **THEN** Estado muestra Correo con aviso «Sin correo», aunque haya un envío anterior anotado como entregado
+
+#### Scenario: Estado en una instalación nueva
+
+- **WHEN** todavía no se ha desplegado ningún proyecto y el directorio de trabajo del trabajador no existe
+- **THEN** el trabajador lo crea al medir y Estado muestra Docker y Disco con su lectura, no en error
+
 #### Scenario: Solo en autoalojado
 
 - **WHEN** un admin de la nube abre /admin/instalacion

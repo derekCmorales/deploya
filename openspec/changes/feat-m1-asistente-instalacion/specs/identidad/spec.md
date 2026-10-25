@@ -4,7 +4,7 @@
 
 ### Requirement: Primera configuración
 
-En modo autoalojado y sin administrador, el sistema SHALL ofrecer `/configurar`, que SHALL pedir el código de configuración de un solo uso antes de crear la cuenta de administrador verificada. Crear el administrador SHALL dejar su sesión iniciada para seguir con correo, registro y límites. El asistente SHALL permitir probar el SMTP o seguir sin correo y SHALL guardar la elección en la instalación, no en archivos. Con administrador y sin sesión de administrador, o en modo nube, `/configurar` y sus endpoints SHALL responder 404.
+En modo autoalojado y sin administrador, el sistema SHALL ofrecer `/configurar`, que SHALL pedir el código de configuración de un solo uso antes de crear la cuenta de administrador verificada y SHALL volver a validarlo al crearla. Crear el administrador SHALL dejar su sesión iniciada para seguir con correo, registro y límites. El asistente SHALL permitir probar el SMTP o seguir sin correo y SHALL guardar la elección en la instalación, no en archivos. Con administrador y sin sesión de administrador, o en modo nube, `/configurar` y sus endpoints SHALL responder 404.
 
 #### Scenario: Código válido
 
@@ -25,6 +25,11 @@ En modo autoalojado y sin administrador, el sistema SHALL ofrecer `/configurar`,
 
 - **WHEN** quien instaló crea la cuenta de administrador con un código válido
 - **THEN** la respuesta deja la sesión iniciada, el código ya no sirve y el asistente sigue en el paso de correo sin pedir el login
+
+#### Scenario: Administrador sin código
+
+- **WHEN** sin administrador, alguien llama a `POST /instalacion/administrador` sin código o con uno inválido o vencido
+- **THEN** responde 401 o 410 y no crea la cuenta
 
 #### Scenario: Correo de prueba
 

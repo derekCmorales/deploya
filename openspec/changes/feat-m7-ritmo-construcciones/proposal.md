@@ -28,5 +28,6 @@ El medidor de construcciones dice cuántas van, pero no si alcanzan para el mes.
 
 ## Impact
 
-- API: `observabilidad/consumo/` (`ConsumoService.diario`).
+- API: `observabilidad/consumo/` (`ConsumoService.diario`, `diariosDe`); `RepositorioDespliegues.fechasDeConstruccionDesde` en construcción (memoria y Prisma), revisa Derek.
+- Diagramas: `clases-unificado.mmd` gana el método del puerto.
 - Web: `ConsumoPeriodo` gana `GraficaRitmo`; `lib/proyeccion.ts`.

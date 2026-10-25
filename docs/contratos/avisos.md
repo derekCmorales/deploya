@@ -1,6 +1,6 @@
 # Contrato · Avisos por correo (M10 ← M4, M2)
 
-Versión 1.1 · 2026-10-22 · dueño: Eddy (M10) · consumidores: Derek (M4, pipeline), Javier (M2, ciclo §4.4). Cambiarlo exige avisar antes de mergear. Change: `feat-m10-avisos-correo`. Spec: [notificaciones](../../openspec/specs/notificaciones/spec.md). Pantalla: 24b del canvas.
+Versión 1.2 · 2026-10-25 · dueño: Eddy (M10) · consumidores: Derek (M4, pipeline), Javier (M2, ciclo §4.4). Cambiarlo exige avisar antes de mergear. Change: `feat-m10-avisos-correo`. Spec: [notificaciones](../../openspec/specs/notificaciones/spec.md). Pantalla: 24b del canvas.
 
 ## Puerto
 
@@ -39,7 +39,7 @@ export interface AvisoSuscripcion {
 
 1. **Nunca rompe a quien avisa.** Un error del SMTP se registra (`Logger.warn`) y la promesa se resuelve; el despliegue y el ciclo siguen igual.
 2. **Una vez por hecho.** El pipeline avisa al pasar a Saludable o Fallido; el ciclo, solo cuando cambia el estado. Correr la tarea diaria dos veces no repite el correo.
-3. **Cómo se engancha M4:** `AvisoDespliegueOyente` es un `OyenteDespliegue` más dentro de `OYENTES_DESPLIEGUE` (el mismo mecanismo que la retención de artefactos). No hay `if` nuevos en el pipeline.
+3. **Cómo se engancha M4:** `AvisoDespliegueOyente` es un `OyenteDespliegue` más dentro de `OYENTES_DESPLIEGUE` (el mismo mecanismo que la retención de artefactos). No hay `if` nuevos en el pipeline. Lee el despliegue (`RepositorioDespliegues`) y el proyecto (`ProyectosLecturaPuerto`, que suma `nombre`); en un Fallido, la versión activa (`activoDe`) y las dos últimas líneas (`ultimasLineas`, como `«n texto»`). El pipeline guarda la bitácora antes de anunciar un Fallido para que esas líneas incluyan el motivo.
 4. **Autoalojado sin SMTP:** se usa el adaptador de consola de [ADR 0001](../adr/0001-correo-por-smtp-configurable.md); los avisos quedan en la bitácora del API.
 5. **Plantillas:** `PlantillaDespliegueSaludable`, `PlantillaDespliegueFallido`, `PlantillaPlanPorVencer` y `PlantillaSuscripcionSuspendida` extienden `PlantillaCorreo` (Template Method). Textos exactos en [24b-Correos-avisos.md](../diseno/pantallas/24b-Correos-avisos.md).
 
@@ -49,3 +49,4 @@ export interface AvisoSuscripcion {
 |---|---|---|
 | 1 | 2026-10-20 | Sprint fuera de alcance (SP-02, SP-04, SP-08) |
 | 1.1 | 2026-10-22 | `AvisosModule` exporta el puerto (sin ciclo con identidad); `proyecto.id` en `AvisoDespliegue` para el enlace a la bitácora; `vigenciaDias` opcional en `AvisoSuscripcion` |
+| 1.2 | 2026-10-25 | SP-08: `AvisoDespliegueOyente` en `OYENTES_DESPLIEGUE`; qué lee y de dónde salen la etapa, la versión activa y las últimas líneas |

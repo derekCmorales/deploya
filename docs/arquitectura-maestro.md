@@ -2350,6 +2350,13 @@ classDiagram
         <<abstract>>
         +alTerminar(evento DespliegueTerminado) void
     }
+    class AvisoDespliegueOyente {
+        <<Observer · SP-08>>
+        -despliegues RepositorioDespliegues
+        -proyectos ProyectosLecturaPuerto
+        -avisos AvisosPuerto
+        +alTerminar(evento) void
+    }
     class PasoPipeline {
         <<abstract>>
         +etapa Etapa
@@ -2537,6 +2544,7 @@ classDiagram
         +marcarEtapa(id, etapa, estadoEtapa, marca) void
         +agregarLineas(id, lineas) void
         +lineasDesde(id, desde, limite) List~LineaBitacora~
+        +ultimasLineas(id, cuantas) List~LineaBitacora~
         +ultimosDe(proyectoIds) List~Despliegue~
         +activoDe(proyectoId) Despliegue
         +enCursoDe(proyectoId) Despliegue
@@ -2924,6 +2932,8 @@ classDiagram
     ReversionService --> ColaConstruccionPuerto
     RetencionArtefactos --> PoliticaRetencion
     OyenteDespliegue <|-- RetencionArtefactos
+    OyenteDespliegue <|-- AvisoDespliegueOyente
+    AvisoDespliegueOyente --> AvisosPuerto : Saludable · Fallido
     RetencionArtefactos --> OrquestacionService : eliminarImagen
     RetencionArtefactos --> RepositorioArtefactos
     RetencionArtefactos --> RepositorioDespliegues

@@ -26,7 +26,7 @@ Es dato en vivo: cumple la regla de Señal = en curso.
 | `escalaLineal`, `puntosDeSerie`, `detallePunto`, `tonoDeUso` | Funciones puras | S | Se prueban sin DOM |
 | `MetricasProyecto` (página) | Container | S | Pide datos y se los pasa a las gráficas |
 
-Cambios de clases y puertos: ninguno en la API (la lectura es de `feat-m5-muestreo-metricas`); componentes web nuevos → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
+Cambios de clases y puertos: ninguno. La lectura de la API es de `feat-m5-muestreo-metricas` y `clases-unificado.mmd` solo modela la API, así que los componentes web nuevos no lo tocan.
 
 ## Risks / Trade-offs
 

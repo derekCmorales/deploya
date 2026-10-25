@@ -58,3 +58,11 @@ const NOMBRE_ROL: Record<string, string> = { cliente: "Cliente", administrador: 
 export function nombreDeRol(rol: string): string {
   return NOMBRE_ROL[rol] ?? rol;
 }
+
+/**
+ * 05b «Último cambio: 22 sep 2026» (SP-03). Recibe la fecha ya formateada (`fechaCorta`);
+ * `null` significa que la API no la tiene: nunca se cambió.
+ */
+export function textoUltimoCambio(fechaFormateada: string | null): string {
+  return fechaFormateada ? `Último cambio: ${fechaFormateada}` : "Nunca la has cambiado";
+}

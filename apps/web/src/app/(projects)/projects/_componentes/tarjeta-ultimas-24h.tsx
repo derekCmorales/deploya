@@ -42,6 +42,7 @@ export function TarjetaUltimas24h({ proyectoId }: { proyectoId: string }) {
   if (!datos || !leidoEn) return null;
   const vista = vistaResumen(datos, new Date(leidoEn));
   if (!vista) return null;
+  const { memoria, cpu } = vista;
 
   return (
     <Card>
@@ -58,22 +59,28 @@ export function TarjetaUltimas24h({ proyectoId }: { proyectoId: string }) {
         </Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
-        <FilaUso
-          uso={vista.cpu}
-          serie={vista.series.cpu}
-          limite={vista.limiteCpu}
-          unidad="vCPU"
-          divisiones={DIVISIONES_CPU}
-          ventana={vista.ventana}
-        />
-        <FilaUso
-          uso={vista.memoria}
-          serie={vista.series.memoria}
-          limite={vista.limiteMemoria}
-          unidad="MB"
-          divisiones={DIVISIONES_MEMORIA}
-          ventana={vista.ventana}
-        />
+        {cpu && memoria ? (
+          <>
+            <FilaUso
+              uso={cpu}
+              serie={vista.series.cpu}
+              limite={vista.limiteCpu}
+              unidad="vCPU"
+              divisiones={DIVISIONES_CPU}
+              ventana={vista.ventana}
+            />
+            <FilaUso
+              uso={memoria}
+              serie={vista.series.memoria}
+              limite={vista.limiteMemoria}
+              unidad="MB"
+              divisiones={DIVISIONES_MEMORIA}
+              ventana={vista.ventana}
+            />
+          </>
+        ) : (
+          <p className="py-4 text-center text-sm text-muted-foreground">Sin muestras todavía.</p>
+        )}
       </CardContent>
     </Card>
   );

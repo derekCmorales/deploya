@@ -196,9 +196,9 @@ Reglas, iguales en las tres:
 3. **Señal solo para el dato en vivo:** el punto «ahora», que late como `PuntoVivo`. Nada más usa Señal.
 4. **Los despliegues son eventos:** línea vertical punteada y chip mono `#14`. Así se ve qué versión cambió el uso.
 5. **Geist Mono para medir:** ejes, límites y valores; `tnum` en números que cambian.
-6. **Siempre con hover:** cruz y tooltip con hora, valor, % del límite y versión; zona de hover más ancha que la marca. También con teclado (flechas sobre la gráfica enfocada).
+6. **Siempre con hover:** cruz y tooltip con hora, valor, % del límite y versión; zona de hover más ancha que la marca. También con teclado (flechas, Home/End; el tooltip se va al salir de la gráfica).
 7. **Una escala por gráfica:** nunca doble eje; CPU y memoria van en dos gráficas.
-8. **Accesible:** `role="img"` con un resumen en `aria-label`, «Ver tabla» como alternativa, estados con palabra e icono («Holgada», «Cerca del límite»).
+8. **Accesible:** `role="group"` con `aria-roledescription="gráfica"` y un resumen en `aria-label`, «Ver tabla» como alternativa, estados con palabra e icono («Holgada», «Cerca del límite») y `aria-live` para el punto enfocado.
 9. **Etapas:** tonos de tinta en el orden del riel; la etapa donde falló va en `bad`; la reversión no tiene Construcción.
 10. **Movimiento:** solo el pulso del punto en vivo; se apaga con `prefers-reduced-motion`.
 

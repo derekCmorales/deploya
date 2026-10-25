@@ -104,10 +104,17 @@ export interface PuntoGrafica {
   valor: number;
 }
 
+/** Lo que pinta el tooltip de un punto: valor, % del límite y versión vigente. */
+export interface DetallePunto {
+  valor: number;
+  porcentaje: number;
+  version: string | null;
+}
+
 export interface DeltaMemoria {
-  /** Texto corto bajo el valor: «▲ 90 MB desde #13». */
+  /** Texto corto bajo el valor: «▲ 89 MB desde #14». */
   texto: string;
-  /** Frase del banner: «Subió unos 90 MB desde la versión #13». */
+  /** Frase del banner: «Subió unos 89 MB desde la versión #14». */
   frase: string;
 }
 
@@ -152,8 +159,9 @@ export interface VistaMetricas {
 }
 
 export interface VistaResumen {
-  memoria: UsoRecurso;
-  cpu: UsoRecurso;
+  /** Nulos mientras el despliegue no ha producido su primera muestra. */
+  memoria: UsoRecurso | null;
+  cpu: UsoRecurso | null;
   series: { memoria: PuntoGrafica[]; cpu: PuntoGrafica[] };
   ventana: { inicio: string; fin: string };
   limiteMemoria: number;
@@ -163,8 +171,7 @@ export interface VistaResumen {
 /** Holgada por debajo del 80 %, cerca hasta el 99 % y al límite desde el 100 %. */
 export function estadoEnPalabra(pct: number): EstadoUso {
   if (pct >= PORCENTAJE) return "Al límite";
-  if (pct >= UMBRAL_AVISO * PORCENTAJE) return "Cerca del límite";
-  return "Holgada";
+  return tonoDeUso(pct, PORCENTAJE) === "aviso" ? "Cerca del límite" : "Holgada";
 }
 
 /** Titular del banner con el plan que devuelve la API. Sin plan: «del límite del plan». */
@@ -173,15 +180,39 @@ export function textoBanner(porcentajeMemoria: number, nombrePlan: string | null
   return `La memoria está al ${porcentajeMemoria} % del límite ${destino}`;
 }
 
-/** «Subió unos 90 MB desde la versión #13. Si llega a 512 MB, Docker reinicia el contenedor.» */
+/** «Subió unos 89 MB desde la versión #14. Si llega a 512 MB, Docker reinicia el contenedor.» */
 export function cuerpoBanner(fraseDelta: string | null, limiteMb: number): string {
   const inicio = fraseDelta ? `${fraseDelta}. ` : "";
   return `${inicio}Si llega a ${limiteMb} MB, Docker reinicia el contenedor.`;
 }
 
-/** «El contenedor no está corriendo» si la API lo avisa; `null` si corre. */
-export function corriendoONo(respuesta: RespuestaMetricas): string | null {
-  return respuesta.aviso;
+/** Versión vigente en un instante: el último despliegue que ya había ocurrido. */
+export function versionEnPunto(despliegues: ChipDespliegue[], en: string): string | null {
+  const tPunto = Date.parse(en);
+  if (!Number.isFinite(tPunto)) return null;
+  let vigente: ChipDespliegue | null = null;
+  for (const despliegue of despliegues) {
+    const tEvento = Date.parse(despliegue.en);
+    if (!Number.isFinite(tEvento) || tEvento > tPunto) continue;
+    if (!vigente || tEvento >= Date.parse(vigente.en)) vigente = despliegue;
+  }
+  return vigente ? `#${vigente.version}` : null;
+}
+
+/** Lo que pinta el tooltip: valor, % del límite y versión vigente en ese punto. */
+export function detallePunto(
+  muestras: PuntoGrafica[],
+  indice: number,
+  limite: number,
+  despliegues: ChipDespliegue[],
+): DetallePunto | null {
+  const muestra = muestras[indice];
+  if (!muestra) return null;
+  return {
+    valor: muestra.valor,
+    porcentaje: limite > 0 ? Math.round((muestra.valor / limite) * PORCENTAJE) : 0,
+    version: versionEnPunto(despliegues, muestra.tiempo),
+  };
 }
 
 /** Ventana exacta de la serie: 1 h hacia atrás, o 48 cubos de 30 min alineados a :00/:30 UTC. */
@@ -232,12 +263,18 @@ export function vistaMetricas(
   }
 
   const ultimo = respuesta.serie[respuesta.serie.length - 1] ?? null;
-  const previa = versionAnterior(respuesta.promedioPorVersion);
-  const delta = ultimo && previa ? deltaDeMemoria(ultimo.memoriaMb, previa.memoriaMb, previa.version) : null;
+  const eventos = eventosDe(respuesta);
+  const promedios = [...respuesta.promedioPorVersion].sort((a, b) => a.version - b.version);
+  const versionActual = eventos[eventos.length - 1] ?? null;
+  const primeraDeLaVersion = versionActual ? primeraMuestraDesde(respuesta.serie, versionActual.en) : null;
+  const delta =
+    ultimo && versionActual && primeraDeLaVersion
+      ? deltaDeMemoria(ultimo.memoriaMb, primeraDeLaVersion.memoriaMb, versionActual.version)
+      : null;
   const memoria = ultimo ? usoDe("memoria", ultimo.memoriaMb, respuesta.limite.memoriaMb) : null;
   const cpu = ultimo ? usoDe("cpu", ultimo.cpu, respuesta.limite.cpu) : null;
   const porcentajeMemoria = memoria?.porcentaje ?? 0;
-  const enAviso = ultimo ? tonoDeUso(ultimo.memoriaMb, respuesta.limite.memoriaMb) === "aviso" : false;
+  const enAviso = memoria !== null && memoria.estado !== "Holgada";
 
   return {
     memoria: memoria ? { ...memoria, delta } : null,
@@ -246,11 +283,11 @@ export function vistaMetricas(
       memoria && enAviso
         ? { titulo: textoBanner(porcentajeMemoria, nombrePlan), cuerpo: cuerpoBanner(delta?.frase ?? null, respuesta.limite.memoriaMb) }
         : null,
-    promedios: lineaDePromedios(respuesta, ahora),
+    promedios: lineaDePromedios(promedios, respuesta.pico, ahora),
     picoCpu: picoDeCpu(respuesta, ahora),
     fraseCpu: fraseDeCpu(respuesta, rango),
-    comparacion: comparacionDe(respuesta.promedioPorVersion),
-    eventos: eventosDe(respuesta),
+    comparacion: comparacionDe(promedios),
+    eventos,
     series,
     ventana,
     limiteMemoria: respuesta.limite.memoriaMb,
@@ -258,11 +295,13 @@ export function vistaMetricas(
   };
 }
 
-/** Tarjeta 13c: solo CPU y memoria de la ventana de 24 h. */
+/**
+ * Tarjeta 13c: solo CPU y memoria de la ventana de 24 h. Sin muestras devuelve
+ * la vista con `memoria` y `cpu` nulos para que la tarjeta muestre su vacío.
+ */
 export function vistaResumen(respuesta: RespuestaMetricas, ahora: Date): VistaResumen | null {
   if (respuesta.aviso !== null) return null;
   const vista = vistaMetricas(respuesta, null, "24h", ahora);
-  if (!vista.memoria || !vista.cpu) return null;
   return {
     memoria: vista.memoria,
     cpu: vista.cpu,
@@ -328,41 +367,43 @@ function usoDe(recurso: RecursoMetrica, valor: number, limite: number): UsoRecur
   };
 }
 
-function deltaDeMemoria(valorActual: number, valorAnterior: number, versionAnterior: number): DeltaMemoria {
-  const diferencia = Math.round(valorActual - valorAnterior);
+function primeraMuestraDesde(serie: PuntoSerie[], en: string): PuntoSerie | null {
+  const desde = Date.parse(en);
+  if (!Number.isFinite(desde)) return null;
+  return serie.find((punto) => {
+    const tiempo = Date.parse(punto.en);
+    return Number.isFinite(tiempo) && tiempo >= desde;
+  }) ?? null;
+}
+
+function deltaDeMemoria(valorActual: number, valorAlEntrar: number, versionActual: number): DeltaMemoria {
+  const diferencia = Math.round(valorActual - valorAlEntrar);
   if (diferencia === 0) {
-    return { texto: `Sin cambios desde #${versionAnterior}`, frase: `Sin cambios desde la versión #${versionAnterior}` };
+    return { texto: `Sin cambios desde #${versionActual}`, frase: `Sin cambios desde la versión #${versionActual}` };
   }
   const signo = diferencia > 0 ? "▲" : "▼";
   const verbo = diferencia > 0 ? "Subió" : "Bajó";
   return {
-    texto: `${signo} ${Math.abs(diferencia)} MB desde #${versionAnterior}`,
-    frase: `${verbo} unos ${Math.abs(diferencia)} MB desde la versión #${versionAnterior}`,
+    texto: `${signo} ${Math.abs(diferencia)} MB desde #${versionActual}`,
+    frase: `${verbo} unos ${Math.abs(diferencia)} MB desde la versión #${versionActual}`,
   };
 }
 
-function versionAnterior(promedios: PromedioVersion[]): PromedioVersion | null {
-  const orden = [...promedios].sort((a, b) => a.version - b.version);
-  return orden.length < 2 ? null : orden[orden.length - 2];
-}
-
+/** Recibe los promedios ya ordenados por versión. */
 function comparacionDe(promedios: PromedioVersion[]): ComparacionVersiones | null {
-  const orden = [...promedios].sort((a, b) => a.version - b.version);
-  if (orden.length < 2) return null;
-  const anterior = orden[orden.length - 2];
-  const actual = orden[orden.length - 1];
+  if (promedios.length < 2) return null;
+  const anterior = promedios[promedios.length - 2];
+  const actual = promedios[promedios.length - 1];
   return { anterior: anterior.version, actual: actual.version, etiqueta: `Comparar #${anterior.version} y #${actual.version}` };
 }
 
-function lineaDePromedios(respuesta: RespuestaMetricas, ahora: Date): string | null {
-  const promedios = respuesta.promedioPorVersion.length
-    ? `Promedio con ${[...respuesta.promedioPorVersion]
-        .sort((a, b) => a.version - b.version)
-        .map((p) => `#${p.version}: ${p.memoriaMb} MB`)
-        .join(" · con ")}.`
+/** Recibe los promedios ya ordenados por versión. */
+function lineaDePromedios(promedios: PromedioVersion[], pico: PicoMetricas, ahora: Date): string | null {
+  const lineaPromedios = promedios.length
+    ? `Promedio con ${promedios.map((p) => `#${p.version}: ${p.memoriaMb} MB`).join(" · con ")}.`
     : null;
-  const pico = respuesta.pico.memoriaMb ? `Pico: ${respuesta.pico.memoriaMb.valor} MB, ${etiquetaMomento(respuesta.pico.memoriaMb.en, ahora)}.` : null;
-  const linea = [promedios, pico].filter((parte): parte is string => parte !== null).join(" ");
+  const lineaPico = pico.memoriaMb ? `Pico: ${pico.memoriaMb.valor} MB, ${etiquetaMomento(pico.memoriaMb.en, ahora)}.` : null;
+  const linea = [lineaPromedios, lineaPico].filter((parte): parte is string => parte !== null).join(" ");
   return linea === "" ? null : linea;
 }
 

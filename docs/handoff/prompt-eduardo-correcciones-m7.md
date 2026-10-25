@@ -73,9 +73,9 @@ Antes de nada: git merge origin/main en la rama (sin force-push).
 1. lib/metricas.ts (puro, sin React). Agrega, conservando lo que ya hay:
    - el tipo RespuestaMetricas igual al contrato;
    - vistaMetricas(respuesta) → todo lo que la pantalla pinta: % y valor actual de memoria
-     y CPU (último punto de serie / límite), estado en palabra, delta contra la versión
-     anterior (promedioPorVersion), texto del banner, plan, pico, eventos;
-   - corriendoONo(respuesta): si aviso !== null → «El contenedor no está corriendo».
+     y CPU (último punto de serie / límite), estado en palabra, delta desde la primera muestra
+     de la versión actual, texto del banner, plan, pico, eventos;
+   - si aviso !== null, la pantalla muestra «El contenedor no está corriendo» sin calcular la vista.
    Constantes con nombre: UMBRAL_AVISO = 0.8, etc.
 
 2. GraficaUso (components/deploya/graficas/grafica-uso.tsx):
@@ -89,8 +89,8 @@ Antes de nada: git merge origin/main en la rama (sin force-push).
      teclado. El tooltip recibe la versión vigente de ese punto.
    - puntosDeSerie devuelve el índice o la hora con cada punto (quita muestras.indexOf).
 
-3. GraficaEtapas y GraficaRitmo: NO las arregles aquí. Se rehacen en C2 y C3.
-   Solo deja que compilen.
+3. GraficaEtapas y GraficaRitmo: NO van en este PR. Se retiran también del índice de
+   exportaciones y se rehacen en C2 y C3.
 
 4. Pantalla 16 (projects/[proyecto]/metricas/page.tsx):
    - Pide el endpoint al montar y al cambiar el rango. Vuelve a pedir cada 60 s. Skeleton
@@ -102,7 +102,7 @@ Antes de nada: git merge origin/main en la rama (sin force-push).
    - Leyenda (Uso · Límite del plan · Zona de aviso · Despliegue · Ahora). Dos Card (Memoria
      y CPU) con valor grande, «de N», estado en palabra e icono, delta, y la línea de
      promedios por versión y pico.
-   - Si corriendoONo da el mensaje: muéstralo en lugar de las gráficas.
+   - Si la respuesta trae aviso: muéstralo en lugar de las gráficas.
 
 5. Tarjeta 13c en el Resumen (_componentes/panel-resumen.tsx o la page del proyecto): dos
    GraficaUso compacta (24 h), estado en palabra y enlace «Ver métricas». Si no corre, la
@@ -113,7 +113,7 @@ Antes de nada: git merge origin/main en la rama (sin force-push).
 
 7. Pruebas en apps/web/test/metricas.test.mjs y graficas.test.mjs. Nombres exactos:
    «Memoria cerca del límite», «Despliegue en la ventana», «Sin datos», «Hover y teclado»,
-   «Resumen de 24 h», «Los eventos caen en su hora».
+   «Resumen de 24 h», «Resumen sin muestras», «Los eventos caen en su hora».
    Prueba vistaMetricas, eventoEnX y las funciones de hover/teclado (sácalas a series.ts).
    Las pruebas de escalas, hueco y tono que ya tienes se quedan.
 
@@ -127,7 +127,7 @@ Hecho cuando:
   [ ] Con la API local (pnpm dev:api, seed) dos proyectos distintos muestran números distintos
   [ ] El chip #N cae a la hora que dice la tabla de Despliegues
   [ ] Proyecto Detenido → «El contenedor no está corriendo», sin errores en consola
-  [ ] Los 6 escenarios tienen prueba con su nombre exacto y pasan
+  [ ] Los 7 escenarios tienen prueba con su nombre exacto y pasan
   [ ] pnpm check en verde
   [ ] PR: título «feat(m7): métricas del proyecto y últimas 24 h (SP-10, SP-11)», plantilla
       llena, capturas en claro y oscuro, tasks.md marcado
@@ -182,7 +182,7 @@ Web:
        con «↺» y sin recepción ni construcción; «activa» bajo numeroActivo; mediana como línea
        punteada; eje Y en minutos; alto mínimo visible para columnas muy cortas
      - tooltip por columna con las cinco etapas («omitida» si vale 0); teclado con flechas
-     - role="img" + aria-label con resumen + «Ver tabla»
+     - role="group" + aria-roledescription="gráfica" + aria-label con resumen + «Ver tabla»
      - sin animate-pulse, sin bg-destructive
   6. lib/tiempos.ts (puro): textos de la cabecera a partir de resumen: «2 min 44 s»,
      «72 % del tiempo», «2 de 14», «38 s · sin construir». Formato de duración en una función.

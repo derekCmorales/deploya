@@ -3489,3 +3489,5 @@ SOLID: DIP de pagos se conserva; M1 gana `CorreoPuerto`; controladores gordos de
 | Fallido | cualquier etapa | Construcción, ejecución, enrutamiento o salud no superados; se notifica. |
 | Revirtiendo | — | Se levanta un artefacto previo; no se reconstruye (M5-04, en el núcleo). |
 | Detenido | — | Contenedores parados (p. ej. suscripción Suspendida); datos conservados. |
+
+

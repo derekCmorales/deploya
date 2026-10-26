@@ -2298,6 +2298,7 @@ classDiagram
         -cuotaProyectos CuotaProyectosPuerto
         -reloj Reloj
         +de(usuarioId) ConsumoPeriodo
+        +diario(usuarioId) ConsumoDiario
     }
     class ActividadService {
         <<Service Layer>>
@@ -2573,6 +2574,7 @@ classDiagram
         +enCursoDe(proyectoId) Despliegue
         +marcarActivo(proyectoId, despliegueId) void
         +contarConstruccionesDesde(usuarioId, desde) Integer
+        +fechasDeConstruccionDesde(usuarioId, desde) List~Date~
         +desplieguesDesde(proyectoId, desde) List~MuestraDespliegue~
         +tiemposDe(proyectoId, ultimos) List~TiemposDespliegue~
         +activosSaludables() List~DespliegueMuestreable~
@@ -2919,7 +2921,7 @@ classDiagram
     ResumenProyectoService --> ConstruccionService : vistaDe
     ResumenProyectoService ..> LineaTiempoDespliegue : de
     DetalleProyectoPuerto ..> RepositorioProyectos : mismo almacén
-    ConsumoService --> RepositorioDespliegues : contarConstruccionesDesde
+    ConsumoService --> RepositorioDespliegues : contarConstruccionesDesde / fechasDeConstruccionDesde
     ConsumoService --> ProyectosLecturaPuerto : deUsuario
     ConsumoService --> CuotaPlanPuerto : permisoDe
     ConsumoService --> CuotaProyectosPuerto : cuotaDe

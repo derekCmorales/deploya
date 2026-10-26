@@ -8,6 +8,7 @@ import {
   ESTADOS_SUSCRIPCION,
   EstadoDespliegue,
   EstadoSuscripcion,
+  GraficaEtapas,
   GraficaUso,
   LineaTiempo,
   MapaActividad,
@@ -26,6 +27,7 @@ import { Meter } from "@/components/ui/meter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { TiemposDespliegue } from "@/lib/tiempos";
 
 import { Interactivos } from "./interactivos";
 
@@ -89,6 +91,61 @@ const eventosGrafica = [
   { en: "2026-10-19T20:12:00Z", version: 13 },
   { en: "2026-10-20T12:06:23Z", version: 14 },
 ];
+
+/** Ejemplo de 14c: una columna por despliegue; #3 falló y #5 es una reversión. */
+const desplieguesEtapas: TiemposDespliegue[] = [
+  {
+    numero: 1,
+    creado: "2026-10-18T10:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 8000, construccion: 90000, ejecucion: 25000, enrutamiento: 12000, operacion: 15000 },
+    falloEn: null,
+  },
+  {
+    numero: 2,
+    creado: "2026-10-18T18:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 7000, construccion: 98000, ejecucion: 26000, enrutamiento: 13000, operacion: 16000 },
+    falloEn: null,
+  },
+  {
+    numero: 3,
+    creado: "2026-10-19T09:00:00Z",
+    estado: "fallido",
+    reversion: false,
+    etapas: { recepcion: 7000, construccion: 60000, ejecucion: 0, enrutamiento: 0, operacion: 0 },
+    falloEn: "construccion",
+  },
+  {
+    numero: 4,
+    creado: "2026-10-19T15:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 9000, construccion: 104000, ejecucion: 27000, enrutamiento: 14000, operacion: 16000 },
+    falloEn: null,
+  },
+  {
+    numero: 5,
+    creado: "2026-10-20T08:00:00Z",
+    estado: "saludable",
+    reversion: true,
+    etapas: { recepcion: 0, construccion: 0, ejecucion: 28000, enrutamiento: 9000, operacion: 12000 },
+    falloEn: null,
+  },
+  {
+    numero: 6,
+    creado: "2026-10-20T12:00:00Z",
+    estado: "saludable",
+    reversion: false,
+    etapas: { recepcion: 8000, construccion: 92000, ejecucion: 24000, enrutamiento: 10000, operacion: 12000 },
+    falloEn: null,
+  },
+];
+
+/** Mediana de los Saludables sin reversión del ejemplo (#1, #2, #4 y #6); en 14c la da la API. */
+const medianaEtapas = 155000;
 
 export default function SistemaPage() {
   return (
@@ -378,6 +435,15 @@ export default function SistemaPage() {
             </CardContent>
           </Card>
         </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Tiempo por etapa</CardTitle>
+            <CardDescription>Una columna por despliegue; #3 falló y #5 es una reversión.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GraficaEtapas despliegues={desplieguesEtapas} numeroActivo={6} medianaMs={medianaEtapas} />
+          </CardContent>
+        </Card>
       </Seccion>
 
       <Seccion titulo="Pestañas">

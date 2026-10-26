@@ -12,13 +12,22 @@ import { ActividadService } from "./actividad/actividad.service";
 import { ActividadController } from "./actividad/actividad.controller";
 import { LecturaMetricasService } from "./metricas/lectura-metricas.service";
 import { MetricasProyectoController } from "./metricas/metricas-proyecto.controller";
+import { TiemposModule } from "./tiempos/tiempos.module";
 
 /**
  * M7: modelo de lectura sobre lo que exportan M3, M4 y M5 (consumo del período y actividad).
+ * `TiemposModule` se registra en `AppModule` antes de `ProyectosModule` para ganarle la ruta a
+ * `/despliegues/:numero`; aquí se importa para mantener el módulo dueño de la feature.
  */
 @Module({
-  imports: [IdentidadModule, ConstruccionModule, OrquestacionModule, ProyectosModule],
-  controllers: [ObservabilidadController, ResumenProyectoController, ConsumoController, ActividadController, MetricasProyectoController],
+  imports: [TiemposModule, IdentidadModule, ConstruccionModule, OrquestacionModule, ProyectosModule],
+  controllers: [
+    ObservabilidadController,
+    ResumenProyectoController,
+    ConsumoController,
+    ActividadController,
+    MetricasProyectoController,
+  ],
   providers: [ResumenProyectoService, ConsumoService, ActividadService, LecturaMetricasService],
 })
 export class ObservabilidadModule {}

@@ -18,4 +18,29 @@ describe("AppModule (inyección de dependencias del proceso API)", () => {
     expect(modulo.get(AccionesDespliegueService, { strict: false })).toBeInstanceOf(AccionesDespliegueService);
     expect(modulo.get(ContenedoresClientePuerto, { strict: false })).toBeDefined();
   });
+
+  it("registra /despliegues/tiempos antes que /despliegues/:numero para que «tiempos» no se lea como número", async () => {
+    const modulo = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(PrismaService)
+      .useValue({})
+      .compile();
+    const app = modulo.createNestApplication({ logger: false });
+    await app.init();
+
+    const rutas = rutasRegistradas(app.getHttpAdapter().getInstance());
+    await app.close();
+
+    const tiempos = rutas.indexOf("/proyectos/:id/despliegues/tiempos");
+    const porNumero = rutas.indexOf("/proyectos/:id/despliegues/:numero");
+    expect(tiempos).toBeGreaterThanOrEqual(0);
+    expect(porNumero).toBeGreaterThan(tiempos);
+  });
 });
+
+interface CapaExpress {
+  route?: { path: string };
+}
+
+function rutasRegistradas(express: { _router: { stack: CapaExpress[] } }): string[] {
+  return express._router.stack.flatMap((capa) => (capa.route ? [capa.route.path] : []));
+}

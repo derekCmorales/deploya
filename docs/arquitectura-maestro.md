@@ -2597,6 +2597,11 @@ classDiagram
     class LecturaMetricasService {
         +leer(proyectoId, usuarioId, rango) RespuestaMetricas
     }
+    class TiemposService {
+        -proyectos DetalleProyectoPuerto
+        -despliegues RepositorioDespliegues
+        +leer(proyectoId, usuarioId, ultimos) RespuestaTiempos
+    }
     class TiemposDespliegue {
         +numero Integer
         +reversion Boolean
@@ -2966,6 +2971,8 @@ classDiagram
     LecturaMetricasService --> CuotaPlanPuerto : recursosDe
     LecturaMetricasService --> DetalleProyectoPuerto
     LecturaMetricasService --> Reloj
+    TiemposService --> DetalleProyectoPuerto
+    TiemposService --> RepositorioDespliegues : tiemposDe
     ColaOperacionPuerto <|-- ColaOperacionBullMq
     PasoEjecucion --> VariablesEntornoPuerto
     VariablesEntornoPuerto <|-- VariablesEntornoProyecto

@@ -1,6 +1,6 @@
 # Contrato · Métricas, tiempos y ritmo (M5, M4 → M7 → web)
 
-Versión 1.1 · 2026-10-21 · dueños: Derek (muestreo M5 y tiempos M4), Eduardo (lectura M7 y web) · consumidores: Eduardo (16, 13c, 14c, 08c, 27). Cambiarlo exige avisar antes de mergear. Changes: `feat-m5-muestreo-metricas`, `feat-m7-metricas`, `feat-m7-tiempo-por-etapa`, `feat-m7-ritmo-construcciones`, `feat-m9-infraestructura`. Specs: [orquestacion](../../openspec/specs/orquestacion/spec.md), [observabilidad](../../openspec/specs/observabilidad/spec.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.3 · 2026-10-25 · dueños: Derek (muestreo M5 y tiempos M4), Eduardo (lectura M7 y web) · consumidores: Eduardo (16, 13c, 14c, 08c, 27). Cambiarlo exige avisar antes de mergear. Changes: `feat-m5-muestreo-metricas`, `feat-m7-metricas`, `feat-m7-tiempo-por-etapa`, `feat-m7-ritmo-construcciones`, `feat-m9-infraestructura`. Specs: [orquestacion](../../openspec/specs/orquestacion/spec.md), [observabilidad](../../openspec/specs/observabilidad/spec.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Muestreo (M5, trabajador)
 
@@ -52,10 +52,23 @@ RepositorioDespliegues.tiemposDe(proyectoId: string, ultimos: number): Promise<T
 
 ```http
 GET /proyectos/:id/despliegues/tiempos?ultimos=14
-200 [{ "numero": 14, "creado": "…", "estado": "saludable", "reversion": false,
-       "etapas": { "recepcion": 1400, "construccion": 112000, "ejecucion": 21000, "enrutamiento": 9000, "operacion": 17600 },
-       "falloEn": null }]                               // ms; etapa omitida = 0; falloEn = etapa donde terminó un Fallido
+200 {
+  "despliegues": [
+    { "numero": 14, "creado": "…", "estado": "saludable", "reversion": false,
+      "etapas": { "recepcion": 1400, "construccion": 112000, "ejecucion": 21000, "enrutamiento": 9000, "operacion": 17600 },
+      "falloEn": null }
+  ],                                                   // ms; etapa omitida = 0; falloEn = etapa donde terminó un Fallido
+  "resumen": {
+    "medianaMs": 164000,                               // solo Saludables sin reversión
+    "porcentajeConstruccion": 72,                      // % del tiempo total de los despliegues mostrados
+    "fallos": { "fallidos": 2, "total": 14 },
+    "ultimaReversion": { "numero": 7, "ms": 38000 }    // null si no hubo reversiones
+  }
+}
+404 proyecto ajeno
 ```
+
+`ultimos` vale 14 por defecto y nunca pasa de 14; un valor no entero o menor que 1 se ignora. El resumen se calcula sobre los mismos despliegues que devuelve `despliegues`.
 
 ## Ritmo de construcciones (M7, amplía M7-03)
 
@@ -88,3 +101,4 @@ export abstract class MetricasNodoPuerto { abstract nodo(): Promise<{ cpu: { usa
 | 1 | 2026-10-20 | Sprint fuera de alcance (SP-07, SP-10, SP-11, SP-13, SP-14, SP-15) |
 | 1.1 | 2026-10-21 | SP-07: pico, aviso y cubos alineados a :00/:30; aditivo, Eduardo avisado |
 | 1.2 | 2026-10-25 | SP-15: `fechasDeConstruccionDesde` en `RepositorioDespliegues` para el ritmo diario; aditivo |
+| 1.3 | 2026-10-25 | SP-14: tiempos por etapa pasan de array a `{ despliegues, resumen }`; el resumen alimenta la cabecera de 14c; Eduardo avisado |

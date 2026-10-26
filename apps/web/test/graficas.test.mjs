@@ -3,6 +3,7 @@ import assert from "node:assert";
 
 import { escalaLineal, ticks } from "../src/components/deploya/graficas/escalas.ts";
 import {
+  esTeclaDeNavegacion,
   eventoEnX,
   indiceAlMover,
   indiceMasCercano,
@@ -90,6 +91,8 @@ test("Hover y teclado", () => {
   assert.strictEqual(indiceAlMover(1, "Home", 3), 0);
   assert.strictEqual(indiceAlMover(1, "End", 3), 2);
   assert.strictEqual(indiceAlMover(1, "Escape", 3), null);
+  for (const tecla of ["ArrowRight", "ArrowLeft", "Home", "End", "Escape"]) assert.ok(esTeclaDeNavegacion(tecla), tecla);
+  assert.strictEqual(esTeclaDeNavegacion("Enter"), false);
 
   assert.strictEqual(indiceMasCercano(muestras, 0.5, "2026-10-20T16:00:00Z", "2026-10-20T18:00:00Z"), 1);
 

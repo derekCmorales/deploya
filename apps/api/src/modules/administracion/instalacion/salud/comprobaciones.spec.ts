@@ -1,10 +1,11 @@
 import { RelojFijo } from "../../../../compartido/reloj";
 import { RegistroEnviosMemoria, ReporteServidorMemoria } from "../../../../adapters/stubs/estado-compartido.memoria";
+import { RepositorioConfiguracionInstalacionMemoria } from "../../../suscripciones/modo/repositorio-configuracion-instalacion.memoria";
 import type { CertificadoPuerto } from "../../../enrutamiento/puertos/certificado.puerto";
 import type { ReporteServidor } from "../puertos/reporte-servidor.puerto";
 import type { ResolutorDnsPuerto } from "../puertos/resolutor-dns.puerto";
 import { ComprobacionInstalacion, SaludInstalacion } from "./comprobacion";
-import { ComprobacionCertificado, ComprobacionCorreo, ComprobacionDisco, ComprobacionDnsComodin, ComprobacionDocker } from "./comprobaciones";
+import { ComprobacionCertificado, ComprobacionCorreo, DETALLE_SIN_CORREO, ComprobacionDisco, ComprobacionDnsComodin, ComprobacionDocker } from "./comprobaciones";
 
 const AHORA = new Date("2026-10-21T12:00:00.000Z");
 const reloj = () => new RelojFijo(AHORA);
@@ -44,7 +45,7 @@ describe("SP-18 · SaludInstalacion y sus comprobaciones", () => {
 
   it("sin reporte o con uno viejo, el Composite lo muestra como error sin tumbar a las demás", async () => {
     const viejo = await conReporte(reporte({ tomado: new Date("2026-10-21T10:00:00.000Z") }));
-    const salud = new SaludInstalacion([new ComprobacionDocker(await conReporte(null), reloj()), new ComprobacionDisco(viejo, reloj()), new ComprobacionCorreo(new RegistroEnviosMemoria(), reloj())]);
+    const salud = new SaludInstalacion([new ComprobacionDocker(await conReporte(null), reloj()), new ComprobacionDisco(viejo, reloj()), new ComprobacionCorreo(new RepositorioConfiguracionInstalacionMemoria(), new RegistroEnviosMemoria(), reloj())]);
 
     const resultados = await salud.comprobar();
 
@@ -100,6 +101,19 @@ describe("SP-18 · SaludInstalacion y sus comprobaciones", () => {
     const envios = new RegistroEnviosMemoria();
     await envios.registrar({ en: new Date("2026-10-21T11:48:00.000Z"), entregado: true, error: null });
 
-    await expect(new ComprobacionCorreo(envios, reloj()).comprobar()).resolves.toEqual({ id: "correo", estado: "ok", detalle: "El último envío llegó hace 12 min" });
+    await expect(new ComprobacionCorreo(new RepositorioConfiguracionInstalacionMemoria(), envios, reloj()).comprobar()).resolves.toEqual({
+      id: "correo",
+      estado: "ok",
+      detalle: "El último envío llegó hace 12 min",
+    });
+  });
+
+  it("Estado sin correo", async () => {
+    const configuracion = new RepositorioConfiguracionInstalacionMemoria();
+    await configuracion.guardarCorreo({ tipo: "sin-correo" });
+    const envios = new RegistroEnviosMemoria();
+    await envios.registrar({ en: new Date("2026-10-21T11:48:00.000Z"), entregado: true, error: null });
+
+    await expect(new ComprobacionCorreo(configuracion, envios, reloj()).comprobar()).resolves.toEqual({ id: "correo", estado: "aviso", detalle: DETALLE_SIN_CORREO });
   });
 });

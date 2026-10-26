@@ -9,22 +9,24 @@ import {
   ETIQUETA_ETAPA,
   duracionTotal,
   formatoDuracion,
-  medianaSaludables,
   minutosDelEje,
+  MS_POR_MINUTO,
   resumenAccesible,
-  segmentosDeEtapas,
   textoTramo,
+  tramosVisibles,
   type EtapaTiempo,
   type TiemposDespliegue,
 } from "@/lib/tiempos";
 
 import { escalaLineal } from "./escalas";
-import { indiceAlMover } from "./series";
+import { esTeclaDeNavegacion, indiceAlMover } from "./series";
 
 export interface GraficaEtapasProps {
   despliegues: TiemposDespliegue[];
   /** Número del despliegue activo; `null` si el proyecto no tiene ninguno. */
   numeroActivo: number | null;
+  /** Mediana de los Saludables sin reversión, en ms; la calcula la API (`resumen.medianaMs`). */
+  medianaMs: number;
 }
 
 const ANCHO = 720;
@@ -33,7 +35,8 @@ const MARGEN = { top: 18, right: 62, bottom: 42, left: 42 };
 const ALTO_MINIMO_BARRA = 2;
 const ANCHO_MAXIMO_BARRA = 32;
 const ANCHO_TOOLTIP = 174;
-const ALTO_TOOLTIP = 116;
+/** Cabecera y cinco etapas en `text-[10px]` con `leading-tight`, más el relleno. */
+const ALTO_TOOLTIP = 124;
 const MARGEN_TOOLTIP = 8;
 const TONO_ETAPA: Record<EtapaTiempo, number> = {
   recepcion: 0.8,
@@ -43,9 +46,19 @@ const TONO_ETAPA: Record<EtapaTiempo, number> = {
   operacion: 0.2,
 };
 const DIVISIONES_EJE = 4;
+/** Parte del ancho de la columna que ocupa la barra; el resto es aire entre versiones. */
+const PROPORCION_BARRA = 0.55;
+/** Posiciones (px del viewBox) de los textos bajo cada columna y junto a la mediana. */
+const Y_NUMERO_COLUMNA = 15;
+const Y_PRIMERA_PALABRA = 27;
+const ALTO_LINEA_PALABRA = 10;
+const SEPARACION_ETIQUETA = 6;
+const SEPARACION_EJE = 8;
+const AJUSTE_BASE_TEXTO = 3;
+const Y_PALABRA_MEDIANA = 13;
 
 /** Columnas apiladas por despliegue: una por versión, cinco tramos del riel (14c). */
-export function GraficaEtapas({ despliegues, numeroActivo }: GraficaEtapasProps) {
+export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaEtapasProps) {
   const [mostrarTabla, setMostrarTabla] = useState(false);
   const [indiceActivo, setIndiceActivo] = useState<number | null>(null);
 
@@ -54,11 +67,10 @@ export function GraficaEtapas({ despliegues, numeroActivo }: GraficaEtapasProps)
   const anchoGrafica = ANCHO - MARGEN.left - MARGEN.right;
   const altoGrafica = ALTO - MARGEN.top - MARGEN.bottom;
   const minutos = minutosDelEje(despliegues);
-  const topeMs = minutos * 60_000;
+  const topeMs = minutos * MS_POR_MINUTO;
   const escalaY = escalaLineal([0, topeMs], [altoGrafica, 0]);
   const anchoColumna = anchoGrafica / despliegues.length;
-  const anchoBarra = Math.min(ANCHO_MAXIMO_BARRA, anchoColumna * 0.55);
-  const mediana = medianaSaludables(despliegues);
+  const anchoBarra = Math.min(ANCHO_MAXIMO_BARRA, anchoColumna * PROPORCION_BARRA);
   const marcasY = marcasDelEje(minutos);
   const activa = indiceActivo !== null ? despliegues[indiceActivo] : null;
 
@@ -74,7 +86,7 @@ export function GraficaEtapas({ despliegues, numeroActivo }: GraficaEtapasProps)
   };
 
   const moverTeclado = (evento: TecladoReact<HTMLDivElement>) => {
-    if (evento.key !== "ArrowRight" && evento.key !== "ArrowLeft" && evento.key !== "Escape") return;
+    if (!esTeclaDeNavegacion(evento.key)) return;
     evento.preventDefault();
     setIndiceActivo(indiceAlMover(indiceActivo, evento.key, despliegues.length));
   };
@@ -119,13 +131,15 @@ export function GraficaEtapas({ despliegues, numeroActivo }: GraficaEtapasProps)
         </div>
       ) : (
         <div
-          role="img"
-          aria-label={`Tiempo por etapa. ${resumenAccesible(despliegues)} Usa las flechas para recorrer las columnas.`}
+          role="group"
+          aria-roledescription="gráfica"
+          aria-label={`Tiempo por etapa. ${resumenAccesible(despliegues, medianaMs)} Usa las flechas, Inicio y Fin para recorrer las columnas.`}
           tabIndex={0}
           onKeyDown={moverTeclado}
           onFocus={() => {
             if (indiceActivo === null) setIndiceActivo(despliegues.length - 1);
           }}
+          onBlur={() => setIndiceActivo(null)}
           className="rounded outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <svg
@@ -140,7 +154,7 @@ export function GraficaEtapas({ despliegues, numeroActivo }: GraficaEtapasProps)
               {despliegues.map((despliegue, indice) => {
                 const centro = anchoColumna * (indice + 0.5);
                 const izquierda = centro - anchoBarra / 2;
-                const tramos = segmentosDeEtapas(despliegue).filter((tramo) => tramo.ms > 0 || tramo.fallo);
+                const tramos = tramosVisibles(despliegue);
                 let base = altoGrafica;
                 return (
                   <g key={despliegue.numero}>
@@ -171,21 +185,21 @@ export function GraficaEtapas({ despliegues, numeroActivo }: GraficaEtapasProps)
                 );
               })}
 
-              {mediana > 0 ? (
+              {medianaMs > 0 ? (
                 <g>
                   <line
                     x1="0"
-                    y1={escalaY(mediana)}
+                    y1={escalaY(medianaMs)}
                     x2={anchoGrafica}
-                    y2={escalaY(mediana)}
+                    y2={escalaY(medianaMs)}
                     stroke="var(--muted-foreground)"
                     strokeWidth="1"
                     strokeDasharray="4 4"
                   />
-                  <text x={anchoGrafica + 6} y={escalaY(mediana) + 3} className="fill-muted-foreground font-mono text-[9px] tnum">
-                    {formatoDuracion(mediana)}
+                  <text x={anchoGrafica + SEPARACION_ETIQUETA} y={escalaY(medianaMs) + AJUSTE_BASE_TEXTO} className="fill-muted-foreground font-mono text-[9px] tnum">
+                    {formatoDuracion(medianaMs)}
                   </text>
-                  <text x={anchoGrafica + 6} y={escalaY(mediana) + 13} className="fill-muted-foreground font-mono text-[8px]">
+                  <text x={anchoGrafica + SEPARACION_ETIQUETA} y={escalaY(medianaMs) + Y_PALABRA_MEDIANA} className="fill-muted-foreground font-mono text-[8px]">
                     mediana
                   </text>
                 </g>
@@ -245,11 +259,11 @@ function EjeY({
   return (
     <g className="select-none text-muted-foreground" aria-hidden="true">
       {marcas.map((minuto) => {
-        const y = escala(minuto * 60_000);
+        const y = escala(minuto * MS_POR_MINUTO);
         return (
           <g key={minuto}>
             <line x1="0" y1={y} x2={ancho} y2={y} stroke="currentColor" strokeOpacity="0.12" strokeDasharray="2 4" />
-            <text x="-8" y={y + 3} textAnchor="end" className="fill-muted-foreground font-mono text-[10px] tnum">
+            <text x={-SEPARACION_EJE} y={y + AJUSTE_BASE_TEXTO} textAnchor="end" className="fill-muted-foreground font-mono text-[10px] tnum">
               {minuto} min
             </text>
           </g>
@@ -277,7 +291,7 @@ function EtiquetaColumna({
   const palabras = [fallo ? "falló" : null, activa ? "activa" : null].filter((palabra) => palabra !== null);
   return (
     <g transform={`translate(${centro}, ${alto})`}>
-      <text textAnchor="middle" y="15" className="fill-muted-foreground font-mono text-[10px] tnum">
+      <text textAnchor="middle" y={Y_NUMERO_COLUMNA} className="fill-muted-foreground font-mono text-[10px] tnum">
         #{numero}
         {reversion ? " ↺" : ""}
       </text>
@@ -285,8 +299,8 @@ function EtiquetaColumna({
         <text
           key={palabra}
           textAnchor="middle"
-          y={27 + indice * 10}
-          className={palabra === "falló" ? "fill-bad font-mono text-[9px]" : "fill-signal font-mono text-[9px]"}
+          y={Y_PRIMERA_PALABRA + indice * ALTO_LINEA_PALABRA}
+          className={palabra === "falló" ? "fill-bad font-mono text-[9px]" : "fill-foreground font-mono text-[9px]"}
         >
           {palabra}
         </text>
@@ -308,11 +322,11 @@ function TooltipEtapas({
 }) {
   const aLaDerecha = x < anchoContenedor - ANCHO_TOOLTIP - MARGEN_TOOLTIP;
   const izquierda = Math.max(0, aLaDerecha ? x + MARGEN_TOOLTIP : x - ANCHO_TOOLTIP - MARGEN_TOOLTIP);
-  const arriba = Math.min(8, Math.max(0, altoContenedor - ALTO_TOOLTIP));
+  const arriba = Math.min(MARGEN_TOOLTIP, Math.max(0, altoContenedor - ALTO_TOOLTIP));
   return (
     <g transform={`translate(${izquierda}, ${arriba})`} className="pointer-events-none">
       <foreignObject width={ANCHO_TOOLTIP} height={ALTO_TOOLTIP}>
-        <div className="flex flex-col gap-0.5 rounded-md border border-border-strong bg-popover p-2 font-mono text-[10px] text-popover-foreground shadow-elev">
+        <div className="flex flex-col gap-0.5 rounded-md border border-border-strong bg-popover p-2 font-mono text-[10px] leading-tight text-popover-foreground shadow-elev">
           <span className="flex items-center justify-between gap-2 font-medium">
             <span>
               #{despliegue.numero}

@@ -2,13 +2,13 @@
 
 ## Context
 
-`AltaPrimerUsuario` y `ConfiguracionInstalacion` vienen de `feat-m2-modo-autoalojado`; el código lo imprime `instalar.sh` (`feat-instalador-autoalojado`). Desde el contrato `instalacion.md` v1.6–1.7 ya existen: las columnas `smtp*` y `sinCorreo`, `RepositorioConfiguracionInstalacion.correo()` / `guardarCorreo()` y `CifradorVariables` exportado por `VariablesModule`.
+`AltaPrimerUsuario` y `ConfiguracionInstalacion` vienen de `feat-m2-modo-autoalojado`; el código lo imprime `instalar.sh` (`feat-instalador-autoalojado`). Desde el contrato `instalacion.md` v1.6–1.8 ya existen: las columnas `smtp*` y `sinCorreo`, `RepositorioConfiguracionInstalacion.correo()` / `guardarCorreo()` y `CifradorVariables` exportado por `VariablesModule`.
 
 ## Decisions
 
 ### 1. Código de un solo uso
 
-Se guarda solo su hash y su vencimiento; al crear el administrador se borra (`AltaPrimerUsuario.consumirCodigo`). Evita que otro reclame la cuenta en un servidor recién expuesto.
+Se guarda solo su hash y su vencimiento; al crear el administrador se borra (`AltaPrimerUsuario.consumirCodigo`). Evita que otro reclame la cuenta en un servidor recién expuesto. `POST /instalacion/administrador` recibe `{ codigo, correo, contrasena }` y vuelve a llamar a `validarCodigo` antes de crear la cuenta (contrato v1.8): sin eso, el endpoint abierto permite saltarse el paso 1. La web guarda el código solo en memoria entre el paso 1 y el 2.
 
 ### 2. La sesión queda iniciada al crear el administrador
 
@@ -37,11 +37,23 @@ La API no puede escribir el `.env` (vive en el host, permisos 600) y lee `SMTP_*
 
 Un paso no se marca hecho sin la respuesta de la API (regla de `Pasos`). El estado del asistente es una función pura (`pasoSiguiente(estado, evento)`) probada con `node --test`.
 
+### 7. Detalles de la implementación
+
+- **Orden al crear el administrador.** `crearAdministrador` vuelve a validar el código, revisa correo, contraseña y que el correo no exista, y recién entonces llama a `consumirCodigo` y crea la cuenta. Un dato mal escrito no gasta el código. `consumirCodigo` va antes de `crear` porque, con un administrador ya creado, M2 responde 404. Es atómico (`borrarCodigoSiEs`: `UPDATE … WHERE hashCodigo = <el validado>`), así de dos altas a la vez solo una pasa; si `crear` falla, `devolverCodigo` lo restaura (compensación, contrato v1.9).
+- **Sin código es código inválido.** Si falta `codigo` en `/codigo` o `/administrador`, el controlador lo pasa vacío: responde 401 `CodigoInvalido` (escenario «Administrador sin código») y cuenta para el límite, en vez del 400 de un campo faltante.
+- **Límite de intentos.** `LimiteIntentos` cuenta solo los códigos fallidos (`CodigoInvalido`, `CodigoVencido`) por `solicitud.ip`, en memoria del proceso. La API no tiene `trust proxy`: detrás de Traefik todos comparten origen, lo que en una instalación nueva solo endurece el límite.
+- **Nombre del controlador.** `PrimeraConfiguracionController` (en `identidad/instalacion/`) para no chocar con el `InstalacionController` de M2, que sirve `GET /instalacion/modo` bajo el mismo prefijo.
+- **Correo de prueba.** `PruebaCorreoPuerto` (M10) manda `PlantillaPrueba` por un transporte armado con los datos recibidos; no pasa por `CorreoConRegistro` porque no es un envío de la instalación. Su botón abre la instalación, no `/configurar`: otra pestaña del asistente empezaría vacía; el correo pide seguir en la pestaña donde se probó.
+- **Web.** «Servidor» en «Dominio y HTTPS» muestra la memoria libre que reporta el trabajador (`limites.memoriaLibreMb`): `GET /admin/instalacion` no trae vCPU ni memoria total. «Terminar» lleva a Admin · Instalación (32). Los pasos 3 a 5 comparten una sola lectura de `GET /admin/instalacion` (en el contenedor del asistente): avanzar antes de que termine no pierde el dominio de la columna, y el paso 5 abre sin esperar. En el paso Correo, «Continuar» con SMTP exige una prueba que llegó con esos mismos datos.
+
 ## Diseño: SOLID y patrones
 
 | Clase / puerto | Patrón | Principio | Por qué |
 |---|---|---|---|
 | `PrimeraConfiguracionService` | Service Layer | S | Código, administrador y correo; el controlador solo adapta |
+| `LimiteIntentos` | Objeto de dominio | S | Regla pura contra la fuerza bruta, probada con el reloj fijo |
+| `PruebaCorreoPuerto` / `PruebaCorreoSmtp` | Adapter | D, I | M1 prueba un SMTP sin conocer nodemailer |
+| `AsistenteDisponibleGuard` | Guard (tabla por modo) | O | En la nube, 404 antes de pedir sesión |
 | `AltaPrimerUsuario` (de M2) | Strategy | O, D | M1 no sabe del modo |
 | `RepositorioConfiguracionInstalacion` (de M2) | Repository | D | M1 guarda el correo sin conocer Prisma |
 | `CifradorVariables` (de M3) | Adapter | D, L | Mismo AES-GCM que las variables; doble en pruebas |
@@ -49,7 +61,7 @@ Un paso no se marca hecho sin la respuesta de la API (regla de `Pasos`). El esta
 | `CorreoConRegistro` (de M10) | Decorator | O | Envuelve al nuevo adaptador sin cambiar |
 | Asistente (web) | State | S | Pasos con transiciones explícitas |
 
-Cambios de clases y puertos: `PrimeraConfiguracionService`, `InstalacionController`, `CorreoSegunInstalacion` → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
+Cambios de clases y puertos: `PrimeraConfiguracionService`, `PrimeraConfiguracionController`, `AsistenteDisponibleGuard`, `LimiteIntentos`, `CorreoSegunInstalacion`, `PruebaCorreoPuerto`, `PruebaCorreoSmtp` → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
 
 ## Risks / Trade-offs
 

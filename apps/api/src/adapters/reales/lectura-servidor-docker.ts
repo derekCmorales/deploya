@@ -1,4 +1,4 @@
-import { statfs } from "node:fs/promises";
+import { mkdir, statfs } from "node:fs/promises";
 import { freemem, totalmem } from "node:os";
 import type Docker from "dockerode";
 import { LecturaServidorPuerto, type ReporteServidor } from "../../modules/administracion/instalacion/puertos/reporte-servidor.puerto";
@@ -14,6 +14,7 @@ const redondearGb = (bytes: number) => Math.round((bytes / BYTES_POR_GB) * DECIM
 /**
  * Solo en el trabajador (ADR 0002): versión de Docker y contenedores de deploya en marcha, disco
  * del directorio de trabajo y memoria del servidor. Si Docker no responde, lo dice sin lanzar.
+ * El directorio lo crea el primer clon; en una instalación nueva se crea aquí para poder medirlo.
  */
 export class LecturaServidorDocker extends LecturaServidorPuerto {
   constructor(
@@ -25,13 +26,18 @@ export class LecturaServidorDocker extends LecturaServidorPuerto {
   }
 
   async medir(): Promise<Omit<ReporteServidor, "tomado">> {
-    const [docker, disco] = await Promise.all([this.leerDocker(), statfs(this.directorio)]);
+    const [docker, disco] = await Promise.all([this.leerDocker(), this.leerDisco()]);
     const totalBytes = disco.blocks * disco.bsize;
     return {
       ...docker,
       disco: { usadoGb: redondearGb(totalBytes - disco.bavail * disco.bsize), totalGb: redondearGb(totalBytes) },
       memoria: { libreMb: Math.round(freemem() / BYTES_POR_MB), totalMb: Math.round(totalmem() / BYTES_POR_MB) },
     };
+  }
+
+  private async leerDisco() {
+    await mkdir(this.directorio, { recursive: true });
+    return statfs(this.directorio);
   }
 
   private async leerDocker(): Promise<Pick<ReporteServidor, "docker" | "errorDocker">> {

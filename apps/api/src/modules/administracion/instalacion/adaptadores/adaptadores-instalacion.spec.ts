@@ -127,4 +127,20 @@ describe("SP-18 · adaptadores de Admin · Instalación", () => {
     expect(medido.disco.totalGb).toBeGreaterThan(0);
     expect(sinDocker).toMatchObject({ docker: null, errorDocker: "connect ENOENT" });
   });
+
+  it("Estado en una instalación nueva: LecturaServidorDocker crea el directorio de trabajo y mide el disco", async () => {
+    const raiz = await mkdtemp(join(tmpdir(), "deploya-trabajo-"));
+    const sano = {
+      version: jest.fn().mockResolvedValue({ Version: "27.3.1" }),
+      listContainers: jest.fn().mockResolvedValue([]),
+    } as unknown as Docker;
+    try {
+      const medido = await new LecturaServidorDocker(sano, join(raiz, "deploya"), "deploya").medir();
+
+      expect(medido.docker).toEqual({ version: "27.3.1", contenedores: 0 });
+      expect(medido.disco.totalGb).toBeGreaterThan(0);
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
 });

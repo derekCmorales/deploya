@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useResumen } from "@/hooks/use-resumen";
 import { useTiempos } from "@/hooks/use-tiempos";
 import { esFalloDeConexion } from "@/lib/reintento";
-import { consultaTiempos, indicadoresTiempos, type IndicadoresTiempos } from "@/lib/tiempos";
+import { consultaTiempos, indicadoresTiempos, subtituloTiempos, type IndicadoresTiempos } from "@/lib/tiempos";
 
 /**
  * 14c · Tiempo por etapa: la tarjeta que va encima del historial. Los tiempos salen de
@@ -84,13 +84,14 @@ export function TarjetaTiempos({ proyectoId }: { proyectoId: string }) {
       <Card>
         <CardHeader className="flex-col items-start gap-1">
           <CardTitle>Tiempo por etapa</CardTitle>
-          <CardDescription>Últimos 14 despliegues de {nombre}</CardDescription>
+          <CardDescription>{subtituloTiempos(tiempos.datos.despliegues.length, nombre)}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-5">
           <Datos indicadores={indicadores} />
           <GraficaEtapas
             despliegues={tiempos.datos.despliegues}
             numeroActivo={resumen.datos.activo?.numero ?? null}
+            medianaMs={tiempos.datos.resumen.medianaMs}
           />
         </CardContent>
       </Card>

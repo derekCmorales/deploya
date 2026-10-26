@@ -1900,7 +1900,8 @@ classDiagram
         <<abstract · Strategy SP-06>>
         +configurada() boolean
         +validarCodigo(codigo) void
-        +consumirCodigo() void
+        +consumirCodigo(codigo) CodigoConfiguracion
+        +devolverCodigo(codigo) void
     }
     class ComoCliente
     class ConCodigoDeConfiguracion
@@ -1908,7 +1909,8 @@ classDiagram
         <<abstract · Repository>>
         +limites() LimitesInstalacion
         +codigo() CodigoConfiguracion
-        +borrarCodigo() void
+        +borrarCodigoSiEs(hashCodigo) boolean
+        +restaurarCodigo(codigo) void
         +hayAdministrador() boolean
         +politicaRegistro() PoliticaRegistro
         +guardarPoliticaRegistro(politica) void
@@ -2152,6 +2154,27 @@ classDiagram
     }
     class CorreoConRegistro {
         <<Decorator>>
+    }
+    class CorreoSegunInstalacion {
+        <<Proxy>>
+        +enviar(destinatario, plantilla, datos) void
+    }
+    class PruebaCorreoPuerto {
+        <<abstract>>
+        +probar(smtp, destinatario, enlace) void
+    }
+    class PruebaCorreoSmtp
+    class PrimeraConfiguracionService {
+        +validarCodigo(codigo, origen) void
+        +crearAdministrador(solicitud, origen) SesionIniciada
+        +probarCorreo(cuerpo, destinatario) PruebaEntregada
+        +guardarCorreo(cuerpo) void
+    }
+    class PrimeraConfiguracionController
+    class AsistenteDisponibleGuard
+    class LimiteIntentos {
+        +espera(origen, ahora) number
+        +registrarFallo(origen, ahora) void
     }
     class SoloAutoalojadaGuard
     class InstalacionAdminController
@@ -2849,6 +2872,7 @@ classDiagram
     ComprobacionDisco --> ReporteServidorPuerto
     ComprobacionCertificado --> CertificadoPuerto
     ComprobacionCorreo --> RegistroEnviosCorreo
+    ComprobacionCorreo --> RepositorioConfiguracionInstalacion
     PoliticaRegistroPuerto <|-- RegistroAbierto
     PoliticaRegistroPuerto <|-- RegistroDeInstalacion
     RegistroDeInstalacion --> RepositorioInvitaciones
@@ -2857,6 +2881,19 @@ classDiagram
     TareaReporteServidor --> ReporteServidorPuerto : cada 10 min
     CorreoPuerto <|-- CorreoConRegistro
     CorreoConRegistro --> RegistroEnviosCorreo
+    CorreoPuerto <|-- CorreoSegunInstalacion
+    CorreoConRegistro --> CorreoSegunInstalacion : autoalojado
+    CorreoSegunInstalacion --> RepositorioConfiguracionInstalacion : correo() en cada envío
+    CorreoSegunInstalacion --> CifradorVariables : descifra
+    PruebaCorreoPuerto <|-- PruebaCorreoSmtp
+    PrimeraConfiguracionController --> PrimeraConfiguracionService
+    PrimeraConfiguracionController ..> AsistenteDisponibleGuard
+    PrimeraConfiguracionService --> AltaPrimerUsuario
+    PrimeraConfiguracionService --> SesionService : sesión del administrador
+    PrimeraConfiguracionService --> RepositorioConfiguracionInstalacion : guardarCorreo
+    PrimeraConfiguracionService --> CifradorVariables : cifra
+    PrimeraConfiguracionService --> PruebaCorreoPuerto
+    PrimeraConfiguracionService --> LimiteIntentos
     ProyectosService --> ProveedorFuente
     ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos

@@ -1,6 +1,6 @@
 # Contrato · Modo de instalación y autoalojado (M2, M9 → M1, scripts)
 
-Versión 1.7 · 2026-10-25 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.9 · 2026-10-26 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Variables de entorno
 
@@ -30,16 +30,20 @@ Cada módulo registra la implementación según `MODO_INSTALACION` en su `*.modu
 
 **Sin límite (SP-06).** En autoalojado `cuotaDe` devuelve `construccionesMes` sin límite y, si `proyectosPorUsuario` es nulo, `maxProyectos` sin límite (`Infinity` en la API). En JSON llegan como `null`: `GET /proyectos` (`maximo`) y `GET /observabilidad/consumo` (`limite`) dicen «sin límite» con `null`; la web debe ocultar el medidor en ese caso (pendiente en 10, de Eduardo).
 
-**Primer administrador (SP-06 → SP-17).** `SuscripcionesModule` exporta `AltaPrimerUsuario`: `validarCodigo(codigo)` (404 `PrimeraConfiguracionNoDisponible` · 401 `CodigoInvalido` · 410 `CodigoVencido`) y `consumirCodigo()` (borra el hash; llamarlo al crear el administrador). El asistente de M1 los usa en `POST /instalacion/codigo` y `/administrador`.
+**Primer administrador (SP-06 → SP-17).** `SuscripcionesModule` exporta `AltaPrimerUsuario`: `validarCodigo(codigo)` (404 `PrimeraConfiguracionNoDisponible` · 401 `CodigoInvalido` · 410 `CodigoVencido`), `consumirCodigo(codigo)` (valida y borra el hash en una sola escritura; devuelve lo borrado) y `devolverCodigo(consumido)` (compensación si crear la cuenta falla). El asistente de M1 los usa en `POST /instalacion/codigo` y `/administrador`: los dos llaman a `validarCodigo` (v1.8).
 
 ## Primera configuración (asistente 31)
 
 ```http
 POST /instalacion/codigo         { codigo }              → 204 | 401 CodigoInvalido | 410 CodigoVencido
-POST /instalacion/administrador  { correo, contrasena }   → 201 + Set-Cookie (cuenta Administrador verificada, sesión iniciada; borra hashCodigo)
+POST /instalacion/administrador  { codigo, correo, contrasena } → 201 + Set-Cookie (cuenta Administrador verificada, sesión iniciada; borra hashCodigo) | 401 CodigoInvalido | 410 CodigoVencido
 POST /instalacion/correo/prueba  { smtp }                 → { entregado: true, ms } | 502 { error }   // del servidor SMTP · sesión de administrador
 PATCH /instalacion/correo        { smtp } | { sinCorreo: true }                                         // sesión de administrador
 ```
+
+**El código viaja en los dos pasos (v1.8).** Mientras no hay administrador, `/administrador` está abierto: sin el código, cualquiera podría llamarlo directo y saltarse el paso 1. Por eso vuelve a llamar a `validarCodigo(codigo)`, revisa correo y contraseña y llama a `consumirCodigo(codigo)` justo antes de crear la cuenta. `POST /instalacion/codigo` se queda para que el paso 1 avise pronto de un código malo o vencido. Los dos cuentan para el límite de 5 intentos por IP en 15 min. La web guarda el código solo en el estado del asistente (memoria), nunca en `localStorage` ni en la URL.
+
+**Un solo administrador aunque lleguen dos altas a la vez (v1.9).** `consumirCodigo` borra el hash con `UPDATE … WHERE hashCodigo = <el validado>` (`borrarCodigoSiEs`): de dos peticiones simultáneas solo una cuenta la fila y la otra recibe 404 `PrimeraConfiguracionNoDisponible`. Si crear la cuenta falla después de gastarlo, `devolverCodigo` lo restaura (solo si el instalador no dejó otro), así la instalación no queda sin forma de crear el administrador. La IP del límite es la del cliente: la API confía en un salto de proxy (`PROXIES_DE_CONFIANZA: 1` en `docker-compose.vps.yml`, Traefik); sin la variable no confía en `X-Forwarded-For`.
 
 `smtp` = `{ host, puerto, usuario, contrasena, remitente }`. La contraseña viaja en claro solo en esta petición (HTTPS) y se guarda cifrada.
 
@@ -93,6 +97,8 @@ PATCH /admin/instalacion/limites   { cpu, memoriaMb, proyectosPorUsuario: number
 
 `SaludInstalacion` (Composite) junta comprobaciones independientes: Docker, DNS comodín, certificado (`CertificadoPuerto` de M6), disco y último envío de correo. Cada una es una clase.
 
+**Correo y disco (v1.8).** `ComprobacionCorreo` lee primero `correo()`: con `sin-correo` responde `aviso` «Sin correo: no se envían avisos ni enlaces de recuperación» sin mirar el último envío (`CorreoSegunInstalacion` no manda nada, pero `CorreoConRegistro` lo anota como entregado). El trabajador crea el directorio de trabajo (`DIRECTORIO_TRABAJO`, por defecto `/tmp/deploya`) antes de medir el disco: en una instalación sin despliegues no existe y el reporte entero fallaba, Docker incluido.
+
 **Cómo se arma (SP-18).** La API no llama a Docker: el trabajador mide Docker, disco y memoria al arrancar y cada 10 min (`TareaReporteServidor` → `ReporteServidorPuerto`, Redis `instalacion:servidor:reporte`) y la API lee el último. Un reporte de más de 30 min se muestra como error. El último envío de correo lo anota `CorreoConRegistro` (Decorator de `CorreoPuerto`, M10) en `RegistroEnviosCorreo` (Redis `instalacion:correo:ultimo`). La respuesta suma `dominio` y `comprobado`; `limites` trae `capacidad` y `memoriaLibreMb` para «caben unos 3 proyectos». `respaldo` y `version` salen de los JSON de los scripts: `docker-compose.autoalojado.yml` monta `DEPLOYA_RESPALDOS` de solo lectura en `/respaldos` de la API (`DIR_RESPALDOS`).
 
 **Invitaciones.** El token viaja solo en el enlace (`URL_WEB/registro?invitacion=<token>`); la base guarda su sha256. Por eso «Copiar enlace» solo existe al crearla. Cada invitación es del correo al que se mandó.
@@ -131,3 +137,5 @@ La etapa 2 comprueba la raíz `DOMINIO_BASE` (ahí vive la web; el comodín no l
 | 1.5 | 2026-10-24 | SP-18: reporte del servidor desde el trabajador, último envío de correo, `dominio`/`comprobado`/`capacidad` en `GET /admin/instalacion`, montaje de respaldos en la API y `PoliticaRegistroPuerto` en `RegistroInstalacionModule` |
 | 1.6 | 2026-10-25 | SP-17: el correo del asistente se guarda en `ConfiguracionInstalacion` (no en el `.env`); `POST /instalacion/administrador` deja la sesión iniciada y los endpoints de correo piden sesión de administrador en lugar de 404 por haber administrador. SP-18: `PoliticaRegistroPuerto` conectado al registro de M1 |
 | 1.7 | 2026-10-25 | `VariablesModule` exporta `CifradorVariables` para la clave del SMTP (SP-17) |
+| 1.8 | 2026-10-25 | SP-17: `POST /instalacion/administrador` pide también el `codigo` y lo valida otra vez. SP-18: con «sin correo» la salud no dice que el último envío llegó; el trabajador crea su directorio antes de medir el disco |
+| 1.9 | 2026-10-26 | SP-17: `consumirCodigo(codigo)` atómico (`borrarCodigoSiEs`) y `devolverCodigo` si crear la cuenta falla; límite de intentos por la IP real detrás de Traefik (`PROXIES_DE_CONFIANZA`) |

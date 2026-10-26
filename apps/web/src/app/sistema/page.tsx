@@ -144,6 +144,9 @@ const desplieguesEtapas: TiemposDespliegue[] = [
   },
 ];
 
+/** Mediana de los Saludables sin reversión del ejemplo (#1, #2, #4 y #6); en 14c la da la API. */
+const medianaEtapas = 155000;
+
 export default function SistemaPage() {
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-8 py-10">
@@ -438,7 +441,7 @@ export default function SistemaPage() {
             <CardDescription>Una columna por despliegue; #3 falló y #5 es una reversión.</CardDescription>
           </CardHeader>
           <CardContent>
-            <GraficaEtapas despliegues={desplieguesEtapas} numeroActivo={6} />
+            <GraficaEtapas despliegues={desplieguesEtapas} numeroActivo={6} medianaMs={medianaEtapas} />
           </CardContent>
         </Card>
       </Seccion>

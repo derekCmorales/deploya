@@ -8,7 +8,7 @@ import type { EstadoDespliegue } from "./proyectos";
 export const ULTIMOS_DESPLIEGUES = 14;
 const MS_POR_SEGUNDO = 1000;
 const SEGUNDOS_POR_MINUTO = 60;
-const MS_POR_MINUTO = SEGUNDOS_POR_MINUTO * MS_POR_SEGUNDO;
+export const MS_POR_MINUTO = SEGUNDOS_POR_MINUTO * MS_POR_SEGUNDO;
 
 export const ETAPAS_TIEMPO = ["recepcion", "construccion", "ejecucion", "enrutamiento", "operacion"] as const;
 export type EtapaTiempo = (typeof ETAPAS_TIEMPO)[number];
@@ -70,18 +70,6 @@ export function duracionTotal(despliegue: Pick<TiemposDespliegue, "etapas">): nu
   return ETAPAS_TIEMPO.reduce((total, etapa) => total + despliegue.etapas[etapa], 0);
 }
 
-/** Mediana de los Saludables sin reversión; la misma regla que aplica la API. */
-export function medianaSaludables(despliegues: TiemposDespliegue[]): number {
-  const totales = despliegues
-    .filter((despliegue) => despliegue.estado === "saludable" && !despliegue.reversion)
-    .map(duracionTotal)
-    .sort((a, b) => a - b);
-  if (totales.length === 0) return 0;
-  const mitad = Math.floor(totales.length / 2);
-  if (totales.length % 2 === 1) return totales[mitad];
-  return Math.round((totales[mitad - 1] + totales[mitad]) / 2);
-}
-
 /** Los cinco tramos de la columna, en el orden del riel; un tramo omitido vale 0. */
 export function segmentosDeEtapas(despliegue: TiemposDespliegue): SegmentoEtapa[] {
   return ETAPAS_TIEMPO.map((etapa) => ({
@@ -89,6 +77,14 @@ export function segmentosDeEtapas(despliegue: TiemposDespliegue): SegmentoEtapa[
     ms: despliegue.etapas[etapa],
     fallo: despliegue.falloEn === etapa,
   }));
+}
+
+/**
+ * Los tramos que se dibujan, de abajo arriba: los que duraron algo y el del fallo, aunque
+ * haya durado 0. Una reversión no tiene Recepción ni Construcción; un Fallido termina en `falloEn`.
+ */
+export function tramosVisibles(despliegue: TiemposDespliegue): SegmentoEtapa[] {
+  return segmentosDeEtapas(despliegue).filter((tramo) => tramo.ms > 0 || tramo.fallo);
 }
 
 /** Tope del eje Y en minutos enteros, con un mínimo de 1 min para que la escala no colapse. */
@@ -115,12 +111,17 @@ export function consultaTiempos(proyectoId: string, ultimos: number = ULTIMOS_DE
   return `/proyectos/${proyectoId}/despliegues/tiempos?ultimos=${pedidos}`;
 }
 
-/** Texto del resumen accesible: cuántos despliegues, mediana y fallos. */
-export function resumenAccesible(despliegues: TiemposDespliegue[]): string {
+/** Texto del resumen accesible: cuántos despliegues, mediana (la de la API) y fallos. */
+export function resumenAccesible(despliegues: TiemposDespliegue[], medianaMs: number): string {
   const total = despliegues.length;
   const fallidos = despliegues.filter((despliegue) => despliegue.estado === "fallido").length;
   const fallos = fallidos === 1 ? "1 fallido" : `${fallidos} fallidos`;
-  return `${total} despliegues. Mediana ${formatoDuracion(medianaSaludables(despliegues))}. ${fallos} de ${total}.`;
+  return `${total} despliegues. Mediana ${formatoDuracion(medianaMs)}. ${fallos} de ${total}.`;
+}
+
+/** «Últimos 14 despliegues de api-tienda»: el número es el de despliegues que llegaron, no un fijo. */
+export function subtituloTiempos(cantidad: number, nombre: string): string {
+  return cantidad === 1 ? `Último despliegue de ${nombre}` : `Últimos ${cantidad} despliegues de ${nombre}`;
 }
 
 /** Para tablas y tooltips: un tramo en 0 se dice «omitida», no «0 s». */

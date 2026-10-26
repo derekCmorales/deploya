@@ -3,10 +3,14 @@ import assert from "node:assert";
 
 import {
   consultaTiempos,
+  duracionTotal,
   formatoDuracion,
   indicadoresTiempos,
-  medianaSaludables,
+  minutosDelEje,
   resumenAccesible,
+  subtituloTiempos,
+  textoTramo,
+  tramosVisibles,
 } from "../src/lib/tiempos.ts";
 
 const RESUMEN = {
@@ -45,22 +49,56 @@ test("indicadoresTiempos arma los cuatro textos de la cabecera", () => {
   assert.strictEqual(indicadoresTiempos({ ...RESUMEN, ultimaReversion: null }).reversion, "Sin reversiones");
 });
 
-test("medianaSaludables ignora fallidos y reversiones", () => {
-  const despliegues = [
-    despliegue(1, 10_000),
-    despliegue(2, 20_000),
-    despliegue(3, 60_000),
-    despliegue(4, 900_000, { estado: "fallido" }),
-    despliegue(5, 800_000, { reversion: true }),
-  ];
+test("Dónde falló", () => {
+  const once = despliegue(11, 0, {
+    estado: "fallido",
+    etapas: { recepcion: 4_000, construccion: 5_000, ejecucion: 0, enrutamiento: 0, operacion: 0 },
+    falloEn: "construccion",
+  });
 
-  assert.strictEqual(medianaSaludables(despliegues), 20_000);
+  const visibles = tramosVisibles(once);
+
+  assert.deepStrictEqual(
+    visibles.map((tramo) => tramo.etapa),
+    ["recepcion", "construccion"],
+  );
+  assert.strictEqual(visibles.at(-1).fallo, true);
+  assert.strictEqual(visibles[0].fallo, false);
 });
 
-test("resumenAccesible cuenta los despliegues y los fallidos", () => {
+test("Reversión", () => {
+  const siete = despliegue(7, 0, {
+    reversion: true,
+    etapas: { recepcion: 0, construccion: 0, ejecucion: 21_000, enrutamiento: 9_000, operacion: 18_000 },
+  });
+
+  const visibles = tramosVisibles(siete);
+
+  assert.deepStrictEqual(
+    visibles.map((tramo) => tramo.etapa),
+    ["ejecucion", "enrutamiento", "operacion"],
+  );
+  assert.strictEqual(duracionTotal(siete), 48_000);
+  assert.strictEqual(textoTramo(siete.etapas.construccion), "omitida");
+  assert.strictEqual(textoTramo(siete.etapas.ejecucion), "21 s");
+});
+
+test("minutosDelEje redondea hacia arriba y nunca baja de 1 min", () => {
+  assert.strictEqual(minutosDelEje([despliegue(1, 164_000), despliegue(2, 20_000)]), 3);
+  assert.strictEqual(minutosDelEje([despliegue(1, 0)]), 1);
+});
+
+test("resumenAccesible usa la mediana de la API y cuenta los fallidos", () => {
   const despliegues = [despliegue(1, 20_000), despliegue(2, 60_000), despliegue(3, 120_000, { estado: "fallido" })];
 
-  assert.strictEqual(resumenAccesible(despliegues), "3 despliegues. Mediana 40 s. 1 fallido de 3.");
+  assert.strictEqual(resumenAccesible(despliegues, 40_000), "3 despliegues. Mediana 40 s. 1 fallido de 3.");
+  assert.strictEqual(resumenAccesible(despliegues.slice(0, 2), 40_000), "2 despliegues. Mediana 40 s. 0 fallidos de 2.");
+});
+
+test("subtituloTiempos dice cuántos despliegues llegaron", () => {
+  assert.strictEqual(subtituloTiempos(14, "api-tienda"), "Últimos 14 despliegues de api-tienda");
+  assert.strictEqual(subtituloTiempos(5, "api-tienda"), "Últimos 5 despliegues de api-tienda");
+  assert.strictEqual(subtituloTiempos(1, "api-tienda"), "Último despliegue de api-tienda");
 });
 
 test("consultaTiempos pide como máximo los últimos 14", () => {

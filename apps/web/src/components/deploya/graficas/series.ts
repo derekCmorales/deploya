@@ -79,6 +79,11 @@ export function indiceMasCercano(muestras: PuntoGrafica[], fraccion: number, ini
   return mejor;
 }
 
+/** Las teclas que recorren una gráfica enfocada: flechas, `Home`, `End` y `Escape`. */
+export function esTeclaDeNavegacion(tecla: string): boolean {
+  return tecla === "ArrowRight" || tecla === "ArrowLeft" || tecla === "Home" || tecla === "End" || tecla === "Escape";
+}
+
 /**
  * Teclado sobre la gráfica enfocada: las flechas se detienen en los extremos,
  * `Home`/`End` saltan al primero/último y `Escape` quita el punto activo.

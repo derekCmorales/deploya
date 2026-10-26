@@ -19,7 +19,7 @@ import { ChipEvento } from "./chip-evento";
 import { Ejes } from "./ejes";
 import { escalaLineal, ticks } from "./escalas";
 import { PuntoVivoSvg } from "./punto-vivo-svg";
-import { eventoEnX, indiceAlMover, indiceMasCercano, intervaloMaximo, puntosDeSerie } from "./series";
+import { esTeclaDeNavegacion, eventoEnX, indiceAlMover, indiceMasCercano, intervaloMaximo, puntosDeSerie } from "./series";
 import { TooltipGrafica } from "./tooltip";
 
 export interface GraficaUsoProps {
@@ -44,10 +44,6 @@ const MARGEN_NORMAL = { top: 16, right: 52, bottom: 26, left: 44 };
 const MARGEN_COMPACTA = { top: 8, right: 8, bottom: 8, left: 8 };
 const DIVISIONES_NORMAL = 4;
 const DIVISIONES_COMPACTA = 2;
-
-function esTeclaDeNavegacion(tecla: string): boolean {
-  return tecla === "ArrowRight" || tecla === "ArrowLeft" || tecla === "Home" || tecla === "End" || tecla === "Escape";
-}
 
 /** Gráfica de un recurso contra el límite del plan (memoria o CPU), en SVG a mano. */
 export function GraficaUso({

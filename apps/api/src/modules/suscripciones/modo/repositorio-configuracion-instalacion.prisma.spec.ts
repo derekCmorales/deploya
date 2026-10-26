@@ -29,16 +29,28 @@ describe("RepositorioConfiguracionInstalacionPrisma", () => {
     await expect(repositorio({ configuracionInstalacion: { findUnique: sinHash } }).codigo()).resolves.toBeNull();
   });
 
-  it("borrar el código y contar administradores", async () => {
-    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+  it("borrar el código solo si sigue siendo el mismo, y contar administradores", async () => {
+    const updateMany = jest.fn().mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
     const count = jest.fn().mockResolvedValue(1);
     const repo = repositorio({ configuracionInstalacion: { updateMany }, usuario: { count } });
 
-    await repo.borrarCodigo();
+    await expect(repo.borrarCodigoSiEs("h")).resolves.toBe(true);
+    await expect(repo.borrarCodigoSiEs("h")).resolves.toBe(false);
 
-    expect(updateMany).toHaveBeenCalledWith({ where: { id: "instalacion" }, data: { hashCodigo: null, codigoVence: null } });
+    expect(updateMany).toHaveBeenCalledWith({ where: { id: "instalacion", hashCodigo: "h" }, data: { hashCodigo: null, codigoVence: null } });
     await expect(repo.hayAdministrador()).resolves.toBe(true);
     expect(count).toHaveBeenCalledWith({ where: { rol: "administrador" } });
+  });
+});
+
+describe("RepositorioConfiguracionInstalacionPrisma · SP-17", () => {
+  it("restaurar el código solo si no hay otro", async () => {
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const codigo = { hashCodigo: "h", codigoVence: new Date("2026-10-24T03:30:00.000Z") };
+
+    await repositorio({ configuracionInstalacion: { updateMany } }).restaurarCodigo(codigo);
+
+    expect(updateMany).toHaveBeenCalledWith({ where: { id: "instalacion", hashCodigo: null }, data: codigo });
   });
 });
 

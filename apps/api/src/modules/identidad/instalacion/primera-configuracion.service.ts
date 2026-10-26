@@ -4,9 +4,10 @@ import { CorreoNoEnviado, PruebaCorreoPuerto } from "../../notificaciones";
 import { CifradorVariables } from "../../proyectos/puertos/cifrador-variables.puerto";
 import { CodigoInvalido, CodigoVencido } from "../../suscripciones/dominio/errores";
 import { AltaPrimerUsuario } from "../../suscripciones/modo/alta-primer-usuario.puerto";
+import type { CodigoConfiguracion } from "../../suscripciones/modo/configuracion-instalacion";
 import { RepositorioConfiguracionInstalacion } from "../../suscripciones/modo/repositorio-configuracion-instalacion.puerto";
 import { CONFIGURACION_IDENTIDAD, type ConfiguracionIdentidad } from "../configuracion-identidad";
-import { nombreDesdeCorreo, normalizarCorreo } from "../dominio/cuenta";
+import { nombreDesdeCorreo, normalizarCorreo, type NuevoUsuario, type Usuario } from "../dominio/cuenta";
 import { ContrasenaDebil, CorreoYaRegistrado } from "../dominio/errores";
 import { NombreCuenta } from "../dominio/nombre-cuenta";
 import { PoliticaContrasena } from "../dominio/politica-contrasena";
@@ -72,7 +73,8 @@ export class PrimeraConfiguracionService {
   /**
    * Paso 2. Vuelve a validar el código (nadie salta el paso 1) y revisa la cuenta antes de
    * consumirlo: un correo o una contraseña que no sirven no gastan el código. `consumirCodigo`
-   * va antes de crear la cuenta porque con un administrador ya creado M2 responde 404.
+   * va antes de crear la cuenta (con un administrador ya creado M2 responde 404) y es atómico:
+   * de dos altas a la vez solo una pasa. Si crear la cuenta falla, el código se devuelve.
    */
   async crearAdministrador(solicitud: SolicitudAdministrador, origen: string): Promise<SesionIniciada> {
     await this.validarCodigo(solicitud.codigo, origen);
@@ -80,18 +82,29 @@ export class PrimeraConfiguracionService {
     const politica = this.politica.validar(solicitud.contrasena);
     if (!politica.valida) throw new ContrasenaDebil(politica.incumplidas);
     if (await this.usuarios.porCorreo(correo)) throw new CorreoYaRegistrado(correo);
+    const hashContrasena = await this.hash.calcular(solicitud.contrasena);
 
-    await this.alta.consumirCodigo();
-    const usuario = await this.usuarios.crear({
+    const consumido = await this.alta.consumirCodigo(solicitud.codigo);
+    const usuario = await this.crearConCompensacion(consumido, {
       correo,
       nombre: NombreCuenta.de(nombreDesdeCorreo(correo)).valor,
-      hashContrasena: await this.hash.calcular(solicitud.contrasena),
+      hashContrasena,
       rol: "administrador",
       estadoCuenta: "activa",
       creado: this.reloj.ahora(),
     });
     await this.sandbox.asignarSandbox(usuario.id);
     return this.sesiones.iniciar({ correo, contrasena: solicitud.contrasena, agenteUsuario: solicitud.agenteUsuario });
+  }
+
+  /** Sin la cuenta, el código gastado dejaría la instalación sin forma de crear el administrador. */
+  private async crearConCompensacion(consumido: CodigoConfiguracion, datos: NuevoUsuario): Promise<Usuario> {
+    try {
+      return await this.usuarios.crear(datos);
+    } catch (error) {
+      await this.alta.devolverCodigo(consumido);
+      throw error;
+    }
   }
 
   /** Paso 4 · «Enviar correo de prueba» al administrador por el SMTP recibido, sin guardarlo. */

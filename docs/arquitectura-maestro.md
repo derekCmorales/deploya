@@ -1900,7 +1900,8 @@ classDiagram
         <<abstract · Strategy SP-06>>
         +configurada() boolean
         +validarCodigo(codigo) void
-        +consumirCodigo() void
+        +consumirCodigo(codigo) CodigoConfiguracion
+        +devolverCodigo(codigo) void
     }
     class ComoCliente
     class ConCodigoDeConfiguracion
@@ -1908,7 +1909,8 @@ classDiagram
         <<abstract · Repository>>
         +limites() LimitesInstalacion
         +codigo() CodigoConfiguracion
-        +borrarCodigo() void
+        +borrarCodigoSiEs(hashCodigo) boolean
+        +restaurarCodigo(codigo) void
         +hayAdministrador() boolean
         +politicaRegistro() PoliticaRegistro
         +guardarPoliticaRegistro(politica) void

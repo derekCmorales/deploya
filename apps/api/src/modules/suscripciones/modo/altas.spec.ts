@@ -26,7 +26,7 @@ describe("SP-06 · AltaPrimerUsuario", () => {
     const { alta, configuracion } = armar();
 
     await expect(alta.validarCodigo(` ${CODIGO} `)).resolves.toBeUndefined();
-    await alta.consumirCodigo();
+    await alta.consumirCodigo(CODIGO);
 
     await expect(alta.validarCodigo(CODIGO)).rejects.toBeInstanceOf(CodigoInvalido);
     expect(configuracion.codigoGuardado).toBeNull();
@@ -48,7 +48,7 @@ describe("SP-06 · AltaPrimerUsuario", () => {
 
     await expect(alta.configurada()).resolves.toBe(true);
     await expect(alta.validarCodigo(CODIGO)).rejects.toBeInstanceOf(PrimeraConfiguracionNoDisponible);
-    await expect(alta.consumirCodigo()).rejects.toBeInstanceOf(PrimeraConfiguracionNoDisponible);
+    await expect(alta.consumirCodigo(CODIGO)).rejects.toBeInstanceOf(PrimeraConfiguracionNoDisponible);
     expect(ESTADO_HTTP_POR_CODIGO.PrimeraConfiguracionNoDisponible).toBe(404);
   });
 
@@ -58,6 +58,37 @@ describe("SP-06 · AltaPrimerUsuario", () => {
     await expect(new InstalacionController("nube", alta).estado()).resolves.toEqual({ modo: "nube", configurada: true });
     await expect(alta.validarCodigo()).rejects.toBeInstanceOf(PrimeraConfiguracionNoDisponible);
     await expect(alta.consumirCodigo()).rejects.toBeInstanceOf(PrimeraConfiguracionNoDisponible);
+    await expect(alta.devolverCodigo()).rejects.toBeInstanceOf(PrimeraConfiguracionNoDisponible);
+  });
+
+  it("consumir valida el código: equivocado no gasta nada", async () => {
+    const { alta, configuracion } = armar();
+
+    await expect(alta.consumirCodigo("DPY-0000-0000")).rejects.toBeInstanceOf(CodigoInvalido);
+    expect(configuracion.codigoGuardado).not.toBeNull();
+  });
+
+  it("Dos administradores a la vez: solo una alta gasta el código; la otra, 404", async () => {
+    const { alta } = armar();
+
+    const resultados = await Promise.allSettled([alta.consumirCodigo(CODIGO), alta.consumirCodigo(CODIGO)]);
+
+    expect(resultados.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    const perdedora = resultados.find((r) => r.status === "rejected");
+    expect(perdedora?.status === "rejected" && perdedora.reason).toBeInstanceOf(PrimeraConfiguracionNoDisponible);
+  });
+
+  it("devolver el código lo deja servir otra vez, sin pisar uno nuevo del instalador", async () => {
+    const { alta, configuracion } = armar();
+    const gastado = await alta.consumirCodigo(CODIGO);
+
+    await alta.devolverCodigo(gastado);
+    await expect(alta.validarCodigo(CODIGO)).resolves.toBeUndefined();
+
+    const nuevo = { hashCodigo: hashDeCodigo("DPY-NUEV-OCOD"), codigoVence: AHORA };
+    configuracion.codigoGuardado = nuevo;
+    await alta.devolverCodigo(gastado);
+    expect(configuracion.codigoGuardado).toBe(nuevo);
   });
 
   it("el hash es el sha256 hex del texto exacto, como el instalador", () => {

@@ -13,7 +13,7 @@ import { AsistenteDisponibleGuard } from "./asistente-disponible.guard";
 import { ErroresInstalacionFilter } from "./errores-instalacion.filter";
 import { PrimeraConfiguracionService, type PruebaEntregada } from "./primera-configuracion.service";
 
-/** Sin `trust proxy`, detrás de Traefik todos comparten origen: en una instalación nueva solo entra quien instaló. */
+/** La IP del cliente: detrás de Traefik la da `trust proxy` (`PROXIES_DE_CONFIANZA` en docker-compose.vps.yml). */
 function origenDe(solicitud: Request): string {
   return solicitud.ip ?? "desconocido";
 }

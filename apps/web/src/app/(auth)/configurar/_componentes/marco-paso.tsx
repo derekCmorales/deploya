@@ -16,9 +16,9 @@ export function MarcoPaso({
   children: ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1.5">
-        <h2 className="text-[22px] leading-[28px] font-semibold tracking-[-0.02em] text-balance">{titulo}</h2>
+    <section className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-[28px] leading-[34px] font-semibold tracking-[-0.032em] text-balance">{titulo}</h1>
         {descripcion ? <p className="text-sm text-muted-foreground">{descripcion}</p> : null}
       </div>
       {children}

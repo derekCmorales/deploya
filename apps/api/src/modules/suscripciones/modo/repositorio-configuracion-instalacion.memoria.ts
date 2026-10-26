@@ -25,8 +25,14 @@ export class RepositorioConfiguracionInstalacionMemoria extends RepositorioConfi
     return this.codigoGuardado;
   }
 
-  async borrarCodigo(): Promise<void> {
+  async borrarCodigoSiEs(hashCodigo: string): Promise<boolean> {
+    if (this.codigoGuardado?.hashCodigo !== hashCodigo) return false;
     this.codigoGuardado = null;
+    return true;
+  }
+
+  async restaurarCodigo(codigo: CodigoConfiguracion): Promise<void> {
+    this.codigoGuardado ??= codigo;
   }
 
   async hayAdministrador(): Promise<boolean> {

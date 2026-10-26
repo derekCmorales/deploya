@@ -11,7 +11,7 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 1. API (M1)
 
-- [x] 1.1 `PrimeraConfiguracionService` + `PrimeraConfiguracionController` (`identidad/instalacion/`; design.md § 7): `POST /instalacion/codigo` y `/administrador` (`{ codigo, correo, contrasena }`: vuelve a `validarCodigo`, crea Administrador activo, `consumirCodigo`, `SesionService.iniciar` y `Set-Cookie`); 404 con administrador o en nube
+- [x] 1.1 `PrimeraConfiguracionService` + `PrimeraConfiguracionController` (`identidad/instalacion/`; design.md § 7): `POST /instalacion/codigo` y `/administrador` (`{ codigo, correo, contrasena }`: vuelve a `validarCodigo`, `consumirCodigo(codigo)` atómico, crea Administrador activo —si falla, `devolverCodigo`—, `SesionService.iniciar` y `Set-Cookie`); 404 con administrador o en nube
 - [x] 1.2 `POST /instalacion/correo/prueba` (transporte con los datos recibidos, sin guardarlos; 502 con el error del SMTP) y `PATCH /instalacion/correo` (cifra con `CifradorVariables`, `guardarCorreo`); los dos con `SesionGuard` + `RolGuard("administrador")`
 - [x] 1.3 Límite de 5 intentos de código por IP en 15 min (cuentan `/codigo` y `/administrador`)
 - [x] 1.4 Pruebas: «Código válido», «Código vencido», «Código usado», «Sesión al crear el administrador», «Administrador sin código», «Correo de prueba», «SMTP rechazado», «Correo guardado sin editar archivos», «Ya configurada»

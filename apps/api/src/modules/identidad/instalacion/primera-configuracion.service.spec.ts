@@ -205,6 +205,29 @@ describe("SP-17 · Primera configuración (31)", () => {
 });
 
 describe("SP-17 · Reglas del asistente", () => {
+  it("Dos administradores a la vez: solo uno se crea; la otra alta, 404", async () => {
+    const { crear, usuarios, sandbox } = armar();
+
+    const resultados = await Promise.allSettled([crear(), crear()]);
+
+    expect(resultados.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    const perdedora = resultados.find((r) => r.status === "rejected");
+    expect(perdedora?.status === "rejected" && perdedora.reason).toBeInstanceOf(PrimeraConfiguracionNoDisponible);
+    expect(sandbox.asignados).toEqual([(await usuarios.porCorreo(ADMIN))?.id]);
+  });
+
+  it("si crear la cuenta falla, el código se devuelve y vuelve a servir", async () => {
+    const { servicio, crear, usuarios, configuracion } = armar();
+    const guardado = configuracion.codigoGuardado;
+    jest.spyOn(usuarios, "crear").mockRejectedValueOnce(new Error("la base no respondió"));
+
+    await expect(crear()).rejects.toThrow("la base no respondió");
+
+    expect(configuracion.codigoGuardado).toEqual(guardado);
+    await expect(servicio.validarCodigo(CODIGO, ORIGEN)).resolves.toBeUndefined();
+    await expect(crear()).resolves.toMatchObject({ usuario: { correo: ADMIN } });
+  });
+
   it("una contraseña débil no gasta el código ni crea la cuenta", async () => {
     const { crear, configuracion, usuarios } = armar();
 

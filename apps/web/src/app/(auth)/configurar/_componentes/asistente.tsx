@@ -68,10 +68,10 @@ function Recorrido({ inicial }: { inicial: Paso }) {
 
   return (
     // Artboard 31: panel lateral (título, pasos y datos del servidor) y el paso a la derecha.
-    <div className="grid min-h-full grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)]">
-      <aside className="flex flex-col gap-6 border-b border-border bg-sunken px-6 py-8 lg:border-r lg:border-b-0">
+    <div className="grid min-h-full grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <aside className="flex flex-col gap-6 border-b border-border bg-sunken px-6 py-8 lg:border-r lg:border-b-0 lg:px-10 lg:py-12">
         <header className="flex flex-col gap-0.5 px-3">
-          <h1 className="text-[13px] font-medium">Configura tu instalación</h1>
+          <p className="text-[13px] leading-[18px] font-medium text-muted-foreground">Configura tu instalación</p>
           <p className="text-xs text-muted-foreground">{encabezadoPaso(paso)}</p>
         </header>
         <Pasos pasos={pasosVisibles(paso, { correoAdministrador, dominio })} actual={paso} />
@@ -83,8 +83,8 @@ function Recorrido({ inicial }: { inicial: Paso }) {
           </dl>
         ) : null}
       </aside>
-      <div className="min-w-0 px-6 py-10 lg:px-12">
-        <div className="max-w-[540px]">
+      <div className="min-w-0 px-6 py-10 lg:px-16 lg:py-12">
+        <div className="max-w-[720px]">
           {paso === 0 ? (
             <PasoCodigo
               alValidar={(valido) => {

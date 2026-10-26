@@ -12,7 +12,7 @@ export function hashDeCodigo(codigo: string): string {
 }
 
 /** Regla pura del código de configuración: mismo hash y sin vencer. */
-export function verificarCodigo(guardado: CodigoConfiguracion | null, hashDado: string, ahora: Date): void {
+export function verificarCodigo(guardado: CodigoConfiguracion | null, hashDado: string, ahora: Date): asserts guardado is CodigoConfiguracion {
   if (!guardado) throw new CodigoInvalido();
   const esperado = Buffer.from(guardado.hashCodigo);
   const dado = Buffer.from(hashDado);
@@ -31,7 +31,11 @@ export class ComoCliente extends AltaPrimerUsuario {
     throw new PrimeraConfiguracionNoDisponible();
   }
 
-  async consumirCodigo(): Promise<void> {
+  async consumirCodigo(): Promise<CodigoConfiguracion> {
+    throw new PrimeraConfiguracionNoDisponible();
+  }
+
+  async devolverCodigo(): Promise<void> {
     throw new PrimeraConfiguracionNoDisponible();
   }
 }
@@ -58,9 +62,17 @@ export class ConCodigoDeConfiguracion extends AltaPrimerUsuario {
     verificarCodigo(await this.configuracion.codigo(), hashDeCodigo(codigo.trim()), this.reloj.ahora());
   }
 
-  async consumirCodigo(): Promise<void> {
+  async consumirCodigo(codigo: string): Promise<CodigoConfiguracion> {
     await this.exigirSinAdministrador();
-    await this.configuracion.borrarCodigo();
+    const guardado = await this.configuracion.codigo();
+    verificarCodigo(guardado, hashDeCodigo(codigo.trim()), this.reloj.ahora());
+    // Perder la carrera es lo mismo que llegar tarde: la otra petición está creando el administrador.
+    if (!(await this.configuracion.borrarCodigoSiEs(guardado.hashCodigo))) throw new PrimeraConfiguracionNoDisponible();
+    return guardado;
+  }
+
+  async devolverCodigo(codigo: CodigoConfiguracion): Promise<void> {
+    await this.configuracion.restaurarCodigo(codigo);
   }
 
   private async exigirSinAdministrador(): Promise<void> {

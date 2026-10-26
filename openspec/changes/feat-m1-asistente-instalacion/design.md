@@ -39,7 +39,7 @@ Un paso no se marca hecho sin la respuesta de la API (regla de `Pasos`). El esta
 
 ### 7. Detalles de la implementación
 
-- **Orden al crear el administrador.** `crearAdministrador` vuelve a validar el código, revisa correo, contraseña y que el correo no exista, y recién entonces llama a `consumirCodigo` y crea la cuenta. Un dato mal escrito no gasta el código. `consumirCodigo` va antes de `crear` porque, con un administrador ya creado, M2 responde 404.
+- **Orden al crear el administrador.** `crearAdministrador` vuelve a validar el código, revisa correo, contraseña y que el correo no exista, y recién entonces llama a `consumirCodigo` y crea la cuenta. Un dato mal escrito no gasta el código. `consumirCodigo` va antes de `crear` porque, con un administrador ya creado, M2 responde 404. Es atómico (`borrarCodigoSiEs`: `UPDATE … WHERE hashCodigo = <el validado>`), así de dos altas a la vez solo una pasa; si `crear` falla, `devolverCodigo` lo restaura (compensación, contrato v1.9).
 - **Sin código es código inválido.** Si falta `codigo` en `/codigo` o `/administrador`, el controlador lo pasa vacío: responde 401 `CodigoInvalido` (escenario «Administrador sin código») y cuenta para el límite, en vez del 400 de un campo faltante.
 - **Límite de intentos.** `LimiteIntentos` cuenta solo los códigos fallidos (`CodigoInvalido`, `CodigoVencido`) por `solicitud.ip`, en memoria del proceso. La API no tiene `trust proxy`: detrás de Traefik todos comparten origen, lo que en una instalación nueva solo endurece el límite.
 - **Nombre del controlador.** `PrimeraConfiguracionController` (en `identidad/instalacion/`) para no chocar con el `InstalacionController` de M2, que sirve `GET /instalacion/modo` bajo el mismo prefijo.

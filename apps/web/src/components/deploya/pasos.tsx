@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 /**
  * Pasos de un asistente (Nuevo proyecto: Repositorio · Variables · Revisar).
  * `actual` es 0-based. Los pasos previos se marcan completos, salvo los deshabilitados.
+ * Un paso hecho va en tinta (canvas 07, 11c y 31): `ok` es solo Saludable y Activa, `signal` solo el paso en curso.
  */
 function Pasos({
   pasos,
@@ -33,7 +34,7 @@ function Pasos({
             <span
               className={cn(
                 "grid size-6 shrink-0 place-items-center rounded-full border font-mono text-[11px]",
-                hecho && "border-ok bg-ok/10 text-ok",
+                hecho && "border-foreground bg-foreground text-background",
                 activo && "border-signal text-signal",
                 !hecho && !activo && "border-border-strong text-muted-foreground",
               )}

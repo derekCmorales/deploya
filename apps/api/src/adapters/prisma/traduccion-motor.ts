@@ -43,8 +43,6 @@ export function despliegueDesdePrisma(fila: DespliegueConEtapas): Despliegue {
     memoriaMb: fila.memoriaMb,
     codigoSalida: fila.codigoSalida,
     motivoFallo: fila.motivoFallo,
-    fecha: fila.creado,
-    creadoEn: fila.creado,
     creado: fila.creado,
     terminado: fila.terminado,
     etapas: etapas.map((e) => ({

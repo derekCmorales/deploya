@@ -84,3 +84,31 @@ describe("Consumo del período (M7-03)", () => {
     await expect(servicio.de(USUARIO)).rejects.toThrow(SuscripcionNoEncontrada);
   });
 });
+
+describe("Ritmo diario de construcciones (SP-15)", () => {
+  it("la reversión no cuenta", async () => {
+    const { servicio, desplegar } = escenario("2026-10-14T12:00:00.000Z");
+    await desplegar("2026-10-02T10:00:00.000Z");
+    await desplegar("2026-10-03T10:00:00.000Z", 1, "reversion");
+
+    const diario = await servicio.diario(USUARIO);
+
+    expect(diario.desde).toBe("2026-10-01T00:00:00.000Z");
+    expect(diario.reinicia).toBe("2026-11-01T00:00:00.000Z");
+    expect(diario.cuota).toBe(CONSTRUCCIONES_MES);
+    expect(diario.diarios).toHaveLength(14);
+    expect(diario.diarios[1]).toBe(1);
+    expect(diario.diarios[2]).toBe(0);
+    expect(diario.diarios.reduce((total, dia) => total + dia, 0)).toBe(1);
+  });
+
+  it("sum(diarios) coincide con las construcciones usadas del período", async () => {
+    const { servicio, desplegar } = escenario("2026-10-14T12:00:00.000Z");
+    await desplegar("2026-10-02T10:00:00.000Z", 3);
+    await desplegar("2026-10-09T10:00:00.000Z", 2);
+
+    const [consumo, diario] = await Promise.all([servicio.de(USUARIO), servicio.diario(USUARIO)]);
+
+    expect(diario.diarios.reduce((total, dia) => total + dia, 0)).toBe(consumo.construcciones.usadas);
+  });
+});

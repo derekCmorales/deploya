@@ -81,6 +81,12 @@ export abstract class RepositorioDespliegues {
   abstract contarConstruccionesDesde(usuarioId: string, desde: Date): Promise<number>;
 
   /**
+   * Las fechas de esas mismas construcciones (I7), para agruparlas por día en el ritmo.
+   * `sum(diarios)` de `/observabilidad/consumo/diario` coincide con `contarConstruccionesDesde`.
+   */
+  abstract fechasDeConstruccionDesde(usuarioId: string, desde: Date): Promise<Date[]>;
+
+  /**
    * Fecha y estado de cada despliegue del proyecto creado desde `desde`, reversiones incluidas:
    * la actividad cuenta despliegues, no construcciones (pantalla 13).
    */

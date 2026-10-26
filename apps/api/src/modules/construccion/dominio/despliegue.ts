@@ -22,8 +22,6 @@ export interface EtapaRegistrada {
 }
 
 export interface Despliegue {
-  fecha: any;
-  creadoEn: any;
   id: string;
   proyectoId: string;
   numero: number;

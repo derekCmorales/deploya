@@ -5,6 +5,7 @@ import { CuotaPlanPuerto } from "../../orquestacion/puertos/cuota-plan.puerto";
 import { CuotaProyectosPuerto } from "../../proyectos/puertos/cuota-proyectos.puerto";
 import { ProyectosLecturaPuerto } from "../../construccion/puertos/proyectos-lectura.puerto";
 import { periodoDe, type PeriodoConsumo } from "../dominio/periodo";
+import { diariosDe } from "../dominio/ritmo";
 
 export interface ConsumoPeriodoDto {
   periodo: PeriodoConsumo;
@@ -56,35 +57,17 @@ export class ConsumoService {
   async diario(usuarioId: string): Promise<ConsumoDiarioDto> {
     const hoy = this.reloj.ahora();
     const periodo = periodoDe(hoy);
-    const permiso = await this.cuotaPlan.permisoDe(usuarioId);
 
-    const historial = await this.despliegues.historialDe(usuarioId, "todos", 100, 0);
-    
-    const vigentes = historial.filter((d: any) => {
-      const fecha = new Date(d.fecha ?? d.creadoEn);
-      return fecha >= periodo.desde && fecha < periodo.reinicia && !d.esReversion;
-    });
-
-    const anio = hoy.getUTCFullYear();
-    const mes = hoy.getUTCMonth();
-    const diasDelMes = new Date(Date.UTC(anio, mes + 1, 0)).getUTCDate();
-    const diaActual = hoy.getUTCDate();
-
-    const conteoDiario = new Array(Math.min(diaActual, diasDelMes)).fill(0);
-
-    for (const d of vigentes) {
-      const fechaDespliegue = new Date(d.fecha ?? d.creadoEn);
-      const dia = fechaDespliegue.getUTCDate();
-      if (dia >= 1 && dia <= conteoDiario.length) {
-        conteoDiario[dia - 1]++;
-      }
-    }
+    const [permiso, fechas] = await Promise.all([
+      this.cuotaPlan.permisoDe(usuarioId),
+      this.despliegues.fechasDeConstruccionDesde(usuarioId, periodo.desde),
+    ]);
 
     return {
       desde: periodo.desde.toISOString(),
       reinicia: periodo.reinicia.toISOString(),
       cuota: permiso.construccionesMes,
-      diarios: conteoDiario,
+      diarios: diariosDe(fechas, periodo, hoy),
     };
   }
 }

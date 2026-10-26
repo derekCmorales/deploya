@@ -54,8 +54,6 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
         iniciada: null,
         terminada: null,
       })),
-      fecha: undefined,
-      creadoEn: undefined
     };
     this.despliegues.set(despliegue.id, despliegue);
     this.lineas.set(despliegue.id, []);
@@ -142,6 +140,12 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     return [...this.despliegues.values()].filter(
       (d) => this.duenos.get(d.proyectoId) === usuarioId && d.disparador !== DISPARADOR_SIN_CONSTRUCCION && d.creado >= desde,
     ).length;
+  }
+
+  async fechasDeConstruccionDesde(usuarioId: string, desde: Date): Promise<Date[]> {
+    return [...this.despliegues.values()]
+      .filter((d) => this.duenos.get(d.proyectoId) === usuarioId && d.disparador !== DISPARADOR_SIN_CONSTRUCCION && d.creado >= desde)
+      .map((d) => d.creado);
   }
 
   private siguienteNumero(proyectoId: string): number {

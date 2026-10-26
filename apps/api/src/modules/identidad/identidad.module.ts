@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { RegistroInstalacionModule } from "../administracion/instalacion/registro-instalacion.module";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
+import { VariablesModule } from "../proyectos/variables.module";
 import { SuscripcionesModule } from "../suscripciones/suscripciones.module";
 import { AsignacionSandboxSuscripciones } from "./adaptadores/asignacion-sandbox.suscripciones";
 import { GeneradorTokenCripto } from "./adaptadores/generador-token-cripto";
@@ -15,6 +16,10 @@ import { CuentaService } from "./cuenta.service";
 import { DirectorioCuentas } from "./directorio-cuentas.service";
 import { IdentidadController } from "./identidad.controller";
 import { IdentidadService } from "./identidad.service";
+import { AsistenteDisponibleGuard } from "./instalacion/asistente-disponible.guard";
+import { LimiteIntentos } from "./instalacion/limite-intentos";
+import { PrimeraConfiguracionController } from "./instalacion/primera-configuracion.controller";
+import { LIMITE_INTENTOS_CODIGO, PrimeraConfiguracionService } from "./instalacion/primera-configuracion.service";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
 import { HashContrasena } from "./puertos/hash-contrasena.puerto";
@@ -31,17 +36,21 @@ import { SesionService } from "./sesion.service";
 /**
  * Binding de M1: repositorios en PostgreSQL (DB-01) y Sandbox vía la Facade de M2.
  * Exporta `SesionGuard` y `SesionService` para que M3 y M4 protejan sus rutas, y `RolGuard`
- * para las rutas de administración (M9).
+ * para las rutas de administración (M9). El asistente de primera configuración (31, SP-17) vive
+ * aquí porque crea la cuenta y la sesión; cifra la clave del SMTP con `CifradorVariables`.
  */
 @Module({
-  imports: [NotificacionesModule, SuscripcionesModule, RegistroInstalacionModule],
-  controllers: [IdentidadController, SesionController, RecuperacionController, CuentaController],
+  imports: [NotificacionesModule, SuscripcionesModule, RegistroInstalacionModule, VariablesModule],
+  controllers: [IdentidadController, SesionController, RecuperacionController, CuentaController, PrimeraConfiguracionController],
   providers: [
     IdentidadService,
     SesionService,
     RecuperacionService,
     CuentaService,
     DirectorioCuentas,
+    PrimeraConfiguracionService,
+    AsistenteDisponibleGuard,
+    { provide: LIMITE_INTENTOS_CODIGO, useValue: new LimiteIntentos() },
     SesionGuard,
     RolGuard,
     { provide: CONFIGURACION_IDENTIDAD, useFactory: () => configuracionIdentidadDesde(process.env) },

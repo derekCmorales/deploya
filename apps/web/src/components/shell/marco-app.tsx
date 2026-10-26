@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
-import type { ReactNode } from "react";
+import { useSelectedLayoutSegments } from "next/navigation";
+import { useSyncExternalStore, type ReactNode } from "react";
 
 import { AppShell } from "@/components/shell/app-shell";
 import { MenuUsuario, RUTA_INGRESAR } from "@/components/shell/menu-usuario";
@@ -13,6 +13,21 @@ import { hayCobro } from "@/lib/instalacion";
 
 /** Grupo de rutas de las pantallas de acceso (01–05): llevan el header público, sin navegación del panel. */
 const GRUPO_ACCESO = "(auth)";
+/** El asistente 31 vive en `(auth)` pero su header lleva el dominio de la instalación, sin «Iniciar sesión». */
+const ASISTENTE_INSTALACION = "configurar";
+
+const sinSuscripcion = () => () => {};
+
+/** Artboard 31: el dominio en el que se está configurando, en mono a la izquierda del tema. */
+function DominioActual() {
+  const dominio = useSyncExternalStore(
+    sinSuscripcion,
+    () => window.location.hostname,
+    () => "",
+  );
+  if (!dominio) return null;
+  return <span className="mr-2 font-mono text-xs text-muted-foreground">{dominio}</span>;
+}
 
 /** «Planes» del header público; en autoalojado no hay planes (SP-06). */
 function EnlacePlanes() {
@@ -31,7 +46,11 @@ function EnlacePlanes() {
  * Header público (fichas 01–04): Planes · tema · Iniciar sesión.
  */
 export function MarcoApp({ children }: { children: ReactNode }) {
-  const grupo = useSelectedLayoutSegment();
+  const [grupo, pantalla] = useSelectedLayoutSegments();
+
+  if (grupo === GRUPO_ACCESO && pantalla === ASISTENTE_INSTALACION) {
+    return <AppShell acciones={<DominioActual />}>{children}</AppShell>;
+  }
 
   if (grupo === GRUPO_ACCESO) {
     return (

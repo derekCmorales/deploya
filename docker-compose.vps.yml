@@ -27,6 +27,8 @@ services:
       - traefik_acme:/acme:ro
     environment:
       URL_WEB: https://${DOMINIO_BASE:?Define DOMINIO_BASE en .env.vps}
+      # La API solo se alcanza por Traefik: `req.ip` sale de su X-Forwarded-For (límite de intentos, SP-17).
+      PROXIES_DE_CONFIANZA: 1
       CLAVE_CIFRADO_VARIABLES: ${CLAVE_CIFRADO_VARIABLES:?Define CLAVE_CIFRADO_VARIABLES en .env.vps (32 bytes)}
       DOMINIO_BASE: ${DOMINIO_BASE}
       ESQUEMA_PUBLICO: https

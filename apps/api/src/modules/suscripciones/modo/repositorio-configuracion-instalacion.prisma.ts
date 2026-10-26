@@ -34,8 +34,17 @@ export class RepositorioConfiguracionInstalacionPrisma extends RepositorioConfig
     return { hashCodigo: fila.hashCodigo, codigoVence: fila.codigoVence };
   }
 
-  async borrarCodigo(): Promise<void> {
-    await this.prisma.configuracionInstalacion.updateMany({ where: { id: ID_INSTALACION }, data: { hashCodigo: null, codigoVence: null } });
+  async borrarCodigoSiEs(hashCodigo: string): Promise<boolean> {
+    // El WHERE con el hash lo vuelve a evaluar PostgreSQL tras el bloqueo de la fila: la segunda escritura cuenta 0.
+    const { count } = await this.prisma.configuracionInstalacion.updateMany({
+      where: { id: ID_INSTALACION, hashCodigo },
+      data: { hashCodigo: null, codigoVence: null },
+    });
+    return count === 1;
+  }
+
+  async restaurarCodigo(codigo: CodigoConfiguracion): Promise<void> {
+    await this.prisma.configuracionInstalacion.updateMany({ where: { id: ID_INSTALACION, hashCodigo: null }, data: codigo });
   }
 
   /** Lectura de una sola columna de M1, igual que el seed: sin administrador no hay instalación configurada. */

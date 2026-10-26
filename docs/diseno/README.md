@@ -169,7 +169,7 @@ Importa desde `@/components/...`. Catálogo vivo: `/sistema`.
 | `RielEtapas` | Cinco etapas. `size="sm"` en listas (55px), `size="lg"` en cabeceras con duración. |
 | `EstadoDespliegue`, `EstadoSuscripcion` | Badges canónicos. |
 | `Bitacora` | Líneas numeradas en mono; `nivel="error"` resalta; `enCurso` muestra cursor. Contenido no confiable: solo texto. |
-| `Pasos` | Asistente de alta (Repositorio · Variables · Revisar). Un paso `deshabilitado` nunca se marca como hecho. |
+| `Pasos` | Asistente de alta (Repositorio · Variables · Revisar). Hecho en tinta (`foreground` con el check en `background`), en curso en `signal`, pendiente en `border-strong`; nunca `ok`. Un paso `deshabilitado` nunca se marca como hecho. |
 | `RequisitosContrasena` + `REGLAS_CONTRASENA`, `contrasenaValida` | Reglas de contraseña compartidas por 01, 04 y 05b. |
 | `LineaTiempo` | Secuencia de eventos con hora. |
 | `MapaActividad` | 12 semanas de despliegues. |

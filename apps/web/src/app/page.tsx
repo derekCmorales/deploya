@@ -4,9 +4,12 @@ import Link from "next/link";
 import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { Button } from "@/components/ui/button";
 
+import { RedirigeAConfigurar } from "./redirige-a-configurar";
+
 export default function HomePage() {
   return (
     <main className="puntos flex min-h-full flex-col justify-center gap-6 px-8 py-16">
+      <RedirigeAConfigurar />
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <RielEtapas etapas={["completada", "completada", "completada", "completada", "completada"]} saludable size="sm" />
         <h1 className="text-[40px] leading-[44px] font-semibold tracking-[-0.04em]">

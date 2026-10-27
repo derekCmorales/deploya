@@ -12,6 +12,12 @@ import { ColaMemoria } from "./cola.memoria";
 import { ColaOperacionMemoria } from "./cola-operacion.memoria";
 import { ContenedorStub } from "./contenedor.stub";
 import { MetricasContenedorStub } from "./metricas-contenedor.stub";
+import { MetricasNodoPuerto } from "../../modules/administracion/infraestructura/puertos/metricas-nodo.puerto";
+import { SalidaContenedorPuerto } from "../../modules/observabilidad/puertos/salida-contenedor.puerto";
+import { MetricasNodoSistema } from "../reales/metricas-nodo";
+import { SalidaContenedorBullMq } from "../reales/salida-contenedor-bullmq";
+import { MetricasNodoStub } from "./metricas-nodo.stub";
+import { SalidaContenedorMemoria } from "./salida-contenedor.memoria";
 
 /** LSP: el stub y el adaptador real cumplen el mismo contrato, método por método. */
 function metodosDe(clase: abstract new (...args: never[]) => unknown): string[] {
@@ -33,6 +39,7 @@ describe("Stubs del motor (M5-02)", () => {
     ["MetricasContenedorPuerto", MetricasContenedorStub, MetricasDockerStats, MetricasContenedorPuerto],
     ["ColaOperacionPuerto", ColaOperacionMemoria, ColaOperacionBullMq, ColaOperacionPuerto],
     ["CancelacionesPuerto", CancelacionesMemoria, CancelacionesRedis, CancelacionesPuerto],
+    ["MetricasNodoPuerto", MetricasNodoStub, MetricasNodoSistema, MetricasNodoPuerto],
   ] as const)("%s: el stub y el real son el mismo puerto y el real implementa cada método del stub", (_n, stub, real, puerto) => {
     expect(stub.prototype).toBeInstanceOf(puerto);
     expect(real.prototype).toBeInstanceOf(puerto);
@@ -44,6 +51,13 @@ describe("Stubs del motor (M5-02)", () => {
     for (const cola of [ColaMemoria, ColaBullMq]) {
       expect(cola.prototype).toBeInstanceOf(ColaConstruccionPuerto);
       expect(metodosDe(cola)).toEqual(expect.arrayContaining(["encolar", "quitar"]));
+    }
+  });
+
+  it("SalidaContenedorPuerto: la memoria y BullMQ leen (la memoria suma `escribir` solo para las pruebas)", () => {
+    for (const salida of [SalidaContenedorMemoria, SalidaContenedorBullMq]) {
+      expect(salida.prototype).toBeInstanceOf(SalidaContenedorPuerto);
+      expect(metodosDe(salida)).toContain("leer");
     }
   });
 });

@@ -10,6 +10,10 @@ import { RecetaProyectoPuerto } from "../modules/construccion/puertos/receta-pro
 import { RepositorioArtefactos } from "../modules/construccion/puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../modules/construccion/puertos/repositorio-despliegues.puerto";
 import { DetalleProyectoPuerto } from "../modules/observabilidad/puertos/detalle-proyecto.puerto";
+import { SalidaContenedorPuerto } from "../modules/observabilidad/puertos/salida-contenedor.puerto";
+import { MetricasNodoPuerto } from "../modules/administracion/infraestructura/puertos/metricas-nodo.puerto";
+import { MetricasNodoSistema } from "./reales/metricas-nodo";
+import { MetricasNodoStub } from "./stubs/metricas-nodo.stub";
 import { CertificadoPuerto } from "../modules/enrutamiento/puertos/certificado.puerto";
 import { EnrutamientoPuerto } from "../modules/enrutamiento/puertos/enrutamiento.puerto";
 import { ColaOperacionPuerto } from "../modules/orquestacion/puertos/cola-operacion.puerto";
@@ -26,6 +30,8 @@ import { RegistroEnviosRedis, ReporteServidorRedis } from "./reales/estado-compa
 import { LecturaServidorDocker } from "./reales/lectura-servidor-docker";
 import { RegistroEnviosMemoria, ReporteServidorMemoria } from "./stubs/estado-compartido.memoria";
 import { LecturaServidorStub } from "./stubs/lectura-servidor.stub";
+import { SalidaContenedorBullMq } from "./reales/salida-contenedor-bullmq";
+import { SalidaContenedorMemoria } from "./stubs/salida-contenedor.memoria";
 import { RecetaProyectoPrisma } from "./prisma/receta-proyecto.prisma";
 import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.prisma";
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
@@ -64,6 +70,9 @@ export function puerto<T>(token: abstract new (...args: never[]) => T, fabrica: 
   };
 }
 
+/** Admin · Infraestructura (SP-13) mide el disco donde viven imágenes y artefactos: la raíz del nodo. */
+const RAIZ_NODO = "/";
+
 const socketDocker = (): Docker => new Docker({ socketPath: "/var/run/docker.sock" });
 
 /**
@@ -95,6 +104,8 @@ const COMUNES: Provider[] = [
   puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
   puerto(RegistroEnviosCorreo, { docker: (c) => new RegistroEnviosRedis(c.redisUrl), stub: () => new RegistroEnviosMemoria() }),
   puerto(ReporteServidorPuerto, { docker: (c) => new ReporteServidorRedis(c.redisUrl), stub: () => new ReporteServidorMemoria() }),
+  puerto(SalidaContenedorPuerto, { docker: (c) => new SalidaContenedorBullMq(c.redisUrl), stub: () => new SalidaContenedorMemoria() }),
+  puerto(MetricasNodoPuerto, { docker: () => new MetricasNodoSistema(RAIZ_NODO), stub: () => new MetricasNodoStub() }),
 ];
 
 const SOLO_TRABAJADOR: Provider[] = [

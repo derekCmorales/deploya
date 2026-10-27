@@ -30,6 +30,10 @@ import {
   ComprobacionDocker,
 } from "./instalacion/salud/comprobaciones";
 import { CuentasSuspensionPuerto } from "./puertos/cuentas-suspension.puerto";
+import { ConsultaInfraestructuraPrisma } from "./infraestructura/adaptadores/consulta-infraestructura.prisma";
+import { InfraestructuraAdminController } from "./infraestructura/infraestructura-admin.controller";
+import { InfraestructuraService } from "./infraestructura/infraestructura.service";
+import { ConsultaInfraestructuraPuerto } from "./infraestructura/puertos/consulta-infraestructura.puerto";
 import { ReactivacionCuentaService } from "./reactivacion-cuenta.service";
 import { SuspensionService } from "./suspension.service";
 import { UsuariosAdminController } from "./usuarios-admin.controller";
@@ -41,11 +45,14 @@ const DIRECTORIO_RESPALDOS = process.env.DIR_RESPALDOS ?? "/var/backups/deploya"
  * La sesión y el rol salen de M1 (`SesionGuard` y `RolGuard`); detener los contenedores de una
  * cuenta suspendida y reanudarlos al reactivarla, de M5 (`ContenedoresClientePuerto`). Admin ·
  * Instalación (SP-18) lee el modo y la configuración de M2, y la salud la arma un Composite.
+ * Admin · Infraestructura (SP-13) lee el nodo por `MetricasNodoPuerto` (AdaptersModule).
  */
 @Module({
   imports: [IdentidadModule, OrquestacionModule, SuscripcionesModule, RegistroInstalacionModule],
-  controllers: [AdministracionController, UsuariosAdminController, InstalacionAdminController],
+  controllers: [AdministracionController, UsuariosAdminController, InstalacionAdminController, InfraestructuraAdminController],
   providers: [
+    InfraestructuraService,
+    { provide: ConsultaInfraestructuraPuerto, useClass: ConsultaInfraestructuraPrisma },
     InstalacionService,
     InvitacionesService,
     { provide: RegistroAccionesPuerto, useClass: RegistroAccionesPrisma },

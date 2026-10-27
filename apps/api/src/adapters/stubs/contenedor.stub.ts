@@ -1,8 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import {
   ContenedorPuerto,
+  type ConsultaSalida,
   type ContenedorCreado,
   type EspecContenedor,
+  type LineaSalida,
 } from "../../modules/orquestacion/puertos/contenedor.puerto";
 
 @Injectable()
@@ -16,6 +18,9 @@ export class ContenedorStub extends ContenedorPuerto {
   readonly imagenesRetiradas: string[] = [];
   /** Imágenes cuyo borrado falla (para probar que la retención no rompe el despliegue). */
   readonly imagenesQueFallan = new Set<string>();
+
+  /** Salida de cada contenedor por id: la prueba la llena para simular que la app imprime (SP-12). */
+  readonly salidas = new Map<string, LineaSalida[]>();
 
   /** Gancho para simular un evento externo (p. ej. una cancelación) justo cuando se crea el contenedor. */
   alCrear: (() => Promise<void>) | null = null;
@@ -49,5 +54,10 @@ export class ContenedorStub extends ContenedorPuerto {
 
   async eliminarImagenesDe(subdominio: string): Promise<void> {
     this.imagenesBorradas.push(subdominio);
+  }
+
+  async bitacora(contenedorId: string, { desde, max }: ConsultaSalida): Promise<LineaSalida[]> {
+    const lineas = (this.salidas.get(contenedorId) ?? []).filter((l) => !desde || l.marca > desde);
+    return lineas.slice(-max);
   }
 }

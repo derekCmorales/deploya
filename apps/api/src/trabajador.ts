@@ -3,8 +3,10 @@ import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { CONFIGURACION_MOTOR, type ConfiguracionMotor } from "./adapters/configuracion-motor";
 import { consumirDespliegues, consumirOperaciones } from "./adapters/reales/cola-bullmq";
+import { consumirBitacoras } from "./adapters/reales/salida-contenedor-bullmq";
 import { PipelineDespliegue } from "./modules/construccion/pipeline/pipeline-despliegue";
 import { AccionesContenedorService } from "./modules/orquestacion/acciones/acciones-contenedor.service";
+import { ContenedorPuerto } from "./modules/orquestacion/puertos/contenedor.puerto";
 import { TrabajadorModule } from "./trabajador.module";
 
 async function iniciar(): Promise<void> {
@@ -22,9 +24,11 @@ async function iniciar(): Promise<void> {
   );
   const acciones = app.get(AccionesContenedorService);
   const operaciones = consumirOperaciones(configuracion.redisUrl, (accion) => acciones.ejecutar(accion));
-  registro.log(`Consumiendo las colas de despliegues (concurrencia ${configuracion.trabajadorConcurrencia}) y de operación`);
+  const contenedores = app.get(ContenedorPuerto);
+  const bitacoras = consumirBitacoras(configuracion.redisUrl, (contenedorId, consulta) => contenedores.bitacora(contenedorId, consulta));
+  registro.log(`Consumiendo las colas de despliegues (concurrencia ${configuracion.trabajadorConcurrencia}), de operación y de bitácoras`);
   const detener = async () => {
-    await Promise.all([consumidor.close(), operaciones.close()]);
+    await Promise.all([consumidor.close(), operaciones.close(), bitacoras.close()]);
     await app.close();
     process.exit(0);
   };

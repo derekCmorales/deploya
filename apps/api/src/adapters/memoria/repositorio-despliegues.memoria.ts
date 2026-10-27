@@ -142,6 +142,12 @@ export class RepositorioDesplieguesMemoria extends RepositorioDespliegues {
     ).length;
   }
 
+  async fechasDeConstruccionDesde(usuarioId: string, desde: Date): Promise<Date[]> {
+    return [...this.despliegues.values()]
+      .filter((d) => this.duenos.get(d.proyectoId) === usuarioId && d.disparador !== DISPARADOR_SIN_CONSTRUCCION && d.creado >= desde)
+      .map((d) => d.creado);
+  }
+
   private siguienteNumero(proyectoId: string): number {
     const numeros = [...this.despliegues.values()].filter((d) => d.proyectoId === proyectoId).map((d) => d.numero);
     return Math.max(0, ...numeros) + 1;

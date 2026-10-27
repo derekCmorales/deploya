@@ -165,6 +165,14 @@ export class RepositorioDesplieguesPrisma extends RepositorioDespliegues {
     });
   }
 
+  async fechasDeConstruccionDesde(usuarioId: string, desde: Date): Promise<Date[]> {
+    const filas = await this.prisma.despliegue.findMany({
+      where: { proyecto: { usuarioId }, creado: { gte: desde }, disparador: { not: DISPARADOR_SIN_CONSTRUCCION } },
+      select: { creado: true },
+    });
+    return filas.map((fila) => fila.creado);
+  }
+
   async desplieguesDesde(proyectoId: string, desde: Date): Promise<MuestraDespliegue[]> {
     const filas = await this.prisma.despliegue.findMany({
       where: { proyectoId, creado: { gte: desde } },

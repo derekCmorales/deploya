@@ -1,5 +1,6 @@
 import { FolderGit2, Hammer, TriangleAlert } from "lucide-react";
 
+import { RitmoConstrucciones } from "@/components/deploya/ritmo-construcciones";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Meter } from "@/components/ui/meter";
@@ -15,6 +16,7 @@ const COTA_AVISO = 0.8;
  * «Consumo del período» de 08. Proyectos sale de `GET /proyectos`; el conteo de construcciones
  * del mes, de `GET /observabilidad/consumo` (M7-03): si no responde se muestra el límite del plan. El
  * período es el mes calendario en UTC (M5-03), no la vigencia: se reinicia el día 1 aunque la vigencia haya terminado.
+ * Debajo de los dos medidores va el ritmo de construcciones (08c), que desaparece si su petición falla.
  */
 export function PanelConsumo({
   suscripcion,
@@ -101,6 +103,7 @@ export function PanelConsumo({
           <Skeleton className="h-14 w-full" />
         )}
       </div>
+      <RitmoConstrucciones plan={plan.nombre} className="border-t border-border px-4 py-5" />
       <CardFooter>
         <span className="text-[13px] text-muted-foreground">
           Si llegas al límite, no podrás crear más proyectos ni lanzar más construcciones este mes.

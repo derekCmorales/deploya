@@ -9,6 +9,7 @@ import {
   EstadoDespliegue,
   EstadoSuscripcion,
   GraficaEtapas,
+  GraficaRitmo,
   GraficaUso,
   LineaTiempo,
   MapaActividad,
@@ -93,6 +94,14 @@ const eventosGrafica = [
 ];
 
 /** Ejemplo de 14c: una columna por despliegue; #3 falló y #5 es una reversión. */
+/** 20 días de octubre que suman 84 con cuota 150: cierra en ~130, en la zona de aviso (08c). */
+const ritmoEjemplo = {
+  desde: "2026-10-01T00:00:00.000Z",
+  reinicia: "2026-11-01T00:00:00.000Z",
+  cuota: 150,
+  diarios: [6, 4, 2, 5, 3, 4, 6, 2, 5, 4, 3, 5, 4, 6, 3, 4, 5, 4, 4, 5],
+};
+
 const desplieguesEtapas: TiemposDespliegue[] = [
   {
     numero: 1,
@@ -442,6 +451,15 @@ export default function SistemaPage() {
           </CardHeader>
           <CardContent>
             <GraficaEtapas despliegues={desplieguesEtapas} numeroActivo={6} medianaMs={medianaEtapas} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ritmo de construcciones</CardTitle>
+            <CardDescription>Acumulado del mes contra la cuota; día 20 de 31, proyección ~130 en la zona de aviso.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GraficaRitmo datos={ritmoEjemplo} />
           </CardContent>
         </Card>
       </Seccion>

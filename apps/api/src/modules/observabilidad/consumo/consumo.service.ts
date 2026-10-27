@@ -5,11 +5,19 @@ import { CuotaPlanPuerto } from "../../orquestacion/puertos/cuota-plan.puerto";
 import { CuotaProyectosPuerto } from "../../proyectos/puertos/cuota-proyectos.puerto";
 import { ProyectosLecturaPuerto } from "../../construccion/puertos/proyectos-lectura.puerto";
 import { periodoDe, type PeriodoConsumo } from "../dominio/periodo";
+import { diariosDe } from "../dominio/ritmo";
 
 export interface ConsumoPeriodoDto {
   periodo: PeriodoConsumo;
   proyectos: { usados: number; limite: number };
   construcciones: { usadas: number; limite: number };
+}
+
+export interface ConsumoDiarioDto {
+  desde: string;
+  reinicia: string;
+  cuota: number;
+  diarios: number[];
 }
 
 @Injectable()
@@ -43,6 +51,23 @@ export class ConsumoService {
         usadas: usadasConstrucciones,
         limite: permiso.construccionesMes,
       },
+    };
+  }
+
+  async diario(usuarioId: string): Promise<ConsumoDiarioDto> {
+    const hoy = this.reloj.ahora();
+    const periodo = periodoDe(hoy);
+
+    const [permiso, fechas] = await Promise.all([
+      this.cuotaPlan.permisoDe(usuarioId),
+      this.despliegues.fechasDeConstruccionDesde(usuarioId, periodo.desde),
+    ]);
+
+    return {
+      desde: periodo.desde.toISOString(),
+      reinicia: periodo.reinicia.toISOString(),
+      cuota: permiso.construccionesMes,
+      diarios: diariosDe(fechas, periodo, hoy),
     };
   }
 }

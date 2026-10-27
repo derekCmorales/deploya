@@ -1,6 +1,6 @@
 # Contrato · Métricas, tiempos y ritmo (M5, M4 → M7 → web)
 
-Versión 1.3 · 2026-10-25 · dueños: Derek (muestreo M5 y tiempos M4), Eduardo (lectura M7 y web) · consumidores: Eduardo (16, 13c, 14c, 08c, 27). Cambiarlo exige avisar antes de mergear. Changes: `feat-m5-muestreo-metricas`, `feat-m7-metricas`, `feat-m7-tiempo-por-etapa`, `feat-m7-ritmo-construcciones`, `feat-m9-infraestructura`. Specs: [orquestacion](../../openspec/specs/orquestacion/spec.md), [observabilidad](../../openspec/specs/observabilidad/spec.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.4 · 2026-10-27 · dueños: Derek (muestreo M5 y tiempos M4), Eduardo (lectura M7 y web) · consumidores: Eduardo (16, 13c, 14c, 08c, 27). Cambiarlo exige avisar antes de mergear. Changes: `feat-m5-muestreo-metricas`, `feat-m7-metricas`, `feat-m7-tiempo-por-etapa`, `feat-m7-ritmo-construcciones`, `feat-m9-infraestructura`. Specs: [orquestacion](../../openspec/specs/orquestacion/spec.md), [observabilidad](../../openspec/specs/observabilidad/spec.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Muestreo (M5, trabajador)
 
@@ -74,10 +74,10 @@ GET /proyectos/:id/despliegues/tiempos?ultimos=14
 
 ```http
 GET /observabilidad/consumo/diario
-200 { "desde": "2026-10-01", "reinicia": "2026-11-01", "cuota": 150, "diarios": [6, 4, 2, …] }   // mes calendario UTC, igual que el bloqueo (I7)
+200 { "desde": "2026-10-01T00:00:00.000Z", "reinicia": "2026-11-01T00:00:00.000Z", "cuota": 150, "diarios": [6, 4, 2, …] }   // mes calendario UTC, igual que el bloqueo (I7)
 ```
 
-La proyección (`acumulado / díasTranscurridos × díasDelMes`) se calcula en la web con una función pura; la reversión no cuenta.
+`desde` y `reinicia` van en ISO 8601 completo, como `periodo` de `GET /observabilidad/consumo`. `diarios` tiene un elemento por día transcurrido (del 1 a hoy, UTC). La proyección (`acumulado / díasTranscurridos × díasDelMes`) se calcula en la web con una función pura; la reversión no cuenta.
 
 ```ts
 // M4 · lo implementa Eduardo con revisión de Derek: mismo criterio que contarConstruccionesDesde (I7)
@@ -102,3 +102,4 @@ export abstract class MetricasNodoPuerto { abstract nodo(): Promise<{ cpu: { usa
 | 1.1 | 2026-10-21 | SP-07: pico, aviso y cubos alineados a :00/:30; aditivo, Eduardo avisado |
 | 1.2 | 2026-10-25 | SP-15: `fechasDeConstruccionDesde` en `RepositorioDespliegues` para el ritmo diario; aditivo |
 | 1.3 | 2026-10-25 | SP-14: tiempos por etapa pasan de array a `{ despliegues, resumen }`; el resumen alimenta la cabecera de 14c; Eduardo avisado |
+| 1.4 | 2026-10-27 | SP-15: `desde` y `reinicia` de `/consumo/diario` en ISO completo (lo que ya devolvía la API); sin cambio de forma |

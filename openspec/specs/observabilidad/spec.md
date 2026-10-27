@@ -99,9 +99,100 @@ El sistema SHALL exponer el consumo del período (proyectos y construcciones fre
 - **WHEN** el cliente abre el resumen de un proyecto con 38 despliegues en las últimas 12 semanas, 2 fallidos
 - **THEN** ve el mapa de 84 días con «12 semanas · 38 despliegues · 2 con fallo»
 
+### Requirement: Métricas del proyecto
+
+El cliente SHALL ver la CPU y la memoria de su contenedor de la última hora o de las últimas 24 h frente al límite del plan, con la zona de aviso desde el 80 %, los despliegues de la ventana marcados como eventos y un tooltip por punto. Cada gráfica SHALL tener una sola escala y una alternativa en tabla.
+
+#### Scenario: Memoria cerca del límite
+
+- **WHEN** la memoria está al 84 % del límite
+- **THEN** ve el banner de aviso y el tramo de la línea dentro de la zona de aviso
+
+#### Scenario: Despliegue en la ventana
+
+- **WHEN** #14 se publicó hace 5 h
+- **THEN** la gráfica muestra el chip #14 en esa hora y los promedios por versión
+
+#### Scenario: Sin datos
+
+- **WHEN** el proyecto está Detenido
+- **THEN** ve «El contenedor no está corriendo» en vez de la gráfica
+
+#### Scenario: Hover y teclado
+
+- **WHEN** el cliente pasa el cursor o usa las flechas sobre la gráfica
+- **THEN** ve la hora, el valor, el % del límite y la versión de ese punto
+
+#### Scenario: Resumen de 24 h
+
+- **WHEN** el cliente abre el Resumen
+- **THEN** ve la tarjeta «Últimas 24 h» con CPU y memoria y su estado en palabra
+
+#### Scenario: Resumen sin muestras
+
+- **WHEN** el proyecto acaba de desplegar y aún no hay muestras
+- **THEN** la tarjeta «Últimas 24 h» sigue visible con «Sin muestras todavía»
+
+### Requirement: Tiempo por etapa
+
+El cliente SHALL ver la duración por etapa de los últimos 14 despliegues de su proyecto, con la etapa donde falló cada Fallido y las reversiones sin Construcción, y la mediana de los Saludables.
+
+#### Scenario: Mediana
+
+- **WHEN** hay 11 despliegues Saludables
+- **THEN** ve la mediana de sus duraciones totales
+
+#### Scenario: Dónde falló
+
+- **WHEN** #11 falló en Construcción
+- **THEN** su columna termina en Construcción marcada como fallo
+
+#### Scenario: Reversión
+
+- **WHEN** #7 fue una reversión
+- **THEN** su columna no tiene Recepción ni Construcción y lleva ↺
+
+### Requirement: Ritmo de construcciones
+
+Mi suscripción SHALL mostrar las construcciones acumuladas por día del mes calendario contra la cuota y una proyección al cierre al ritmo actual. La reversión SHALL NOT contar.
+
+#### Scenario: Proyección en zona de aviso
+
+- **WHEN** van 84 construcciones el día 20 de un mes de 31 con cuota 150
+- **THEN** ve «~130» al cierre marcado como en zona de aviso
+
+#### Scenario: Se acaba antes
+
+- **WHEN** la proyección pasa la cuota
+- **THEN** la frase dice el día en que se acaban las construcciones
+
+#### Scenario: Primer día
+
+- **WHEN** es el día 1 del mes
+- **THEN** no se dibuja proyección
+
+### Requirement: Bitácora de ejecución
+
+El cliente SHALL ver las últimas 500 líneas de la salida de su contenedor activo, actualizadas cada 3 s, con filtro por nivel, búsqueda, pausa y descarga. Deploya SHALL NOT guardar esas líneas.
+
+#### Scenario: Líneas nuevas
+
+- **WHEN** el contenedor escribe 6 líneas
+- **THEN** aparecen en la siguiente consulta
+
+#### Scenario: Pausa sin perder líneas
+
+- **WHEN** el cliente pausa y llegan 6 líneas
+- **THEN** ve «En pausa · 6 líneas nuevas» y al reanudar aparecen todas
+
+#### Scenario: Filtro por nivel
+
+- **WHEN** el cliente elige Error
+- **THEN** solo ve las líneas de error
+
 ## Fuera de alcance · solo si da el tiempo
 
-- Métricas de CPU, memoria y transferencia en vivo.
-- Bitácoras de ejecución del contenedor (runtime).
+- Transferencia de red en vivo (CPU y memoria entraron en el sprint fuera de alcance: «Métricas del proyecto», SP-10).
+- Guardar o retener la bitácora de ejecución (SP-12 la lee de Docker sin guardarla: «Bitácora de ejecución»).
 - Transmisión por WebSocket o SSE (polling alcanza).
 - Avisos de cuota por correo.

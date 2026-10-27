@@ -1,6 +1,6 @@
 # Contrato · Métricas, tiempos y ritmo (M5, M4 → M7 → web)
 
-Versión 1.4 · 2026-10-27 · dueños: Derek (muestreo M5 y tiempos M4), Eduardo (lectura M7 y web) · consumidores: Eduardo (16, 13c, 14c, 08c, 27). Cambiarlo exige avisar antes de mergear. Changes: `feat-m5-muestreo-metricas`, `feat-m7-metricas`, `feat-m7-tiempo-por-etapa`, `feat-m7-ritmo-construcciones`, `feat-m9-infraestructura`. Specs: [orquestacion](../../openspec/specs/orquestacion/spec.md), [observabilidad](../../openspec/specs/observabilidad/spec.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.5 · 2026-10-27 · dueños: Derek (muestreo M5, tiempos M4 y `ContenedorPuerto.bitacora`), Eduardo (lectura M7 y web) · consumidores: Eduardo (16, 13c, 14c, 08c, 15, 27). Cambiarlo exige avisar antes de mergear. Changes: `feat-m5-muestreo-metricas`, `feat-m7-metricas`, `feat-m7-tiempo-por-etapa`, `feat-m7-ritmo-construcciones`, `feat-m7-bitacoras-ejecucion`, `feat-m9-infraestructura`. Specs: [orquestacion](../../openspec/specs/orquestacion/spec.md), [observabilidad](../../openspec/specs/observabilidad/spec.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Muestreo (M5, trabajador)
 
@@ -86,13 +86,57 @@ RepositorioDespliegues.fechasDeConstruccionDesde(usuarioId: string, desde: Date)
 
 `ConsumoService.diario` agrupa esas fechas por día UTC (`diariosDe`, puro). Así `sum(diarios)` es igual a `construcciones.usadas` de `GET /observabilidad/consumo`. El día 1 la web no dibuja proyección.
 
-## Infraestructura (si da tiempo, M9)
+## Bitácora de ejecución (SP-12, M5 → M7)
 
 ```ts
-export abstract class MetricasNodoPuerto { abstract nodo(): Promise<{ cpu: { usado; total }; memoriaMb: { usado; total }; discoGb: { usado; total } }>; }
+// M5 · Derek: `docker logs --since --timestamps --tail`, solo en el trabajador (ADR 0002)
+ContenedorPuerto.bitacora(contenedorId: string, { desde: Date | null, max: number }): Promise<{ marca: Date; texto: string }[]>
+// M7: la API se lo pide al trabajador por la cola `bitacoras` de BullMQ (petición y respuesta, espera máx. 2,5 s)
+SalidaContenedorPuerto.leer(contenedorId, { desde, max })   // SalidaContenedorBullMq · SalidaContenedorMemoria
 ```
 
-`GET /admin/infraestructura` → nodo, cola de BullMQ (`enEspera`, `enCurso`, `fallidas24h`) y la última muestra por entorno. Solo Administrador.
+```http
+GET /proyectos/:id/bitacora?desde=2026-10-20T10:42:01.515Z
+200 {
+  "despliegue": { "numero": 14, "commit": "a1b2c3d…" },          // null si no hay despliegue activo con contenedor
+  "lineas": [{ "en": "2026-10-20T10:42:03.087Z", "texto": "INFO POST /api/pagos 200 · 380 ms", "nivel": "info" }],
+  "aviso": null                                                  // "El contenedor no está corriendo" si el activo no está Saludable
+}
+400 desde inválido · 404 proyecto ajeno · 503 el trabajador no respondió
+```
+
+- `desde` es la marca de la última línea recibida; sin `desde`, las últimas **500**. Solo vuelve lo **estrictamente posterior** a `desde` (Docker filtra por segundo; el servicio quita el resto).
+- `nivel` sale del prefijo: `ERROR`, `ERR`, `FATAL`, `PANIC` → `error`; `WARN`, `WARNING` → `aviso`; lo demás `info`.
+- Deploya **no guarda** estas líneas: el trabajo de BullMQ se borra al terminar. La web consulta cada 3 s (ADR 0006), numera, pausa y filtra.
+
+## Infraestructura (SP-13, M9)
+
+```ts
+export abstract class MetricasNodoPuerto {                // MetricasNodoSistema (/proc y statfs, sin docker.sock) · MetricasNodoStub
+  abstract nodo(): Promise<{ cpu: { usado; total }; memoriaMb: { usado; total }; discoGb: { usado; total } }>;
+}
+export abstract class ConsultaInfraestructuraPuerto {     // ConsultaInfraestructuraPrisma
+  abstract leer(fallidasDesde: Date): Promise<LecturaInfraestructura>;
+}
+```
+
+```http
+GET /admin/infraestructura                                       // solo Administrador (403 SoloAdministracion); nube y autoalojado
+200 {
+  "tomado": "2026-10-20T10:42:00.000Z",
+  "nodo": { "cpu": { "usado": 1.24, "total": 2 }, "memoriaMb": { "usado": 2662, "total": 4096 }, "discoGb": { "usado": 31, "total": 80 } },
+  "cola": {
+    "enEspera": 2, "enCurso": 1, "fallidas24h": 3,
+    "trabajos": [{ "proyecto": "api-tienda", "numero": 15, "estado": "construyendo", "ms": 72000 }]   // en curso primero; ms = duración o espera
+  },
+  "entornos": [{ "proyecto": "api-tienda", "titular": "derek@tiendademo.com", "estado": "saludable", "cpu": 0.12, "memoriaMb": 430 }],
+  "totalProyectos": 41
+}
+```
+
+- **Cola.** Sale de `Despliegue` (el `jobId` de BullMQ es el `despliegueId` y el trabajador mantiene el estado): `encolado` = en espera; `construyendo`, `aprovisionando`, `publicando`, `revirtiendo` = en curso; `fallidas24h` cuenta los `fallido` con `terminado` en las últimas 24 h.
+- **Entornos.** Proyectos con despliegue activo; `cpu` y `memoriaMb` son la última `MuestraMetrica` si tiene menos de 2 min (dos rondas del muestreo), si no `null` («—»).
+- **Nodo.** La CPU es la fracción ocupada entre dos lecturas; la web consulta cada 5 s y arma la serie de `GraficaUso compacta` con sus propias lecturas (la API no guarda historia del nodo).
 
 ## Historial
 
@@ -103,3 +147,4 @@ export abstract class MetricasNodoPuerto { abstract nodo(): Promise<{ cpu: { usa
 | 1.2 | 2026-10-25 | SP-15: `fechasDeConstruccionDesde` en `RepositorioDespliegues` para el ritmo diario; aditivo |
 | 1.3 | 2026-10-25 | SP-14: tiempos por etapa pasan de array a `{ despliegues, resumen }`; el resumen alimenta la cabecera de 14c; Eduardo avisado |
 | 1.4 | 2026-10-27 | SP-15: `desde` y `reinicia` de `/consumo/diario` en ISO completo (lo que ya devolvía la API); sin cambio de forma |
+| 1.5 | 2026-10-27 | SP-12 y SP-13 entran: `ContenedorPuerto.bitacora`, `GET /proyectos/:id/bitacora` y la forma final de `GET /admin/infraestructura`; aditivo |

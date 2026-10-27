@@ -18,4 +18,4 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 - [x] 3.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro
 - [x] 3.2 Contrato `metricas.md` con la respuesta final; `pnpm check` en verde (CI)
-- [ ] 3.3 `/opsx-archive` después del merge
+- [x] 3.3 `/opsx-archive` después del merge (archivado en el PR que cierra el sprint)

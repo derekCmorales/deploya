@@ -2142,6 +2142,23 @@ classDiagram
         +medir() ReporteServidor
     }
     class TareaReporteServidor
+    class InfraestructuraService {
+        <<Facade · SP-13>>
+        -nodo MetricasNodoPuerto
+        -consulta ConsultaInfraestructuraPuerto
+        -reloj Reloj
+        +leer() VistaInfraestructura
+    }
+    class MetricasNodoPuerto {
+        <<abstract · Adapter SP-13>>
+        +nodo() UsoNodo
+    }
+    class MetricasNodoSistema
+    class ConsultaInfraestructuraPuerto {
+        <<abstract · Repository de lectura>>
+        +leer(fallidasDesde) LecturaInfraestructura
+    }
+    class ConsultaInfraestructuraPrisma
     class EstadoScriptsPuerto {
         <<abstract>>
         +respaldo() EstadoRespaldo
@@ -2597,6 +2614,7 @@ classDiagram
         +eliminarContenedoresDe(subdominio) void
         +eliminarImagen(imagen) void
         +eliminarImagenesDe(subdominio) void
+        +bitacora(contenedorId, consulta) LineaSalida[]
     }
     class MetricasContenedorPuerto {
         <<abstract>>
@@ -2621,6 +2639,20 @@ classDiagram
     }
     class LecturaMetricasService {
         +leer(proyectoId, usuarioId, rango) RespuestaMetricas
+    }
+    class SalidaContenedorPuerto {
+        <<abstract · SP-12>>
+        +leer(contenedorId, consulta) LineaSalida[]
+    }
+    class SalidaContenedorBullMq {
+        <<Adapter · petición y respuesta>>
+    }
+    class BitacoraEjecucionService {
+        <<Service Layer · SP-12>>
+        -proyectos DetalleProyectoPuerto
+        -despliegues RepositorioDespliegues
+        -salida SalidaContenedorPuerto
+        +leer(proyectoId, usuarioId, desde) RespuestaBitacora
     }
     class TiemposService {
         -proyectos DetalleProyectoPuerto
@@ -2880,6 +2912,11 @@ classDiagram
     RegistroDeInstalacion --> RepositorioInvitaciones
     RegistroDeInstalacion --> RepositorioConfiguracionInstalacion
     TareaReporteServidor --> LecturaServidorPuerto
+    InfraestructuraService --> MetricasNodoPuerto
+    InfraestructuraService --> ConsultaInfraestructuraPuerto
+    InfraestructuraService --> Reloj
+    MetricasNodoPuerto <|-- MetricasNodoSistema
+    ConsultaInfraestructuraPuerto <|-- ConsultaInfraestructuraPrisma
     TareaReporteServidor --> ReporteServidorPuerto : cada 10 min
     CorreoPuerto <|-- CorreoConRegistro
     CorreoConRegistro --> RegistroEnviosCorreo
@@ -3009,6 +3046,11 @@ classDiagram
     LecturaMetricasService --> CuotaPlanPuerto : recursosDe
     LecturaMetricasService --> DetalleProyectoPuerto
     LecturaMetricasService --> Reloj
+    BitacoraEjecucionService --> DetalleProyectoPuerto
+    BitacoraEjecucionService --> RepositorioDespliegues : activoDe
+    BitacoraEjecucionService --> SalidaContenedorPuerto
+    SalidaContenedorPuerto <|-- SalidaContenedorBullMq
+    SalidaContenedorBullMq ..> ContenedorPuerto : bitacora en el trabajador
     TiemposService --> DetalleProyectoPuerto
     TiemposService --> RepositorioDespliegues : tiemposDe
     ColaOperacionPuerto <|-- ColaOperacionBullMq

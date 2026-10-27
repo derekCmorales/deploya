@@ -34,4 +34,4 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 - [x] 4.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro: panel lateral con pasos y datos del servidor, formulario en tarjeta y Atrás / Continuar debajo
 - [x] 4.2 `clases-unificado.mmd` (`PrimeraConfiguracionService`, `PrimeraConfiguracionController`, `CorreoSegunInstalacion`, `PruebaCorreoPuerto`); `pnpm check` en verde
 - [x] 4.3 Demo: instalación limpia → código → administrador → correo probado o «sin correo» → registro con invitación (local, `docker-compose.autoalojado.yml`: sin invitación responde 403 `InvitacionRequerida`)
-- [ ] 4.4 `/opsx-archive` después del merge
+- [x] 4.4 `/opsx-archive` después del merge (archivado en el PR que cierra el sprint)

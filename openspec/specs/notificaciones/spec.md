@@ -95,8 +95,26 @@ El sistema SHALL avisar por correo al titular cuando un despliegue termina Salud
 - **WHEN** el servidor SMTP rechaza el envío de un aviso
 - **THEN** el despliegue conserva su estado y el error queda en la bitácora del API
 
+### Requirement: Correo de la instalación
+
+En autoalojado, el sistema SHALL mandar cada correo según lo que guardó el asistente o Admin · Instalación: por el SMTP guardado, sin enviar si se eligió «Sin correo por ahora», o con las `SMTP_*` del entorno si nadie lo configuró. Cambiarlo SHALL aplicar en el siguiente envío, sin reiniciar. El último envío SHALL seguir registrándose para el estado de la instalación.
+
+#### Scenario: SMTP guardado
+
+- **WHEN** la instalación tiene un SMTP guardado y se manda una verificación de cuenta
+- **THEN** sale por ese servidor, con la contraseña descifrada solo para el envío
+
+#### Scenario: Sin correo
+
+- **WHEN** la instalación eligió «Sin correo por ahora» y se manda un aviso
+- **THEN** no se envía nada y quien avisa no recibe error
+
+#### Scenario: Sin configurar
+
+- **WHEN** nadie configuró el correo en la web
+- **THEN** se usan las `SMTP_*` del entorno, como en la nube
+
 ## Fuera de alcance · solo si da el tiempo
 
-- Correos de resultado de despliegue (Saludable / Fallido).
-- Avisos de plan Por vencer, Vencido y Suspendido (§4.4); en el núcleo esos estados solo se ven en el panel.
+- Aviso de plan Vencido (Saludable, Fallido, Por vencer y Suspendida entraron en el sprint fuera de alcance: «Avisos por correo», SP-04 y SP-08).
 - Avisos por proximidad al límite de cuota.

@@ -124,8 +124,26 @@ En autoalojado, un administrador SHALL ver el estado de la instalación y SHALL 
 - **WHEN** un admin de la nube abre /admin/instalacion
 - **THEN** responde 404
 
+### Requirement: Infraestructura
+
+Un administrador SHALL ver, de solo lectura, el uso de CPU, memoria y disco del servidor, el estado de la cola de construcción y la última muestra de cada entorno.
+
+#### Scenario: Vista del nodo
+
+- **WHEN** el admin abre Infraestructura
+- **THEN** ve CPU, memoria y disco con su total
+
+#### Scenario: Cola atascada
+
+- **WHEN** hay 3 construcciones en espera
+- **THEN** la cola muestra 3 en espera con su tiempo de espera
+
+#### Scenario: Cliente no puede
+
+- **WHEN** un Cliente abre /admin/infraestructura
+- **THEN** responde 403
+
 ## Fuera de alcance · solo si da el tiempo
 
-- Reactivar una cuenta suspendida desde el panel.
 - Crear, editar y descontinuar planes (el catálogo es fijo por seed).
-- Estado de la infraestructura (nodo, cola, consumo agregado).
+- Consumo agregado de todas las cuentas y varios nodos (el nodo y la cola entraron en el sprint fuera de alcance: «Infraestructura», SP-13; reactivar, en «Reactivar cuenta», SP-05).

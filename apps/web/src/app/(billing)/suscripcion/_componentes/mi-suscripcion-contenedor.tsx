@@ -3,7 +3,6 @@
 import { RotateCw } from "lucide-react";
 import { useState } from "react";
 
-import { TarjetaRitmo } from "@/components/deploya/consumo-periodo";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,10 +58,7 @@ export function MiSuscripcionContenedor() {
         <>
           <TarjetaPlanActual suscripcion={suscripcion.datos} ahora={ahora} />
           <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[3fr_2fr]">
-            <div className="flex flex-col gap-6">
-              <PanelConsumo suscripcion={suscripcion.datos} proyectos={proyectos} consumo={consumo} ahora={ahora} />
-              <TarjetaRitmo plan={suscripcion.datos.plan.nombre} />
-            </div>
+            <PanelConsumo suscripcion={suscripcion.datos} proyectos={proyectos} consumo={consumo} ahora={ahora} />
             <PanelCambiarPlan
               suscripcion={suscripcion.datos}
               catalogo={catalogo.tipo === "listo" ? catalogo.planes : null}

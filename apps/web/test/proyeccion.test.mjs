@@ -5,10 +5,13 @@ import {
   cabeceraRitmo,
   diaEnQueSeAcaba,
   diasDelMes,
+  ejeRitmo,
   enZonaAviso,
+  estadoRitmo,
   etiquetasDeDia,
   fraseRitmo,
   indiceDeDia,
+  porcentajeDeCuota,
   promedioPorDia,
   proyectar,
   puntosRitmo,
@@ -80,8 +83,40 @@ test("Cabecera, promedio, acumulado y hover salen de los datos", () => {
     puntos.map((punto) => punto.acumulado),
     [4, 9, 13],
   );
-  assert.strictEqual(indiceDeDia(0.5, 3), 1);
-  assert.strictEqual(indiceDeDia(-1, 3), 0);
-  assert.strictEqual(indiceDeDia(2, 3), 2);
-  assert.strictEqual(indiceDeDia(0.5, 0), null);
+  assert.strictEqual(porcentajeDeCuota(84, 150), 56);
+  assert.strictEqual(porcentajeDeCuota(5, 0), 0);
+});
+
+test("El hover marca el día que está bajo el puntero", () => {
+  // Día 20 de 31: el eje X cubre el mes entero, no solo los días que pasaron.
+  assert.strictEqual(indiceDeDia(9 / 30, 31, 20), 9);
+  assert.strictEqual(indiceDeDia(19 / 30, 31, 20), 19);
+  assert.strictEqual(indiceDeDia(0.9, 31, 20), 19);
+  assert.strictEqual(indiceDeDia(-1, 31, 20), 0);
+  assert.strictEqual(indiceDeDia(0.5, 31, 0), null);
+  assert.strictEqual(indiceDeDia(0.5, 0, 3), null);
+});
+
+test("Ya se acabaron: la frase dice el día en que se llegó a la cuota", () => {
+  const diarios = [...Array(15).fill(10), 0, 0, 0, 0, 0];
+
+  assert.strictEqual(diaEnQueSeAcaba(diarios, 150, 31), 15);
+  assert.strictEqual(estadoRitmo({ ...OCTUBRE, diarios }), "agotada");
+  assert.match(fraseRitmo({ ...OCTUBRE, diarios }), /Te quedaste sin construcciones el 15 oct; se reinician el 1 nov/);
+});
+
+test("Estado del ritmo según la proyección", () => {
+  assert.strictEqual(estadoRitmo({ ...OCTUBRE, diarios: [7] }), "sin-proyeccion");
+  assert.strictEqual(estadoRitmo({ ...OCTUBRE, diarios: Array(20).fill(5) }), "se-acaba");
+  assert.strictEqual(estadoRitmo({ ...OCTUBRE, diarios: [8, ...Array(19).fill(4)] }), "aviso");
+  assert.strictEqual(estadoRitmo({ ...OCTUBRE, diarios: Array(20).fill(1) }), "holgada");
+  assert.match(fraseRitmo({ ...OCTUBRE, diarios: Array(20).fill(1) }), /^No te quedas sin construcciones antes del 1 nov\. Revertir/);
+});
+
+test("Eje Y con pasos redondos: cuota 150 → 0 · 50 · 100 · 150", () => {
+  assert.deepStrictEqual(ejeRitmo(150), { tope: 150, marcas: [0, 50, 100, 150] });
+  assert.deepStrictEqual(ejeRitmo(1000), { tope: 1000, marcas: [0, 500, 1000] });
+  assert.deepStrictEqual(ejeRitmo(155), { tope: 200, marcas: [0, 100, 200] });
+  assert.deepStrictEqual(ejeRitmo(0), { tope: 1, marcas: [0, 1] });
+  assert.deepStrictEqual(ejeRitmo(2), { tope: 2, marcas: [0, 1, 2] });
 });

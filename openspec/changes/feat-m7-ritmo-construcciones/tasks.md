@@ -16,6 +16,6 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 3. Cierre
 
-- [ ] 3.1 Revisión contra el canvas (página «Sprint · fuera de alcance») en claro y oscuro
+- [x] 3.1 Revisión contra la ficha 08c en claro y oscuro (capturas en el PR: zona de aviso, se acaba antes, día 1, hover y sin API)
 - [x] 3.2 `pnpm check` en verde (incluye diagramas) — CI «Build y pruebas» en success
 - [ ] 3.3 `/opsx-archive` después del merge

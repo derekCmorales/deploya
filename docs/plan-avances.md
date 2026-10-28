@@ -506,7 +506,7 @@ Plan B: el video del martes y compose local, por si el VPS o la red fallan duran
 
 ## Entrega final — 100 % (entrega y exposición: viernes 6 de noviembre)
 
-Sprint de cierre del miércoles 28 de octubre al viernes 6 de noviembre (fase F5 de la propuesta). Prompts para los agentes: [handoff/prompt-entrega-final.md](handoff/prompt-entrega-final.md).
+Sprint de cierre del miércoles 28 de octubre al viernes 6 de noviembre (fase F5 de la propuesta). La versión visual (resumen y una hoja por persona) está en la página **«Entrega final · 100 %»** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Prompts para los agentes: [handoff/prompt-entrega-final.md](handoff/prompt-entrega-final.md).
 
 ### Dónde estamos (28 de octubre)
 

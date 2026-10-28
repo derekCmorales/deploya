@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { FormularioRecuperacion } from "./formulario-recuperacion";
 
-export const metadata: Metadata = { title: "Recuperar contraseña · Deploya" };
+export const metadata: Metadata = { title: "Recuperar contraseña" };
 
 /** Pantalla 04 · Recuperar contraseña, paso 1 (patrón A, acceso partido, como 01 y 03). */
 export default function RecuperarPage() {

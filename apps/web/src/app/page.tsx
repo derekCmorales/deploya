@@ -1,10 +1,15 @@
 import { ArrowRight } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { RielEtapas } from "@/components/deploya/riel-etapas";
 import { Button } from "@/components/ui/button";
+import { tituloDePagina } from "@/lib/titulos";
 
 import { RedirigeAConfigurar } from "./redirige-a-configurar";
+
+/** La portada comparte segmento con el layout raíz, así que la plantilla de título no le aplica. */
+export const metadata: Metadata = { title: tituloDePagina("Inicio") };
 
 export default function HomePage() {
   return (

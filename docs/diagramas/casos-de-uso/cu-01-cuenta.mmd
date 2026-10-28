@@ -1,0 +1,47 @@
+---
+title: Casos de uso — Cuenta y acceso (M1, M10)
+---
+flowchart LR
+    VIS["«actor»<br/>Visitante"]
+    CLI["«actor»<br/>Cliente"]
+    ADM["«actor»<br/>Administrador"]
+
+    subgraph M1["Deploya · Identidad y notificaciones"]
+        direction TB
+        CU01(["CU-01 Registrarse"])
+        CU02(["CU-02 Verificar correo"])
+        CU02b(["Reenviar verificación"])
+        CU03(["CU-03 Iniciar sesión"])
+        CU03b(["Cerrar sesión"])
+        CU04(["CU-04 Recuperar contraseña"])
+        CU05(["CU-05 Gestionar mi cuenta"])
+        CU05b(["Cambiar contraseña"])
+        CU05c(["Cerrar sesión en todos<br/>los dispositivos"])
+        INC1(["Validar política<br/>de contraseña"])
+        INC2(["Enviar correo"])
+        INC3(["Asignar plan Sandbox"])
+    end
+
+    SMTP["«sistema»<br/>Proveedor SMTP"]
+
+    VIS --- CU01 & CU02 & CU04
+    CLI --- CU03 & CU03b & CU05
+    ADM --- CU03 & CU03b
+
+    CU01 -. «include» .-> INC1
+    CU01 -. «include» .-> INC2
+    CU01 -. «include» .-> INC3
+    CU04 -. «include» .-> INC2
+    CU04 -. «include» .-> INC1
+    CU02b -. «extend» .-> CU02
+    CU05b -. «extend» .-> CU05
+    CU05c -. «extend» .-> CU05
+    CU05b -. «include» .-> INC1
+    INC2 --- SMTP
+
+    classDef actor fill:#fefdfb,stroke:#1a1510,stroke-width:1.5px,color:#1a1510
+    classDef externo fill:#f2efe9,stroke:#a5a09a,stroke-dasharray:4 3,color:#1a1510
+    classDef data fill:#f2efe9,stroke:#a5a09a,color:#1a1510
+    class VIS,CLI,ADM actor
+    class SMTP externo
+    class INC1,INC2,INC3 data

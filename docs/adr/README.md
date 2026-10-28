@@ -23,4 +23,5 @@ Cuando la decisión es difícil de revertir o afecta a más de un módulo: elegi
 | [0005](0005-traefik-proveedor-de-archivo.md) | Traefik v3 con proveedor de archivo y una red por proyecto | Aceptado |
 | [0006](0006-polling-en-vez-de-websocket.md) | Polling cada 3 s en vez de WebSocket o SSE | Aceptado |
 | [0007](0007-certificado-comodin-por-dns-01.md) | Certificado comodín por DNS-01 en el VPS | Aceptado |
-| [0008](0008-autoalojado-y-codigo-abierto.md) | Código abierto y autoalojado con un modo de instalación (Strategy por puerto) | Propuesto |
+| [0008](0008-autoalojado-y-codigo-abierto.md) | Código abierto y autoalojado con un modo de instalación (Strategy por puerto) | Aceptado |
+| [0009](0009-monolito-modular-hexagonal.md) | Monolito modular con arquitectura hexagonal y stack TypeScript de punta a punta | Aceptado |

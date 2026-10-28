@@ -1,0 +1,42 @@
+---
+title: Casos de uso — Suscripción y pagos (M2)
+---
+flowchart LR
+    VIS["«actor»<br/>Visitante"]
+    CLI["«actor»<br/>Cliente"]
+    RELOJ["«actor»<br/>Tarea diaria"]
+
+    subgraph M2["Deploya · Suscripciones"]
+        direction TB
+        CU06(["CU-06 Consultar planes"])
+        CU07(["CU-07 Contratar un plan"])
+        CU08(["CU-08 Renovar ahora"])
+        CU08b(["Ascender de plan"])
+        CU08c(["Programar descenso"])
+        CU09(["CU-09 Consultar historial<br/>de pagos"])
+        CU09b(["Descargar comprobante PDF"])
+        CU15(["CU-15 Avanzar el ciclo<br/>de suscripciones"])
+        INC1(["Cobrar con la<br/>pasarela simulada"])
+        INC2(["Cotizar"])
+        INC3(["Detener o reanudar<br/>contenedores"])
+        INC4(["Avisar por correo"])
+    end
+
+    VIS --- CU06
+    CLI --- CU06 & CU07 & CU08 & CU09
+    RELOJ --- CU15
+
+    CU07 -. «include» .-> INC2
+    CU07 -. «include» .-> INC1
+    CU08 -. «include» .-> INC1
+    CU08b -. «extend» .-> CU07
+    CU08c -. «extend» .-> CU08
+    CU09b -. «extend» .-> CU09
+    CU15 -. «include» .-> INC3
+    CU15 -. «include» .-> INC4
+    CU08 -. «include» .-> INC3
+
+    classDef actor fill:#fefdfb,stroke:#1a1510,stroke-width:1.5px,color:#1a1510
+    classDef data fill:#f2efe9,stroke:#a5a09a,color:#1a1510
+    class VIS,CLI,RELOJ actor
+    class INC1,INC2,INC3,INC4 data

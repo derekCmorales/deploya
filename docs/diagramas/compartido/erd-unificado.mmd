@@ -20,6 +20,7 @@ erDiagram
     ARTEFACTO |o--o{ DESPLIEGUE : "construido o reusado por"
     DESPLIEGUE ||--|{ ETAPA_DESPLIEGUE : "cinco etapas"
     DESPLIEGUE ||--o{ LINEA_BITACORA : produce
+    DESPLIEGUE ||--o{ MUESTRA_METRICA : "se muestrea (24 h)"
 
     USUARIO {
         string id PK
@@ -155,4 +156,22 @@ erDiagram
         decimal cpuPorProyecto
         int memoriaMbPorProyecto
         int proyectosPorUsuario "null = sin límite"
+        string smtpHost "correo de la instalación (SP-17)"
+        string smtpClaveCifrada "AES-GCM; nunca en claro"
+        boolean sinCorreo
+    }
+    MUESTRA_METRICA {
+        string despliegueId PK,FK
+        datetime tomada PK "una por minuto; se purga a las 24 h"
+        decimal cpu
+        int memoriaMb
+    }
+    INVITACION {
+        string id PK
+        string correo
+        string hashToken UK "sha256; un solo uso"
+        datetime vence "7 días"
+        datetime usada
+        datetime revocada
+        string creadaPor "id del administrador"
     }

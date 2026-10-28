@@ -1,0 +1,124 @@
+---
+title: Clases de Identidad (M1) y Notificaciones (M10)
+---
+classDiagram
+    direction LR
+    class IdentidadController
+    class SesionController
+    class RecuperacionController
+    class CuentaController
+    class SesionGuard
+    class RolGuard
+
+    class IdentidadService {
+        +registrar(solicitud) CuentaRegistrada
+        +verificar(token) CuentaVerificada
+        +reenviarVerificacion(solicitud) void
+    }
+    class SesionService {
+        +iniciar(credenciales) SesionIniciada
+        +usuarioDe(token) UsuarioSesion
+        +cerrar(token) void
+    }
+    class RecuperacionService {
+        +solicitar(correo) void
+        +restablecer(solicitud) void
+    }
+    class CuentaService {
+        +perfil(usuarioId) PerfilCuenta
+        +renombrar(usuarioId, nombre) PerfilCuenta
+        +cambiarContrasena(usuarioId, sesion, cambio) void
+        +cerrarTodas(usuarioId) void
+    }
+
+    class PoliticaContrasena {
+        <<dominio>>
+        +validar(clave) ResultadoPolitica
+    }
+    class PoliticaReenvio {
+        <<dominio>>
+        +segundosRestantes(creadoUltimo, ahora) number
+    }
+    class NombreCuenta {
+        <<objeto valor>>
+    }
+
+    class RepositorioUsuarios {
+        <<puerto>>
+    }
+    class RepositorioSesiones {
+        <<puerto>>
+    }
+    class RepositorioTokensCuenta {
+        <<puerto>>
+    }
+    class HashContrasena {
+        <<puerto>>
+        +calcular(clave) string
+        +coincide(clave, hash) boolean
+    }
+    class GeneradorToken {
+        <<puerto>>
+    }
+    class AsignacionSandboxPuerto {
+        <<puerto>>
+    }
+    class Reloj {
+        <<puerto>>
+        +ahora() Date
+    }
+
+    class CorreoPuerto {
+        <<puerto>>
+        +enviar(destinatario, plantilla, datos) void
+    }
+    class PlantillaCorreo {
+        <<template method>>
+        +componer(datos) MensajeCorreo
+        #asunto(datos)* string
+        #titulo(datos)* string
+        #parrafo(datos)* string
+        #textoBoton(datos)* string
+    }
+    class CorreoSmtpAdaptador
+    class CorreoConsolaAdaptador
+    class CorreoConRegistro {
+        <<decorator>>
+    }
+    class CorreoSegunInstalacion
+    class PlantillaVerificacion
+    class PlantillaRecuperacion
+    class HashContrasenaScrypt
+    class RepositorioUsuariosPrisma
+    class AsignacionSandboxSuscripciones
+
+    IdentidadController --> IdentidadService
+    SesionController --> SesionService
+    RecuperacionController --> RecuperacionService
+    CuentaController --> CuentaService
+    SesionGuard --> SesionService
+
+    IdentidadService --> PoliticaContrasena
+    IdentidadService --> PoliticaReenvio
+    IdentidadService --> RepositorioUsuarios
+    IdentidadService --> RepositorioTokensCuenta
+    IdentidadService --> HashContrasena
+    IdentidadService --> GeneradorToken
+    IdentidadService --> CorreoPuerto
+    IdentidadService --> AsignacionSandboxPuerto
+    IdentidadService --> Reloj
+    SesionService --> RepositorioSesiones
+    RecuperacionService --> CorreoPuerto
+    CuentaService --> NombreCuenta
+
+    HashContrasena <|-- HashContrasenaScrypt
+    RepositorioUsuarios <|-- RepositorioUsuariosPrisma
+    AsignacionSandboxPuerto <|-- AsignacionSandboxSuscripciones
+    CorreoPuerto <|-- CorreoSmtpAdaptador
+    CorreoPuerto <|-- CorreoConsolaAdaptador
+    CorreoPuerto <|-- CorreoConRegistro
+    CorreoPuerto <|-- CorreoSegunInstalacion
+    CorreoConRegistro o-- CorreoPuerto : envuelve
+    PlantillaCorreo <|-- PlantillaVerificacion
+    PlantillaCorreo <|-- PlantillaRecuperacion
+    CorreoPuerto ..> PlantillaCorreo : usa

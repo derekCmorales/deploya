@@ -1,0 +1,15 @@
+{
+  "name": "deploya-documentacion",
+  "private": true,
+  "description": "Genera los PDF y el HTML de la entrega final con el design system v4.1. No forma parte del producto.",
+  "type": "module",
+  "scripts": {
+    "construir": "node construir.mjs"
+  },
+  "dependencies": {
+    "geist": "1.8.2",
+    "marked": "18.1.2",
+    "mermaid": "12.2.0",
+    "playwright": "1.63.0"
+  }
+}

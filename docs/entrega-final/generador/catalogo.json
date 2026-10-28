@@ -1,0 +1,60 @@
+{
+  "entrega": {
+    "facultad": "Facultad de Ingeniería",
+    "carrera": "Ingeniería en Informática y Sistemas",
+    "curso": "Ingeniería de Software I · Proyecto final 2026",
+    "entrega": "Entrega final · 6 de noviembre de 2026",
+    "repositorio": "github.com/derekCmorales/deploya",
+    "version": "1.0",
+    "fecha": "6 de noviembre de 2026",
+    "estado": "Entrega final",
+    "equipo": [
+      { "nombre": "Eddy Poroj", "papel": "Cuentas, seguridad y notificaciones (M1, M10)" },
+      { "nombre": "Javier Rodríguez", "papel": "Suscripciones, pagos y administración (M2, M9)" },
+      { "nombre": "Eduardo Portillo", "papel": "Proyectos, observabilidad y design system (M3, M7)" },
+      { "nombre": "Derek Calderón Morales", "papel": "Motor de despliegue, arquitectura e infraestructura (M4–M6)" }
+    ]
+  },
+  "documentos": [
+    {
+      "id": "requisitos",
+      "numero": 1,
+      "archivo": "01-requisitos.md",
+      "salida": "01-deploya-requisitos",
+      "etiqueta": "Documento de requisitos",
+      "corto": "Requisitos",
+      "alcance": "Qué hace y para quién",
+      "subtitulo": "Qué construimos, para quién y con qué criterios de aceptación: alcance, actores, requisitos funcionales y no funcionales, casos de uso y trazabilidad con el enunciado."
+    },
+    {
+      "id": "diseno",
+      "numero": 2,
+      "archivo": "02-diseno.md",
+      "salida": "02-deploya-diseno",
+      "etiqueta": "Documento de diseño",
+      "corto": "Diseño",
+      "alcance": "Cómo está hecho y por qué",
+      "subtitulo": "Arquitectura defendida decisión por decisión: monolito modular hexagonal, modelo C4, UML por módulo, SOLID y patrones, modelo entidad-relación y diseño de la base de datos."
+    },
+    {
+      "id": "manual-tecnico",
+      "numero": 3,
+      "archivo": "03-manual-tecnico.md",
+      "salida": "03-deploya-manual-tecnico",
+      "etiqueta": "Manual técnico",
+      "corto": "Manual técnico",
+      "alcance": "Cómo se instala y opera",
+      "subtitulo": "Tecnologías, instalación local y en servidor, configuración, despliegue en el VPS, modo autoalojado, operación diaria, pruebas y solución de problemas."
+    },
+    {
+      "id": "manual-usuario",
+      "numero": 4,
+      "archivo": "04-manual-usuario.md",
+      "salida": "04-deploya-manual-usuario",
+      "etiqueta": "Manual de usuario",
+      "corto": "Manual de usuario",
+      "alcance": "Cómo se usa",
+      "subtitulo": "De la cuenta nueva a la aplicación en línea con HTTPS: registro, inicio de sesión, planes y pagos, proyectos, despliegues, reversión, métricas y administración."
+    }
+  ]
+}

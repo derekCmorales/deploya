@@ -1,0 +1,27 @@
+---
+title: Arquitectura hexagonal dentro de cada módulo — ejemplo real del motor (M4–M6)
+---
+flowchart LR
+    ENTRADA["<b>Entrada · adapta</b><br/>DesplieguesController<br/>AccionesDespliegueController<br/>ReversionController<br/>consumirDespliegues() del trabajador<br/>SesionGuard · RolGuard"]
+    APLICACION["<b>Aplicación · orquesta</b><br/>ConstruccionService<br/>ReversionService<br/>AccionesDespliegueService<br/>PipelineDespliegue y sus cinco pasos"]
+    DOMINIO["<b>Dominio · decide</b><br/>TypeScript puro, sin Nest ni Prisma<br/>TransicionesDespliegue<br/>PoliticaAcciones · PoliticaDespliegue<br/>PoliticaRetencion · RecetaStack"]
+    PUERTOS["<b>Puertos · contratos</b><br/>ColaConstruccionPuerto<br/>RepositorioDespliegues · RepositorioArtefactos<br/>ClonadorRepositorioPuerto · ConstructorImagenPuerto<br/>ContenedorPuerto · VerificacionEntornoPuerto<br/>EnrutamientoPuerto · CertificadoPuerto"]
+    ADAPTADORES["<b>Adaptadores · hablan con el exterior</b><br/>ColaBullMq · ColaMemoria<br/>RepositorioDesplieguesPrisma · …Memoria<br/>ClonadorGit · ConstructorDocker<br/>ContenedorDocker · VerificacionHttp<br/>EnrutamientoTraefikArchivo · CertificadoAcmeArchivo"]
+    EXTERIOR["<b>Exterior</b><br/>PostgreSQL · Redis<br/>git · Docker Engine<br/>Traefik · Let's Encrypt"]
+
+    ENTRADA -->|"llama"| APLICACION
+    APLICACION -->|"decide con"| DOMINIO
+    APLICACION -->|"depende solo de"| PUERTOS
+    ADAPTADORES -. "implementan" .-> PUERTOS
+    ADAPTADORES -->|"hablan con"| EXTERIOR
+
+    classDef capaEntrada fill:#fefdfb,stroke:#a5a09a,color:#1a1510,text-align:left
+    classDef capaAplicacion fill:#fefdfb,stroke:#a5a09a,color:#1a1510,text-align:left
+    classDef capaDominio fill:#e2e9ec,stroke:#0065b4,stroke-width:1.5px,color:#1a1510,text-align:left
+    classDef capaPuerto fill:#ece9e4,stroke:#a5a09a,color:#1a1510,text-align:left
+    classDef capaExterna fill:#f2efe9,stroke:#a5a09a,stroke-dasharray:4 3,color:#1a1510,text-align:left
+    class ENTRADA capaEntrada
+    class APLICACION capaAplicacion
+    class DOMINIO capaDominio
+    class PUERTOS capaPuerto
+    class ADAPTADORES,EXTERIOR capaExterna

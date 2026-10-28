@@ -1,161 +1,107 @@
+---
+title: Clases — Suscripciones y pagos (M2) y Administración (M9)
+---
 classDiagram
     direction LR
 
-    class ServicioCatalogo {
-        +listarPlanes() List~Plan~
-        +obtenerPlan(planId) Plan
-        +listarComplementos() List~Complemento~
+    class SuscripcionesService {
+        <<facade>>
+        +catalogo() PlanCatalogo[]
+        +asignarSandbox(usuarioId) void
+        +cuotaDe(usuarioId) Cuota
     }
-
-    class ServicioSuscripciones {
-        +crearSuscripcion(clienteId, planId, vigencia) Suscripcion
-        +renovar(suscripcionId) Suscripcion
-        +cambiarPlan(suscripcionId, planNuevoId) Suscripcion
-        +cancelar(suscripcionId) Suscripcion
-        +actualizarEstadoPorCiclo(suscripcionId) Suscripcion
+    class ContratacionService {
+        +miSuscripcion(usuarioId) VistaSuscripcion
+        +cotizar(usuarioId, solicitud) Cotizacion
+        +contratar(usuarioId, solicitud) ResultadoContratacion
+        +programarDescenso(usuarioId, codigoPlan) VistaSuscripcion
     }
-
-    class ServicioPagos {
-        -pasarela : PasarelaPago
-        +procesarCargo(suscripcion, monto) Transaccion
+    class HistorialPagosService {
+        +deUsuario(usuarioId) FilaPago[]
+        +pdfDe(usuarioId, pagoId) ArchivoComprobante
+    }
+    class CicloSuscripcionService {
+        +ejecutar() ResultadoCiclo
+    }
+    class TareaCicloDiaria
+    class PoliticaCiclo {
+        <<dominio>>
+        +siguiente(suscripcion, ahora) SaltoCiclo
+        +cambioPorSalto(suscripcion, salto, ahora) CambioSuscripcion
     }
 
     class PasarelaPago {
-        <<interface>>
-        +cobrar(monto, metodo) ResultadoPago
+        <<puerto>>
+        +cobrar(cargo) ResultadoCobro
+    }
+    class PasarelaSimulada
+    class CatalogoPlanes {
+        <<puerto · Strategy>>
+        +enVenta() PlanCatalogo[]
+        +planInicial() Plan
+        +exigirCobro() void
+    }
+    class CatalogoNube
+    class CatalogoAutoalojado
+    class PoliticaCuotas {
+        <<puerto · Strategy>>
+    }
+    class CuotasDelPlan
+    class LimitesDeInstalacion
+    class ComprobantePdfPuerto {
+        <<puerto>>
+    }
+    class ComprobantePdfKit
+    class RepositorioSuscripciones {
+        <<puerto>>
+    }
+    class RepositorioPagos {
+        <<puerto>>
+    }
+    class RepositorioPlanes {
+        <<puerto>>
+    }
+    class ContenedoresClientePuerto {
+        <<puerto · M5>>
+    }
+    class AvisosPuerto {
+        <<puerto · M10>>
     }
 
-    class PasarelaSimulada {
-        +cobrar(monto, metodo) ResultadoPago
+    class SuspensionService {
+        +suspender(adminId, usuarioId, solicitud) void
+    }
+    class ReactivacionCuentaService {
+        +reactivar(adminId, usuarioId, solicitud) ResultadoReactivacion
+    }
+    class CuentasSuspensionPuerto {
+        <<puerto>>
+        +cuenta(usuarioId) CuentaObjetivo
+        +suspender(suspension) void
+        +reactivar(reactivacion) void
     }
 
-    class ServicioCuotas {
-        +aplicarLimites(suscripcion, plan)
-        +reaplicarLimites(suscripcion, plan)
-    }
+    ContratacionService --> PasarelaPago
+    ContratacionService --> RepositorioPlanes
+    ContratacionService --> RepositorioSuscripciones
+    ContratacionService --> RepositorioPagos
+    SuscripcionesService --> CatalogoPlanes
+    SuscripcionesService --> PoliticaCuotas
+    HistorialPagosService --> RepositorioPagos
+    HistorialPagosService --> ComprobantePdfPuerto
+    TareaCicloDiaria --> CicloSuscripcionService
+    CicloSuscripcionService --> PoliticaCiclo
+    CicloSuscripcionService --> RepositorioSuscripciones
+    CicloSuscripcionService --> ContenedoresClientePuerto
+    CicloSuscripcionService --> AvisosPuerto
+    PasarelaPago <|-- PasarelaSimulada
+    CatalogoPlanes <|-- CatalogoNube
+    CatalogoPlanes <|-- CatalogoAutoalojado
+    PoliticaCuotas <|-- CuotasDelPlan
+    PoliticaCuotas <|-- LimitesDeInstalacion
+    ComprobantePdfPuerto <|-- ComprobantePdfKit
 
-    class ServicioHistorialPagos {
-        +registrar(transaccion)
-        +listarPorSuscripcion(suscripcionId) List~Transaccion~
-    }
-
-    class ServicioAdministracionPlanes {
-        +crearPlan(datosPlan) Plan
-        +actualizarPlan(planId, datosPlan) Plan
-        +descontinuarPlan(planId)
-    }
-
-    class ServicioAdministracionUsuarios {
-        +listarUsuarios(filtros) List~Usuario~
-        +suspenderCuenta(usuarioId)
-    }
-
-    class ServicioAuditoriaAdministrativa {
-        +registrarAccion(adminId, accion, entidad, entidadId)
-    }
-
-    class Plan {
-        +id : UUID
-        +nombre : String
-        +descripcion : String
-        +precio : Decimal
-        +vigenciaDias : Integer
-        +activo : Boolean
-    }
-
-    class LimitePlan {
-        +id : UUID
-        +planId : UUID
-        +recurso : String
-        +valor : String
-    }
-
-    class Complemento {
-        +id : UUID
-        +nombre : String
-        +descripcion : String
-        +precio : Decimal
-    }
-
-    class Suscripcion {
-        +id : UUID
-        +usuarioId : UUID
-        +planId : UUID
-        +estado : EstadoSuscripcion
-        +renovacionAutomatica : Boolean
-        +fechaInicio : DateTime
-        +fechaFin : DateTime
-        +fechaCreacion : DateTime
-        +fechaActualizacion : DateTime
-    }
-
-    class SuscripcionComplemento {
-        +suscripcionId : UUID
-        +complementoId : UUID
-        +cantidad : Integer
-        +fechaInicio : DateTime
-        +fechaFin : DateTime
-    }
-
-    class Transaccion {
-        +id : UUID
-        +suscripcionId : UUID
-        +tipo : TipoTransaccion
-        +monto : Decimal
-        +estado : EstadoTransaccion
-        +fecha : DateTime
-        +comprobante : String
-    }
-
-    class AccionAdministrativa {
-        +id : UUID
-        +adminId : UUID
-        +accion : String
-        +entidadAfectada : String
-        +entidadId : UUID
-        +fecha : DateTime
-        +detalle : String
-    }
-
-    class EstadoSuscripcion {
-        <<enumeration>>
-        ACTIVA
-        POR_VENCER
-        VENCIDA
-        SUSPENDIDA
-        CANCELADA
-    }
-
-    class TipoTransaccion {
-        <<enumeration>>
-        CONTRATACION
-        RENOVACION
-        CAMBIO_PLAN
-        COMPLEMENTO
-    }
-
-    class EstadoTransaccion {
-        <<enumeration>>
-        APROBADA
-        RECHAZADA
-        PENDIENTE
-    }
-
-    PasarelaPago <|.. PasarelaSimulada : implementa
-    ServicioPagos --> PasarelaPago : depende de (DIP)
-    ServicioSuscripciones --> ServicioCatalogo
-    ServicioSuscripciones --> ServicioPagos
-    ServicioSuscripciones --> ServicioCuotas
-    ServicioPagos --> ServicioHistorialPagos
-    ServicioAdministracionPlanes --> ServicioCatalogo
-    ServicioAdministracionPlanes --> ServicioAuditoriaAdministrativa
-    ServicioAdministracionUsuarios --> ServicioAuditoriaAdministrativa
-
-    Plan "1" --> "0..*" LimitePlan
-    Suscripcion "1" --> "1" Plan
-    Suscripcion "1" --> "0..*" SuscripcionComplemento
-    Complemento "1" --> "0..*" SuscripcionComplemento
-    Suscripcion "1" --> "0..*" Transaccion
-    Suscripcion "1" --> "1" EstadoSuscripcion
-    Transaccion "1" --> "1" TipoTransaccion
-    Transaccion "1" --> "1" EstadoTransaccion
+    SuspensionService --> CuentasSuspensionPuerto
+    SuspensionService --> ContenedoresClientePuerto
+    ReactivacionCuentaService --> CuentasSuspensionPuerto
+    ReactivacionCuentaService --> ContenedoresClientePuerto

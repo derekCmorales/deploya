@@ -1,0 +1,26 @@
+---
+title: Integración continua y publicación — de la rama al VPS
+---
+flowchart LR
+    RAMA["Rama<br/>feat/m‹n›-‹slug›"] --> PR["Pull request<br/>plantilla + CODEOWNERS"]
+    PR --> CI
+
+    subgraph CI["GitHub Actions · ci.yml"]
+        direction TB
+        J1["Build y pruebas<br/>pnpm test · pnpm build<br/>validate:mermaid"]
+        J2["Secretos<br/>gitleaks sobre todo el historial"]
+        J3["Scripts<br/>shellcheck del instalador"]
+        J4["Smoke compose<br/>docker compose up · e2e/smoke.mjs"]
+    end
+
+    CI --> REV{"¿Verde y<br/>aprobado?"}
+    REV -- "No" --> RAMA
+    REV -- "Sí" --> MAIN["main"]
+    MAIN --> ARCH["/opsx-archive<br/>el spec delta pasa al spec del módulo"]
+    MAIN --> VPS["scripts/desplegar-vps.sh<br/>git pull · compose up --build<br/>migraciones · seed · espera health"]
+    VPS --> OK["https://‹dominio›<br/>en línea"]
+
+    classDef success fill:#e3efe9,stroke:#00784f,stroke-width:1.5px,color:#1a1510
+    classDef decision fill:#f4ebdf,stroke:#945a00,stroke-width:1.5px,color:#1a1510
+    class OK success
+    class REV decision

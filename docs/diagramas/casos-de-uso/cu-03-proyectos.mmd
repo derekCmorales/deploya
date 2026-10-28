@@ -1,0 +1,45 @@
+---
+title: Casos de uso — Proyectos, despliegues y observabilidad (M3 a M7)
+---
+flowchart LR
+    CLI["«actor»<br/>Cliente"]
+
+    subgraph MOTOR["Deploya · Proyectos y motor de despliegue"]
+        direction TB
+        CU10(["CU-10 Crear proyecto<br/>y desplegar"])
+        CU11(["CU-11 Seguir un despliegue"])
+        CU12(["CU-12 Revertir a una versión"])
+        CU13(["CU-13 Operar el proyecto"])
+        CU13a(["Redesplegar, reintentar<br/>o cancelar"])
+        CU13b(["Reiniciar o detener"])
+        CU13c(["Editar variables cifradas"])
+        CU13d(["Configurar o eliminar"])
+        CU14(["CU-14 Monitorear recursos"])
+        INC1(["Detectar stack"])
+        INC2(["Verificar cuota<br/>y suscripción"])
+        INC3(["Construir, ejecutar<br/>y publicar"])
+    end
+
+    GH["«sistema»<br/>GitHub"]
+    DOCKER["«sistema»<br/>Docker y Traefik"]
+
+    CLI --- CU10 & CU11 & CU12 & CU13 & CU14
+
+    CU10 -. «include» .-> INC1
+    CU10 -. «include» .-> INC2
+    CU10 -. «include» .-> INC3
+    CU12 -. «include» .-> INC3
+    CU13a -. «extend» .-> CU13
+    CU13b -. «extend» .-> CU13
+    CU13c -. «extend» .-> CU13
+    CU13d -. «extend» .-> CU13
+    CU13a -. «include» .-> INC2
+    INC1 --- GH
+    INC3 --- DOCKER
+
+    classDef actor fill:#fefdfb,stroke:#1a1510,stroke-width:1.5px,color:#1a1510
+    classDef externo fill:#f2efe9,stroke:#a5a09a,stroke-dasharray:4 3,color:#1a1510
+    classDef data fill:#f2efe9,stroke:#a5a09a,color:#1a1510
+    class CLI actor
+    class GH,DOCKER externo
+    class INC1,INC2,INC3 data

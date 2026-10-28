@@ -549,6 +549,7 @@ El puerto de correo ya no lleva prefijo `I`. En el unificado se nombra `CorreoPu
 <!-- diagrama: docs/diagramas/m1-m10/m1-m10-componentes.mmd -->
 ```mermaid
 ---
+title: Componentes — Identidad (M1) y Notificaciones (M10)
 config:
   layout: elk
 ---
@@ -652,6 +653,7 @@ flowchart TB
 <!-- diagrama: docs/diagramas/m1-m10/m1-actividad-registro.mmd -->
 ```mermaid
 ---
+title: Actividad — registro de cuenta (M1, M10)
 config:
   layout: fixed
 ---
@@ -724,6 +726,7 @@ flowchart TB
 <!-- diagrama: docs/diagramas/m1-m10/m1-actividad-verificacion-correo.mmd -->
 ```mermaid
 ---
+title: Actividad — verificación de correo (M1, M10)
 config:
   layout: elk
 ---
@@ -792,6 +795,7 @@ flowchart TD
 <!-- diagrama: docs/diagramas/m1-m10/m1-actividad-recuperacion-contrasena.mmd -->
 ```mermaid
 ---
+title: Actividad — recuperación de contraseña (M1, M10)
 config:
   layout: elk
 ---
@@ -889,6 +893,7 @@ flowchart TD
 <!-- diagrama: docs/diagramas/m1-m10/m2-m9-componentes.mmd -->
 ```mermaid
 ---
+title: Componentes — Suscripciones (M2) y Administración (M9)
 config:
   layout: elk
 ---
@@ -993,167 +998,113 @@ flowchart TB
 
 <!-- diagrama: docs/diagramas/m1-m10/m2-m9-clases.mmd -->
 ```mermaid
+---
+title: Clases — Suscripciones y pagos (M2) y Administración (M9)
+---
 classDiagram
     direction LR
 
-    class ServicioCatalogo {
-        +listarPlanes() List~Plan~
-        +obtenerPlan(planId) Plan
-        +listarComplementos() List~Complemento~
+    class SuscripcionesService {
+        <<facade>>
+        +catalogo() PlanCatalogo[]
+        +asignarSandbox(usuarioId) void
+        +cuotaDe(usuarioId) Cuota
     }
-
-    class ServicioSuscripciones {
-        +crearSuscripcion(clienteId, planId, vigencia) Suscripcion
-        +renovar(suscripcionId) Suscripcion
-        +cambiarPlan(suscripcionId, planNuevoId) Suscripcion
-        +cancelar(suscripcionId) Suscripcion
-        +actualizarEstadoPorCiclo(suscripcionId) Suscripcion
+    class ContratacionService {
+        +miSuscripcion(usuarioId) VistaSuscripcion
+        +cotizar(usuarioId, solicitud) Cotizacion
+        +contratar(usuarioId, solicitud) ResultadoContratacion
+        +programarDescenso(usuarioId, codigoPlan) VistaSuscripcion
     }
-
-    class ServicioPagos {
-        -pasarela : PasarelaPago
-        +procesarCargo(suscripcion, monto) Transaccion
+    class HistorialPagosService {
+        +deUsuario(usuarioId) FilaPago[]
+        +pdfDe(usuarioId, pagoId) ArchivoComprobante
+    }
+    class CicloSuscripcionService {
+        +ejecutar() ResultadoCiclo
+    }
+    class TareaCicloDiaria
+    class PoliticaCiclo {
+        <<dominio>>
+        +siguiente(suscripcion, ahora) SaltoCiclo
+        +cambioPorSalto(suscripcion, salto, ahora) CambioSuscripcion
     }
 
     class PasarelaPago {
-        <<interface>>
-        +cobrar(monto, metodo) ResultadoPago
+        <<puerto>>
+        +cobrar(cargo) ResultadoCobro
+    }
+    class PasarelaSimulada
+    class CatalogoPlanes {
+        <<puerto · Strategy>>
+        +enVenta() PlanCatalogo[]
+        +planInicial() Plan
+        +exigirCobro() void
+    }
+    class CatalogoNube
+    class CatalogoAutoalojado
+    class PoliticaCuotas {
+        <<puerto · Strategy>>
+    }
+    class CuotasDelPlan
+    class LimitesDeInstalacion
+    class ComprobantePdfPuerto {
+        <<puerto>>
+    }
+    class ComprobantePdfKit
+    class RepositorioSuscripciones {
+        <<puerto>>
+    }
+    class RepositorioPagos {
+        <<puerto>>
+    }
+    class RepositorioPlanes {
+        <<puerto>>
+    }
+    class ContenedoresClientePuerto {
+        <<puerto · M5>>
+    }
+    class AvisosPuerto {
+        <<puerto · M10>>
     }
 
-    class PasarelaSimulada {
-        +cobrar(monto, metodo) ResultadoPago
+    class SuspensionService {
+        +suspender(adminId, usuarioId, solicitud) void
+    }
+    class ReactivacionCuentaService {
+        +reactivar(adminId, usuarioId, solicitud) ResultadoReactivacion
+    }
+    class CuentasSuspensionPuerto {
+        <<puerto>>
+        +cuenta(usuarioId) CuentaObjetivo
+        +suspender(suspension) void
+        +reactivar(reactivacion) void
     }
 
-    class ServicioCuotas {
-        +aplicarLimites(suscripcion, plan)
-        +reaplicarLimites(suscripcion, plan)
-    }
+    ContratacionService --> PasarelaPago
+    ContratacionService --> RepositorioPlanes
+    ContratacionService --> RepositorioSuscripciones
+    ContratacionService --> RepositorioPagos
+    SuscripcionesService --> CatalogoPlanes
+    SuscripcionesService --> PoliticaCuotas
+    HistorialPagosService --> RepositorioPagos
+    HistorialPagosService --> ComprobantePdfPuerto
+    TareaCicloDiaria --> CicloSuscripcionService
+    CicloSuscripcionService --> PoliticaCiclo
+    CicloSuscripcionService --> RepositorioSuscripciones
+    CicloSuscripcionService --> ContenedoresClientePuerto
+    CicloSuscripcionService --> AvisosPuerto
+    PasarelaPago <|-- PasarelaSimulada
+    CatalogoPlanes <|-- CatalogoNube
+    CatalogoPlanes <|-- CatalogoAutoalojado
+    PoliticaCuotas <|-- CuotasDelPlan
+    PoliticaCuotas <|-- LimitesDeInstalacion
+    ComprobantePdfPuerto <|-- ComprobantePdfKit
 
-    class ServicioHistorialPagos {
-        +registrar(transaccion)
-        +listarPorSuscripcion(suscripcionId) List~Transaccion~
-    }
-
-    class ServicioAdministracionPlanes {
-        +crearPlan(datosPlan) Plan
-        +actualizarPlan(planId, datosPlan) Plan
-        +descontinuarPlan(planId)
-    }
-
-    class ServicioAdministracionUsuarios {
-        +listarUsuarios(filtros) List~Usuario~
-        +suspenderCuenta(usuarioId)
-    }
-
-    class ServicioAuditoriaAdministrativa {
-        +registrarAccion(adminId, accion, entidad, entidadId)
-    }
-
-    class Plan {
-        +id : UUID
-        +nombre : String
-        +descripcion : String
-        +precio : Decimal
-        +vigenciaDias : Integer
-        +activo : Boolean
-    }
-
-    class LimitePlan {
-        +id : UUID
-        +planId : UUID
-        +recurso : String
-        +valor : String
-    }
-
-    class Complemento {
-        +id : UUID
-        +nombre : String
-        +descripcion : String
-        +precio : Decimal
-    }
-
-    class Suscripcion {
-        +id : UUID
-        +usuarioId : UUID
-        +planId : UUID
-        +estado : EstadoSuscripcion
-        +renovacionAutomatica : Boolean
-        +fechaInicio : DateTime
-        +fechaFin : DateTime
-        +fechaCreacion : DateTime
-        +fechaActualizacion : DateTime
-    }
-
-    class SuscripcionComplemento {
-        +suscripcionId : UUID
-        +complementoId : UUID
-        +cantidad : Integer
-        +fechaInicio : DateTime
-        +fechaFin : DateTime
-    }
-
-    class Transaccion {
-        +id : UUID
-        +suscripcionId : UUID
-        +tipo : TipoTransaccion
-        +monto : Decimal
-        +estado : EstadoTransaccion
-        +fecha : DateTime
-        +comprobante : String
-    }
-
-    class AccionAdministrativa {
-        +id : UUID
-        +adminId : UUID
-        +accion : String
-        +entidadAfectada : String
-        +entidadId : UUID
-        +fecha : DateTime
-        +detalle : String
-    }
-
-    class EstadoSuscripcion {
-        <<enumeration>>
-        ACTIVA
-        POR_VENCER
-        VENCIDA
-        SUSPENDIDA
-        CANCELADA
-    }
-
-    class TipoTransaccion {
-        <<enumeration>>
-        CONTRATACION
-        RENOVACION
-        CAMBIO_PLAN
-        COMPLEMENTO
-    }
-
-    class EstadoTransaccion {
-        <<enumeration>>
-        APROBADA
-        RECHAZADA
-        PENDIENTE
-    }
-
-    PasarelaPago <|.. PasarelaSimulada : implementa
-    ServicioPagos --> PasarelaPago : depende de (DIP)
-    ServicioSuscripciones --> ServicioCatalogo
-    ServicioSuscripciones --> ServicioPagos
-    ServicioSuscripciones --> ServicioCuotas
-    ServicioPagos --> ServicioHistorialPagos
-    ServicioAdministracionPlanes --> ServicioCatalogo
-    ServicioAdministracionPlanes --> ServicioAuditoriaAdministrativa
-    ServicioAdministracionUsuarios --> ServicioAuditoriaAdministrativa
-
-    Plan "1" --> "0..*" LimitePlan
-    Suscripcion "1" --> "1" Plan
-    Suscripcion "1" --> "0..*" SuscripcionComplemento
-    Complemento "1" --> "0..*" SuscripcionComplemento
-    Suscripcion "1" --> "0..*" Transaccion
-    Suscripcion "1" --> "1" EstadoSuscripcion
-    Transaccion "1" --> "1" TipoTransaccion
-    Transaccion "1" --> "1" EstadoTransaccion
+    SuspensionService --> CuentasSuspensionPuerto
+    SuspensionService --> ContenedoresClientePuerto
+    ReactivacionCuentaService --> CuentasSuspensionPuerto
+    ReactivacionCuentaService --> ContenedoresClientePuerto
 ```
 
 #### Secuencia: contratación de plan
@@ -1161,6 +1112,9 @@ classDiagram
 
 <!-- diagrama: docs/diagramas/m1-m10/m2-secuencia-contratacion-plan.mmd -->
 ```mermaid
+---
+title: Secuencia — contratación de un plan con la pasarela simulada (M2)
+---
 sequenceDiagram
     actor Cliente
     participant UI as Interfaz web
@@ -1217,6 +1171,9 @@ sequenceDiagram
 
 <!-- diagrama: docs/diagramas/m1-m10/m2-secuencia-renovacion.mmd -->
 ```mermaid
+---
+title: Secuencia — renovación manual de la suscripción (M2, M5)
+---
 sequenceDiagram
     actor Cliente
     participant Sched as Programador de renovaciones
@@ -1273,6 +1230,9 @@ sequenceDiagram
 
 <!-- diagrama: docs/diagramas/m1-m10/m2-actividad-contratacion-activacion.mmd -->
 ```mermaid
+---
+title: Actividad — contratación y activación de un plan (M2)
+---
 flowchart TB
     START(("Inicio")) --> A["Cliente consulta<br>catalogo de planes"]
     A --> B["Selecciona plan<br>y vigencia (30/365 dias)"]
@@ -1324,6 +1284,9 @@ flowchart TB
 
 <!-- diagrama: docs/diagramas/m1-m10/m2-actividad-renovacion.mmd -->
 ```mermaid
+---
+title: Actividad — renovación de la suscripción (M2)
+---
 flowchart TB
     START(("Inicio")) --> A{"Origen"}
     A -- "Cliente (manual)" --> B["Cliente solicita<br>renovar desde el panel"]
@@ -1420,6 +1383,9 @@ flowchart TB
 
 <!-- diagrama: docs/diagramas/m1-m10/m3-m7-componentes.mmd -->
 ```mermaid
+---
+title: Componentes — Proyectos (M3) y Observabilidad (M7)
+---
 flowchart TD
     %% Interfaz
     UI[Interfaz Next.js - Panel de Cliente]
@@ -1450,30 +1416,95 @@ El ERD y las clases **canónicos** son los unificados (§6 y §7).
 
 <!-- diagrama: docs/diagramas/m1-m10/m3-m7-clases.mmd -->
 ```mermaid
+---
+title: Clases — Proyectos (M3) y Observabilidad (M7)
+---
 classDiagram
+    direction LR
+    class ProyectosController
+    class ProyectosService {
+        +validarRepositorio(consulta) ValidacionRepositorio
+        +listar(usuarioId) ListaProyectos
+        +crear(usuarioId, alta) ProyectoCreado
+        +configurar(usuarioId, proyectoId, cambios) Proyecto
+        +eliminar(usuarioId, proyectoId, confirmacion) void
+    }
+    class VariablesProyectoService {
+        +guardarVariables(usuarioId, proyectoId, pedido) VariablesGuardadas
+        +listarVariables(usuarioId, proyectoId) VariablePublica[]
+        +mostrarVariable(usuarioId, proyectoId, clave) string
+    }
     class ProveedorFuente {
-        <<interface>>
-        +obtenerCodigoFuente() CodigoFuente
+        <<puerto>>
+        +validar(consulta) ValidacionRepositorio
+        +lector(consulta) LectorFuente
     }
-    class FuenteRepositorio {
-        +obtenerCodigoFuente() CodigoFuente
+    class RepositorioProyectos {
+        <<puerto>>
+        +guardar(proyecto) Proyecto
+        +porId(id) Proyecto
+        +deUsuario(usuarioId) Proyecto[]
+        +existeSubdominio(subdominio) boolean
     }
-    class FuenteArchivoComprimido {
-        +obtenerCodigoFuente() CodigoFuente
+    class CuotaProyectosPuerto {
+        <<puerto>>
+        +cuotaDe(usuarioId) CuotaProyectos
     }
-    ProveedorFuente <|.. FuenteRepositorio
-    ProveedorFuente <|.. FuenteArchivoComprimido
+    class CifradorVariables {
+        <<puerto>>
+        +cifrar(valor) string
+        +descifrar(valorCifrado) string
+    }
+    class FuenteGitHubPublica
+    class CifradorAesGcm
+    class CuotaProyectosSuscripciones
+    class RepositorioProyectosPrisma
 
-    class ControladorProyecto {
-        -proveedorFuente: ProveedorFuente
-        +crearProyecto(nombre, variablesEntorno) Proyecto
+    class DeteccionStackService {
+        <<M4>>
     }
-    ControladorProyecto --> ProveedorFuente
+    class ConstruccionService {
+        <<M4>>
+        +crearDespliegue(pedido) Despliegue
+    }
+    class BloqueosService {
+        <<M5>>
+    }
 
-    class ControladorObservabilidad {
-        +consultarMetricasEnVivo(proyectoId) List~MetricaConsumo~
-        +transmitirBitacorasConstruccion(proyectoId)
+    class ResumenProyectoService {
+        +resumen(proyectoId, usuarioId) ResumenProyecto
     }
+    class ConsumoService {
+        +de(usuarioId) ConsumoPeriodoDto
+        +diario(usuarioId) ConsumoDiarioDto
+    }
+    class LecturaMetricasService {
+        +leer(proyectoId, usuarioId, rango) RespuestaMetricas
+    }
+    class TiemposService {
+        +leer(proyectoId, usuarioId, ultimos) RespuestaTiempos
+    }
+    class BitacoraEjecucionService {
+        +leer(proyectoId, usuarioId, desde) RespuestaBitacora
+    }
+    class SalidaContenedorPuerto {
+        <<puerto>>
+    }
+
+    ProyectosController --> ProyectosService
+    ProyectosService --> ProveedorFuente
+    ProyectosService --> RepositorioProyectos
+    ProyectosService --> CuotaProyectosPuerto
+    ProyectosService --> VariablesProyectoService
+    ProyectosService --> DeteccionStackService
+    ProyectosService --> ConstruccionService
+    ProyectosService --> BloqueosService
+    VariablesProyectoService --> CifradorVariables
+    ProveedorFuente <|-- FuenteGitHubPublica
+    CifradorVariables <|-- CifradorAesGcm
+    CuotaProyectosPuerto <|-- CuotaProyectosSuscripciones
+    RepositorioProyectos <|-- RepositorioProyectosPrisma
+    BitacoraEjecucionService --> SalidaContenedorPuerto
 ```
 
 #### Actividad: crear proyecto (original de compañeros; es `stateDiagram-v2`)
@@ -1481,6 +1512,9 @@ classDiagram
 
 <!-- diagrama: docs/diagramas/m1-m10/m3-actividad-crear-proyecto.mmd -->
 ```mermaid
+---
+title: Actividad — crear un proyecto (M3)
+---
 stateDiagram-v2
     [*] --> IniciarFormulario
     IniciarFormulario --> IngresarNombreYFuente
@@ -1503,6 +1537,9 @@ stateDiagram-v2
 
 <!-- diagrama: docs/diagramas/m1-m10/m7-actividad-consultar-metricas.mmd -->
 ```mermaid
+---
+title: Actividad — consultar métricas del proyecto (M7)
+---
 stateDiagram-v2
     [*] --> EntrarDashboardProyecto
     EntrarDashboardProyecto --> CargarDatos
@@ -1557,6 +1594,7 @@ erDiagram
     ARTEFACTO |o--o{ DESPLIEGUE : "construido o reusado por"
     DESPLIEGUE ||--|{ ETAPA_DESPLIEGUE : "cinco etapas"
     DESPLIEGUE ||--o{ LINEA_BITACORA : produce
+    DESPLIEGUE ||--o{ MUESTRA_METRICA : "se muestrea (24 h)"
 
     USUARIO {
         string id PK
@@ -1692,6 +1730,24 @@ erDiagram
         decimal cpuPorProyecto
         int memoriaMbPorProyecto
         int proyectosPorUsuario "null = sin límite"
+        string smtpHost "correo de la instalación (SP-17)"
+        string smtpClaveCifrada "AES-GCM; nunca en claro"
+        boolean sinCorreo
+    }
+    MUESTRA_METRICA {
+        string despliegueId PK,FK
+        datetime tomada PK "una por minuto; se purga a las 24 h"
+        decimal cpu
+        int memoriaMb
+    }
+    INVITACION {
+        string id PK
+        string correo
+        string hashToken UK "sha256; un solo uso"
+        datetime vence "7 días"
+        datetime usada
+        datetime revocada
+        string creadaPor "id del administrador"
     }
 ```
 
@@ -3101,6 +3157,9 @@ No copiar estos cinco estados al despliegue.
 
 <!-- diagrama: docs/diagramas/m1-m10/m2-estados-suscripcion.mmd -->
 ```mermaid
+---
+title: Estados de la suscripción — ciclo §4.4 (no son los de despliegue)
+---
 stateDiagram-v2
     [*] --> Activa : contratacion con pago aprobado<br/>(Sandbox: Activa sin vencimiento)
 

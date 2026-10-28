@@ -1,0 +1,112 @@
+---
+title: Clases del motor de despliegue (M4 Construcción, M5 Orquestación, M6 Enrutamiento)
+---
+classDiagram
+    direction TB
+    class PipelineDespliegue {
+        +ejecutar(trabajo) void
+        -recorrer(contexto, pasos) void
+        -fallar(contexto, error) void
+        -cancelar(contexto) void
+    }
+    class PasoPipeline {
+        <<abstract>>
+        +etapa Etapa
+        +estado EstadoDespliegue
+        +ejecutar(contexto)* void
+        +compensar(contexto) void
+        +liberar(contexto) void
+    }
+    class PasoRecepcion
+    class PasoConstruccion
+    class PasoEjecucion
+    class PasoEnrutamiento
+    class PasoOperacion
+
+    class TransicionesDespliegue {
+        <<dominio>>
+        +puedeTransicionar(de, a) boolean
+        +transicionar(de, a) EstadoDespliegue
+    }
+    class DeteccionStackService {
+        +detectar(fuente, rutaDockerfile) ResultadoDeteccion
+    }
+    class RecetaStack {
+        <<abstract>>
+        +reconoce(archivos)* boolean
+        +describir(archivos)* DescripcionReceta
+        +dockerfile(archivos)* string
+        +puertoSugerido(archivos)* number
+    }
+    class RecetaDockerfile
+    class RecetaNode
+    class RecetaPython
+    class RecetaGo
+    class RecetaEstatica
+
+    class OyenteDespliegue {
+        <<abstract>>
+        +alTerminar(evento)* void
+    }
+    class RetencionArtefactos
+    class AvisoDespliegueOyente
+
+    class ClonadorRepositorioPuerto {
+        <<puerto>>
+    }
+    class ConstructorImagenPuerto {
+        <<puerto>>
+    }
+    class ContenedorPuerto {
+        <<puerto>>
+        +crear(espec) ContenedorCreado
+        +detener(id) void
+        +eliminarImagen(imagen) void
+    }
+    class VerificacionEntornoPuerto {
+        <<puerto>>
+        +saludable(objetivo) ResultadoSalud
+    }
+    class EnrutamientoPuerto {
+        <<puerto>>
+        +publicar(ruta) url
+        +retirar(subdominio) void
+    }
+    class RepositorioDespliegues {
+        <<puerto>>
+    }
+
+    class ClonadorGit
+    class ConstructorDocker
+    class ContenedorDocker
+    class VerificacionHttp
+    class EnrutamientoTraefikArchivo
+
+    PipelineDespliegue o-- PasoPipeline : plan construccion o reversion
+    PipelineDespliegue --> TransicionesDespliegue
+    PipelineDespliegue --> RepositorioDespliegues
+    PipelineDespliegue --> OyenteDespliegue : DespliegueTerminado
+    PasoPipeline <|-- PasoRecepcion
+    PasoPipeline <|-- PasoConstruccion
+    PasoPipeline <|-- PasoEjecucion
+    PasoPipeline <|-- PasoEnrutamiento
+    PasoPipeline <|-- PasoOperacion
+    PasoRecepcion --> ClonadorRepositorioPuerto
+    PasoRecepcion --> DeteccionStackService
+    PasoConstruccion --> ConstructorImagenPuerto
+    PasoEjecucion --> ContenedorPuerto
+    PasoEjecucion --> VerificacionEntornoPuerto
+    PasoEnrutamiento --> EnrutamientoPuerto
+    DeteccionStackService o-- RecetaStack : en orden
+    RecetaStack <|-- RecetaDockerfile
+    RecetaStack <|-- RecetaNode
+    RecetaStack <|-- RecetaPython
+    RecetaStack <|-- RecetaGo
+    RecetaStack <|-- RecetaEstatica
+    OyenteDespliegue <|-- RetencionArtefactos
+    OyenteDespliegue <|-- AvisoDespliegueOyente
+    ClonadorRepositorioPuerto <|.. ClonadorGit
+    ConstructorImagenPuerto <|.. ConstructorDocker
+    ContenedorPuerto <|.. ContenedorDocker
+    VerificacionEntornoPuerto <|.. VerificacionHttp
+    EnrutamientoPuerto <|.. EnrutamientoTraefikArchivo

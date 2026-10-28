@@ -23,7 +23,11 @@ Define `ADMIN_CLAVE` en `.env`. API en [http://localhost:3001/health](http://loc
 
 ## Autoalojado
 
-En un servidor propio el comando es `./scripts/instalar.sh`, que entra con el change `feat-instalador-autoalojado` (PR #42). La primera etapa comprueba Docker 24+, Docker Compose v2, `curl`, `dig` y `openssl`. Contrato: [docs/contratos/instalacion.md](docs/contratos/instalacion.md). La decisión sigue propuesta en el [ADR 0008](docs/adr/0008-autoalojado-y-codigo-abierto.md) hasta el merge de `feat-m2-modo-autoalojado`.
+En un servidor propio el comando es `./scripts/instalar.sh`. La primera etapa comprueba Docker 24+, Docker Compose v2, `curl`, `dig` y `openssl`; el detalle está en el [manual técnico](docs/entrega-final/03-manual-tecnico.md#modo-autoalojado). Contrato: [docs/contratos/instalacion.md](docs/contratos/instalacion.md). Decisión: [ADR 0008](docs/adr/0008-autoalojado-y-codigo-abierto.md).
+
+## Documentación de la entrega final
+
+Requisitos, diseño, manual técnico y manual de usuario, en Markdown y en PDF con el design system v4.1: [docs/entrega-final/](docs/entrega-final/).
 
 ## Contribuir
 

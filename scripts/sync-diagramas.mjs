@@ -5,7 +5,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const DOCUMENTOS = ["docs/arquitectura.md", "docs/arquitectura-maestro.md"];
+const DOCUMENTOS = [
+  "docs/arquitectura.md",
+  "docs/arquitectura-maestro.md",
+  "docs/entrega-final/01-requisitos.md",
+  "docs/entrega-final/02-diseno.md",
+  "docs/entrega-final/03-manual-tecnico.md",
+  "docs/entrega-final/04-manual-usuario.md",
+];
 const BLOQUE = /(<!-- diagrama: (\S+) -->\n+```mermaid\n)([\s\S]*?)(```)/g;
 
 const soloRevisar = process.argv.includes("--check");

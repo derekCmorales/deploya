@@ -1,0 +1,35 @@
+---
+title: Casos de uso — Administración y autoalojado (M9, instalación)
+---
+flowchart LR
+    ADM["«actor»<br/>Administrador"]
+    OPE["«actor»<br/>Quien instala"]
+
+    subgraph M9["Deploya · Administración"]
+        direction TB
+        CU16(["CU-16 Gestionar usuarios"])
+        CU17(["CU-17 Suspender cuenta"])
+        CU17b(["Reactivar cuenta"])
+        CU18(["CU-18 Supervisar infraestructura"])
+        CU19(["CU-19 Ajustar la instalación"])
+        CU19b(["Invitar usuarios"])
+        CU20(["CU-20 Instalar Deploya<br/>autoalojado"])
+        CU20b(["Configurar el primer<br/>administrador"])
+        INC1(["Registrar acción<br/>administrativa"])
+        INC2(["Detener o reanudar<br/>contenedores"])
+    end
+
+    ADM --- CU16 & CU17 & CU18 & CU19
+    OPE --- CU20
+
+    CU17 -. «include» .-> INC1
+    CU17 -. «include» .-> INC2
+    CU17b -. «extend» .-> CU17
+    CU19 -. «include» .-> INC1
+    CU19b -. «extend» .-> CU19
+    CU20 -. «include» .-> CU20b
+
+    classDef actor fill:#fefdfb,stroke:#1a1510,stroke-width:1.5px,color:#1a1510
+    classDef data fill:#f2efe9,stroke:#a5a09a,color:#1a1510
+    class ADM,OPE actor
+    class INC1,INC2 data

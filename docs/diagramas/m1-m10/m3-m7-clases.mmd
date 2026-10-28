@@ -1,24 +1,89 @@
+---
+title: Clases — Proyectos (M3) y Observabilidad (M7)
+---
 classDiagram
+    direction LR
+    class ProyectosController
+    class ProyectosService {
+        +validarRepositorio(consulta) ValidacionRepositorio
+        +listar(usuarioId) ListaProyectos
+        +crear(usuarioId, alta) ProyectoCreado
+        +configurar(usuarioId, proyectoId, cambios) Proyecto
+        +eliminar(usuarioId, proyectoId, confirmacion) void
+    }
+    class VariablesProyectoService {
+        +guardarVariables(usuarioId, proyectoId, pedido) VariablesGuardadas
+        +listarVariables(usuarioId, proyectoId) VariablePublica[]
+        +mostrarVariable(usuarioId, proyectoId, clave) string
+    }
     class ProveedorFuente {
-        <<interface>>
-        +obtenerCodigoFuente() CodigoFuente
+        <<puerto>>
+        +validar(consulta) ValidacionRepositorio
+        +lector(consulta) LectorFuente
     }
-    class FuenteRepositorio {
-        +obtenerCodigoFuente() CodigoFuente
+    class RepositorioProyectos {
+        <<puerto>>
+        +guardar(proyecto) Proyecto
+        +porId(id) Proyecto
+        +deUsuario(usuarioId) Proyecto[]
+        +existeSubdominio(subdominio) boolean
     }
-    class FuenteArchivoComprimido {
-        +obtenerCodigoFuente() CodigoFuente
+    class CuotaProyectosPuerto {
+        <<puerto>>
+        +cuotaDe(usuarioId) CuotaProyectos
     }
-    ProveedorFuente <|.. FuenteRepositorio
-    ProveedorFuente <|.. FuenteArchivoComprimido
+    class CifradorVariables {
+        <<puerto>>
+        +cifrar(valor) string
+        +descifrar(valorCifrado) string
+    }
+    class FuenteGitHubPublica
+    class CifradorAesGcm
+    class CuotaProyectosSuscripciones
+    class RepositorioProyectosPrisma
 
-    class ControladorProyecto {
-        -proveedorFuente: ProveedorFuente
-        +crearProyecto(nombre, variablesEntorno) Proyecto
+    class DeteccionStackService {
+        <<M4>>
     }
-    ControladorProyecto --> ProveedorFuente
+    class ConstruccionService {
+        <<M4>>
+        +crearDespliegue(pedido) Despliegue
+    }
+    class BloqueosService {
+        <<M5>>
+    }
 
-    class ControladorObservabilidad {
-        +consultarMetricasEnVivo(proyectoId) List~MetricaConsumo~
-        +transmitirBitacorasConstruccion(proyectoId)
+    class ResumenProyectoService {
+        +resumen(proyectoId, usuarioId) ResumenProyecto
     }
+    class ConsumoService {
+        +de(usuarioId) ConsumoPeriodoDto
+        +diario(usuarioId) ConsumoDiarioDto
+    }
+    class LecturaMetricasService {
+        +leer(proyectoId, usuarioId, rango) RespuestaMetricas
+    }
+    class TiemposService {
+        +leer(proyectoId, usuarioId, ultimos) RespuestaTiempos
+    }
+    class BitacoraEjecucionService {
+        +leer(proyectoId, usuarioId, desde) RespuestaBitacora
+    }
+    class SalidaContenedorPuerto {
+        <<puerto>>
+    }
+
+    ProyectosController --> ProyectosService
+    ProyectosService --> ProveedorFuente
+    ProyectosService --> RepositorioProyectos
+    ProyectosService --> CuotaProyectosPuerto
+    ProyectosService --> VariablesProyectoService
+    ProyectosService --> DeteccionStackService
+    ProyectosService --> ConstruccionService
+    ProyectosService --> BloqueosService
+    VariablesProyectoService --> CifradorVariables
+    ProveedorFuente <|-- FuenteGitHubPublica
+    CifradorVariables <|-- CifradorAesGcm
+    CuotaProyectosPuerto <|-- CuotaProyectosSuscripciones
+    RepositorioProyectos <|-- RepositorioProyectosPrisma
+    BitacoraEjecucionService --> SalidaContenedorPuerto

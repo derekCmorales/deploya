@@ -1,0 +1,40 @@
+---
+title: Casos de uso — vista general de Deploya (núcleo v4.1 y sprint)
+---
+flowchart LR
+    VIS["«actor»<br/>Visitante"]
+    CLI["«actor»<br/>Cliente"]
+    ADM["«actor»<br/>Administrador"]
+    RELOJ["«actor»<br/>Tarea diaria"]
+
+    subgraph DEPLOYA["Deploya"]
+        direction TB
+        P1["<b>Cuenta · M1 M10</b><br/>CU-01 Registrarse<br/>CU-02 Verificar correo<br/>CU-03 Iniciar sesión<br/>CU-04 Recuperar contraseña<br/>CU-05 Gestionar mi cuenta"]
+        P2["<b>Suscripción y pagos · M2</b><br/>CU-06 Consultar planes<br/>CU-07 Contratar un plan<br/>CU-08 Renovar o cambiar de plan<br/>CU-09 Consultar historial de pagos<br/>CU-15 Avanzar el ciclo de suscripciones"]
+        P3["<b>Proyectos y despliegues · M3 a M7</b><br/>CU-10 Crear proyecto y desplegar<br/>CU-11 Seguir un despliegue<br/>CU-12 Revertir a una versión<br/>CU-13 Operar el proyecto<br/>CU-14 Monitorear recursos"]
+        P4["<b>Administración · M9</b><br/>CU-16 Gestionar usuarios<br/>CU-17 Suspender o reactivar cuenta<br/>CU-18 Supervisar infraestructura<br/>CU-19 Ajustar la instalación<br/>CU-20 Instalar autoalojado"]
+    end
+
+    GH["«sistema»<br/>GitHub"]
+    SMTP["«sistema»<br/>Proveedor SMTP"]
+    INFRA["«sistema»<br/>Docker · Traefik<br/>Let's Encrypt"]
+
+    VIS --- P1
+    VIS --- P2
+    CLI --- P1
+    CLI --- P2
+    CLI --- P3
+    ADM --- P1
+    ADM --- P4
+    RELOJ --- P2
+    P1 --- SMTP
+    P2 --- SMTP
+    P3 --- GH
+    P3 --- INFRA
+
+    classDef actor fill:#fefdfb,stroke:#1a1510,stroke-width:1.5px,color:#1a1510
+    classDef externo fill:#f2efe9,stroke:#a5a09a,stroke-dasharray:4 3,color:#1a1510
+    classDef paquete fill:#fefdfb,stroke:#a5a09a,color:#1a1510,text-align:left
+    class VIS,CLI,ADM,RELOJ actor
+    class GH,SMTP,INFRA externo
+    class P1,P2,P3,P4 paquete

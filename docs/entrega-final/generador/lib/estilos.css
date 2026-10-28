@@ -1,0 +1,351 @@
+/*
+ * Documentación Deploya — design system v4.1, modo claro.
+ * Los tokens (:root) se inyectan desde apps/web/src/app/globals.css: aquí no hay hex.
+ * Principios que se respetan: neutros cálidos y una sola tinta, bordes antes que sombras,
+ * Geist para hablar y Geist Mono para medir, Señal solo para lo que está «en curso».
+ */
+
+/* @page, margen y @font-face los genera plantilla.mjs: var() no aplica dentro de @page ni de @font-face. */
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 10pt;
+  line-height: 1.6;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body { margin: 0; }
+
+/* ───────────── Portada ───────────── */
+
+.portada {
+  page: portada;
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  padding: 24mm 22mm 20mm;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  break-after: page;
+  overflow: hidden;
+}
+
+.portada::before {
+  /* retícula de puntos, la textura del canvas v4.1 */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 45%, #000 70%, transparent 100%);
+}
+
+.portada > * { position: relative; }
+
+.wordmark {
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  color: var(--foreground);
+  line-height: 1;
+}
+.wordmark .a-senal { color: var(--signal); }
+
+.portada .wordmark { font-size: 30pt; }
+
+.portada-etiqueta {
+  margin-top: 46mm;
+  font: 500 8.5pt/1 "Geist Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.portada h1 {
+  margin: 6mm 0 0;
+  font-size: 40pt;
+  line-height: 1.02;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  max-width: 150mm;
+}
+
+.portada-subtitulo {
+  margin: 6mm 0 0;
+  font-size: 13pt;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+  max-width: 140mm;
+}
+
+/* Riel de la entrega: los cuatro documentos como las etapas del producto. */
+.riel {
+  margin-top: 16mm;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.riel-etapa {
+  position: relative;
+  padding-top: 7mm;
+  font-size: 8.5pt;
+  color: var(--muted-foreground);
+}
+.riel-etapa::before {
+  content: "";
+  position: absolute;
+  top: 2mm;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: var(--border-strong);
+}
+.riel-etapa::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4.5mm;
+  height: 4.5mm;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1.5px solid var(--border-stronger);
+}
+.riel-etapa b { display: block; color: var(--foreground); font-weight: 600; font-size: 9pt; }
+.riel-etapa .num { font-family: "Geist Mono", monospace; color: var(--faint); }
+.riel-etapa.actual { color: var(--foreground); }
+.riel-etapa.actual::before { background: linear-gradient(90deg, var(--signal) 0 55%, var(--border-strong) 55%); }
+.riel-etapa.actual::after { background: var(--signal); border-color: var(--signal); box-shadow: 0 0 0 4px var(--signal-soft); }
+.riel-etapa.actual .num { color: var(--signal); }
+
+.portada-pie {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 10mm;
+  padding-top: 7mm;
+  border-top: 1px solid var(--border-strong);
+  font-size: 8.5pt;
+}
+.portada-pie dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 1.6mm 5mm; }
+.portada-pie dt { color: var(--faint); font: 500 7.5pt/1.6 "Geist Mono", monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+.portada-pie dd { margin: 0; color: var(--foreground); }
+.equipo-titulo { margin: 0 0 2mm; color: var(--faint); font: 500 7.5pt/1.6 "Geist Mono", monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+.equipo ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.2mm; }
+.equipo li { margin: 0; line-height: 1.35; }
+.equipo b { display: block; font-weight: 600; }
+.equipo span { color: var(--muted-foreground); font-size: 8pt; }
+
+/* ───────────── Control del documento e índice ───────────── */
+
+.preliminar { break-after: page; }
+
+.control {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--card);
+  margin-bottom: 10mm;
+}
+.control div { padding: 3.2mm 4mm; border-left: 1px solid var(--border); }
+.control div:first-child { border-left: 0; }
+.control dt { font: 500 7pt/1.4 "Geist Mono", monospace; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); }
+.control dd { margin: 0.6mm 0 0; font-size: 9pt; font-weight: 500; }
+
+.indice-titulo {
+  font: 500 8pt/1 "Geist Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  margin: 0 0 4mm;
+}
+.indice { list-style: none; margin: 0; padding: 0; counter-reset: cap; }
+.indice li { display: flex; align-items: baseline; gap: 2mm; break-inside: avoid; }
+.indice a { color: inherit; text-decoration: none; }
+.indice .relleno { flex: 1; border-bottom: 1px dotted var(--border-stronger); transform: translateY(-1mm); }
+.indice .pagina { font: 500 8.5pt/1 "Geist Mono", monospace; color: var(--muted-foreground); min-width: 6mm; text-align: right; }
+.indice .n2 { margin-top: 2.6mm; font-weight: 600; font-size: 10pt; }
+.indice .n3 { padding-left: 8mm; font-size: 9pt; color: var(--muted-foreground); }
+.indice .n3 a { color: var(--muted-foreground); }
+.indice .numero { font: 500 8.5pt/1 "Geist Mono", monospace; color: var(--faint); min-width: 8mm; }
+.indice .n3 .numero { min-width: 10mm; }
+
+/* ───────────── Cuerpo ───────────── */
+
+.cuerpo { counter-reset: h2 figura; }
+
+h2, h3, h4 { font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; break-after: avoid; }
+
+h2 {
+  break-before: page;
+  counter-increment: h2;
+  counter-reset: h3;
+  font-size: 22pt;
+  margin: 0 0 7mm;
+  padding-top: 2mm;
+}
+h2::before {
+  content: counter(h2, decimal-leading-zero);
+  display: block;
+  font: 500 9pt/1 "Geist Mono", monospace;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+  margin-bottom: 4mm;
+  padding-bottom: 3mm;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+h3 {
+  counter-increment: h3;
+  font-size: 13pt;
+  margin: 9mm 0 3mm;
+}
+h3::before {
+  content: counter(h2) "." counter(h3);
+  font: 500 10pt/1 "Geist Mono", monospace;
+  color: var(--faint);
+  margin-right: 3mm;
+}
+
+h4 { font-size: 10.5pt; margin: 6mm 0 2mm; }
+
+p { margin: 0 0 3mm; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 3.5mm; padding-left: 5.5mm; }
+li { margin: 0.8mm 0; }
+li::marker { color: var(--faint); }
+strong { font-weight: 600; }
+a { color: var(--foreground); text-decoration: underline; text-decoration-color: var(--border-stronger); text-underline-offset: 2px; }
+hr { border: 0; border-top: 1px solid var(--border-strong); margin: 6mm 0; }
+
+code {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 0.86em;
+  background: var(--sunken);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  word-break: break-word;
+}
+
+pre {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8pt;
+  line-height: 1.55;
+  background: var(--sunken);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 3.5mm 4mm;
+  margin: 0 0 4mm;
+  white-space: pre-wrap;
+  break-inside: avoid;
+}
+pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+.tabla { margin: 0 0 4.5mm; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; background: var(--card); }
+table { width: 100%; border-collapse: collapse; font-size: 8.4pt; line-height: 1.45; }
+thead { display: table-header-group; }
+th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 7.8pt;
+  color: var(--muted-foreground);
+  background: var(--sunken);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 2mm 2.6mm;
+}
+td { padding: 1.8mm 2.6mm; border-top: 1px solid var(--border); vertical-align: top; }
+tr { break-inside: avoid; }
+tbody tr:first-child td { border-top: 0; }
+td code, th code { font-size: 0.92em; }
+
+/* Avisos (sintaxis > [!NOTE] de GitHub) */
+.aviso {
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--border-stronger);
+  border-radius: 8px;
+  background: var(--card);
+  padding: 3mm 4mm 1mm;
+  margin: 0 0 4.5mm;
+  break-inside: avoid;
+}
+.aviso-titulo { font: 600 7.5pt/1 "Geist Mono", monospace; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2mm; color: var(--muted-foreground); }
+.aviso-consejo { border-left-color: var(--ok); }
+.aviso-consejo .aviso-titulo { color: var(--ok); }
+.aviso-importante { border-left-color: var(--foreground); }
+.aviso-importante .aviso-titulo { color: var(--foreground); }
+.aviso-aviso { border-left-color: var(--warn); }
+.aviso-aviso .aviso-titulo { color: var(--warn); }
+.aviso-cuidado { border-left-color: var(--bad); }
+.aviso-cuidado .aviso-titulo { color: var(--bad); }
+
+blockquote { margin: 0 0 4mm; padding-left: 4mm; border-left: 2px solid var(--border-stronger); color: var(--muted-foreground); }
+
+/* Figuras */
+figure { margin: 0 0 5mm; break-inside: avoid; }
+figure.diagrama, figure.captura {
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 5mm;
+}
+figure.diagrama pre.mermaid { all: unset; display: block; text-align: center; }
+figure.diagrama svg { height: auto; max-height: 188mm; }
+figure.captura { padding: 2.5mm; }
+figure.captura img { display: block; max-width: 100%; max-height: 92mm; width: auto; height: auto; margin: 0 auto; border-radius: 6px; border: 1px solid var(--border); }
+figcaption { margin-top: 3mm; font-size: 8pt; color: var(--muted-foreground); text-align: center; }
+.figura-numero { font-family: "Geist Mono", monospace; font-weight: 500; color: var(--foreground); }
+
+/* Componentes de contenido */
+.metricas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 0 0 5mm; }
+.metrica { border: 1px solid var(--border-strong); border-radius: 8px; background: var(--card); padding: 3mm 3.5mm; break-inside: avoid; }
+.metrica b { display: block; font: 600 17pt/1.1 "Geist", sans-serif; letter-spacing: -0.03em; }
+.metrica span { font-size: 7.8pt; color: var(--muted-foreground); }
+
+.estado { display: inline-flex; align-items: center; gap: 1.2mm; font-size: 0.92em; font-weight: 500; }
+.estado::before { content: ""; width: 1.8mm; height: 1.8mm; border-radius: 50%; background: currentColor; }
+.estado.ok { color: var(--ok); }
+.estado.warn { color: var(--warn); }
+.estado.bad { color: var(--bad); }
+.estado.curso { color: var(--signal); }
+.estado.neutro { color: var(--muted-foreground); }
+
+.salto { break-after: page; }
+.apaisada { page: apaisada; }
+figure.diagrama.apaisada { margin: 0; }
+
+td.sin-corte, th.sin-corte { white-space: nowrap; }
+.ficha td:first-child { width: 27mm; font-weight: 600; color: var(--muted-foreground); background: var(--sunken); font-size: 8pt; }
+.ficha tbody tr:first-child td { border-top: 0; }
+.pasos { list-style: none; margin: 0; padding: 0; }
+.pasos li { display: flex; gap: 2mm; margin: 0 0 1mm; }
+.pasos .paso { flex: 0 0 6mm; font: 500 7.8pt/1.6 "Geist Mono", monospace; color: var(--faint); }
+
+/* ───────────── En pantalla (HTML y Artifact) ───────────── */
+:root { color-scheme: light; }
+
+@media screen {
+  body { background: var(--background); max-width: 210mm; margin: 0 auto; padding: 0 16px 24mm; }
+  .portada { width: auto; height: auto; min-height: 100vh; margin: 0 -16px; padding: 18mm 8% 12mm; }
+  .preliminar, .cuerpo > h2 { margin-top: 18mm; }
+  h2 { padding-top: 10mm; }
+  section.apaisada { margin: 0 calc(50% - 50vw + 16px); padding: 0 calc(50vw - 50% - 16px); }
+  section.apaisada > * { max-width: 100%; }
+  .tabla { overflow-x: auto; }
+}
+
+@media screen and (max-width: 720px) {
+  html { font-size: 11pt; }
+  .portada h1 { font-size: 30pt; }
+  .portada-etiqueta { margin-top: 18mm; }
+  .riel { grid-template-columns: repeat(2, 1fr); row-gap: 6mm; }
+  .portada-pie { grid-template-columns: 1fr; }
+  .control, .metricas { grid-template-columns: 1fr 1fr; }
+  table { font-size: 9pt; }
+  .ficha td:first-child { width: auto; }
+}

@@ -1,0 +1,16 @@
+---
+title: Instalador autoalojado — cinco etapas que comprueban antes de escribir
+---
+flowchart LR
+    INICIO(["./scripts/instalar.sh"]) --> E1
+    E1["1 · Requisitos<br/>Docker 24+, Compose v2<br/>curl, dig, openssl"] --> E2
+    E2["2 · Dominio<br/>la raíz y el comodín<br/>apuntan a esta IP"] --> E3
+    E3["3 · Certificado<br/>comodín por DNS-01<br/>o HTTP-01 (--sin-comodin)"] --> E4
+    E4["4 · Servicios<br/>.env con secretos generados<br/>compose up · migraciones"] --> E5
+    E5["5 · Administrador<br/>imprime el código de<br/>configuración (30 min)"] --> FIN(["/configurar"])
+    E3 -. "si una etapa falla" .-> ALTO["Se detiene con instrucciones<br/>corriges y corres --continuar<br/>retoma en la etapa que falló"]
+
+    classDef startEnd fill:#1a1510,stroke:#1a1510,color:#f8f6f2
+    classDef error fill:#f7e3e5,stroke:#bd1f3d,stroke-width:1.5px,color:#1a1510
+    class INICIO,FIN startEnd
+    class ALTO error

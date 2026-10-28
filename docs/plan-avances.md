@@ -18,13 +18,13 @@ El Avance 1 queda por encima del 30 % a propósito. Con la detección de stack (
 
 | Persona | Hecho | A1 | A2 | A3 | Final | Total |
 |---|---|---|---|---|---|---|
-| Eddy | — | 10 | 6 | 4 | 5 | 25 |
-| Javier | — | 5 | 11 | 13 | 3 | 32 |
-| Eduardo | 3 | 8 | 8 | 4 | 3 | 26 |
-| Derek | 5 | 10 | 12 | 19 | 3 | 49 |
-| Todos | 5 | — | — | — | 8 | 13 |
+| Eddy | — | 10 | 6 | 4 | 2 | 22 |
+| Javier | — | 5 | 11 | 13 | 2 | 31 |
+| Eduardo | 3 | 8 | 8 | 4 | 2 | 25 |
+| Derek | 5 | 10 | 12 | 19 | 16 | 62 |
+| Todos | 5 | — | — | — | — | 5 |
 
-Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene que estar en `main` el lunes.
+Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene que estar en `main` el lunes. En la entrega final (28 de octubre) Derek toma toda la documentación y el e2e, y el equipo solo escribe código ([§ Entrega final](#entrega-final--100--entrega-y-exposición-viernes-6-de-noviembre)).
 
 ## Backlog del núcleo
 
@@ -42,7 +42,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M10-02 | Correo de recuperación | 24 | Eddy | 1 | A2 |
 | M1-06 | Mi cuenta · Perfil | 05 | Eddy | 2 | A3 |
 | M1-07 | Mi cuenta · Seguridad | 05b | Eddy | 2 | A3 |
-| QA-01 | Pruebas e2e del recorrido completo en CI | — | Eddy | 5 | Final |
+| QA-01 | Pruebas e2e del recorrido completo en CI | — | Derek | 5 | Final |
 | DB-01 | Schema Prisma del núcleo + seed (planes v4.1, admin) + Sandbox al registrarse | — | Javier | 3 | **A1** |
 | M2-01 | Catálogo de planes (público) | 06 | Javier | 2 | **A1** |
 | M2-02 | Contratación con pasarela simulada | 07, 07b | Javier | 5 | A2 |
@@ -52,7 +52,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M2-06 | Historial de pagos y comprobante PDF | 09, 09b | Javier | 3 | A3 |
 | M9-01 | Admin · Usuarios | 25 | Javier | 3 | A3 |
 | M9-02 | Admin · Suspender cuenta | 25b | Javier | 2 | A3 |
-| DOC-01 | Documento de requisitos y manual de usuario | — | Javier | 3 | Final |
+| DOC-01 | Documento de requisitos y manual de usuario | — | Derek | 3 | Final |
 | WEB-01 | Design system v4.1 migrado: tokens, componentes, shell, `/sistema` y `docs/diseno` | Main | Derek | 2 | Hecho |
 | M3-01 | Lista de proyectos y primer proyecto | 10, 10b | Eduardo | 3 | **A1** |
 | M3-02 | Nuevo proyecto: repositorio, revisar y desplegar | 11a, 11d, 11e | Eduardo | 5 | **A1** |
@@ -62,7 +62,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M3-04 | Configuración y eliminar proyecto | 19, 19b | Derek | 3 | A3 |
 | WEB-02 | Estados del sistema + banner de vencida | 10c, 28 | Eduardo | 2 | A3 |
 | M7-03 | Consumo del período y actividad | 08, 13 | Eduardo | 2 | A3 |
-| DOC-02 | Guion de demo, video y revisión de accesibilidad | — | Eduardo | 3 | Final |
+| DOC-02 | Guion de demo, video y revisión de accesibilidad | — | Derek | 3 | Final |
 | ENG-01 | Compose: trabajador, Traefik y Mailpit | — | Derek | 2 | **A1** |
 | M4-01 | Cola + clonar + `docker build` + artefacto + bitácora | 12 | Derek | 5 | **A1** |
 | M5-01 | Ejecutar contenedor con límites + verificación de salud | 12b | Derek | 3 | **A1** |
@@ -75,7 +75,7 @@ Javier tiene menos puntos en el Avance 1 porque su schema bloquea a todos: tiene
 | M6-02 | VPS con `*.deploya.app`, HTTPS comodín y credenciales SMTP del proveedor de correo (SPF/DKIM) | — | Derek | 5 | A3 |
 | ADR | ADR: Dockerfile, cola, polling, Traefik | — | Derek | 2 | A3 |
 | DOC-03 | Documento de diseño final y manual técnico | — | Derek | 3 | Final |
-| EST-01 | Estabilización, corrección de errores y ensayo | — | Todos | 8 | Final |
+| EST-01 | Estabilización, corrección de errores y ensayo (2 pts cada uno: EST-01a a EST-01d) | — | Todos | 8 | Final |
 
 Rama por historia: `feat/m<n>-<slug>` (p. ej. `feat/m1-registro`). Cada historia entra con su change de OpenSpec.
 
@@ -504,11 +504,94 @@ Las cuatro historias del Avance 3 (13 pts) están en la rama, con su change sinc
 
 Plan B: el video del martes y compose local, por si el VPS o la red fallan durante la presentación.
 
-## Entrega final — 100 %
+## Entrega final — 100 % (entrega y exposición: viernes 6 de noviembre)
 
-Pruebas e2e (Eddy), requisitos y manual de usuario (Javier), guion, video y accesibilidad (Eduardo), diseño final y manual técnico (Derek), estabilización y ensayo (todos).
+Sprint de cierre del miércoles 28 de octubre al viernes 6 de noviembre (fase F5 de la propuesta). La versión visual (resumen y una hoja por persona) está en la página **«Entrega final · 100 %»** del canvas Deploya v4.1 (<https://claude.ai/artifact/B89rty3MNxRKW9RHJQwSZT>). Prompts para los agentes: [handoff/prompt-entrega-final.md](handoff/prompt-entrega-final.md).
 
-Solo después de la entrega del Avance 3, y si el núcleo está estable, se toma algo de [Fuera de alcance · solo si da el tiempo](alcance.md#fuera-de-alcance--solo-si-da-el-tiempo), en su orden.
+### Dónde estamos (28 de octubre)
+
+| Qué | Estado |
+|---|---|
+| Núcleo v4.1 | **123 de 145 pts (85 %)**: A1, A2 y A3 en `main`, sus changes archivados |
+| Sprint fuera de alcance | **Cerrado** (PR #59): las 19 historias en `main`, incluidas SP-12 y SP-13; `openspec/changes/` sin changes activos |
+| Calidad de `main` | 146 suites y 1069 pruebas de la API en verde; 96.8 % de líneas cubiertas |
+| Faltan | Los 22 pts de abajo y el lanzamiento en el VPS |
+
+### Regla del sprint: el equipo escribe código, Derek documenta y lanza
+
+- **Eddy, Javier y Eduardo solo escriben código**: un change pequeño de endurecimiento cada uno (2 pts, ya propuesto en `openspec/changes/`) y los errores P1 de su módulo. No escriben documentos ni tocan el VPS, DNS, correo, CI de despliegue ni el e2e.
+- **Derek hace toda la documentación final, el e2e y el lanzamiento**: QA-01, DOC-01, DOC-02, DOC-03 y los pasos L0–L10.
+- **No entran funciones nuevas** fuera de los tres changes. Nada de pantallas nuevas, dependencias nuevas ni cambios de contrato (salvo la columna de `feat-m9-limpieza-diaria`, avisada en su proposal).
+- Un error encontrado en el VPS va a un issue con la plantilla «error» y la etiqueta `final`. Derek lo clasifica cada noche: **P1** (rompe la demo o pierde datos) lo corrige el dueño del módulo o Derek; P2 y P3 pasan a `despues-de-entrega`.
+- Misma definición de terminado que el núcleo: change, una prueba por escenario, PR revisado, `pnpm check` en verde y `/opsx-archive` tras el merge.
+
+### Historias
+
+| Id | Historia | Dueño | Pts | Terminado cuando |
+|---|---|---|---|---|
+| EST-01a | Límite de intentos en iniciar sesión, registro, verificación y recuperación (`feat-m1-limite-intentos`) | Eddy | 2 | El sexto fallo de contraseña responde 429 con `Retry-After`; la recuperación repetida no revela la cuenta ni manda correo; 03 dice cuántos minutos faltan |
+| EST-01b | Limpieza diaria de tokens, sesiones e invitaciones vencidas (`feat-m9-limpieza-diaria`) | Javier | 2 | La tarea corre a las 00:35 UTC y a mano desde admin; borra solo lo vencido; 32 muestra la última limpieza |
+| EST-01c | Web lista para el público: errores, carga, cabeceras, títulos, ícono y accesibilidad (`feat-web-lanzamiento`) | Eduardo | 2 | Un error de render muestra «Reintentar» dentro del shell; la web manda las cabeceras; cada pestaña tiene su título; corregido lo pequeño de la tabla de DOC-02 |
+| EST-01d | Triar errores, corregir los P1 sin dueño disponible y dos ensayos | Derek | 2 | Cero P1 abiertos el jueves 5 y dos ensayos completos |
+| QA-01 | Recorrido e2e de la API en CI, sin dependencias nuevas | Derek | 5 | `e2e/recorrido.mjs` en el job «Smoke compose»: registro → enlace de Mailpit → verificar → sesión → Starter → `hola-deploya` → despliegue encolado; negativos 403 sin verificar, 403 Cliente en admin, 404 proyecto ajeno, y 429 al sexto fallo cuando entre EST-01a |
+| DOC-01 | Documento de requisitos y manual de usuario | Derek | 3 | `docs/entrega-final/requisitos.md` (RF y RNF con spec y pantalla de origen, y trazabilidad) y `docs/entrega-final/manual-usuario.md` (Cliente y Administrador, con capturas del VPS) |
+| DOC-02 | Guion de demo, video de respaldo y revisión de accesibilidad | Derek | 3 | `docs/entrega-final/guion-demo.md`, video de ≤ 15 min grabado en el VPS y `docs/entrega-final/accesibilidad.md` (pantalla × criterio); la tabla está lista el domingo 1 para que Eduardo corrija |
+| DOC-03 | Documento de diseño final y manual técnico | Derek | 3 | `docs/entrega-final/diseno-final.md` (arquitectura, módulos, puertos, patrones, ADR 0001–0008, diagramas) y `docs/entrega-final/manual-tecnico.md` (compose, VPS, autoalojado, respaldos, actualizar, variables, problemas comunes) |
+
+| Persona | Pts | Qué escribe | Tiempo estimado |
+|---|---|---|---|
+| Eddy | 2 | Código (M1, `(auth)`) | ~2 tardes |
+| Javier | 2 | Código (M9, Prisma) | ~2 tardes |
+| Eduardo | 2 | Código (`apps/web`) | ~2 tardes |
+| Derek | 16 | Documentación, e2e, triaje y lanzamiento | resto del sprint |
+| **Total** | **22** | | 123 + 22 = **145 pts (100 %)** |
+
+### Lanzamiento (Derek, sin puntos)
+
+| Paso | Qué | Cuándo |
+|---|---|---|
+| L0 | Este plan y los tres changes en `main` | Mié 28 |
+| L1 | VPS al día con `main` (`scripts/desplegar-vps.sh`): HTTPS comodín y las comprobaciones de [infra-vps.md §3](infra-vps.md#3-cómo-saber-que-quedó) | Jue 29 |
+| L2 | Correo real del proveedor con SPF, DKIM y DMARC: verificación, recuperación y los cuatro avisos de 24b llegan a una bandeja real, no a spam | Jue 29 |
+| L3 | Datos de la demo: `hola-deploya` con tres despliegues, cuentas `cliente@`, `vencida@`, `suspendida@` y el administrador; contraseñas fuera del repo | Vie 30 |
+| L4 | Operación: `respaldar.sh` diario por `cron` con retención de 7 días y una restauración probada; `docker image prune` semanal; vigilancia de `api.<dominio>/health` cada 5 min | Vie 30 |
+| L5 | **Vie 30 a las 20:00: URL del VPS al equipo** para probar su parte | Vie 30 |
+| L6 | Triar los issues `final` cada noche | Sáb 31 – mar 3 |
+| L7 | Recorrido del despliegue en el VPS (`e2e/vps.mjs`, a mano): `hola-deploya` Saludable con HTTPS, revertir a #1 y volver, cancelar uno en Construyendo | Lun 2 |
+| L8 | Instalación limpia en un servidor aparte con `instalar.sh` → asistente (31) → primer despliegue; `actualizar.sh` y `--volver` | Mié 4 |
+| L9 | `v1.0.0`: `main` congelado, `CHANGELOG.md`, etiqueta y *release* en GitHub, despliegue final y comprobación de §3 | Jue 5, 20:00 |
+| L10 | Plan B: video, compose local con los mismos datos y capturas en las diapositivas | Jue 5 |
+
+### Calendario
+
+| Día | Eddy | Javier | Eduardo | Derek |
+|---|---|---|---|---|
+| Mié 28 | Lee su prompt y su change | Lee su prompt y su change | Lee su prompt y su change | L0 |
+| Jue 29 | EST-01a: regla y API | EST-01b: política, puerto y servicio | EST-01c: `error.tsx` y `loading.tsx` | L1, L2, QA-01 |
+| Vie 30 | EST-01a: web y pruebas; PR | EST-01b: Prisma, cola y endpoint | EST-01c: cabeceras, títulos e ícono | L3, L4, **20:00 URL al equipo** |
+| Sáb 31 – dom 1 | Prueba 1 (1 h): cuentas y correos en el VPS | Prueba 1: planes, ciclo y admin; PR | Prueba 1: proyectos y métricas; PR | DOC-02 (tabla de accesibilidad), capturas, triaje |
+| Lun 2 | P1 propios, si hay | P1 propios, si hay | Correcciones de accesibilidad | L7, DOC-01 |
+| Mar 3 | P1 propios, si hay | P1 propios, si hay | P1 propios, si hay | DOC-03. **20:00 todo en `main`** |
+| Mié 4 | Prueba 2 y ensayo 1 | Prueba 2 y ensayo 1 | Prueba 2 y ensayo 1 | L8, video, ensayo 1 |
+| Jue 5 | Ensayo 2 | Ensayo 2 | Ensayo 2 | **20:00** L9 y L10 |
+| Vie 6 | **Entrega y exposición** | | | |
+
+### Guion de la demo (≈ 15 min)
+
+1. **Producto y número (Derek, 1 min):** Deploya en `https://<dominio>`, 145 de 145 puntos, código abierto y autoalojable.
+2. **Cuentas (Eddy, 2 min):** registro, correo real, verificar, iniciar sesión; el límite de intentos; Mi cuenta con «Último cambio»; las ilustraciones de acceso.
+3. **Cobro y ciclo (Javier, 2 min):** contratar Starter, comprobante PDF; correr el ciclo: «Por vencer» llega por correo, Vencida bloquea, renovar reanuda.
+4. **Desplegar (Derek, 3 min):** alta de un repo sin `Dockerfile` → «Stack detectado», etapas en vivo, `https://hola-deploya.<dominio>` con candado; correo de Saludable; **revertir a #1 en segundos sin reconstruir**.
+5. **Observar (Eduardo, 2 min):** Métricas, 13c, bitácoras (15), tiempo por etapa (14c) y ritmo (08c).
+6. **Administrar (Javier, 1 min):** suspender con motivo y reactivar; Infraestructura (27); limpieza diaria en 32.
+7. **Autoalojado (Derek, 2 min):** grabación corta de `instalar.sh` y el asistente (31) en un servidor limpio; `actualizar.sh` con respaldo.
+8. **Calidad y proceso (Eddy, 2 min):** CI con pruebas por escenario y el recorrido e2e, changes archivados, ADR, SOLID y patrones por historia.
+
+Plan B: el video del miércoles 4 y compose local con los mismos datos.
+
+### Qué no se hace
+
+M8, pantallas nuevas, dependencias nuevas, refactors sin un P1 detrás y cambios de contrato fuera de los tres changes. Lo que alguien quiera agregar va a un issue con la etiqueta `despues-de-entrega`.
 
 ## Sprint fuera de alcance
 

@@ -1,8 +1,10 @@
 import type Docker from "dockerode";
 import {
   ContenedorPuerto,
+  type ConsultaSalida,
   type ContenedorCreado,
   type EspecContenedor,
+  type LineaSalida,
 } from "../../modules/orquestacion/puertos/contenedor.puerto";
 import { PREFIJO_IMAGEN, redDeProyecto } from "../../modules/construccion/dominio/motor.constantes";
 import { limitesDesde } from "../../modules/orquestacion/dominio/limites-contenedor";
@@ -13,6 +15,34 @@ const ESTADO_NO_EXISTE = 404;
 const ESTADO_PROHIBIDO = 403;
 const ESTADO_CONFLICTO = 409;
 const ETIQUETA_DEPLOYA = "app.deploya.proyecto";
+/** Cabecera de cada trama de `docker logs` sin TTY: flujo (1 byte), 3 de relleno y el largo (4 bytes). */
+const CABECERA_TRAMA = 8;
+const POSICION_LARGO = 4;
+const FLUJOS_DOCKER = new Set([0, 1, 2]);
+const MS_POR_SEGUNDO = 1000;
+
+/** Junta las tramas de stdout y stderr; si el contenedor tiene TTY la salida ya viene cruda. */
+export function demultiplexar(salida: Buffer): string {
+  if (salida.length < CABECERA_TRAMA || !FLUJOS_DOCKER.has(salida[0])) return salida.toString("utf8");
+  const partes: Buffer[] = [];
+  let posicion = 0;
+  while (posicion + CABECERA_TRAMA <= salida.length) {
+    const largo = salida.readUInt32BE(posicion + POSICION_LARGO);
+    partes.push(salida.subarray(posicion + CABECERA_TRAMA, posicion + CABECERA_TRAMA + largo));
+    posicion += CABECERA_TRAMA + largo;
+  }
+  return Buffer.concat(partes).toString("utf8");
+}
+
+/** `--timestamps` antepone la marca RFC 3339 con nanosegundos y un espacio; se descarta lo que no la trae. */
+export function lineasDeSalida(texto: string): LineaSalida[] {
+  return texto.split("\n").flatMap((linea) => {
+    const espacio = linea.indexOf(" ");
+    const marca = new Date(linea.slice(0, espacio));
+    if (espacio < 0 || Number.isNaN(marca.getTime())) return [];
+    return [{ marca, texto: linea.slice(espacio + 1).replace(/\r$/, "") }];
+  });
+}
 
 /**
  * Contenedor sin privilegios, con los límites del plan y en la red propia del
@@ -82,6 +112,18 @@ export class ContenedorDocker extends ContenedorPuerto {
     for (const { Id } of imagenes) {
       await this.ignorar([ESTADO_NO_EXISTE, ESTADO_CONFLICTO], () => this.docker.getImage(Id).remove({ force: true }));
     }
+  }
+
+  async bitacora(contenedorId: string, { desde, max }: ConsultaSalida): Promise<LineaSalida[]> {
+    const salida = await this.docker.getContainer(contenedorId).logs({
+      follow: false,
+      stdout: true,
+      stderr: true,
+      timestamps: true,
+      tail: max,
+      ...(desde ? { since: desde.getTime() / MS_POR_SEGUNDO } : {}),
+    });
+    return lineasDeSalida(demultiplexar(salida));
   }
 
   private async asegurarRed(nombre: string): Promise<void> {

@@ -209,7 +209,7 @@ Nada de esta lista se empieza hasta que todo lo **Debe** de tu módulo esté ter
 |---|---|---|---|
 | ~~1~~ | ~~Reactivar una cuenta suspendida desde admin~~ | M9 | **Entró en el sprint fuera de alcance** (SP-05, pantalla 25c) |
 | ~~2~~ | ~~Métricas de CPU y memoria en vivo (`docker stats`)~~ | M7 | **Entró en el sprint fuera de alcance** (SP-07, SP-10, SP-11; pantallas 16 y 13c) |
-| 3 | Bitácoras de ejecución del contenedor (runtime) | M7 | En el sprint fuera de alcance como **si da tiempo** (SP-12, pantalla 15) |
+| 3 | Bitácoras de ejecución del contenedor (runtime) | M7 | Entró en el sprint fuera de alcance (SP-12, pantalla 15); sin guardar ni retener líneas |
 | ~~4~~ | ~~Correos de resultado de despliegue y de vencimiento de plan~~ | M10 | **Entró en el sprint fuera de alcance** (SP-02, SP-04, SP-08; pantalla 24b) |
 | 5 | Renovación automática | M2 | v4.1 solo muestra renovación manual |
 | ~~6~~ | ~~Reversión instantánea sin reconstruir (estado Revirtiendo)~~ | M4 M5 | **Entró al núcleo** como M5-04 (retroalimentación de la entrega 1) |
@@ -221,7 +221,7 @@ Nada de esta lista se empieza hasta que todo lo **Debe** de tu módulo esté ter
 | 12 | Prorrateo al cambiar de plan | M2 | Ascenso paga completo; descenso al vencer |
 | 13 | Complementos (§4.3) | M2 | Sin pantalla |
 | 14 | Gestión de planes desde admin (crear, editar, descontinuar) | M9 | Catálogo fijo por seed |
-| 15 | Estado de la infraestructura en admin | M9 | En el sprint fuera de alcance como **si da tiempo** (SP-13, pantalla 27) |
+| 15 | Estado de la infraestructura en admin | M9 | Entró en el sprint fuera de alcance (SP-13, pantalla 27); un nodo, solo lectura |
 | 16 | Bitácora de auditoría completa de cuenta | M1 | Solo se registra la suspensión (M9) |
 | 17 | Roles Operador de infraestructura y Soporte | M1 | Solo Cliente y Administrador |
 | 18 | Cancelación por el cliente y exportar datos | M2 | Cancelada solo llega por el ciclo §4.4 |
@@ -246,8 +246,8 @@ Sus puntos **no** cambian el porcentaje del núcleo (145): es trabajo extra sobr
 | Muestreo de CPU y memoria, pestaña Métricas y tarjeta de 24 h | M5, M7 | Sprint | Punto 2 (sin transferencia ni peticiones) |
 | Tiempo por etapa (14c) y ritmo de construcciones (08c) | M7 | Sprint | Nuevo: datos que ya guarda el núcleo |
 | Deploya open source (el repo ya es público; falta licencia) y autoalojado: licencia, modo de instalación, instalador, asistente, Admin · Instalación, actualizar y respaldar | transversal, M1, M2, M9 | Sprint | Nuevo ([ADR 0008](adr/0008-autoalojado-y-codigo-abierto.md)) |
-| Bitácoras de ejecución | M7 | Si da tiempo | Punto 3 (polling cada 3 s, sin WebSocket) |
-| Estado de la infraestructura en admin | M9 | Si da tiempo | Punto 15 (solo lectura) |
+| Bitácoras de ejecución | M7 | Si da tiempo · entró | Punto 3 (polling cada 3 s, sin WebSocket) |
+| Estado de la infraestructura en admin | M9 | Si da tiempo · entró | Punto 15 (solo lectura) |
 
 **No entra** (sigue en la lista de arriba): dominios personalizados, repos privados, zip, WebSocket, renovación automática, prorrateo, complementos, admin de planes, roles nuevos, 2FA, M8. La landing pública (nube vs. autoalojado) la hace Derek aparte, fuera de estos puntos.
 

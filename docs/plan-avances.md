@@ -638,3 +638,8 @@ Las ilustraciones son libres: Eddy elige el artboard y la idea. Lineamientos en 
 | SP-09 | `gitleaks` sobre todo el historial **el día 1** y rotación inmediata de lo que aparezca (el repo ya es público); `LICENSE`, README, `CONTRIBUTING.md` y `SECURITY.md` |
 | SP-16 | En un servidor limpio, `instalar.sh` llega a HTTPS; con el DNS mal se detiene sin escribir nada y `--continuar` retoma |
 | SP-19 | `actualizar.sh` respalda antes, migra y no corta las apps publicadas; `--volver` restaura |
+
+### Cierre del sprint (27 de octubre)
+
+Las 17 historias fijas (34.5 pts) están en `main` y sus changes archivados. Las dos **si da tiempo** también entraron (6 pts): **SP-12** (pantalla 15, `GET /proyectos/:id/bitacora`, la API pide `docker logs` al trabajador por la cola `bitacoras`) y **SP-13** (pantalla 27, `GET /admin/infraestructura`). Total del sprint: **40.5 pts**. Los seis changes que quedaban abiertos (`feat-m1-asistente-instalacion`, `feat-m7-metricas`, `feat-m7-tiempo-por-etapa`, `feat-m7-ritmo-construcciones`, `feat-m7-bitacoras-ejecucion`, `feat-m9-infraestructura`) se sincronizaron a sus specs y se archivaron en el mismo PR. `openspec/changes/` queda sin changes activos.
+

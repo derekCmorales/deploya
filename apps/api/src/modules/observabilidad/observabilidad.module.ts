@@ -13,6 +13,8 @@ import { ActividadController } from "./actividad/actividad.controller";
 import { LecturaMetricasService } from "./metricas/lectura-metricas.service";
 import { MetricasProyectoController } from "./metricas/metricas-proyecto.controller";
 import { TiemposModule } from "./tiempos/tiempos.module";
+import { BitacoraEjecucionService } from "./bitacora/bitacora-ejecucion.service";
+import { BitacoraProyectoController } from "./bitacora/bitacora-proyecto.controller";
 
 /**
  * M7: modelo de lectura sobre lo que exportan M3, M4 y M5 (consumo del período y actividad).
@@ -27,7 +29,8 @@ import { TiemposModule } from "./tiempos/tiempos.module";
     ConsumoController,
     ActividadController,
     MetricasProyectoController,
+    BitacoraProyectoController,
   ],
-  providers: [ResumenProyectoService, ConsumoService, ActividadService, LecturaMetricasService],
+  providers: [ResumenProyectoService, ConsumoService, ActividadService, LecturaMetricasService, BitacoraEjecucionService],
 })
 export class ObservabilidadModule {}

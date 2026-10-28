@@ -1,5 +1,5 @@
 import type Docker from "dockerode";
-import { ContenedorDocker } from "./contenedor-docker";
+import { ContenedorDocker, demultiplexar, lineasDeSalida } from "./contenedor-docker";
 
 /** Doble de dockerode: registra lo que se le pide, sin socket ni Docker. */
 function dockerFalso(redesExistentes: string[] = []) {
@@ -138,5 +138,50 @@ describe("ContenedorDocker", () => {
       expect(registro.borrados).toEqual(["c-1", "c-2"]);
       expect(registro.imagenesBorradas).toEqual(["sha256:a"]);
     });
+  });
+});
+
+/** Una trama de `docker logs` sin TTY: flujo, 3 bytes de relleno, largo y el texto. */
+function trama(flujo: number, texto: string): Buffer {
+  const cuerpo = Buffer.from(texto, "utf8");
+  const cabecera = Buffer.alloc(8);
+  cabecera[0] = flujo;
+  cabecera.writeUInt32BE(cuerpo.length, 4);
+  return Buffer.concat([cabecera, cuerpo]);
+}
+
+describe("ContenedorDocker.bitacora (SP-12)", () => {
+  it("junta stdout y stderr y separa la marca de cada línea", async () => {
+    const salida = Buffer.concat([
+      trama(1, "2026-10-20T10:41:52.118000000Z INFO GET /health 200\n"),
+      trama(2, "2026-10-20T10:42:01.515000000Z ERROR POST /api/pagos 502\r\n"),
+    ]);
+    const logs = jest.fn(async () => salida);
+    const docker = { getContainer: () => ({ logs }) } as unknown as Docker;
+    const desde = new Date("2026-10-20T10:41:50.000Z");
+
+    const lineas = await new ContenedorDocker(docker, []).bitacora("c-14", { desde, max: 500 });
+
+    expect(logs).toHaveBeenCalledWith({ follow: false, stdout: true, stderr: true, timestamps: true, tail: 500, since: desde.getTime() / 1000 });
+    expect(lineas).toEqual([
+      { marca: new Date("2026-10-20T10:41:52.118Z"), texto: "INFO GET /health 200" },
+      { marca: new Date("2026-10-20T10:42:01.515Z"), texto: "ERROR POST /api/pagos 502" },
+    ]);
+  });
+
+  it("sin `desde` no manda `since`", async () => {
+    const logs = jest.fn(async () => Buffer.alloc(0));
+    const docker = { getContainer: () => ({ logs }) } as unknown as Docker;
+
+    expect(await new ContenedorDocker(docker, []).bitacora("c-14", { desde: null, max: 500 })).toEqual([]);
+    expect(logs).toHaveBeenCalledWith(expect.not.objectContaining({ since: expect.anything() }));
+  });
+
+  it("con TTY la salida llega cruda y se lee igual", () => {
+    expect(demultiplexar(Buffer.from("2026-10-20T10:41:52Z listo\n"))).toBe("2026-10-20T10:41:52Z listo\n");
+  });
+
+  it("descarta lo que no trae marca", () => {
+    expect(lineasDeSalida("sin marca\n\n2026-10-20T10:41:52Z ok")).toEqual([{ marca: new Date("2026-10-20T10:41:52Z"), texto: "ok" }]);
   });
 });

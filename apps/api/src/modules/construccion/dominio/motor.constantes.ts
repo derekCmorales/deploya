@@ -17,6 +17,8 @@ export const PREFIJO_RED_PROYECTO = "deploya-p-";
 export const COLA_DESPLIEGUES = "despliegues";
 /** Cola de acciones sobre el contenedor (M5-02): una acción de segundos no espera detrás de un build. */
 export const COLA_OPERACION = "operacion";
+/** Lecturas de `docker logs` que la API pide al trabajador (SP-12): petición y respuesta, sin guardar nada. */
+export const COLA_BITACORAS = "bitacoras";
 
 export function etiquetaImagen(subdominio: string, numero: number): string {
   return `${PREFIJO_IMAGEN}/${subdominio}:${numero}`;

@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, FolderGit2, LayoutTemplate, Server, ShieldCheck, UserRound } from "lucide-react";
+import { CreditCard, FolderGit2, Gauge, LayoutTemplate, Server, ShieldCheck, UserRound } from "lucide-react";
 
 import { NavPrincipal, type ItemNav } from "@/components/shell/nav-principal";
 import { useModoInstalacion } from "@/hooks/use-modo-instalacion";
@@ -24,16 +24,19 @@ export const NAV_PANEL: ItemNav[] = [
 /** Solo para el rol Administrador (25); la API lo vuelve a exigir con `RolGuard`. */
 export const NAV_ADMINISTRACION: ItemNav = { href: "/admin/usuarios", texto: "Administración", icono: ShieldCheck, activoEn: ["/admin/usuarios"] };
 
+/** Admin · Infraestructura (27, SP-13): solo lectura, en la nube y en autoalojado. */
+export const NAV_INFRAESTRUCTURA: ItemNav = { href: "/admin/infraestructura", texto: "Infraestructura", icono: Gauge };
+
 /** Admin · Instalación (32, SP-18): solo para el administrador de una instalación autoalojada. */
 export const NAV_INSTALACION: ItemNav = { href: "/admin/instalacion", texto: "Instalación", icono: Server };
 
 const NAV_INSTALACION_POR_MODO: Record<ModoInstalacion, ItemNav[]> = { nube: [], autoalojado: [NAV_INSTALACION] };
 
-/** En autoalojado no aparece Suscripción (SP-06) y el administrador ve Instalación (SP-18). */
+/** En autoalojado no aparece Suscripción (SP-06) y el administrador ve Instalación (SP-18); Infraestructura (SP-13) en ambos modos. */
 export function NavPanel() {
   const { usuario } = useSesion();
   const { modo } = useModoInstalacion();
   const base = usuario?.rol === "administrador" ? [...NAV_PANEL, NAV_ADMINISTRACION] : NAV_PANEL;
-  const instalacion = usuario?.rol === "administrador" ? NAV_INSTALACION_POR_MODO[modo] : [];
+  const instalacion = usuario?.rol === "administrador" ? [NAV_INFRAESTRUCTURA, ...NAV_INSTALACION_POR_MODO[modo]] : [];
   return <NavPrincipal items={navegacionSegunModo([...base, ...instalacion], modo)} />;
 }

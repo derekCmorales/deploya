@@ -14,6 +14,19 @@ export interface ContenedorCreado {
   host: string;
 }
 
+/** Una línea de la salida del contenedor (`docker logs --timestamps`), sin nivel: eso lo decide M7. */
+export interface LineaSalida {
+  marca: Date;
+  texto: string;
+}
+
+export interface ConsultaSalida {
+  /** Solo lo posterior a esta marca; `null` = desde el principio. */
+  desde: Date | null;
+  /** Las últimas `max` líneas (SP-12: 500). */
+  max: number;
+}
+
 /** Puerto DIP — la API no llama a Docker. Sin prefijo I. */
 export abstract class ContenedorPuerto {
   abstract crear(espec: EspecContenedor): Promise<ContenedorCreado>;
@@ -27,4 +40,6 @@ export abstract class ContenedorPuerto {
   abstract eliminarImagen(imagen: string): Promise<void>;
   /** Borra las imágenes `deploya/<subdominio>:*`; no falla si ya no hay. */
   abstract eliminarImagenesDe(subdominio: string): Promise<void>;
+  /** Salida del contenedor (SP-12): se lee de Docker, deploya no la guarda. */
+  abstract bitacora(contenedorId: string, consulta: ConsultaSalida): Promise<LineaSalida[]>;
 }

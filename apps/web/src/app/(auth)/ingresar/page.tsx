@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { FormularioIngreso } from "./formulario-ingreso";
 import { IlustracionIngreso } from "./ilustracion-ingreso";
 
-export const metadata: Metadata = { title: "Iniciar sesión · Deploya" };
+export const metadata: Metadata = { title: "Iniciar sesión" };
 
 /** Pantalla 03 · Iniciar sesión (patrón A, acceso partido, como 01). Estados 03b en el formulario. */
 export default function IngresarPage() {

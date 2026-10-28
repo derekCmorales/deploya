@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { Verificacion } from "./verificacion";
 
-export const metadata: Metadata = { title: "Verifica tu correo · Deploya" };
+export const metadata: Metadata = { title: "Verifica tu correo" };
 
 /** Pantalla 02 · Verifica tu correo (patrón B, tarjeta de estado). */
 export default function VerificarPage() {

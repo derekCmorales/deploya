@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
+
 import { PanelDespliegue } from "../../../_componentes/panel-despliegue";
+
+export const metadata: Metadata = { title: "Despliegue" };
 
 /** Pantallas 12, 12b y 12c. M7-01. */
 export default async function DesplieguePage({ params }: { params: Promise<{ proyecto: string; n: string }> }) {

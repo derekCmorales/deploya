@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FormularioRegistro } from "./formulario-registro";
 import { IlustracionRegistro } from "./ilustracion-registro";
 
-export const metadata: Metadata = { title: "Crear cuenta · Deploya" };
+export const metadata: Metadata = { title: "Crear cuenta" };
 
 /**
  * Pantalla 01 · Registro (patrón A, acceso partido). Estados 01b en el formulario. `Suspense`

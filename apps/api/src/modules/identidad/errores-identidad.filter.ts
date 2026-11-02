@@ -11,6 +11,7 @@ import {
   CuentaInexistente,
   CuentaNoVerificada,
   CuentaSuspendida,
+  DemasiadosIntentos,
   EsperaReenvio,
   NombreInvalido,
   TokenNoValido,
@@ -34,6 +35,7 @@ const HTTP_DEMASIADAS_SOLICITUDES = 429;
   CuentaNoVerificada,
   CuentaSuspendida,
   EsperaReenvio,
+  DemasiadosIntentos,
   NombreInvalido,
   ContrasenaActualIncorrecta,
   CuentaInexistente,
@@ -61,6 +63,12 @@ export class ErroresIdentidadFilter implements ExceptionFilter {
     }
     if (error instanceof CorreoYaRegistrado) {
       respuesta.status(HTTP_CONFLICTO).json(cuerpo);
+      return;
+    }
+    if (error instanceof DemasiadosIntentos) {
+      // `Retry-After` para clientes HTTP; la web lee `segundos` del cuerpo (CORS no expone la cabecera).
+      respuesta.setHeader("Retry-After", String(error.segundos));
+      respuesta.status(HTTP_DEMASIADAS_SOLICITUDES).json({ ...cuerpo, segundos: error.segundos });
       return;
     }
     if (error instanceof EsperaReenvio) {

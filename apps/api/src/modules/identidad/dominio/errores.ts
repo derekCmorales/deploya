@@ -74,6 +74,16 @@ export class EsperaReenvio extends Error {
   }
 }
 
+const SEGUNDOS_POR_MINUTO = 60;
+
+/** EST-01a: pasado el límite de inicio de sesión o de registro; la web dice cuántos minutos faltan. */
+export class DemasiadosIntentos extends Error {
+  constructor(readonly segundos: number) {
+    super(`Demasiados intentos. Vuelve a intentar en ${Math.max(1, Math.ceil(segundos / SEGUNDOS_POR_MINUTO))} min.`);
+    this.name = "DemasiadosIntentos";
+  }
+}
+
 /** Pantalla 05 (M1-06): el nombre queda vacío al recortarlo o pasa del máximo. */
 export class NombreInvalido extends Error {
   constructor(readonly maximo: number) {

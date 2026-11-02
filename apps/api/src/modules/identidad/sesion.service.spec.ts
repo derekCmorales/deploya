@@ -2,7 +2,8 @@ import { RelojFijo } from "../../compartido/reloj";
 import { RepositorioSesionesMemoria } from "./adaptadores/repositorio-sesiones.memoria";
 import { RepositorioUsuariosMemoria } from "./adaptadores/repositorio-usuarios.memoria";
 import type { EstadoCuenta } from "./dominio/cuenta";
-import { CredencialesInvalidas, CuentaNoVerificada, CuentaSuspendida } from "./dominio/errores";
+import { CredencialesInvalidas, CuentaNoVerificada, CuentaSuspendida, DemasiadosIntentos } from "./dominio/errores";
+import { MAXIMO_FALLOS_SESION, VENTANA_SESION_MS } from "./dominio/limites-identidad";
 import { DIAS_INACTIVIDAD_SESION, MS_POR_DIA, MS_REFRESCO_ACTIVIDAD } from "./dominio/sesion";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
 import { HashContrasena } from "./puertos/hash-contrasena.puerto";
@@ -173,5 +174,54 @@ describe("M1-03 · Cerrar sesión", () => {
     await servicio.cerrar("token-inventado");
 
     expect(espia).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("EST-01a · Límite de intentos al iniciar sesión", () => {
+  const ORIGEN = "203.0.113.7";
+  const CORREO = "derek@tiendademo.com";
+  const fallar = (servicio: SesionService, origen = ORIGEN) =>
+    expect(servicio.iniciar({ correo: CORREO, contrasena: "Otra#Clave2026", origen })).rejects.toBeInstanceOf(CredencialesInvalidas);
+
+  it("Quinto fallo bloquea el inicio de sesión", async () => {
+    const { servicio, sesiones } = await armar();
+    for (let i = 0; i < MAXIMO_FALLOS_SESION; i++) await fallar(servicio);
+
+    const sexto = servicio.iniciar({ correo: CORREO, contrasena: CLAVE, origen: ORIGEN });
+
+    await expect(sexto).rejects.toBeInstanceOf(DemasiadosIntentos);
+    await expect(sexto).rejects.toMatchObject({ segundos: VENTANA_SESION_MS / 1000 });
+    expect(sesiones.sesiones.size).toBe(0);
+  });
+
+  it("Inicio correcto limpia el conteo", async () => {
+    const { servicio } = await armar();
+    for (let i = 0; i < MAXIMO_FALLOS_SESION - 1; i++) await fallar(servicio);
+
+    await servicio.iniciar({ correo: CORREO, contrasena: CLAVE, origen: ORIGEN });
+
+    // Con el conteo en cero caben otros 4 fallos y la cuenta sigue entrando.
+    for (let i = 0; i < MAXIMO_FALLOS_SESION - 1; i++) await fallar(servicio);
+    await expect(servicio.iniciar({ correo: CORREO, contrasena: CLAVE, origen: ORIGEN })).resolves.toMatchObject({ usuario: { correo: CORREO } });
+  });
+
+  it("La ventana vence", async () => {
+    const { servicio, reloj } = await armar();
+    for (let i = 0; i < MAXIMO_FALLOS_SESION; i++) await fallar(servicio);
+    await expect(servicio.iniciar({ correo: CORREO, contrasena: CLAVE, origen: ORIGEN })).rejects.toBeInstanceOf(DemasiadosIntentos);
+
+    reloj.avanzar(VENTANA_SESION_MS);
+
+    await expect(servicio.iniciar({ correo: CORREO, contrasena: CLAVE, origen: ORIGEN })).resolves.toMatchObject({ usuario: { correo: CORREO } });
+  });
+
+  it("el bloqueo es por IP y correo: otra IP, otro correo o el asistente (sin origen) siguen entrando", async () => {
+    const { servicio, usuarios, reloj } = await armar();
+    await usuarios.crear({ correo: "ana@tiendademo.com", nombre: "Ana", hashContrasena: `h:${CLAVE}`, rol: "cliente", estadoCuenta: "activa", creado: reloj.ahora() });
+    for (let i = 0; i < MAXIMO_FALLOS_SESION; i++) await fallar(servicio);
+
+    await expect(servicio.iniciar({ correo: CORREO, contrasena: CLAVE, origen: "198.51.100.2" })).resolves.toBeDefined();
+    await expect(servicio.iniciar({ correo: "ana@tiendademo.com", contrasena: CLAVE, origen: ORIGEN })).resolves.toBeDefined();
+    await expect(servicio.iniciar({ correo: CORREO, contrasena: CLAVE })).resolves.toBeDefined();
   });
 });

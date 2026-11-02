@@ -12,7 +12,8 @@ import { GeneradorToken } from "../puertos/generador-token.puerto";
 import { HashContrasena } from "../puertos/hash-contrasena.puerto";
 import { SesionService } from "../sesion.service";
 import { CorreoDePruebaRechazado, DatosCorreoInvalidos, DemasiadosIntentosCodigo } from "./errores";
-import { LimiteIntentos, MAXIMO_INTENTOS_CODIGO, VENTANA_INTENTOS_MS } from "./limite-intentos";
+import { LimiteIntentos } from "../dominio/limite-intentos";
+import { MAXIMO_INTENTOS_CODIGO, VENTANA_INTENTOS_MS } from "../dominio/limites-identidad";
 import { PrimeraConfiguracionService } from "./primera-configuracion.service";
 
 const CODIGO = "K7QP-M2XD";
@@ -102,7 +103,7 @@ function armar() {
     cifrador,
     prueba,
     reloj,
-    new LimiteIntentos(),
+    new LimiteIntentos(MAXIMO_INTENTOS_CODIGO, VENTANA_INTENTOS_MS),
     { urlWeb: "https://apps.miempresa.com" },
   );
   const crear = (codigo = CODIGO, contrasena = CLAVE) =>

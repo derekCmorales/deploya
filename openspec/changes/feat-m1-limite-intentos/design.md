@@ -20,7 +20,19 @@ Un 429 en recuperación o reenvío diría que la cuenta existe. Se responde igua
 
 ### 4. Reloj inyectado
 
-Los controladores pasan `Reloj.ahora()`; nada de `Date.now()` en la regla.
+Nada de `Date.now()` en la regla: quien la usa le pasa `Reloj.ahora()`.
+
+### 5. El límite vive en los servicios
+
+Los controladores solo pasan el `origen` (`req.ip`, con `trust proxy`; helper `origen-solicitud.ts`, el mismo del asistente 31). `SesionService`, `IdentidadService` y `RecuperacionService` reciben `LimitesIdentidad` por constructor y deciden. Sin `origen` no hay límite de sesión ni de registro: el asistente 31 inicia la sesión del administrador recién creado sin pasar por él. El inicio de sesión solo cuenta `CredencialesInvalidas`; una contraseña correcta limpia el conteo aunque la cuenta esté pendiente o suspendida. El registro cuenta cada intento, se cree o no la cuenta.
+
+### 6. Correos: una clave por tipo, y el reenvío conserva su cuenta atrás
+
+`verificacion|correo` y `recuperacion|correo` llevan cuentas separadas de 3 por hora. El reenvío sigue respondiendo 429 `EsperaReenvio` dentro de los 60 s de M1-04 (02 muestra la cuenta atrás); el límite por hora se aplica después y en silencio.
+
+### 7. La web lee `segundos` del cuerpo
+
+La API manda `Retry-After` y, como `EsperaReenvio`, `segundos` en el cuerpo. La web usa el cuerpo: entre orígenes el navegador no deja leer `Retry-After` sin `exposedHeaders` en `main.ts`, que queda fuera del change. 04 no recibe 429 (decisión 3), así que el aviso va en 01 y 03.
 
 ## Diseño: SOLID y patrones
 
@@ -31,7 +43,7 @@ Los controladores pasan `Reloj.ahora()`; nada de `Date.now()` en la regla.
 | `ErroresIdentidadFilter` | Adapter | S | Traduce `DemasiadosIntentos` a 429 + `Retry-After` |
 | `Reloj` | Puerto (ya existe) | D | Pruebas sin reloj real |
 
-Cambios de clases: `LimiteIntentos` cambia de carpeta y gana `limpiar`; error de dominio `DemasiadosIntentos` → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
+Cambios de clases: `LimiteIntentos` cambia de carpeta, `registrarFallo` pasa a `registrar` y gana `limpiar`; `LimitesIdentidad` (Factory, también da el límite del código de SP-17); error de dominio `DemasiadosIntentos` → `docs/diagramas/compartido/clases-unificado.mmd` en el mismo PR (`pnpm diagramas:sync`).
 
 ## Risks / Trade-offs
 

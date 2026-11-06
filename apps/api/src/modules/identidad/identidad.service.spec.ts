@@ -6,7 +6,8 @@ import type { PlantillaCorreo } from "../notificaciones/dominio/plantilla-correo
 import { RepositorioTokensCuentaMemoria } from "./adaptadores/repositorio-tokens-cuenta.memoria";
 import { RepositorioUsuariosMemoria } from "./adaptadores/repositorio-usuarios.memoria";
 import { HORAS_VIGENCIA_VERIFICACION, MS_POR_HORA } from "./dominio/cuenta";
-import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
+import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, DemasiadosIntentos, EsperaReenvio, TokenNoValido } from "./dominio/errores";
+import { MAXIMO_CORREOS, MAXIMO_REGISTROS, VENTANA_REGISTRO_MS } from "./dominio/limites-identidad";
 import { IdentidadService } from "./identidad.service";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
@@ -354,5 +355,49 @@ describe("SP-18 · El registro respeta la política de la instalación", () => {
     registro.rechazo = new RegistroCerrado();
 
     await expect(servicio.registrar({ correo: "ana@miempresa.com", contrasena: CLAVE_VALIDA })).rejects.toBeInstanceOf(RegistroCerrado);
+  });
+});
+
+describe("EST-01a · Límite de intentos en el registro y el reenvío", () => {
+  const ORIGEN = "203.0.113.7";
+  const registrarDesde = (servicio: IdentidadService, n: number, origen = ORIGEN) =>
+    servicio.registrar({ correo: `persona${n}@tiendademo.com`, contrasena: CLAVE_VALIDA, origen });
+
+  it("Registro en masa", async () => {
+    const { servicio, usuarios } = armar();
+    for (let n = 1; n <= MAXIMO_REGISTROS; n++) await registrarDesde(servicio, n);
+
+    const onceavo = registrarDesde(servicio, MAXIMO_REGISTROS + 1);
+
+    await expect(onceavo).rejects.toBeInstanceOf(DemasiadosIntentos);
+    expect(await usuarios.porCorreo(`persona${MAXIMO_REGISTROS + 1}@tiendademo.com`)).toBeNull();
+  });
+
+  it("cuenta también los intentos rechazados, y otra IP o una hora después vuelve a poder", async () => {
+    const { servicio, reloj } = armar();
+    for (let n = 1; n <= MAXIMO_REGISTROS; n++) {
+      await expect(servicio.registrar({ correo: "mal@", contrasena: CLAVE_VALIDA, origen: ORIGEN })).rejects.toBeInstanceOf(CorreoInvalido);
+    }
+
+    await expect(registrarDesde(servicio, 1)).rejects.toBeInstanceOf(DemasiadosIntentos);
+    await expect(registrarDesde(servicio, 2, "198.51.100.2")).resolves.toMatchObject({ estadoCuenta: "pendiente" });
+    reloj.avanzar(VENTANA_REGISTRO_MS);
+    await expect(registrarDesde(servicio, 3)).resolves.toMatchObject({ estadoCuenta: "pendiente" });
+  });
+
+  it("el reenvío de verificación pasado el límite responde igual y no manda correo", async () => {
+    const { servicio, correo, reloj } = armar();
+    await registrarValido(servicio);
+    const MINUTO = 60 * 1000;
+    for (let i = 0; i < MAXIMO_CORREOS; i++) {
+      reloj.avanzar(2 * MINUTO);
+      await servicio.reenviarVerificacion({ correo: "derek@tiendademo.com" });
+    }
+    const enviados = correo.enviados.length;
+
+    reloj.avanzar(2 * MINUTO);
+    await expect(servicio.reenviarVerificacion({ correo: "derek@tiendademo.com" })).resolves.toBeUndefined();
+
+    expect(correo.enviados).toHaveLength(enviados);
   });
 });

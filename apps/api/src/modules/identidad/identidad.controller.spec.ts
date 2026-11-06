@@ -1,8 +1,9 @@
 import { BadRequestException, type ArgumentsHost } from "@nestjs/common";
+import type { Request } from "express";
 import { EXCEPTION_FILTERS_METADATA, HTTP_CODE_METADATA } from "@nestjs/common/constants";
 import { Test } from "@nestjs/testing";
 import { ErroresAdministracionFilter } from "../administracion/errores-administracion.filter";
-import { ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
+import { ContrasenaDebil, ContrasenasNoCoinciden, CorreoYaRegistrado, DemasiadosIntentos, EsperaReenvio, TokenNoValido } from "./dominio/errores";
 import { textoDe } from "./cuerpo-solicitud";
 import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { IdentidadController, REENVIO_ACEPTADO } from "./identidad.controller";
@@ -31,6 +32,9 @@ function respuestaDe(error: Error) {
   return { status, json };
 }
 
+/** Petición mínima: la IP que deja Express con `trust proxy`. */
+const SOLICITUD = { ip: "203.0.113.7" } as unknown as Request;
+
 describe("IdentidadController", () => {
   it("health del módulo", async () => {
     const { controller } = await armar();
@@ -40,20 +44,28 @@ describe("IdentidadController", () => {
   it("POST /identidad/registro pasa correo y contraseña al servicio", async () => {
     const { controller, servicio } = await armar();
 
-    const cuenta = await controller.registrar({ correo: "derek@tiendademo.com", contrasena: "Deploya#2026seguro", confirmacion: "Deploya#2026seguro" });
+    const cuenta = await controller.registrar(
+      { correo: "derek@tiendademo.com", contrasena: "Deploya#2026seguro", confirmacion: "Deploya#2026seguro" },
+      SOLICITUD,
+    );
 
     expect(cuenta).toEqual(CUENTA);
-    expect(servicio.registrar).toHaveBeenCalledWith({ correo: "derek@tiendademo.com", contrasena: "Deploya#2026seguro" });
+    expect(servicio.registrar).toHaveBeenCalledWith({ correo: "derek@tiendademo.com", contrasena: "Deploya#2026seguro", origen: "203.0.113.7" });
   });
 
   it("POST /identidad/registro pasa la invitación del enlace (SP-18) y la omite si viene vacía", async () => {
     const { controller, servicio } = await armar();
     const cuerpo = { correo: "ana@miempresa.com", contrasena: "Deploya#2026seguro", confirmacion: "Deploya#2026seguro" };
 
-    await controller.registrar({ ...cuerpo, invitacion: "tok-1" });
-    await controller.registrar({ ...cuerpo, invitacion: "" });
+    await controller.registrar({ ...cuerpo, invitacion: "tok-1" }, SOLICITUD);
+    await controller.registrar({ ...cuerpo, invitacion: "" }, SOLICITUD);
 
-    expect(servicio.registrar).toHaveBeenNthCalledWith(1, { correo: cuerpo.correo, contrasena: cuerpo.contrasena, invitacion: "tok-1" });
+    expect(servicio.registrar).toHaveBeenNthCalledWith(1, {
+      correo: cuerpo.correo,
+      contrasena: cuerpo.contrasena,
+      invitacion: "tok-1",
+      origen: "203.0.113.7",
+    });
     expect(servicio.registrar.mock.calls[1][0].invitacion).toBeUndefined();
   });
 
@@ -64,7 +76,9 @@ describe("IdentidadController", () => {
   it("POST /identidad/registro rechaza si la confirmación no coincide", async () => {
     const { controller, servicio } = await armar();
 
-    expect(() => controller.registrar({ correo: "a@b.co", contrasena: "Deploya#2026seguro", confirmacion: "otra" })).toThrow(ContrasenasNoCoinciden);
+    expect(() => controller.registrar({ correo: "a@b.co", contrasena: "Deploya#2026seguro", confirmacion: "otra" }, SOLICITUD)).toThrow(
+      ContrasenasNoCoinciden,
+    );
     expect(servicio.registrar).not.toHaveBeenCalled();
   });
 
@@ -140,5 +154,18 @@ describe("IdentidadController · reenvío de verificación (M1-04)", () => {
 
     expect(status).toHaveBeenCalledWith(429);
     expect(json).toHaveBeenCalledWith(expect.objectContaining({ codigo: "EsperaReenvio", segundos: 40 }));
+  });
+
+  it("DemasiadosIntentos → 429 con Retry-After y los segundos en el cuerpo (EST-01a)", () => {
+    const json = jest.fn();
+    const status = jest.fn(() => ({ json }));
+    const setHeader = jest.fn();
+    const host = { switchToHttp: () => ({ getResponse: () => ({ status, setHeader }) }) } as unknown as ArgumentsHost;
+
+    new ErroresIdentidadFilter().catch(new DemasiadosIntentos(600), host);
+
+    expect(setHeader).toHaveBeenCalledWith("Retry-After", "600");
+    expect(status).toHaveBeenCalledWith(429);
+    expect(json).toHaveBeenCalledWith({ codigo: "DemasiadosIntentos", mensaje: "Demasiados intentos. Vuelve a intentar en 10 min.", segundos: 600 });
   });
 });

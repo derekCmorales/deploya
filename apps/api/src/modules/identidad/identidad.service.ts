@@ -13,7 +13,8 @@ import {
   type EstadoCuenta,
   type Usuario,
 } from "./dominio/cuenta";
-import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, EsperaReenvio, TokenNoValido } from "./dominio/errores";
+import { ContrasenaDebil, CorreoInvalido, CorreoYaRegistrado, DemasiadosIntentos, EsperaReenvio, TokenNoValido } from "./dominio/errores";
+import { claveDeCorreo, LimitesIdentidad } from "./dominio/limites-identidad";
 import { NombreCuenta } from "./dominio/nombre-cuenta";
 import { PoliticaContrasena } from "./dominio/politica-contrasena";
 import { PoliticaReenvio } from "./dominio/politica-reenvio";
@@ -28,6 +29,8 @@ export interface SolicitudRegistro {
   contrasena: string;
   /** Token del enlace `/registro?invitacion=…` (SP-18); solo lo pide la política «Con invitación». */
   invitacion?: string;
+  /** IP de quien se registra (EST-01a): 10 por hora. Sin origen no hay límite. */
+  origen?: string;
 }
 
 /** Respuesta de `POST /identidad/registro` (pantalla 01b · Cuenta creada). */
@@ -65,9 +68,12 @@ export class IdentidadService {
     private readonly registroPermitido: PoliticaRegistroPuerto,
     private readonly reloj: Reloj,
     @Inject(CONFIGURACION_IDENTIDAD) private readonly configuracion: ConfiguracionIdentidad,
+    private readonly limites: LimitesIdentidad = new LimitesIdentidad(),
   ) {}
 
   async registrar(solicitud: SolicitudRegistro): Promise<CuentaRegistrada> {
+    // Cuenta cada intento, se cree o no la cuenta: el registro número 11 de una IP en una hora es 429.
+    if (solicitud.origen !== undefined) this.contarRegistro(solicitud.origen);
     const correo = normalizarCorreo(solicitud.correo);
     const politica = this.politica.validar(solicitud.contrasena);
     if (!politica.valida) throw new ContrasenaDebil(politica.incumplidas);
@@ -121,6 +127,10 @@ export class IdentidadService {
     const ultimo = await this.tokens.ultimoDe(usuario.id, "verificacion");
     const segundos = ultimo ? this.reenvio.segundosRestantes(ultimo.creado, ahora) : 0;
     if (segundos > 0) throw new EsperaReenvio(segundos);
+    // Pasado el límite por correo responde igual (202) y no manda nada: un 429 revelaría la cuenta.
+    const clave = claveDeCorreo("verificacion", usuario.correo);
+    if (this.limites.correos.espera(clave, ahora) > 0) return;
+    this.limites.correos.registrar(clave, ahora);
 
     await this.tokens.invalidarVigentes(usuario.id, "verificacion", ahora);
     await this.enviarVerificacion(usuario);
@@ -162,5 +172,12 @@ export class IdentidadService {
       this.registro.warn(error.message);
       return false;
     }
+  }
+
+  private contarRegistro(origen: string): void {
+    const ahora = this.reloj.ahora();
+    const espera = this.limites.registro.espera(origen, ahora);
+    if (espera > 0) throw new DemasiadosIntentos(espera);
+    this.limites.registro.registrar(origen, ahora);
   }
 }

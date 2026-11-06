@@ -78,12 +78,12 @@ describe("SesionController", () => {
     const servicio = servicioFalso();
     const controlador = new SesionController(servicio as unknown as SesionService, LOCAL);
     const respuesta = respuestaFalsa();
-    const solicitud = { headers: { "user-agent": "jest" } } as unknown as Request;
+    const solicitud = { ip: "203.0.113.7", headers: { "user-agent": "jest" } } as unknown as Request;
 
     const cuerpo = await controlador.iniciar({ correo: "derek@tiendademo.com", contrasena: "x" }, solicitud, respuesta);
 
     expect(cuerpo).toEqual({ usuario: USUARIO });
-    expect(servicio.iniciar).toHaveBeenCalledWith({ correo: "derek@tiendademo.com", contrasena: "x", agenteUsuario: "jest" });
+    expect(servicio.iniciar).toHaveBeenCalledWith({ correo: "derek@tiendademo.com", contrasena: "x", agenteUsuario: "jest", origen: "203.0.113.7" });
     expect(respuesta.setHeader).toHaveBeenCalledWith("Set-Cookie", cookieSesion("tok en=1", LOCAL));
   });
 

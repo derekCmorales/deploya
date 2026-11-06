@@ -12,7 +12,7 @@ La plataforma sale a internet con dominio propio. Hoy solo el código de configu
 - `POST /identidad/sesion`: 5 fallos por IP y correo en 15 min → `429 DemasiadosIntentos` con `Retry-After`. Un inicio correcto limpia el conteo.
 - `POST /identidad/registro`: 10 por IP por hora.
 - `POST /identidad/verificacion/reenvio` y `POST /identidad/recuperacion`: 3 por correo por hora. Pasado el límite, la respuesta **es la misma** que siempre (no revela si la cuenta existe), pero no se manda correo.
-- Web: 01, 03 y 04 muestran «Demasiados intentos. Vuelve a intentar en N min.» con el `Banner` del design system.
+- Web: 01 y 03 muestran «Demasiados intentos. Vuelve a intentar en N min.» con el `Banner` del design system. 04 no lo necesita: la recuperación nunca responde 429 (design.md, decisión 3).
 
 ## Non-goals
 
@@ -33,5 +33,5 @@ La plataforma sale a internet con dominio propio. Hoy solo el código de configu
 ## Impact
 
 - API: `identidad/dominio/limite-intentos.ts`, `sesion.controller.ts`, `identidad.controller.ts`, `recuperacion.controller.ts`, `ErroresIdentidadFilter` (429).
-- Web: `(auth)` 01, 03 y 04.
+- Web: `(auth)` 01 y 03 (`lib/cuenta.ts`).
 - Datos: ninguno (en memoria).

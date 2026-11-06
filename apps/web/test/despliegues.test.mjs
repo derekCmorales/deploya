@@ -129,3 +129,10 @@ test("12b · el vencimiento del certificado solo se muestra cuando hay TLS", () 
   assert.equal(textoCertificado({ vence: "no es fecha" }, fecha), null);
 });
 
+
+test("12b · Saludable no dice que la versión anterior sigue sirviendo tráfico (solo 12c lo dice)", () => {
+  const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const panel = readFileSync(join(raiz, "src/app/(projects)/projects/_componentes/panel-despliegue.tsx"), "utf8");
+  assert.match(panel, /<Fallo despliegue=\{despliegue\} error=\{error\} aviso=\{aviso\} \/>/);
+  assert.doesNotMatch(panel, /<Saludable[^>]*aviso=/);
+});

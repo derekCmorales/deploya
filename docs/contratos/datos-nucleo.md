@@ -1,6 +1,6 @@
 # Contrato · Datos del núcleo v4.1 (schema Prisma)
 
-Versión 2.3 · 2026-10-25 (versión 1: 2026-09-27) · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
+Versión 2.4 · 2026-11-07 (versión 1: 2026-09-27) · firma: Derek (arquitectura, segundo owner de `prisma/`) · dueño del schema: Javier (DB-01) · consumidores: Eddy (M1, M10), Eduardo (M3, M7), Derek (M4, M5, M6), Javier (M2, M9).
 
 Este documento **firma** el modelo de datos del núcleo para que DB-01 salga el lunes sin idas y vueltas. Javier lo implementa en `apps/api/prisma/schema.prisma` y el seed; cualquier campo nuevo o renombrado pasa por aquí y se avisa a los consumidores antes de mergear (regla de [AGENTS.md](../../AGENTS.md)). Diagrama: [erd-unificado.mmd](../diagramas/compartido/erd-unificado.mmd).
 
@@ -450,6 +450,9 @@ model ConfiguracionInstalacion {
   smtpClaveCifrada     String?   // AES-GCM con CLAVE_CIFRADO_VARIABLES; nunca en claro
   smtpRemitente        String?
   sinCorreo            Boolean   @default(false)
+  // EST-01b · limpieza diaria: cuándo corrió y cuántas filas borró (32). En la nube crea la fila solo para esto
+  ultimaLimpieza       DateTime?
+  filasLimpiadas       Int?
   actualizado          DateTime  @updatedAt
 }
 
@@ -505,3 +508,4 @@ Desde SP-06 (versión 2.2), el seed con `MODO_INSTALACION=autoalojado` crea solo
 | 2.1 | 2026-10-21 | El instalador escribe `hashCodigo` y `codigoVence`. En autoalojado el seed no crea administrador ni cuentas de demo |
 | 2.2 | 2026-10-24 | SP-03: migración de `Usuario.contrasenaCambiadaEn`. SP-05: `reactivar-cuenta` en `AccionAdministrativa` (motivo `reactivacion`). SP-06: en autoalojado el seed crea solo el plan `autoalojado`. SP-18: migración de `Invitacion` (con `revocada`) y `revocar-invitacion` |
 | 2.3 | 2026-10-25 | SP-17: columnas `smtp*` y `sinCorreo` en `ConfiguracionInstalacion` (migración `20261025120000_correo_instalacion`). Solo agrega |
+| 2.4 | 2026-11-07 | EST-01b: `ultimaLimpieza` y `filasLimpiadas` en `ConfiguracionInstalacion` (migración `20261107120000_limpieza_diaria`). La limpieza diaria de M9 borra filas de `TokenCuenta` y `Sesion` (M1, aviso a Eddy) e `Invitacion` vencidas; no escribe ninguna otra columna de M1. Solo agrega |

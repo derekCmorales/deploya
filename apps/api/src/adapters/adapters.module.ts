@@ -24,6 +24,7 @@ import { VerificacionEntornoPuerto } from "../modules/orquestacion/puertos/verif
 import { RepositorioProyectos } from "../modules/proyectos/puertos/repositorio-proyectos.puerto";
 import { RepositorioVariables } from "../modules/proyectos/puertos/repositorio-variables.puerto";
 import { LecturaServidorPuerto, ReporteServidorPuerto } from "../modules/administracion/instalacion/puertos/reporte-servidor.puerto";
+import { PurgaDatosVencidosPuerto } from "../modules/administracion/limpieza/puertos/purga-datos-vencidos.puerto";
 import { RegistroEnviosCorreo } from "../modules/notificaciones/puertos/registro-envios.puerto";
 import { CONFIGURACION_MOTOR, configuracionDesde, type ConfiguracionMotor } from "./configuracion-motor";
 import { RegistroEnviosRedis, ReporteServidorRedis } from "./reales/estado-compartido-redis";
@@ -37,6 +38,7 @@ import { RepositorioArtefactosPrisma } from "./prisma/repositorio-artefactos.pri
 import { RepositorioDesplieguesPrisma } from "./prisma/repositorio-despliegues.prisma";
 import { RepositorioProyectosPrisma } from "./prisma/repositorio-proyectos.prisma";
 import { MuestrasMetricasPrisma } from "./prisma/muestras-metricas.prisma";
+import { PurgaDatosVencidosPrisma } from "./prisma/purga-datos-vencidos.prisma";
 import { RepositorioVariablesPrisma } from "./prisma/repositorio-variables.prisma";
 import { ClonadorGit } from "./reales/clonador-git";
 import { CancelacionesRedis } from "./reales/cancelaciones-redis";
@@ -89,6 +91,8 @@ const PERSISTENCIA: Provider[] = [
   { provide: DetalleProyectoPuerto, useExisting: RepositorioProyectos },
   { provide: RecetaProyectoPuerto, useClass: RecetaProyectoPrisma },
   { provide: MuestrasMetricas, useClass: MuestrasMetricasPrisma },
+  // Limpieza diaria (EST-01b): la corre el trabajador cada día y la API a demanda.
+  { provide: PurgaDatosVencidosPuerto, useClass: PurgaDatosVencidosPrisma },
 ];
 
 const COMUNES: Provider[] = [

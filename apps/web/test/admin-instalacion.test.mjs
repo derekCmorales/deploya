@@ -13,6 +13,7 @@ import {
   textoMemoria,
   textoPrograma,
   textoRegistro,
+  textoUltimaLimpieza,
   textoUltimoRespaldo,
   textoVenceInvitacion,
 } from "../src/lib/admin-instalacion.ts";
@@ -61,4 +62,13 @@ test("32 · Solo en autoalojado: la ruta existe, da 404 si la API dice 404 y el 
   assert.ok(existsSync(join(root, "src/app/(admin)/admin/instalacion/page.tsx")));
   assert.match(leer("src/app/(admin)/admin/instalacion/_componentes/instalacion-contenedor.tsx"), /estado === HTTP_NO_ENCONTRADO\) notFound\(\)/);
   assert.match(leer("src/components/shell/nav-panel.tsx"), /autoalojado: \[NAV_INSTALACION\]/);
+});
+
+test("32 · Respaldos: «Última limpieza: <fecha> · N filas» (EST-01b)", () => {
+  assert.equal(textoUltimaLimpieza({ ultima: "2026-10-24T00:35:00.000Z", filas: 3 }, AHORA), "Última limpieza: hoy, 00:35 · 3 filas");
+  assert.equal(textoUltimaLimpieza({ ultima: "2026-10-23T00:35:00.000Z", filas: 1 }, AHORA), "Última limpieza: ayer, 00:35 · 1 fila");
+  assert.equal(textoUltimaLimpieza({ ultima: "2026-10-23T00:35:00.000Z", filas: 0 }, AHORA), "Última limpieza: ayer, 00:35 · 0 filas");
+  assert.equal(textoUltimaLimpieza({ ultima: null, filas: null }, AHORA), "Última limpieza: todavía no corrió");
+  const bloque = leer("src/app/(admin)/admin/instalacion/_componentes/bloque-respaldos.tsx");
+  assert.match(bloque, /textoUltimaLimpieza\(limpieza, ahora\)/);
 });

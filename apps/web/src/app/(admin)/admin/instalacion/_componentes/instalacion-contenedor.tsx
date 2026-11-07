@@ -44,7 +44,7 @@ export function InstalacionContenedor() {
           <BloqueVersion version={datos.version} rutaRespaldos={datos.respaldo.ruta} />
           <BloqueRegistro registro={datos.registro} ahora={ahora} alCambiar={instalacion.recargar} />
           <BloqueLimites limites={datos.limites} alGuardar={instalacion.recargar} />
-          <BloqueRespaldos respaldo={datos.respaldo} ahora={ahora} />
+          <BloqueRespaldos respaldo={datos.respaldo} limpieza={datos.limpieza} ahora={ahora} />
         </div>
       )}
     </main>

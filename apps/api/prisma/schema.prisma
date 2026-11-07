@@ -369,6 +369,9 @@ model ConfiguracionInstalacion {
   smtpClaveCifrada     String? // AES-GCM con CLAVE_CIFRADO_VARIABLES; nunca en claro
   smtpRemitente        String?
   sinCorreo            Boolean          @default(false)
+  // EST-01b · limpieza diaria: cuándo corrió por última vez y cuántas filas borró (pantalla 32).
+  ultimaLimpieza       DateTime?
+  filasLimpiadas       Int?
   actualizado          DateTime         @updatedAt
 }
 

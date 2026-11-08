@@ -2230,8 +2230,17 @@ classDiagram
     class PrimeraConfiguracionController
     class AsistenteDisponibleGuard
     class LimiteIntentos {
-        +espera(origen, ahora) number
-        +registrarFallo(origen, ahora) void
+        <<Policy>>
+        +espera(clave, ahora) number
+        +registrar(clave, ahora) void
+        +limpiar(clave) void
+    }
+    class LimitesIdentidad {
+        <<Factory>>
+        +sesion LimiteIntentos
+        +registro LimiteIntentos
+        +correos LimiteIntentos
+        +codigo LimiteIntentos
     }
     class SoloAutoalojadaGuard
     class InstalacionAdminController
@@ -2986,6 +2995,10 @@ classDiagram
     PrimeraConfiguracionService --> CifradorVariables : cifra
     PrimeraConfiguracionService --> PruebaCorreoPuerto
     PrimeraConfiguracionService --> LimiteIntentos
+    LimitesIdentidad *-- LimiteIntentos
+    SesionService --> LimitesIdentidad : 5 fallos por ip y correo
+    IdentidadService --> LimitesIdentidad : registro y reenvío
+    RecuperacionService --> LimitesIdentidad : correos
     ProyectosService --> ProveedorFuente
     ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos

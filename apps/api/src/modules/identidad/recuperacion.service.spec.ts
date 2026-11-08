@@ -6,6 +6,7 @@ import { RepositorioTokensCuentaMemoria } from "./adaptadores/repositorio-tokens
 import { RepositorioUsuariosMemoria } from "./adaptadores/repositorio-usuarios.memoria";
 import { VIGENCIA_RECUPERACION_MS, type EstadoCuenta } from "./dominio/cuenta";
 import { ContrasenaDebil, TokenNoValido } from "./dominio/errores";
+import { MAXIMO_CORREOS, VENTANA_CORREOS_MS } from "./dominio/limites-identidad";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
 import { HashContrasena } from "./puertos/hash-contrasena.puerto";
 import { RecuperacionService } from "./recuperacion.service";
@@ -218,5 +219,29 @@ describe("SP-03 · Último cambio de contraseña al restablecer", () => {
       TokenNoValido,
     );
     expect((await usuarios.porId(usuario.id))?.contrasenaCambiadaEn).toBeNull();
+  });
+});
+
+describe("EST-01a · Límite de correos de recuperación", () => {
+  it("Correos sin revelar la cuenta", async () => {
+    const { servicio, correo, usuario } = await armar();
+    for (let i = 0; i < MAXIMO_CORREOS; i++) await servicio.solicitar(usuario.correo);
+    expect(correo.enviados).toHaveLength(MAXIMO_CORREOS);
+
+    // La cuarta vez responde lo mismo que siempre (el controlador devuelve el mismo texto), sin correo.
+    await expect(servicio.solicitar(usuario.correo)).resolves.toBeUndefined();
+    await expect(servicio.solicitar("nadie@tiendademo.com")).resolves.toBeUndefined();
+
+    expect(correo.enviados).toHaveLength(MAXIMO_CORREOS);
+  });
+
+  it("pasada la hora vuelve a mandar el enlace", async () => {
+    const { servicio, correo, usuario, reloj } = await armar();
+    for (let i = 0; i <= MAXIMO_CORREOS; i++) await servicio.solicitar(usuario.correo);
+
+    reloj.avanzar(VENTANA_CORREOS_MS);
+    await servicio.solicitar(usuario.correo);
+
+    expect(correo.enviados).toHaveLength(MAXIMO_CORREOS + 1);
   });
 });

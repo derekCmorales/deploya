@@ -16,7 +16,7 @@ import { HashContrasena } from "../puertos/hash-contrasena.puerto";
 import { RepositorioUsuarios } from "../puertos/repositorio-usuarios.puerto";
 import { SesionService, type SesionIniciada } from "../sesion.service";
 import { CorreoDePruebaRechazado, DemasiadosIntentosCodigo } from "./errores";
-import { LimiteIntentos } from "./limite-intentos";
+import type { LimiteIntentos } from "../dominio/limite-intentos";
 import { eligeSinCorreo, smtpDe } from "./smtp-solicitado";
 
 /** Token de Nest del límite de intentos: una sola instancia por proceso. */
@@ -65,7 +65,7 @@ export class PrimeraConfiguracionService {
     try {
       await this.alta.validarCodigo(codigo);
     } catch (error) {
-      if (error instanceof CodigoInvalido || error instanceof CodigoVencido) this.limite.registrarFallo(origen, ahora);
+      if (error instanceof CodigoInvalido || error instanceof CodigoVencido) this.limite.registrar(origen, ahora);
       throw error;
     }
   }

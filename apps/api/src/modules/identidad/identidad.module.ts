@@ -16,8 +16,8 @@ import { CuentaService } from "./cuenta.service";
 import { DirectorioCuentas } from "./directorio-cuentas.service";
 import { IdentidadController } from "./identidad.controller";
 import { IdentidadService } from "./identidad.service";
+import { LimitesIdentidad } from "./dominio/limites-identidad";
 import { AsistenteDisponibleGuard } from "./instalacion/asistente-disponible.guard";
-import { LimiteIntentos } from "./instalacion/limite-intentos";
 import { PrimeraConfiguracionController } from "./instalacion/primera-configuracion.controller";
 import { LIMITE_INTENTOS_CODIGO, PrimeraConfiguracionService } from "./instalacion/primera-configuracion.service";
 import { AsignacionSandboxPuerto } from "./puertos/asignacion-sandbox.puerto";
@@ -50,7 +50,9 @@ import { SesionService } from "./sesion.service";
     DirectorioCuentas,
     PrimeraConfiguracionService,
     AsistenteDisponibleGuard,
-    { provide: LIMITE_INTENTOS_CODIGO, useValue: new LimiteIntentos() },
+    // Una sola instancia de los límites para todo el proceso (EST-01a); el código de SP-17 usa la suya.
+    LimitesIdentidad,
+    { provide: LIMITE_INTENTOS_CODIGO, useFactory: (limites: LimitesIdentidad) => limites.codigo, inject: [LimitesIdentidad] },
     SesionGuard,
     RolGuard,
     { provide: CONFIGURACION_IDENTIDAD, useFactory: () => configuracionIdentidadDesde(process.env) },

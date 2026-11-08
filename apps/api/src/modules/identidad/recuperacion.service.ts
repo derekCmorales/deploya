@@ -4,6 +4,7 @@ import { CorreoPuerto, PLANTILLA_RECUPERACION } from "../notificaciones";
 import { CONFIGURACION_IDENTIDAD, type ConfiguracionIdentidad } from "./configuracion-identidad";
 import { motivoInvalidez, normalizarCorreo, VIGENCIA_RECUPERACION_MS, type Usuario } from "./dominio/cuenta";
 import { ContrasenaDebil, CorreoInvalido, TokenNoValido } from "./dominio/errores";
+import { claveDeCorreo, LimitesIdentidad } from "./dominio/limites-identidad";
 import { PoliticaContrasena } from "./dominio/politica-contrasena";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
 import { HashContrasena } from "./puertos/hash-contrasena.puerto";
@@ -34,6 +35,7 @@ export class RecuperacionService {
     private readonly correo: CorreoPuerto,
     private readonly reloj: Reloj,
     @Inject(CONFIGURACION_IDENTIDAD) private readonly configuracion: ConfiguracionIdentidad,
+    private readonly limites: LimitesIdentidad = new LimitesIdentidad(),
   ) {}
 
   /** Solo una cuenta Activa recibe el enlace; en cualquier otro caso no pasa nada visible. */
@@ -42,6 +44,10 @@ export class RecuperacionService {
     if (!usuario) return;
 
     const creado = this.reloj.ahora();
+    // 3 por correo por hora; pasado el límite, la misma respuesta y ningún correo (EST-01a).
+    const clave = claveDeCorreo("recuperacion", usuario.correo);
+    if (this.limites.correos.espera(clave, creado) > 0) return;
+    this.limites.correos.registrar(clave, creado);
     await this.tokens.invalidarVigentes(usuario.id, "recuperacion", creado);
     const token = this.generador.generar();
     await this.tokens.crear({

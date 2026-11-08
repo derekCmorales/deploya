@@ -1,10 +1,12 @@
-import { Body, Controller, Get, HttpCode, Post, UseFilters } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, Req, UseFilters } from "@nestjs/common";
+import type { Request } from "express";
 import { ErroresAdministracionFilter } from "../administracion/errores-administracion.filter";
 import { textoDe } from "./cuerpo-solicitud";
 import { ContrasenasNoCoinciden } from "./dominio/errores";
 import { ESPERA_REENVIO_MS } from "./dominio/politica-reenvio";
 import { ErroresIdentidadFilter } from "./errores-identidad.filter";
 import { IdentidadService, type CuentaRegistrada, type CuentaVerificada, type SolicitudReenvio } from "./identidad.service";
+import { origenDe } from "./origen-solicitud";
 
 const HTTP_CREADO = 201;
 const HTTP_OK = 200;
@@ -37,10 +39,15 @@ export class IdentidadController {
   @Post("registro")
   @HttpCode(HTTP_CREADO)
   @UseFilters(ErroresAdministracionFilter)
-  registrar(@Body() cuerpo: unknown): Promise<CuentaRegistrada> {
+  registrar(@Body() cuerpo: unknown, @Req() solicitud: Request): Promise<CuentaRegistrada> {
     const contrasena = textoDe(cuerpo, "contrasena");
     if (textoDe(cuerpo, "confirmacion") !== contrasena) throw new ContrasenasNoCoinciden();
-    return this.identidad.registrar({ correo: textoDe(cuerpo, "correo"), contrasena, invitacion: invitacionDe(cuerpo) });
+    return this.identidad.registrar({
+      correo: textoDe(cuerpo, "correo"),
+      contrasena,
+      invitacion: invitacionDe(cuerpo),
+      origen: origenDe(solicitud),
+    });
   }
 
   /** Pantalla 02: POST y no GET, porque consume el token (abrir el enlace no debe tener efectos). */

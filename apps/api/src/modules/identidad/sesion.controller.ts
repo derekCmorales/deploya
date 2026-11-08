@@ -4,6 +4,7 @@ import { CONFIGURACION_COOKIE, COOKIE_SESION, cookieSesion, cookieSesionVencida,
 import type { UsuarioSesion } from "./dominio/sesion";
 import { textoDe } from "./cuerpo-solicitud";
 import { ErroresIdentidadFilter } from "./errores-identidad.filter";
+import { origenDe } from "./origen-solicitud";
 import { SesionGuard } from "./sesion.guard";
 import { SesionService } from "./sesion.service";
 import { UsuarioActual } from "./usuario-actual.decorator";
@@ -28,6 +29,7 @@ export class SesionController {
       correo: textoDe(cuerpo, "correo"),
       contrasena: textoDe(cuerpo, "contrasena"),
       agenteUsuario: solicitud.headers["user-agent"] ?? null,
+      origen: origenDe(solicitud),
     });
     respuesta.setHeader("Set-Cookie", cookieSesion(token, this.cookie));
     return { usuario };

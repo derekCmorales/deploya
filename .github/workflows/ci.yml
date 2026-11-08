@@ -63,7 +63,7 @@ jobs:
       - name: Revisar instalar, respaldar y actualizar
         run: >-
           shellcheck -x scripts/instalar.sh scripts/respaldar.sh scripts/actualizar.sh
-          scripts/lib/*.sh scripts/lib/proveedores/*.sh
+          scripts/lib/*.sh scripts/lib/proveedores/*.sh scripts/desplegar-vps.sh
 
   smoke:
     name: Smoke compose
@@ -72,6 +72,8 @@ jobs:
     env:
       # El seed exige ADMIN_CLAVE (sin valor por defecto); en CI basta una de un solo uso.
       ADMIN_CLAVE: ci-${{ github.run_id }}-Aa#1
+      # QA-01: validar `hola-deploya` gasta varias peticiones a la API de GitHub; sin token son 60 por hora por IP.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -87,5 +89,9 @@ jobs:
           docker compose logs
           exit 1
       - run: API_URL=http://localhost:3001 WEB_URL=http://localhost:3000 node e2e/smoke.mjs
+      - name: Recorrido e2e (QA-01)
+        run: API_URL=http://localhost:3001 MAILPIT_URL=http://localhost:8025 node e2e/recorrido.mjs
+      - if: failure()
+        run: docker compose logs api worker mailpit
       - if: always()
         run: docker compose down -v

@@ -16,6 +16,6 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 ## 3. Cierre
 
-- [ ] 3.1 Correrla en compose con datos viejos sembrados a mano (hecha contra PostgreSQL 16 local con las migraciones aplicadas: 4 filas borradas, las vigentes intactas, la segunda corrida 0; falta en compose)
+- [x] 3.1 Correrla con datos viejos sembrados a mano: PostgreSQL 16 con las migraciones y el seed, Redis y el trabajador (`dist/trabajador.js`) del stack de compose. `POST /admin/limpieza/ejecutar` borró 4 filas (token usado hace 8 días, sesión inactiva hace 15, sesión revocada hace 8, invitación vencida hace 31) y dejó las vigentes; la segunda corrida, 0; un Cliente, 403. El trabajador registró `limpieza-diaria` en la cola `limpieza` (00:35 UTC)
 - [x] 3.2 `clases-unificado.mmd`, `datos-nucleo.md` y `pnpm check` en verde
 - [ ] 3.3 `/opsx-archive` después del merge

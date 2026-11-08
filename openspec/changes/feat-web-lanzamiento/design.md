@@ -20,7 +20,9 @@ Ningún estado visual nuevo: `ErrorConexionApi` (con `reset` como acción de «R
 
 ### 4. Accesibilidad: solo lo pequeño
 
-Solo se corrige lo que se arregla con un atributo o un token existente. Lo demás queda «Pendiente» en la tabla de DOC-02.
+Solo se corrige lo que se arregla con un atributo, un elemento o un token existente. Lo demás queda «Pendiente» en la tabla de DOC-02.
+
+Corregido: las pantallas sin `<main>` lo reciben en su raíz (01–04, 11a, 404) y el layout del proyecto pasa de `div` a `main`, con lo que su `header` deja de ser un segundo *banner*; `Meter` toma su nombre de la etiqueta (`aria-labelledby` con `useId`); la bitácora es desplazable con teclado (`tabIndex={0}` y anillo de foco) y su número de línea es decorativo. Pendiente: el contraste de las insignias `ok` y `bad` en claro, `text-faint` y el botón destructivo en oscuro, porque piden cambiar tokens del design system, y `heading-order` (buena práctica, no AA), que pide cambiar `CardTitle`.
 
 ### 5. Un adaptador para el contrato de `error.tsx`
 

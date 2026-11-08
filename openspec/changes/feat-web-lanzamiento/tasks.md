@@ -16,10 +16,10 @@ Sin red ni navegador reales en las pruebas. Cada `Scenario` del spec delta tiene
 
 ## 3. Accesibilidad
 
-- [ ] 3.1 Correcciones pequeñas de la tabla de DOC-02 (desde el lunes 2), solo atributos y tokens
+- [x] 3.1 Correcciones pequeñas de la tabla de DOC-02 (`docs/entrega-final/accesibilidad.md`), solo atributos y elementos: un `<main>` en 01–04, 11a, 404 y el marco del proyecto (quita el banner duplicado), nombre de los `Meter` y bitácora con teclado. Prueba «Accesibilidad: un main por pantalla…». El contraste de las insignias, `text-faint` y el botón destructivo en oscuro queda «Pendiente» (son tokens del design system)
 
 ## 4. Cierre
 
-- [ ] 4.1 Revisión en claro y oscuro de 10c, 28 y del error de un grupo
-- [ ] 4.2 `pnpm check` en verde
+- [x] 4.1 Revisión en claro y oscuro de 10c, 28 y del error de un grupo
+- [x] 4.2 `pnpm check` en verde
 - [ ] 4.3 `/opsx-archive` después del merge

@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Reloj } from "../../compartido/reloj";
 import { enmascararCorreo, normalizarCorreo, type Usuario } from "./dominio/cuenta";
-import { CorreoInvalido, CredencialesInvalidas, CuentaNoVerificada, CuentaSuspendida } from "./dominio/errores";
+import { CorreoInvalido, CredencialesInvalidas, CuentaNoVerificada, CuentaSuspendida, DemasiadosIntentos } from "./dominio/errores";
+import { claveDeSesion, LimitesIdentidad } from "./dominio/limites-identidad";
 import { debeRefrescarActividad, sesionVigente, type UsuarioSesion } from "./dominio/sesion";
 import { GeneradorToken } from "./puertos/generador-token.puerto";
 import { HashContrasena } from "./puertos/hash-contrasena.puerto";
@@ -12,6 +13,8 @@ export interface Credenciales {
   correo: string;
   contrasena: string;
   agenteUsuario?: string | null;
+  /** IP de quien llama (EST-01a). Sin origen no hay límite: lo usa el asistente 31 tras crear la cuenta. */
+  origen?: string;
 }
 
 /** El token va solo en la cookie; la respuesta JSON lleva únicamente el usuario. */
@@ -36,10 +39,15 @@ export class SesionService {
     private readonly hash: HashContrasena,
     private readonly generador: GeneradorToken,
     private readonly reloj: Reloj,
+    private readonly limites: LimitesIdentidad = new LimitesIdentidad(),
   ) {}
 
+  /**
+   * Pasados 5 fallos de contraseña desde una IP para un correo en 15 min, responde 429 aunque la
+   * contraseña sea correcta; un inicio correcto pone el conteo en cero (EST-01a).
+   */
   async iniciar(credenciales: Credenciales): Promise<SesionIniciada> {
-    const usuario = await this.usuarioConClave(credenciales.correo, credenciales.contrasena);
+    const usuario = await this.usuarioConLimite(credenciales);
     if (usuario.estadoCuenta === "pendiente") throw new CuentaNoVerificada(enmascararCorreo(usuario.correo));
     if (usuario.estadoCuenta === "suspendida") throw new CuentaSuspendida(usuario.motivoSuspension, usuario.suspendidaDesde);
 
@@ -70,6 +78,22 @@ export class SesionService {
     if (!usuario || usuario.estadoCuenta !== "activa") return null;
     if (debeRefrescarActividad(sesion, ahora)) await this.sesiones.registrarActividad(sesion.id, ahora);
     return usuarioDeSesion(usuario);
+  }
+
+  private async usuarioConLimite(credenciales: Credenciales): Promise<Usuario> {
+    if (credenciales.origen === undefined) return this.usuarioConClave(credenciales.correo, credenciales.contrasena);
+    const clave = claveDeSesion(credenciales.origen, credenciales.correo);
+    const ahora = this.reloj.ahora();
+    const espera = this.limites.sesion.espera(clave, ahora);
+    if (espera > 0) throw new DemasiadosIntentos(espera);
+    try {
+      const usuario = await this.usuarioConClave(credenciales.correo, credenciales.contrasena);
+      this.limites.sesion.limpiar(clave);
+      return usuario;
+    } catch (error) {
+      if (error instanceof CredencialesInvalidas) this.limites.sesion.registrar(clave, ahora);
+      throw error;
+    }
   }
 
   private async usuarioConClave(correo: string, contrasena: string): Promise<Usuario> {

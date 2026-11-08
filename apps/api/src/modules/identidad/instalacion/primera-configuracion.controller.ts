@@ -5,6 +5,7 @@ import { CONFIGURACION_COOKIE, cookieSesion, type ConfiguracionCookie } from "..
 import { textoDe, textoOpcionalDe } from "../cuerpo-solicitud";
 import type { UsuarioSesion } from "../dominio/sesion";
 import { ErroresIdentidadFilter } from "../errores-identidad.filter";
+import { origenDe } from "../origen-solicitud";
 import { Roles } from "../roles.decorator";
 import { RolGuard } from "../rol.guard";
 import { SesionGuard } from "../sesion.guard";
@@ -12,11 +13,6 @@ import { UsuarioActual } from "../usuario-actual.decorator";
 import { AsistenteDisponibleGuard } from "./asistente-disponible.guard";
 import { ErroresInstalacionFilter } from "./errores-instalacion.filter";
 import { PrimeraConfiguracionService, type PruebaEntregada } from "./primera-configuracion.service";
-
-/** La IP del cliente: detrás de Traefik la da `trust proxy` (`PROXIES_DE_CONFIANZA` en docker-compose.vps.yml). */
-function origenDe(solicitud: Request): string {
-  return solicitud.ip ?? "desconocido";
-}
 
 /**
  * Pantalla 31 (SP-17), contrato instalacion.md § Primera configuración. Código y administrador

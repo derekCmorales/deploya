@@ -5,6 +5,7 @@ import { LimitesDeInstalacion } from "../../suscripciones/modo/cuotas";
 import { RepositorioConfiguracionInstalacionMemoria } from "../../suscripciones/modo/repositorio-configuracion-instalacion.memoria";
 import { AjusteInvalido, InstalacionSoloAutoalojada, InvitacionNoEncontrada, InvitacionNoValida, InvitacionRequerida, RegistroCerrado } from "../dominio/errores";
 import { ESTADO_HTTP_POR_CODIGO } from "../errores-administracion.filter";
+import { RegistroLimpiezaMemoria } from "../limpieza/adaptadores/registro-limpieza.memoria";
 import { RepositorioInvitacionesMemoria } from "./adaptadores/repositorio-invitaciones.memoria";
 import { InstalacionService } from "./instalacion.service";
 import { InvitacionesService } from "./invitaciones.service";
@@ -54,9 +55,10 @@ function armar() {
   const envios = new RegistroEnviosMemoria();
   const servicioInvitaciones = new InvitacionesService(invitaciones, tokens, acciones, reloj, "https://apps.miempresa.com");
   const salud = new SaludInstalacion([new ComprobacionCorreo(configuracion, envios, reloj)]);
-  const instalacion = new InstalacionService(configuracion, servicioInvitaciones, SCRIPTS, reportes, acciones, reloj, salud, "apps.miempresa.com");
+  const limpiezas = new RegistroLimpiezaMemoria();
+  const instalacion = new InstalacionService(configuracion, servicioInvitaciones, SCRIPTS, reportes, acciones, limpiezas, reloj, salud, "apps.miempresa.com");
   const registro = new RegistroDeInstalacion(configuracion, invitaciones, tokens, reloj);
-  return { reloj, configuracion, invitaciones, acciones, reportes, envios, servicioInvitaciones, instalacion, registro };
+  return { reloj, configuracion, invitaciones, acciones, reportes, envios, servicioInvitaciones, instalacion, registro, limpiezas };
 }
 
 const tokenDe = (enlace: string) => new URL(enlace).searchParams.get("invitacion") ?? "";
@@ -169,7 +171,15 @@ describe("SP-18 · Ajustes de la instalación", () => {
       registro: { politica: "invitacion", invitaciones: [{ correo: "ana@miempresa.com" }] },
       limites: { cpu: 1, memoriaMb: 1024, proyectosPorUsuario: null, capacidad: 3, memoriaLibreMb: 4096 },
       respaldo: { ruta: "/var/backups/deploya", conserva: 7 },
+      limpieza: { ultima: null, filas: null },
     });
+  });
+
+  it("EST-01b · el estado trae la última limpieza diaria", async () => {
+    const { instalacion, limpiezas } = armar();
+    await limpiezas.guardar({ ultimaLimpieza: AHORA, filasLimpiadas: 3 });
+
+    await expect(instalacion.estado()).resolves.toMatchObject({ limpieza: { ultima: AHORA, filas: 3 } });
   });
 
   it("Solo en autoalojado", () => {

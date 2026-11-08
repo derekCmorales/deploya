@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Reloj } from "../../../compartido/reloj";
 import type { LimitesInstalacion, PoliticaRegistro } from "../../suscripciones/modo/configuracion-instalacion";
 import { RepositorioConfiguracionInstalacion } from "../../suscripciones/modo/repositorio-configuracion-instalacion.puerto";
+import { RegistroLimpiezaPuerto } from "../limpieza/puertos/registro-limpieza.puerto";
 import { ACCION_CAMBIAR_LIMITES, ACCION_CAMBIAR_REGISTRO, capacidadEstimada, validarLimites, validarPolitica } from "./dominio/ajustes";
 import type { InvitacionActiva } from "./dominio/invitacion";
 import { InvitacionesService } from "./invitaciones.service";
@@ -31,11 +32,13 @@ export interface EstadoInstalacion {
   registro: { politica: PoliticaRegistro; invitaciones: InvitacionActiva[] };
   limites: LimitesVista;
   respaldo: EstadoRespaldo;
+  /** EST-01b: la última limpieza diaria; los dos en `null` si todavía no corrió. */
+  limpieza: { ultima: Date | null; filas: number | null };
 }
 
 /**
  * Facade de Admin · Instalación (SP-18): junta la salud (Composite), lo que dejan los scripts,
- * la política de registro y los límites. Cambiar registro o límites deja una acción. Los límites
+ * la política de registro, los límites y la última limpieza diaria (EST-01b). Cambiar registro o límites deja una acción. Los límites
  * los lee `LimitesDeInstalacion` en cada despliegue: aplican en el próximo, no en el que corre.
  */
 @Injectable()
@@ -46,21 +49,32 @@ export class InstalacionService {
     private readonly scripts: EstadoScriptsPuerto,
     private readonly reportes: ReporteServidorPuerto,
     private readonly acciones: RegistroAccionesPuerto,
+    private readonly limpiezas: RegistroLimpiezaPuerto,
     private readonly reloj: Reloj,
     @Inject(SALUD_INSTALACION) private readonly salud: SaludInstalacion,
     @Inject(DOMINIO_INSTALACION) private readonly dominio: string,
   ) {}
 
   async estado(): Promise<EstadoInstalacion> {
-    const [salud, version, respaldo, politica, invitaciones, limites] = await Promise.all([
+    const [salud, version, respaldo, politica, invitaciones, limites, limpieza] = await Promise.all([
       this.salud.comprobar(),
       this.scripts.version(),
       this.scripts.respaldo(),
       this.configuracion.politicaRegistro(),
       this.invitaciones.activas(),
       this.limites(),
+      this.limpiezas.ultima(),
     ]);
-    return { dominio: this.dominio, comprobado: this.reloj.ahora(), salud, version, registro: { politica, invitaciones }, limites, respaldo };
+    return {
+      dominio: this.dominio,
+      comprobado: this.reloj.ahora(),
+      salud,
+      version,
+      registro: { politica, invitaciones },
+      limites,
+      respaldo,
+      limpieza: { ultima: limpieza?.ultimaLimpieza ?? null, filas: limpieza?.filasLimpiadas ?? null },
+    };
   }
 
   async cambiarRegistro(adminId: string, cuerpo: unknown): Promise<{ politica: PoliticaRegistro }> {

@@ -392,9 +392,47 @@ classDiagram
         -scripts EstadoScriptsPuerto
         -reportes ReporteServidorPuerto
         -acciones RegistroAccionesPuerto
+        -limpiezas RegistroLimpiezaPuerto
         +estado() EstadoInstalacion
         +cambiarRegistro(adminId, cuerpo) PoliticaRegistro
         +cambiarLimites(adminId, cuerpo) LimitesVista
+    }
+    class PoliticaLimpieza {
+        <<Policy · EST-01b>>
+        +cortesDeLimpieza(ahora) CortesLimpieza
+    }
+    class LimpiezaService {
+        <<Service Layer · EST-01b>>
+        -purga PurgaDatosVencidosPuerto
+        -registro RegistroLimpiezaPuerto
+        -reloj Reloj
+        +ejecutar() ResultadoLimpieza
+    }
+    class PurgaDatosVencidosPuerto {
+        <<abstract · puerto>>
+        +purgarTokensCuenta(antesDe) number
+        +purgarSesiones(revocadasAntesDe, inactivasAntesDe) number
+        +purgarInvitaciones(antesDe) number
+    }
+    class PurgaDatosVencidosPrisma
+    class PurgaDatosVencidosMemoria
+    class RegistroLimpiezaPuerto {
+        <<abstract · puerto>>
+        +guardar(limpieza) void
+        +ultima() UltimaLimpieza
+    }
+    class RegistroLimpiezaPrisma
+    class LimpiezaController
+    class ColaLimpiezaPuerto {
+        <<abstract · puerto>>
+        +iniciar(manejador) void
+        +cerrar() void
+    }
+    class ColaLimpiezaBullMq
+    class ColaLimpiezaMemoria
+    class TareaLimpiezaDiaria {
+        -cola ColaLimpiezaPuerto
+        -limpieza LimpiezaService
     }
     class InvitacionesService {
         <<Service Layer · SP-18>>
@@ -484,8 +522,17 @@ classDiagram
     class PrimeraConfiguracionController
     class AsistenteDisponibleGuard
     class LimiteIntentos {
-        +espera(origen, ahora) number
-        +registrarFallo(origen, ahora) void
+        <<Policy>>
+        +espera(clave, ahora) number
+        +registrar(clave, ahora) void
+        +limpiar(clave) void
+    }
+    class LimitesIdentidad {
+        <<Factory>>
+        +sesion LimiteIntentos
+        +registro LimiteIntentos
+        +correos LimiteIntentos
+        +codigo LimiteIntentos
     }
     class SoloAutoalojadaGuard
     class InstalacionAdminController
@@ -1189,6 +1236,19 @@ classDiagram
     InstalacionService --> RepositorioConfiguracionInstalacion
     InstalacionService --> EstadoScriptsPuerto
     InstalacionService --> ReporteServidorPuerto
+    InstalacionService --> RegistroLimpiezaPuerto : última limpieza
+    LimpiezaController --> LimpiezaService
+    LimpiezaController ..> RolGuard : protege
+    LimpiezaService ..> PoliticaLimpieza : fechas de corte
+    LimpiezaService --> PurgaDatosVencidosPuerto
+    LimpiezaService --> RegistroLimpiezaPuerto
+    PurgaDatosVencidosPuerto <|-- PurgaDatosVencidosPrisma
+    PurgaDatosVencidosPuerto <|-- PurgaDatosVencidosMemoria
+    RegistroLimpiezaPuerto <|-- RegistroLimpiezaPrisma
+    ColaLimpiezaPuerto <|-- ColaLimpiezaBullMq
+    ColaLimpiezaPuerto <|-- ColaLimpiezaMemoria
+    TareaLimpiezaDiaria --> ColaLimpiezaPuerto
+    TareaLimpiezaDiaria --> LimpiezaService
     InvitacionesService --> RepositorioInvitaciones
     SaludInstalacion o-- ComprobacionInstalacion
     ComprobacionInstalacion <|-- ComprobacionDocker
@@ -1227,6 +1287,10 @@ classDiagram
     PrimeraConfiguracionService --> CifradorVariables : cifra
     PrimeraConfiguracionService --> PruebaCorreoPuerto
     PrimeraConfiguracionService --> LimiteIntentos
+    LimitesIdentidad *-- LimiteIntentos
+    SesionService --> LimitesIdentidad : 5 fallos por ip y correo
+    IdentidadService --> LimitesIdentidad : registro y reenvío
+    RecuperacionService --> LimitesIdentidad : correos
     ProyectosService --> ProveedorFuente
     ProyectosService ..> CambiosProyecto : configurar
     ProyectosService --> RepositorioProyectos

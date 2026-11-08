@@ -21,6 +21,7 @@ import { RegistroAccionesPuerto } from "./instalacion/puertos/registro-acciones.
 import { ReporteServidorPuerto } from "./instalacion/puertos/reporte-servidor.puerto";
 import { ResolutorDnsPuerto } from "./instalacion/puertos/resolutor-dns.puerto";
 import { RegistroInstalacionModule } from "./instalacion/registro-instalacion.module";
+import { LimpiezaModule } from "./limpieza/limpieza.module";
 import { SaludInstalacion } from "./instalacion/salud/comprobacion";
 import {
   ComprobacionCertificado,
@@ -45,10 +46,11 @@ const DIRECTORIO_RESPALDOS = process.env.DIR_RESPALDOS ?? "/var/backups/deploya"
  * La sesión y el rol salen de M1 (`SesionGuard` y `RolGuard`); detener los contenedores de una
  * cuenta suspendida y reanudarlos al reactivarla, de M5 (`ContenedoresClientePuerto`). Admin ·
  * Instalación (SP-18) lee el modo y la configuración de M2, y la salud la arma un Composite.
- * Admin · Infraestructura (SP-13) lee el nodo por `MetricasNodoPuerto` (AdaptersModule).
+ * Admin · Infraestructura (SP-13) lee el nodo por `MetricasNodoPuerto` (AdaptersModule). La
+ * limpieza diaria (EST-01b) vive en `LimpiezaModule`; 32 lee su última corrida.
  */
 @Module({
-  imports: [IdentidadModule, OrquestacionModule, SuscripcionesModule, RegistroInstalacionModule],
+  imports: [IdentidadModule, OrquestacionModule, SuscripcionesModule, RegistroInstalacionModule, LimpiezaModule],
   controllers: [AdministracionController, UsuariosAdminController, InstalacionAdminController, InfraestructuraAdminController],
   providers: [
     InfraestructuraService,

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="deploya">
+  <!--
+    Marca de Deploya para la pestaña: la palabra en Geist 700, tracking −6 %, con la última «a»
+    en Señal (docs/diseno/README.md § Marca). Un SVG estático no lee variables CSS, así que usa
+    los valores exactos de docs/diseno/tokens.json: background, foreground y signal en claro. El
+    navegador no carga Geist en un favicon; cae en la sans del sistema.
+  -->
+  <rect width="64" height="64" rx="14" fill="oklch(0.974 0.006 85)" />
+  <text
+    x="32"
+    y="40"
+    text-anchor="middle"
+    font-family="Geist, ui-sans-serif, system-ui, sans-serif"
+    font-size="15"
+    font-weight="700"
+    letter-spacing="-0.9"
+    fill="oklch(0.2 0.012 70)"
+  >deploy<tspan fill="oklch(0.5 0.15 250)">a</tspan></text>
+</svg>

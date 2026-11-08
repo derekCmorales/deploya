@@ -12,9 +12,9 @@ export default async function ProyectoLayout({
 }) {
   const { proyecto } = await params;
   return (
-    <div className="flex min-h-full flex-col">
+    <main className="flex min-h-full flex-col">
       <MarcoProyecto proyectoId={proyecto} />
       {children}
-    </div>
+    </main>
   );
 }

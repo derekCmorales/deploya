@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { SesionProvider } from "@/hooks/use-sesion";
 import { MarcoApp } from "@/components/shell/marco-app";
 import { ThemeProvider } from "@/components/shell/theme-provider";
+import { DESCRIPCION_SITIO, PLANTILLA_TITULO, TITULO_BASE } from "@/lib/titulos";
 
 import "./globals.css";
 
@@ -19,8 +20,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Deploya",
-  description: "PaaS de alojamiento: de un repositorio a un servicio en línea con HTTPS.",
+  title: { default: TITULO_BASE, template: PLANTILLA_TITULO },
+  description: DESCRIPCION_SITIO,
+  openGraph: {
+    title: TITULO_BASE,
+    description: DESCRIPCION_SITIO,
+    type: "website",
+    locale: "es_ES",
+    siteName: TITULO_BASE,
+  },
 };
 
 export default function RootLayout({

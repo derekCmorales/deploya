@@ -32,7 +32,7 @@ import type { TiemposDespliegue } from "@/lib/tiempos";
 
 import { Interactivos } from "./interactivos";
 
-export const metadata: Metadata = { title: "Sistema de diseño · Deploya" };
+export const metadata: Metadata = { title: "Sistema de diseño" };
 
 function Seccion({ titulo, nota, children }: { titulo: string; nota?: string; children: ReactNode }) {
   return (

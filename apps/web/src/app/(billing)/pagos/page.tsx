@@ -4,7 +4,7 @@ import { RequiereSesion } from "@/components/shell/requiere-sesion";
 
 import { PagosContenedor } from "./_componentes/pagos-contenedor";
 
-export const metadata: Metadata = { title: "Historial de pagos · Deploya" };
+export const metadata: Metadata = { title: "Historial de pagos" };
 
 export default function PagosPage() {
   return (

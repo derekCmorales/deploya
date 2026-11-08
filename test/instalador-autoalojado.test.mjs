@@ -612,3 +612,16 @@ it("Pasos de qué hacer en líneas distintas", () => {
   assert.match(resultado.stdout, /2\. Espera a que propague \(normalmente minutos\)\n3\. Sigue donde quedó:\n\.\/scripts\/instalar\.sh --continuar/);
   rmSync(escena.raiz, { recursive: true, force: true });
 });
+
+it("Respaldo del VPS de la nube: compose y entorno elegidos por variables", () => {
+  const escena = escenario();
+  entornoPlano(escena.entorno.DEPLOYA_ENV);
+  const entorno = { ...escena.entorno, DEPLOYA_ARCHIVOS_COMPOSE: "docker-compose.yml docker-compose.vps.yml" };
+  const resultado = correr("respaldar.sh", [], entorno);
+  assert.equal(resultado.status, 0, detalle(resultado));
+  const volcado = lineasTraza(escena.traza).find((l) => l.includes("pg_dump"));
+  assert.ok(volcado, "no corrió pg_dump");
+  assert.match(volcado, /-f \S*docker-compose\.yml -f \S*docker-compose\.vps\.yml exec/);
+  assert.doesNotMatch(volcado, /autoalojado/);
+  rmSync(escena.raiz, { recursive: true, force: true });
+});

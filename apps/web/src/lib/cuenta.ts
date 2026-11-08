@@ -31,11 +31,25 @@ const MENSAJE_GENERICO = "No pudimos crear la cuenta. Intenta de nuevo en unos s
 /** Rechazos de la política de registro de una instalación autoalojada (SP-18, 403/410): su mensaje se muestra tal cual. */
 const CODIGOS_POLITICA_REGISTRO = new Set(["RegistroCerrado", "InvitacionRequerida", "InvitacionNoValida"]);
 
+const SEGUNDOS_POR_MINUTO = 60;
+/** Lo que manda la API al pasar un límite de intentos (EST-01a): 429 `DemasiadosIntentos` con `segundos`. */
+const CODIGO_DEMASIADOS_INTENTOS = "DemasiadosIntentos";
+
+/**
+ * 01 y 03 · «Demasiados intentos. Vuelve a intentar en 10 min.» Los minutos salen de `segundos`
+ * del cuerpo (lo mismo que `Retry-After`, que el navegador no deja leer entre orígenes).
+ */
+export function textoDemasiadosIntentos(segundos: unknown): string {
+  if (typeof segundos !== "number" || !Number.isFinite(segundos)) return "Demasiados intentos. Espera unos minutos y vuelve a intentar.";
+  return `Demasiados intentos. Vuelve a intentar en ${Math.max(1, Math.ceil(segundos / SEGUNDOS_POR_MINUTO))} min.`;
+}
+
 export function resultadoRegistro(estado: number, cuerpo: Record<string, unknown>): ResultadoRegistro {
   if (estado === 201 && typeof cuerpo.correoEnmascarado === "string") {
     return { tipo: "creada", correoEnmascarado: cuerpo.correoEnmascarado, correoEnviado: cuerpo.correoEnviado !== false };
   }
   if (cuerpo.codigo === "CorreoYaRegistrado") return { tipo: "correo-registrado" };
+  if (cuerpo.codigo === CODIGO_DEMASIADOS_INTENTOS) return { tipo: "error", mensaje: textoDemasiadosIntentos(cuerpo.segundos) };
   if (typeof cuerpo.mensaje === "string" && (estado === 400 || CODIGOS_POLITICA_REGISTRO.has(String(cuerpo.codigo)))) {
     return { tipo: "error", mensaje: cuerpo.mensaje };
   }
@@ -67,6 +81,7 @@ const MENSAJE_INGRESO = "No pudimos iniciar sesión. Intenta de nuevo en unos se
 export function resultadoIngreso(estado: number, cuerpo: Record<string, unknown>): ResultadoIngreso {
   if (estado === 200) return { tipo: "dentro" };
   if (cuerpo.codigo === "CredencialesInvalidas") return { tipo: "credenciales" };
+  if (cuerpo.codigo === CODIGO_DEMASIADOS_INTENTOS) return { tipo: "error", mensaje: textoDemasiadosIntentos(cuerpo.segundos) };
   if (cuerpo.codigo === "CuentaNoVerificada") {
     return { tipo: "sin-verificar", correoEnmascarado: typeof cuerpo.correoEnmascarado === "string" ? cuerpo.correoEnmascarado : "tu correo" };
   }

@@ -10,6 +10,7 @@ import {
   erroresRegistro,
   resultadoIngreso,
   resultadoRegistro,
+  textoDemasiadosIntentos,
   resultadoRestablecer,
   resultadoSolicitudRecuperacion,
   resultadoVerificacion,
@@ -205,4 +206,25 @@ test("04 · textos de la ficha, «Olvidé mi contraseña» lleva a /recuperar y 
     assert.doesNotMatch(codigo, /fetch\(/);
     assert.doesNotMatch(codigo, /#[0-9a-fA-F]{3,8}\b/);
   }
+});
+
+const fuenteDe = (ruta) => readFileSync(new URL(`../${ruta}`, import.meta.url), "utf8");
+
+test("Aviso en la pantalla", () => {
+  // 03 recibe 429 con Retry-After: 600 (y `segundos: 600` en el cuerpo, que es lo que lee la web).
+  assert.deepEqual(resultadoIngreso(429, { codigo: "DemasiadosIntentos", segundos: 600 }), {
+    tipo: "error",
+    mensaje: "Demasiados intentos. Vuelve a intentar en 10 min.",
+  });
+  assert.match(fuenteDe("src/app/(auth)/ingresar/formulario-ingreso.tsx"), /aviso\?\.tipo === "error" \? <Banner variant="bad" title=\{aviso\.mensaje\} \/>/);
+});
+
+test("EST-01a · 01 muestra el mismo aviso; los minutos se redondean hacia arriba y nunca son 0", () => {
+  assert.deepEqual(resultadoRegistro(429, { codigo: "DemasiadosIntentos", segundos: 3599 }), {
+    tipo: "error",
+    mensaje: "Demasiados intentos. Vuelve a intentar en 60 min.",
+  });
+  assert.equal(textoDemasiadosIntentos(20), "Demasiados intentos. Vuelve a intentar en 1 min.");
+  assert.equal(textoDemasiadosIntentos(undefined), "Demasiados intentos. Espera unos minutos y vuelve a intentar.");
+  assert.match(fuenteDe("src/app/(auth)/registro/formulario-registro.tsx"), /errorGeneral \? <Banner variant="bad" title=\{errorGeneral\} \/>/);
 });

@@ -1,6 +1,6 @@
 # VPS: puesta en marcha (M6-02)
 
-Guía operativa de `docker-compose.vps.yml`. Las decisiones están en [ADR 0005](adr/0005-traefik-proveedor-de-archivo.md) y [ADR 0007](adr/0007-certificado-comodin-por-dns-01.md); el diagrama, en [despliegue-infraestructura.mmd](diagramas/compartido/despliegue-infraestructura.mmd). Lo de este documento **se verifica a mano en el servidor**: las pruebas unitarias no tocan DNS, certificados ni correo ([ingenieria.md §5.5](ingenieria.md)).
+Guía operativa de `docker-compose.vps.yml`. Las decisiones están en [ADR 0005](adr/0005-traefik-proveedor-de-archivo.md) y [ADR 0007](adr/0007-certificado-comodin-por-dns-01.md); el diagrama, en [despliegue-infraestructura.mmd](diagramas/compartido/despliegue-infraestructura.mmd). Manual completo (variables, cron de respaldos y salud, problemas comunes): [entrega-final/manual-tecnico.md](entrega-final/manual-tecnico.md#3-vps-de-la-nube-producción). Lo de este documento **se verifica a mano en el servidor**: las pruebas unitarias no tocan DNS, certificados ni correo ([ingenieria.md §5.5](ingenieria.md)).
 
 ## 1. Una sola vez
 
@@ -19,7 +19,7 @@ scripts/desplegar-vps.sh            # rama main
 RAMA=Entrega-85% scripts/desplegar-vps.sh
 ```
 
-El script hace `git pull --ff-only`, genera `infra/traefik/plataforma.generada.yml` con el dominio, corre `docker compose --env-file .env.vps -f docker-compose.yml -f docker-compose.vps.yml up -d --build`, repite las migraciones y el seed (idempotentes) y espera a que la API responda.
+El script hace `git pull --ff-only`, genera `infra/traefik/plataforma.generada.yml` con el dominio, corre `docker compose --env-file .env.vps -f docker-compose.yml -f docker-compose.vps.yml up -d --build` (todos los servicios con `restart: unless-stopped` y logs rotados), repite las migraciones y el seed (idempotentes) y espera a que la API responda.
 
 ## 3. Cómo saber que quedó
 

@@ -137,6 +137,18 @@ valor_env() {
   return 1
 }
 
+# DEPLOYA_ARCHIVOS_COMPOSE (separados por espacios) reemplaza los de la estrategia: el VPS de la
+# nube respalda con «docker-compose.yml docker-compose.vps.yml» y DEPLOYA_ENV=.env.vps.
+archivos_compose() {
+  if [[ -n "${DEPLOYA_ARCHIVOS_COMPOSE:-}" ]]; then
+    local -a elegidos=()
+    read -r -a elegidos <<< "${DEPLOYA_ARCHIVOS_COMPOSE}"
+    printf '%s\n' "${elegidos[@]}"
+    return
+  fi
+  listar_archivos_compose
+}
+
 preparar_compose() {
   local archivo
   COMPOSE_ARCHIVOS=()
@@ -145,7 +157,7 @@ preparar_compose() {
       continue
     fi
     COMPOSE_ARCHIVOS+=(-f "${RAIZ}/${archivo}")
-  done < <(listar_archivos_compose)
+  done < <(archivos_compose)
 }
 
 invocar_compose() {

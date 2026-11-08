@@ -12,6 +12,7 @@
     "test": "pnpm --filter @deploya/api --filter @deploya/web test && node --test test/*.test.mjs",
     "test:cov": "pnpm --filter @deploya/api test:cov",
     "test:smoke": "pnpm --filter @deploya/e2e test",
+    "test:recorrido": "pnpm --filter @deploya/e2e recorrido",
     "validate:mermaid": "node scripts/validate-mermaid.mjs && node scripts/sync-diagramas.mjs --check",
     "diagramas:sync": "node scripts/sync-diagramas.mjs",
     "check": "pnpm test && pnpm build && pnpm validate:mermaid"

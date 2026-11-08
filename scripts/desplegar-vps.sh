@@ -38,7 +38,7 @@ echo "==> Migraciones y seed (idempotentes)"
 "${COMPOSE[@]}" run --rm migracion
 
 echo "==> Esperando a la API"
-for intento in $(seq 1 40); do
+for _ in $(seq 1 40); do
   if "${COMPOSE[@]}" exec -T api node -e "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then
     echo "API en línea: https://api.${DOMINIO_BASE}/health"
     echo "Web: https://${DOMINIO_BASE}"

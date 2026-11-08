@@ -22,4 +22,4 @@ Sin red ni navegador reales en las pruebas. Cada `Scenario` del spec delta tiene
 
 - [x] 4.1 Revisión en claro y oscuro de 10c, 28 y del error de un grupo
 - [x] 4.2 `pnpm check` en verde
-- [ ] 4.3 `/opsx-archive` después del merge
+- [x] 4.3 `/opsx-archive` después del merge

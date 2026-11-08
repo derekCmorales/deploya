@@ -2,14 +2,26 @@
 #   docker compose --env-file .env.vps -f docker-compose.yml -f docker-compose.vps.yml up -d --build
 # (scripts/desplegar-vps.sh lo hace completo). Requiere Docker Compose 2.24 o más (`!reset` y `!override`).
 # Los secretos viven solo en .env.vps del servidor; el ejemplo sin valores está en .env.vps.example.
+# Producción: los servicios vuelven solos tras un reinicio del servidor o una caída, y los logs
+# de Docker rotan (3 × 10 MB por contenedor) para no llenar el disco.
+x-produccion: &produccion
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   # Sin puertos al exterior: solo la red interna de compose.
   postgres:
+    <<: *produccion
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env.vps}
     ports: !reset []
 
   redis:
+    <<: *produccion
     ports: !reset []
 
   # Fuera del VPS: el correo sale por el proveedor SMTP (ADR 0001).
@@ -21,6 +33,7 @@ services:
       CLIENTE_CLAVE: ${CLIENTE_CLAVE:?Define CLIENTE_CLAVE en .env.vps (distinta de ADMIN_CLAVE)}
 
   api:
+    <<: *produccion
     ports: !reset []
     volumes:
       # Solo lectura: la API muestra hasta cuándo vale el certificado (12b).
@@ -43,6 +56,7 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
 
   worker:
+    <<: *produccion
     environment:
       CLAVE_CIFRADO_VARIABLES: ${CLAVE_CIFRADO_VARIABLES:?Define CLAVE_CIFRADO_VARIABLES en .env.vps (32 bytes)}
       DOMINIO_BASE: ${DOMINIO_BASE:?Define DOMINIO_BASE en .env.vps}
@@ -52,6 +66,7 @@ services:
 
   # La web se publica en la raíz: la URL de la API y el dominio de las apps se hornean al construir.
   web:
+    <<: *produccion
     build:
       args:
         NEXT_PUBLIC_API_URL: https://api.${DOMINIO_BASE:?Define DOMINIO_BASE en .env.vps}
@@ -60,6 +75,7 @@ services:
     ports: !reset []
 
   traefik:
+    <<: *produccion
     ports: !override
       - "80:80"
       - "443:443"
@@ -72,7 +88,6 @@ services:
       TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL: ${ACME_CORREO:?Define ACME_CORREO en .env.vps}
       # Token del proveedor DNS con permiso SOLO sobre la zona de DOMINIO_BASE (Cloudflare por defecto).
       CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:?Define CF_DNS_API_TOKEN en .env.vps}
-    restart: unless-stopped
 
 volumes:
   traefik_acme:

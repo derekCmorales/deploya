@@ -18,4 +18,4 @@ Sin Docker, red, base ni reloj reales en las pruebas unitarias. Cada `Scenario` 
 
 - [x] 3.1 Revisión de 01 y 03 en claro y oscuro (04 no cambia: no recibe 429)
 - [x] 3.2 `clases-unificado.mmd` y `pnpm check` en verde
-- [ ] 3.3 `/opsx-archive` después del merge
+- [x] 3.3 `/opsx-archive` después del merge

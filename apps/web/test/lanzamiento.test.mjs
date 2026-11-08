@@ -86,3 +86,30 @@ test("Título por página", () => {
   assert.doesNotMatch(icono, /#[0-9a-fA-F]{3,8}\b/, "el ícono no inventa hex");
   assert.match(icono, /oklch\(0\.5 0\.15 250\)/, "la última «a» va en Señal");
 });
+
+test("Accesibilidad: un main por pantalla, medidores con nombre y bitácora con teclado (DOC-02)", () => {
+  const conMain = [
+    "src/app/(auth)/registro/page.tsx",
+    "src/app/(auth)/ingresar/page.tsx",
+    "src/app/(auth)/recuperar/page.tsx",
+    "src/app/(auth)/verificar/page.tsx",
+    "src/app/(auth)/restablecer/page.tsx",
+    "src/app/(projects)/projects/nuevo/page.tsx",
+    "src/app/(projects)/projects/[proyecto]/layout.tsx",
+    "src/app/not-found.tsx",
+  ];
+  for (const ruta of conMain) {
+    const pagina = leer(ruta);
+    assert.match(pagina, /<main[ >]/, `${ruta} sin <main>`);
+    assert.equal(pagina.match(/<main[ >]/g).length, 1, `${ruta} con más de un <main>`);
+  }
+
+  const medidor = leer("src/components/ui/meter.tsx");
+  assert.match(medidor, /role="meter"\s+aria-labelledby=\{etiqueta\}/, "el medidor no toma su nombre de la etiqueta");
+  assert.match(medidor, /<span id=\{etiqueta\}/);
+
+  const bitacora = leer("src/components/deploya/bitacora.tsx");
+  assert.match(bitacora, /role="log"[\s\S]*tabIndex=\{0\}/, "la bitácora se desplaza sin teclado");
+  assert.match(bitacora, /focus-visible:ring-2 focus-visible:ring-ring/, "la bitácora no muestra el foco");
+  assert.match(bitacora, /text-faint select-none" aria-hidden/, "el número de línea no es decorativo");
+});

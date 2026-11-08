@@ -31,9 +31,10 @@ function Bitacora({
     <div
       role="log"
       aria-label={ariaLabel}
+      tabIndex={0}
       aria-live={enCurso ? "polite" : "off"}
       className={cn(
-        "overflow-auto rounded-lg border border-border bg-sunken py-2 font-mono text-xs leading-5 text-foreground",
+        "overflow-auto rounded-lg border border-border bg-sunken py-2 font-mono text-xs leading-5 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >
@@ -48,7 +49,9 @@ function Bitacora({
             resaltada === l.n && "bg-signal-soft",
           )}
         >
-          <span className="text-right text-faint select-none">{l.n}</span>
+          <span className="text-right text-faint select-none" aria-hidden>
+            {l.n}
+          </span>
           <span className="text-muted-foreground">{l.marca}</span>
           <span className="min-w-0 overflow-hidden text-ellipsis">
             {l.etapa ? <span className="inline-block w-[13ch] text-muted-foreground">{l.etapa}</span> : null}

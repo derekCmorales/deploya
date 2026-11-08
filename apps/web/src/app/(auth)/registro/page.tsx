@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Crear cuenta" };
  */
 export default function RegistroPage() {
   return (
-    <div className="grid min-h-full grid-cols-1 lg:grid-cols-[640px_1fr]">
+    <main className="grid min-h-full grid-cols-1 lg:grid-cols-[640px_1fr]">
       <section className="grid place-items-center p-6 sm:p-12">
         <Suspense fallback={<Skeleton className="h-96 w-[400px] max-w-full rounded-xl" />}>
           <FormularioRegistro />
@@ -23,6 +23,6 @@ export default function RegistroPage() {
       <aside aria-hidden className="puntos hidden place-items-center border-l border-border bg-sunken p-12 lg:grid">
         <IlustracionRegistro className="w-[430px] max-w-full" />
       </aside>
-    </div>
+    </main>
   );
 }

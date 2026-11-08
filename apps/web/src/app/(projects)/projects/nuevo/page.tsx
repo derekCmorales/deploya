@@ -6,5 +6,9 @@ export const metadata: Metadata = { title: "Nuevo proyecto" };
 
 /** Pantallas 11a (Repositorio), 11d (Revisar) y 11e (errores). M3-02. */
 export default function NuevoProyectoPage() {
-  return <AsistenteAlta />;
+  return (
+    <main>
+      <AsistenteAlta />
+    </main>
+  );
 }

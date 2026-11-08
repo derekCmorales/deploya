@@ -6,5 +6,9 @@ export const metadata: Metadata = { title: "Página inexistente" };
 
 /** Pantalla 28 · 404 (WEB-02). */
 export default function NotFound() {
-  return <PaginaInexistente />;
+  return (
+    <main>
+      <PaginaInexistente />
+    </main>
+  );
 }

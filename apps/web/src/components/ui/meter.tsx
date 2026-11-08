@@ -1,4 +1,4 @@
-import type * as React from "react";
+import { useId, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
  * `tonoAlLimite="warn"` cuando llegar al límite no es un error (proyectos del plan, pantalla 10).
  */
 export interface MeterProps {
-  label: React.ReactNode;
+  label: ReactNode;
   value: number;
   max: number;
   /** Texto del valor; por defecto «value / max». */
-  valueLabel?: React.ReactNode;
+  valueLabel?: ReactNode;
   /** Posición de una marca (misma unidad que `value`). */
   cota?: number;
   tonoAlLimite?: "warn" | "bad";
@@ -20,12 +20,15 @@ export interface MeterProps {
 }
 
 function Meter({ label, value, max, valueLabel, cota, tonoAlLimite = "bad", className }: MeterProps) {
+  const etiqueta = useId();
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   const tono = pct >= 100 ? (tonoAlLimite === "warn" ? "bg-warn" : "bg-bad") : pct >= 80 ? "bg-warn" : "bg-foreground";
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       <div className="flex items-baseline justify-between gap-3 text-sm">
-        <span className="text-muted-foreground">{label}</span>
+        <span id={etiqueta} className="text-muted-foreground">
+          {label}
+        </span>
         <span className="tnum font-medium">
           {valueLabel ?? (
             <>
@@ -36,6 +39,7 @@ function Meter({ label, value, max, valueLabel, cota, tonoAlLimite = "bad", clas
       </div>
       <div
         role="meter"
+        aria-labelledby={etiqueta}
         aria-valuemin={0}
         aria-valuemax={max}
         aria-valuenow={value}

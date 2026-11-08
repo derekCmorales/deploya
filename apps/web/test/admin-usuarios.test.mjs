@@ -150,3 +150,8 @@ test("25c · sin aviso cuando la suscripción está vigente: los contenedores ar
   assert.equal(avisoReactivacion({ plan: "Pro", suscripcion: "vencida", suspension }), null);
   assert.equal(avisoReactivacion({ plan: null, suscripcion: null, suspension }), null);
 });
+
+test("25b · con el detalle abierto, la tabla se desplaza y no pisa el panel", () => {
+  const contenedor = readFileSync(new URL("../src/app/(admin)/admin/usuarios/_componentes/usuarios-contenedor.tsx", import.meta.url), "utf8");
+  assert.match(contenedor, /<div className="overflow-x-auto">\s*<TablaUsuarios /);
+});

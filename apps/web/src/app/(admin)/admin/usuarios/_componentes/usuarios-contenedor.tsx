@@ -92,7 +92,10 @@ export function UsuariosContenedor() {
             </label>
             {lista.datos ? <span className="ml-auto text-[13px] text-muted-foreground tabular-nums">{textoTotal(lista.datos.total)}</span> : null}
           </div>
-          <TablaUsuarios usuarios={lista.datos ? usuarios : null} seleccion={seleccion} alSeleccionar={setSeleccion} />
+          {/* Con el detalle abierto la columna se angosta: la tabla se desplaza en vez de pisar el panel. */}
+          <div className="overflow-x-auto">
+            <TablaUsuarios usuarios={lista.datos ? usuarios : null} seleccion={seleccion} alSeleccionar={setSeleccion} />
+          </div>
           {lista.datos && paginas > 1 ? (
             <div className="flex items-center justify-end gap-2 p-3 text-[13px] text-muted-foreground">
               <span className="tabular-nums">

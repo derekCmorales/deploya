@@ -1,6 +1,6 @@
 # Contrato · Modo de instalación y autoalojado (M2, M9 → M1, scripts)
 
-Versión 1.9 · 2026-10-26 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
+Versión 1.10 · 2026-11-07 · dueños: Javier (modo, límites, registro, Admin · Instalación), Derek (scripts) · consumidores: Eddy (asistente 31, registro 01), Derek (instalador), Eduardo (límites en métricas). Cambiarlo exige avisar antes de mergear. Changes: `feat-m2-modo-autoalojado`, `feat-m9-ajustes-instalacion`, `feat-m1-asistente-instalacion`, `feat-instalador-autoalojado`, `feat-m9-limpieza-diaria`. Decisión: [ADR 0008](../adr/0008-autoalojado-y-codigo-abierto.md). Datos: [datos-nucleo.md § versión 2](datos-nucleo.md#sprint-fuera-de-alcance--versión-2).
 
 ## Variables de entorno
 
@@ -88,7 +88,8 @@ En autoalojado el seed no crea administrador ni cuentas de demo (`cliente@`, `ve
 
 ```http
 GET   /admin/instalacion           → { salud: [{ id, estado: "ok"|"aviso"|"error", detalle }], version: { instalada, disponible? },
-                                       registro, limites, respaldo: { ultimo?, tamanoMb?, ruta, programa: "diario", hora: "03:00", conserva: 7 } }
+                                       registro, limites, respaldo: { ultimo?, tamanoMb?, ruta, programa: "diario", hora: "03:00", conserva: 7 },
+                                       limpieza: { ultima: ISO | null, filas: number | null } }   // EST-01b
 PATCH /admin/instalacion/registro  { politica: "abierto" | "invitacion" | "cerrado" }
 POST  /admin/invitaciones          { correo } → { enlace, vence }          // 7 días, un solo uso
 DELETE /admin/invitaciones/:id
@@ -139,3 +140,4 @@ La etapa 2 comprueba la raíz `DOMINIO_BASE` (ahí vive la web; el comodín no l
 | 1.7 | 2026-10-25 | `VariablesModule` exporta `CifradorVariables` para la clave del SMTP (SP-17) |
 | 1.8 | 2026-10-25 | SP-17: `POST /instalacion/administrador` pide también el `codigo` y lo valida otra vez. SP-18: con «sin correo» la salud no dice que el último envío llegó; el trabajador crea su directorio antes de medir el disco |
 | 1.9 | 2026-10-26 | SP-17: `consumirCodigo(codigo)` atómico (`borrarCodigoSiEs`) y `devolverCodigo` si crear la cuenta falla; límite de intentos por la IP real detrás de Traefik (`PROXIES_DE_CONFIANZA`) |
+| 1.10 | 2026-11-07 | EST-01b: `limpieza` en `GET /admin/instalacion` (última limpieza diaria y filas borradas); `POST /admin/limpieza/ejecutar` corre la limpieza a mano (solo Administrador, también en la nube) |

@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { fechaRestaurar, textoPrograma, textoUltimoRespaldo, type EstadoInstalacion } from "@/lib/admin-instalacion";
+import { fechaRestaurar, textoPrograma, textoUltimaLimpieza, textoUltimoRespaldo, type EstadoInstalacion } from "@/lib/admin-instalacion";
 
 import { FilaAjuste } from "./fila-ajuste";
 
@@ -37,8 +37,16 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: ReactNode })
   );
 }
 
-/** Respaldos: lo que dejó `respaldar.sh` y el aviso de guardar la clave de cifrado. */
-export function BloqueRespaldos({ respaldo, ahora }: { respaldo: EstadoInstalacion["respaldo"]; ahora: Date }) {
+/** Respaldos: lo que dejó `respaldar.sh`, el aviso de guardar la clave de cifrado y la última limpieza diaria. */
+export function BloqueRespaldos({
+  respaldo,
+  limpieza,
+  ahora,
+}: {
+  respaldo: EstadoInstalacion["respaldo"];
+  limpieza: EstadoInstalacion["limpieza"];
+  ahora: Date;
+}) {
   const [claveGuardada, setClaveGuardada] = useState(false);
   useEffect(() => setClaveGuardada(leerGuardada()), []);
 
@@ -83,6 +91,7 @@ export function BloqueRespaldos({ respaldo, ahora }: { respaldo: EstadoInstalaci
         <p className="text-[13px] text-muted-foreground">
           Restaurar: <code className="font-mono text-foreground">./scripts/respaldar.sh --restaurar {fechaRestaurar(respaldo.ultimo)}</code>
         </p>
+        <p className="text-[13px] text-muted-foreground">{textoUltimaLimpieza(limpieza, ahora)}</p>
       </Card>
     </FilaAjuste>
   );

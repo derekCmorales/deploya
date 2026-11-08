@@ -33,6 +33,8 @@ export interface EstadoInstalacion {
   registro: { politica: PoliticaRegistro; invitaciones: InvitacionActiva[] };
   limites: LimitesInstalacion;
   respaldo: { ultimo: string | null; tamanoMb: number | null; ruta: string; programa: string; hora: string; conserva: number };
+  /** EST-01b: la última limpieza diaria; los dos en `null` si todavía no corrió. */
+  limpieza: { ultima: string | null; filas: number | null };
 }
 
 export const RUTA_ADMIN_INSTALACION = "/admin/instalacion";
@@ -112,6 +114,12 @@ export function textoUltimoRespaldo(iso: string | null, ahora: Date): string {
   if (mismoDia(fecha, ahora)) return `hoy, ${hora(fecha)}`;
   if (mismoDia(fecha, new Date(ahora.getTime() - DIA_MS))) return `ayer, ${hora(fecha)}`;
   return `${String(fecha.getUTCDate()).padStart(2, "0")} ${MESES[fecha.getUTCMonth()]} ${fecha.getUTCFullYear()}, ${hora(fecha)}`;
+}
+
+/** «Última limpieza: hoy, 00:35 · 3 filas» (EST-01b, corre cada día a las 00:35 UTC). */
+export function textoUltimaLimpieza({ ultima, filas }: EstadoInstalacion["limpieza"], ahora: Date): string {
+  if (!ultima || filas === null) return "Última limpieza: todavía no corrió";
+  return `Última limpieza: ${textoUltimoRespaldo(ultima, ahora)} · ${filas === 1 ? "1 fila" : `${filas} filas`}`;
 }
 
 /** «Diario · guarda 7». */

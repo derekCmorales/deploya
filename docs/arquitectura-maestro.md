@@ -1692,6 +1692,8 @@ erDiagram
         decimal cpuPorProyecto
         int memoriaMbPorProyecto
         int proyectosPorUsuario "null = sin límite"
+        datetime ultimaLimpieza "EST-01b: última limpieza diaria"
+        int filasLimpiadas "filas que borró esa corrida"
     }
 ```
 
@@ -2098,9 +2100,47 @@ classDiagram
         -scripts EstadoScriptsPuerto
         -reportes ReporteServidorPuerto
         -acciones RegistroAccionesPuerto
+        -limpiezas RegistroLimpiezaPuerto
         +estado() EstadoInstalacion
         +cambiarRegistro(adminId, cuerpo) PoliticaRegistro
         +cambiarLimites(adminId, cuerpo) LimitesVista
+    }
+    class PoliticaLimpieza {
+        <<Policy · EST-01b>>
+        +cortesDeLimpieza(ahora) CortesLimpieza
+    }
+    class LimpiezaService {
+        <<Service Layer · EST-01b>>
+        -purga PurgaDatosVencidosPuerto
+        -registro RegistroLimpiezaPuerto
+        -reloj Reloj
+        +ejecutar() ResultadoLimpieza
+    }
+    class PurgaDatosVencidosPuerto {
+        <<abstract · puerto>>
+        +purgarTokensCuenta(antesDe) number
+        +purgarSesiones(revocadasAntesDe, inactivasAntesDe) number
+        +purgarInvitaciones(antesDe) number
+    }
+    class PurgaDatosVencidosPrisma
+    class PurgaDatosVencidosMemoria
+    class RegistroLimpiezaPuerto {
+        <<abstract · puerto>>
+        +guardar(limpieza) void
+        +ultima() UltimaLimpieza
+    }
+    class RegistroLimpiezaPrisma
+    class LimpiezaController
+    class ColaLimpiezaPuerto {
+        <<abstract · puerto>>
+        +iniciar(manejador) void
+        +cerrar() void
+    }
+    class ColaLimpiezaBullMq
+    class ColaLimpiezaMemoria
+    class TareaLimpiezaDiaria {
+        -cola ColaLimpiezaPuerto
+        -limpieza LimpiezaService
     }
     class InvitacionesService {
         <<Service Layer · SP-18>>
@@ -2904,6 +2944,19 @@ classDiagram
     InstalacionService --> RepositorioConfiguracionInstalacion
     InstalacionService --> EstadoScriptsPuerto
     InstalacionService --> ReporteServidorPuerto
+    InstalacionService --> RegistroLimpiezaPuerto : última limpieza
+    LimpiezaController --> LimpiezaService
+    LimpiezaController ..> RolGuard : protege
+    LimpiezaService ..> PoliticaLimpieza : fechas de corte
+    LimpiezaService --> PurgaDatosVencidosPuerto
+    LimpiezaService --> RegistroLimpiezaPuerto
+    PurgaDatosVencidosPuerto <|-- PurgaDatosVencidosPrisma
+    PurgaDatosVencidosPuerto <|-- PurgaDatosVencidosMemoria
+    RegistroLimpiezaPuerto <|-- RegistroLimpiezaPrisma
+    ColaLimpiezaPuerto <|-- ColaLimpiezaBullMq
+    ColaLimpiezaPuerto <|-- ColaLimpiezaMemoria
+    TareaLimpiezaDiaria --> ColaLimpiezaPuerto
+    TareaLimpiezaDiaria --> LimpiezaService
     InvitacionesService --> RepositorioInvitaciones
     SaludInstalacion o-- ComprobacionInstalacion
     ComprobacionInstalacion <|-- ComprobacionDocker

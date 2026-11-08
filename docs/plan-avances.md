@@ -546,6 +546,21 @@ Sprint de cierre del miércoles 28 de octubre al viernes 6 de noviembre (fase F5
 | Derek | 16 | Documentación, e2e, triaje y lanzamiento | resto del sprint |
 | **Total** | **22** | | 123 + 22 = **145 pts (100 %)** |
 
+### Cierre (8 de noviembre)
+
+| Id | Estado | Dónde |
+|---|---|---|
+| EST-01a | **Hecho** · PR #63 | 429 con `Retry-After` al sexto fallo, probado en el stack y en el recorrido e2e; change archivado |
+| EST-01b | **Hecho** · PR #64 | Limpieza a las 00:35 UTC y a mano; probada con PostgreSQL, Redis y el trabajador reales; change archivado |
+| EST-01c | **Hecho** · PR #61 | Errores, carga, cabeceras, títulos e ícono; correcciones pequeñas de accesibilidad; change archivado |
+| EST-01d | **Hecho** | Triaje y P1 de la preparación: compose del VPS con `restart` y rotación de logs, respaldo del VPS de la nube (`DEPLOYA_ARCHIVOS_COMPOSE`), tabla de 25 que pisaba el panel |
+| QA-01 | **Hecho** | `e2e/recorrido.mjs` en «Smoke compose», con los negativos 403, 403, 404 y 429 |
+| DOC-01 | **Hecho** | [requisitos.md](entrega-final/requisitos.md) y [manual-usuario.md](entrega-final/manual-usuario.md) con [capturas](entrega-final/capturas/) |
+| DOC-02 | **Hecho** (falta grabar el video en el VPS) | [guion-demo.md](entrega-final/guion-demo.md) y [accesibilidad.md](entrega-final/accesibilidad.md) |
+| DOC-03 | **Hecho** | [diseno-final.md](entrega-final/diseno-final.md) y [manual-tecnico.md](entrega-final/manual-tecnico.md) |
+
+**145 de 145 puntos (100 %).** `openspec/changes/` queda sin changes activos. Lo que se hace en el servidor (L1–L10) tiene sus comandos en [entrega-final/lanzamiento.md](entrega-final/lanzamiento.md).
+
 ### Lanzamiento (Derek, sin puntos)
 
 | Paso | Qué | Cuándo |

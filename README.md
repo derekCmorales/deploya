@@ -23,7 +23,11 @@ Define `ADMIN_CLAVE` en `.env`. API en [http://localhost:3001/health](http://loc
 
 ## Autoalojado
 
-En un servidor propio el comando es `./scripts/instalar.sh`, que entra con el change `feat-instalador-autoalojado` (PR #42). La primera etapa comprueba Docker 24+, Docker Compose v2, `curl`, `dig` y `openssl`. Contrato: [docs/contratos/instalacion.md](docs/contratos/instalacion.md). La decisión sigue propuesta en el [ADR 0008](docs/adr/0008-autoalojado-y-codigo-abierto.md) hasta el merge de `feat-m2-modo-autoalojado`.
+En un servidor propio: `./scripts/instalar.sh` (requiere Docker 24+, Docker Compose v2, `curl`, `dig` y `openssl`), luego el asistente en `https://<dominio>/configurar`. Paso a paso, respaldos y actualizaciones: [manual técnico § Autoalojado](docs/entrega-final/manual-tecnico.md#4-autoalojado-servidor-propio). Decisión: [ADR 0008](docs/adr/0008-autoalojado-y-codigo-abierto.md); contrato: [docs/contratos/instalacion.md](docs/contratos/instalacion.md).
+
+## Entrega final · v1.0.0
+
+Requisitos, manuales, diseño final, guion de demo, accesibilidad y lanzamiento: [docs/entrega-final/](docs/entrega-final/README.md). Cambios de la versión: [CHANGELOG.md](CHANGELOG.md).
 
 ## Contribuir
 
@@ -68,6 +72,7 @@ Necesitas [Docker](https://docs.docker.com/get-docker/) con Compose v2, y para t
 |---|---|
 | **Alcance núcleo v4.1** (qué entra y qué no) | [docs/alcance.md](docs/alcance.md) |
 | **Plan de avances** (30 / 50 / 80 / 100 %) | [docs/plan-avances.md](docs/plan-avances.md) |
+| **Entrega final** (requisitos, manuales, diseño, demo) | [docs/entrega-final/](docs/entrega-final/README.md) |
 | **Estándar de ingeniería** (SOLID, clean code, patrones, pruebas) | [docs/ingenieria.md](docs/ingenieria.md) |
 | Cómo trabajamos (Scrum, definición de terminado) | [METODOLOGIA.md](METODOLOGIA.md) |
 | Git, ramas, PRs y OpenSpec | [docs/guia-equipo.md](docs/guia-equipo.md) |

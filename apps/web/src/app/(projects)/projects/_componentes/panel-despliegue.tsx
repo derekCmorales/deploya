@@ -95,7 +95,7 @@ function Vista({
       />
       {despliegue.estado === "fallido" ? <Fallo despliegue={despliegue} error={error} aviso={aviso} /> : null}
       {despliegue.estado === "saludable" || despliegue.estado === "detenido" ? (
-        <Saludable proyectoId={proyectoId} despliegue={despliegue} aviso={aviso} ahora={ahora} alAccionar={alAccionar} />
+        <Saludable proyectoId={proyectoId} despliegue={despliegue} ahora={ahora} alAccionar={alAccionar} />
       ) : null}
       <BitacoraPanel lineas={lineas} resaltada={error?.n} enCurso={enCurso} />
     </div>
@@ -227,13 +227,11 @@ function Fallo({
 function Saludable({
   proyectoId,
   despliegue,
-  aviso,
   ahora,
   alAccionar,
 }: {
   proyectoId: string;
   despliegue: VistaDespliegue;
-  aviso: string | null;
   ahora: string;
   alAccionar: () => void;
 }) {
@@ -260,7 +258,6 @@ function Saludable({
         {certificado ? ` · ${certificado}` : null}
       </p>
       {despliegue.terminado ? <p className="text-muted-foreground">Publicado {haceCuanto(despliegue.terminado, new Date(ahora))}</p> : null}
-      {aviso ? <p>{aviso}</p> : null}
     </div>
   );
 }

@@ -36,6 +36,8 @@ export function correoSegun(configuracion: ConfiguracionCorreo, crearTransporte:
 
 Para producción proponemos **Resend o Brevo por SMTP**. Los dos tienen un plan gratuito suficiente para dos correos transaccionales. El dominio del VPS necesita SPF y DKIM para que los correos no acaben en spam; eso entra en M6-02.
 
+**Actualización (2026-11-10):** para el lanzamiento usamos **Resend** (`smtp.resend.com:465`). Se descartó Cloudflare: Email Routing solo reenvía correo entrante y `send_email` de Workers no habla SMTP (exigiría otro adaptador). Pasos en [correo-produccion.md](../correo-produccion.md). Brevo sigue siendo la alternativa sin código.
+
 ## Alternativas consideradas
 
 | Opción | A favor | En contra |

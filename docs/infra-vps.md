@@ -9,7 +9,7 @@ Guía operativa de `docker-compose.vps.yml`. Las decisiones están en [ADR 0005]
 | Servidor | Ubuntu 24.04, 2 vCPU y 4 GB, Docker Engine y Compose 2.24 o más, usuario sin root en el grupo `docker`, firewall con 22, 80 y 443 |
 | DNS | Registro A de `<dominio>` y de `*.<dominio>` hacia la IP del servidor |
 | Token DNS | Cloudflare: *API Token* con `Zone · DNS · Edit` solo sobre la zona. Con otro proveedor, cambia `provider` en [traefik.vps.yml](../infra/traefik/traefik.vps.yml) y el nombre de la variable del token en [docker-compose.vps.yml](../docker-compose.vps.yml) |
-| Correo | Resend o Brevo con el dominio verificado (SPF y DKIM). Se configura solo con variables SMTP (ADR 0001) |
+| Correo | Resend con el dominio verificado (SPF, DKIM y DMARC). Se configura solo con variables SMTP (ADR 0001): pasos en [correo-produccion.md](correo-produccion.md) |
 | Entorno | `cp .env.vps.example .env.vps` y rellenarlo. Es un archivo del servidor: **nunca se sube** |
 
 ## 2. Cada publicación
@@ -39,7 +39,7 @@ Con el recorrido completo: registro con correo real, alta de `hola-deploya` y `h
 | Traefik sirve su certificado por defecto | `docker compose … logs traefik`: errores de ACME. Token sin permiso, registros A sin propagar o límite de Let's Encrypt |
 | `certificado: null` en 12b con TLS activo | `acme.json` vacío (aún no se emitió) o la API sin el volumen `traefik_acme` en solo lectura |
 | 502 al abrir un proyecto | El contenedor no está en la red del proyecto: mira el log del worker |
-| El correo no llega | `SMTP_*` y el dominio verificado en el proveedor; la API registra el fallo de envío |
+| El correo no llega | `SMTP_*` y el dominio verificado en Resend; la API registra el fallo de envío. Tabla completa en [correo-produccion.md §5](correo-produccion.md#5-si-algo-falla) |
 | La web llama a `localhost:3001` | La imagen de la web se construyó sin `build.args`: `up -d --build web` con `.env.vps` |
 
 Los secretos (`CF_DNS_API_TOKEN`, `SMTP_CLAVE`, `ADMIN_CLAVE`, `POSTGRES_PASSWORD`, `CLAVE_CIFRADO_VARIABLES`) solo viven en `.env.vps` del servidor.

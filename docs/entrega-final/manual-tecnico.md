@@ -74,7 +74,7 @@ pnpm check
 | Servidor | Ubuntu 24.04, 2 vCPU y 4 GB, Docker Engine y Compose 2.24 o más, usuario sin root en el grupo `docker`, firewall con 22, 80 y 443 abiertos |
 | DNS | Registros A de `<dominio>` y de `*.<dominio>` hacia la IP del servidor |
 | Token DNS | Cloudflare: *API Token* con `Zone · DNS · Edit` solo sobre la zona. Con otro proveedor, cambia `provider` en [traefik.vps.yml](../../infra/traefik/traefik.vps.yml) y la variable del token en [docker-compose.vps.yml](../../docker-compose.vps.yml) |
-| Correo | Resend o Brevo con el dominio verificado: SPF, DKIM y DMARC |
+| Correo | Resend con el dominio verificado: SPF, DKIM y DMARC. Pasos en [correo-produccion.md](../correo-produccion.md) |
 | Código | `git clone https://github.com/derekCmorales/deploya.git` en el servidor |
 | Entorno | `cp .env.vps.example .env.vps`, rellenarlo y `chmod 600 .env.vps`. **Nunca se sube** |
 

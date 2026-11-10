@@ -30,7 +30,7 @@ Comprobaciones de [manual-tecnico.md §3.4](manual-tecnico.md#34-comprobar). Si 
 
 ## 2. Correo real (L2)
 
-En el proveedor (Resend o Brevo): dominio verificado con SPF, DKIM y DMARC. En `.env.vps`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USUARIO`, `SMTP_CLAVE` y `CORREO_REMITENTE` con el dominio verificado. Después de `scripts/desplegar-vps.sh`, registrar una cuenta con un buzón real y comprobar que llegan —y no a spam— la verificación, la recuperación y los avisos de 24b (Saludable, Fallido, Por vencer y Suspendida; los dos últimos corriendo el ciclo con `POST /admin/ciclo/ejecutar`).
+Proveedor: **Resend** (plan gratis), con los pasos de [correo-produccion.md](../correo-produccion.md). En Resend: dominio verificado con SPF, DKIM y DMARC (registros en Cloudflare). En `.env.vps`: `SMTP_HOST=smtp.resend.com`, `SMTP_PORT=465`, `SMTP_USUARIO=resend`, `SMTP_CLAVE` (clave de API) y `CORREO_REMITENTE` con el dominio verificado. Después de `scripts/desplegar-vps.sh`, registrar una cuenta con un buzón real y comprobar que llegan —y no a spam— la verificación, la recuperación y los avisos de 24b (Saludable, Fallido, Por vencer y Suspendida; los dos últimos corriendo el ciclo con `POST /admin/ciclo/ejecutar`).
 
 ## 3. Datos de la demo (L3)
 

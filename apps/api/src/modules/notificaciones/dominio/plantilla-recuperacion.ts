@@ -10,6 +10,10 @@ export class PlantillaRecuperacion extends PlantillaCorreo<DatosRecuperacion> {
     return "Restablece tu contraseña de deploya";
   }
 
+  protected etiqueta(): string {
+    return "Seguridad";
+  }
+
   protected titulo(): string {
     return "Restablece tu contraseña";
   }

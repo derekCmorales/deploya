@@ -1,3 +1,5 @@
+import { ANCHO_CORREO, COLOR_CORREO as C, FUENTE_CORREO, FUENTE_MONO_CORREO } from "./estilo-correo";
+
 /** Mensaje listo para transportar: lo que recibe cualquier adaptador de `CorreoPuerto`. */
 export interface MensajeCorreo {
   asunto: string;
@@ -11,7 +13,8 @@ export interface DetalleCorreo {
   valor: string;
 }
 
-const PIE = "deploya · soporte@deploya.app";
+const SOPORTE = "soporte@deploya.app";
+const PIE = `deploya · ${SOPORTE}`;
 
 /** Escapa lo que llega de la API (nombre, correo, enlace) antes de meterlo en el HTML. */
 export function escaparHtml(valor: string): string {
@@ -68,23 +71,22 @@ export abstract class PlantillaCorreo<D extends { enlace: string }> {
     const detalles = this.detalles(datos);
     const lineas = this.lineas(datos);
 
-    const html = [
-      `<div style="font-family:Geist,Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;color:#18181b">`,
-      `<p style="font-weight:600;font-size:18px;margin:0 0 24px">deploya</p>`,
-      etiqueta ? `<p style="margin:0 0 6px;font-size:12px;color:#71717a">${escaparHtml(etiqueta)}</p>` : "",
-      `<h1 style="font-size:22px;margin:0 0 12px">${escaparHtml(this.titulo(datos))}</h1>`,
-      `<p style="margin:0 0 24px;line-height:1.5">${escaparHtml(this.parrafo(datos))}</p>`,
-      ...notas.map((nota) => `<p style="margin:-12px 0 24px;line-height:1.5">${escaparHtml(nota)}</p>`),
-      estado ? `<p style="margin:-12px 0 24px;font-family:'Geist Mono',monospace;font-size:12px;color:#71717a">${escaparHtml(estado)}</p>` : "",
-      detalles.length > 0 ? htmlDetalles(detalles) : "",
-      lineas.length > 0 ? htmlLineas(lineas) : "",
-      `<a href="${enlace}" style="display:inline-block;background:#18181b;color:#fafafa;padding:10px 18px;border-radius:6px;text-decoration:none">${escaparHtml(this.textoBoton(datos))}</a>`,
-      `<p style="margin:24px 0 4px;font-size:13px">¿El botón no funciona? Copia este enlace:</p>`,
-      `<p style="margin:0 0 24px;font-size:13px;word-break:break-all"><a href="${enlace}">${enlace}</a></p>`,
-      `<p style="margin:0 0 24px;font-size:13px;color:#71717a">${escaparHtml(this.aviso(datos))}</p>`,
-      `<p style="margin:0;font-size:12px;color:#71717a">${PIE}</p>`,
-      `</div>`,
-    ].join("");
+    const html = htmlCorreo({
+      asunto: this.asunto(datos),
+      previa: this.parrafo(datos),
+      cuerpo: [
+        etiqueta ? htmlEtiqueta(etiqueta) : "",
+        htmlTitulo(this.titulo(datos)),
+        htmlParrafo(this.parrafo(datos)),
+        ...notas.map(htmlParrafo),
+        estado ? htmlEstado(estado) : "",
+        detalles.length > 0 ? htmlDetalles(detalles) : "",
+        lineas.length > 0 ? htmlLineas(lineas) : "",
+        htmlBoton(enlace, this.textoBoton(datos)),
+        htmlEnlaceAlterno(enlace),
+        htmlAviso(this.aviso(datos)),
+      ].join(""),
+    });
 
     const extras = [
       ...notas,
@@ -109,18 +111,110 @@ export abstract class PlantillaCorreo<D extends { enlace: string }> {
   }
 }
 
+interface MarcoCorreo {
+  asunto: string;
+  /** Texto que el cliente muestra junto al asunto en la bandeja (preheader). */
+  previa: string;
+  cuerpo: string;
+}
+
+/**
+ * Documento completo con maquetación de tablas y estilos en línea: es lo único que respetan
+ * Gmail, Outlook y Apple Mail. Fondo papel, tarjeta con borde, marca arriba y pie fuera.
+ */
+function htmlCorreo(marco: MarcoCorreo): string {
+  return [
+    `<!DOCTYPE html>`,
+    `<html lang="es" xmlns="http://www.w3.org/1999/xhtml">`,
+    `<head>`,
+    `<meta charset="utf-8">`,
+    `<meta name="viewport" content="width=device-width,initial-scale=1">`,
+    `<meta name="x-apple-disable-message-reformatting">`,
+    `<meta name="color-scheme" content="light">`,
+    `<meta name="supported-color-schemes" content="light">`,
+    `<title>${escaparHtml(marco.asunto)}</title>`,
+    `<style>`,
+    `body{margin:0;padding:0;}`,
+    `a{color:${C.senal};}`,
+    `@media (max-width:600px){.dy-tarjeta{padding:28px 22px !important;}.dy-exterior{padding:24px 12px !important;}}`,
+    `</style>`,
+    `</head>`,
+    `<body style="margin:0;padding:0;background-color:${C.fondo};-webkit-text-size-adjust:100%;">`,
+    `<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">${escaparHtml(marco.previa)}</div>`,
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${C.fondo};">`,
+    `<tr><td align="center" class="dy-exterior" style="padding:40px 16px;">`,
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:${ANCHO_CORREO}px;">`,
+    `<tr><td style="padding:0 4px 20px;">${htmlMarca()}</td></tr>`,
+    `<tr><td class="dy-tarjeta" style="background-color:${C.tarjeta};border:1px solid ${C.borde};border-radius:12px;padding:36px 36px 32px;font-family:${FUENTE_CORREO};color:${C.texto};">`,
+    marco.cuerpo,
+    `</td></tr>`,
+    `<tr><td style="padding:20px 4px 0;font-family:${FUENTE_CORREO};font-size:12px;line-height:18px;color:${C.apagado};">`,
+    `deploya · <a href="mailto:${SOPORTE}" style="color:${C.apagado};text-decoration:underline;">${SOPORTE}</a>`,
+    `</td></tr>`,
+    `</table>`,
+    `</td></tr>`,
+    `</table>`,
+    `</body>`,
+    `</html>`,
+  ].join("");
+}
+
+/** Wordmark: «deploya» en minúsculas, peso 700, tracking cerrado, la última «a» en Señal. */
+function htmlMarca(): string {
+  return `<span style="font-family:${FUENTE_CORREO};font-size:22px;line-height:22px;font-weight:700;letter-spacing:-0.06em;color:${C.texto};">deploy<span style="color:${C.senal};">a</span></span>`;
+}
+
+function htmlEtiqueta(etiqueta: string): string {
+  return `<p style="margin:0 0 8px;font-size:12px;line-height:16px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:${C.tenue};">${escaparHtml(etiqueta)}</p>`;
+}
+
+function htmlTitulo(titulo: string): string {
+  return `<h1 style="margin:0 0 12px;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.02em;color:${C.texto};">${escaparHtml(titulo)}</h1>`;
+}
+
+function htmlParrafo(parrafo: string): string {
+  return `<p style="margin:0 0 16px;font-size:15px;line-height:24px;color:${C.texto};">${escaparHtml(parrafo)}</p>`;
+}
+
+function htmlEstado(estado: string): string {
+  return `<p style="margin:4px 0 20px;"><span style="display:inline-block;padding:4px 10px;border:1px solid ${C.borde};border-radius:999px;background-color:${C.hundido};font-family:${FUENTE_MONO_CORREO};font-size:12px;line-height:16px;color:${C.tenue};">${escaparHtml(estado)}</span></p>`;
+}
+
 function htmlDetalles(detalles: readonly DetalleCorreo[]): string {
   const filas = detalles
     .map(
-      (d) =>
-        `<tr><td style="padding:6px 16px 6px 0;font-size:13px;color:#71717a">${escaparHtml(d.nombre)}</td>` +
-        `<td style="padding:6px 0;font-size:13px;font-family:'Geist Mono',monospace">${escaparHtml(d.valor)}</td></tr>`,
+      (d, i) =>
+        `<tr>` +
+        `<td style="padding:10px 16px 10px 0;${i > 0 ? `border-top:1px solid ${C.borde};` : ""}font-size:13px;line-height:18px;color:${C.tenue};white-space:nowrap;">${escaparHtml(d.nombre)}</td>` +
+        `<td align="right" style="padding:10px 0;${i > 0 ? `border-top:1px solid ${C.borde};` : ""}font-family:${FUENTE_MONO_CORREO};font-size:13px;line-height:18px;color:${C.texto};word-break:break-all;">${escaparHtml(d.valor)}</td>` +
+        `</tr>`,
     )
     .join("");
-  return `<table role="presentation" style="border-collapse:collapse;margin:0 0 24px">${filas}</table>`;
+  return `<table role="presentation" data-seccion="detalles" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 24px;border-top:1px solid ${C.borde};border-bottom:1px solid ${C.borde};">${filas}</table>`;
 }
 
 function htmlLineas(lineas: readonly string[]): string {
   const cuerpo = lineas.map(escaparHtml).join("<br>");
-  return `<p style="margin:0 0 24px;padding:12px;background:#f4f4f5;border-radius:6px;font-family:'Geist Mono',monospace;font-size:12px;line-height:1.6">${cuerpo}</p>`;
+  return `<div data-seccion="bitacora" style="margin:4px 0 24px;padding:12px 14px;background-color:${C.hundido};border:1px solid ${C.borde};border-radius:8px;font-family:${FUENTE_MONO_CORREO};font-size:12px;line-height:20px;color:${C.texto};overflow-wrap:break-word;word-wrap:break-word;">${cuerpo}</div>`;
+}
+
+/** Botón a prueba de clientes: celda con fondo (Outlook) y enlace con relleno (el resto). */
+function htmlBoton(enlace: string, texto: string): string {
+  return (
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 28px;">` +
+    `<tr><td align="center" bgcolor="${C.texto}" style="border-radius:8px;background-color:${C.texto};">` +
+    `<a href="${enlace}" target="_blank" style="display:inline-block;padding:12px 22px;font-family:${FUENTE_CORREO};font-size:14px;line-height:20px;font-weight:600;color:${C.textoBoton};text-decoration:none;border-radius:8px;">${escaparHtml(texto)}</a>` +
+    `</td></tr></table>`
+  );
+}
+
+function htmlEnlaceAlterno(enlace: string): string {
+  return (
+    `<p style="margin:0 0 4px;font-size:13px;line-height:20px;color:${C.tenue};">¿El botón no funciona? Copia este enlace:</p>` +
+    `<p style="margin:0 0 24px;font-family:${FUENTE_MONO_CORREO};font-size:12px;line-height:18px;word-break:break-all;"><a href="${enlace}" style="color:${C.senal};text-decoration:underline;">${enlace}</a></p>`
+  );
+}
+
+function htmlAviso(aviso: string): string {
+  return `<p style="margin:0;padding-top:20px;border-top:1px solid ${C.borde};font-size:13px;line-height:20px;color:${C.tenue};">${escaparHtml(aviso)}</p>`;
 }

@@ -12,6 +12,10 @@ export class PlantillaVerificacion extends PlantillaCorreo<DatosVerificacion> {
     return "Confirma tu correo en deploya";
   }
 
+  protected etiqueta(): string {
+    return "Cuenta";
+  }
+
   protected titulo(): string {
     return "Confirma tu correo";
   }

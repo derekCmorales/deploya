@@ -59,11 +59,25 @@ describe("M10 · Plantillas de 24b", () => {
     expect(mensaje.html).not.toContain("<b>x</b>");
   });
 
-  it("la verificación de 24 sale igual que antes: sin etiqueta, detalles ni bitácora", () => {
+  it("la verificación de 24 lleva su etiqueta «Cuenta» y no trae detalles ni bitácora", () => {
     const mensaje = PLANTILLA_VERIFICACION.componer({ nombre: "Derek", correo: "derek@tiendademo.com", enlace: "https://d/v" });
 
-    expect(mensaje.texto.startsWith("Confirma tu correo\n\nHola Derek")).toBe(true);
-    expect(mensaje.html).not.toContain("<table");
+    expect(mensaje.texto.startsWith("Cuenta\n\nConfirma tu correo\n\nHola Derek")).toBe(true);
+    expect(mensaje.html).not.toContain('data-seccion="detalles"');
+    expect(mensaje.html).not.toContain('data-seccion="bitacora"');
+  });
+
+  it("el HTML es un documento de correo completo: idioma, preheader, marca y botón a prueba de Outlook", () => {
+    const mensaje = PLANTILLA_DESPLIEGUE_SALUDABLE.componer({ enlace: "https://x.deploya.app", proyecto: "x", numero: 1, commit: "abc1234", duracion: "41 s", host: "x.deploya.app" });
+
+    expect(mensaje.html.startsWith("<!DOCTYPE html>")).toBe(true);
+    expect(mensaje.html).toContain('<html lang="es"');
+    expect(mensaje.html).toContain("<title>x está en línea</title>");
+    expect(mensaje.html).toContain("La versión #1 pasó la verificación de salud y ya recibe tráfico.</div>");
+    expect(mensaje.html).toContain('deploy<span style="color:#0065b4;">a</span>');
+    expect(mensaje.html).toContain('bgcolor="#1a1510"');
+    expect(mensaje.html).toContain('data-seccion="detalles"');
+    expect(mensaje.html).toContain('href="mailto:soporte@deploya.app"');
   });
 });
 

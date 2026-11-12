@@ -16,7 +16,7 @@ const PASOS = [
 /** Columna izquierda del asistente (patrón E): pasos y recursos del plan. */
 export function LateralAlta({ actual, lista }: { actual: number; lista: ListaProyectos | null }) {
   return (
-    <aside className="flex flex-col gap-6 border-border bg-sunken px-8 py-7 lg:border-r">
+    <aside className="flex flex-col gap-6 border-border bg-sunken px-4 py-7 sm:px-8 lg:border-r">
       <Button asChild variant="ghost" size="sm" className="-ml-2.5 self-start">
         <Link href="/projects">
           <ArrowLeft />

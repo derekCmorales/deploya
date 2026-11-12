@@ -140,3 +140,27 @@ sudo umount /mnt/snapshot
 ```
 
 Al final, `aws ec2 detach-volume --volume-id <vol-…>` y `aws ec2 delete-volume --volume-id <vol-…>` (el volumen temporal cobra 0.08 USD/GB-mes mientras exista). Si el volumen de Docker ya no existe (el recurso se eliminó), recrea el recurso desde la pestaña *Datos* del mismo proyecto dueño (vuelve el mismo nombre de contenedor y volumen, con contraseña nueva) y copia con el mismo `rsync`. En PostgreSQL el directorio copiado trae la contraseña vieja del rol `deploya`: tras `docker start`, ajústala a la nueva (la de `GET /proyectos/:id/datos/:recursoId/conexion`) con `docker exec -it "$VOL" psql -U deploya -d app -c '\password deploya'`, que la pide sin dejarla en el historial.
+
+## 6. Publicar la versión con recursos de datos (Nimbo y apps de varios servicios)
+
+Orden único, la primera vez que se publica `feat/m5-recursos-datos`:
+
+| # | Paso | Cómo |
+|---|---|---|
+| 1 | Infra | `cd infra/terraform && terraform apply`: disco de 80 GB y snapshots diarios (DLM, 7 días). Para el piloto con Nimbo, `tipo_instancia = "m7i-flex.xlarge"` (16 GB; cuesta, ver [costos.md](costos.md)) y volver a `m7i-flex.large` al terminar |
+| 2 | Disco | En el servidor, si creció el volumen: `sudo growpart /dev/nvme0n1 1 && sudo resize2fs /dev/nvme0n1p1` (`lsblk` para confirmar el dispositivo) |
+| 3 | Entorno | En `.env.vps`, opcional: `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN=20`. `DOMINIO_BASE` ya existe y ahora también lo lee la API (URL pública del S3) |
+| 4 | Imágenes de datos | `docker pull pgvector/pgvector:pg17 redis:7-alpine pgsty/silo` (evita que el primer «Crear» espere la descarga) |
+| 5 | Publicar | `scripts/desplegar-vps.sh`: aplica la migración `20261112120000_recursos_datos` (tablas nuevas, `Plan.maxRecursosDatos`, `Plan.discoDatosMb`, `Proyecto.comandoInicio`) y el seed con los límites por plan |
+| 6 | Landing | En `deploya_landing`: `pnpm deploy:aws` (sección Datos y precios con bases y disco) |
+
+Comprobación (2 minutos):
+
+```bash
+curl -s https://api.<dominio>/datos/health                 # {"status":"ok"} o equivalente
+curl -s https://api.<dominio>/suscripciones/planes | grep -c maxRecursosDatos
+```
+
+En la web: un proyecto → pestaña **Datos** → *Crear PostgreSQL* → pasa a **Disponible** → *Desplegar* → la bitácora de Ejecución dice «Recursos conectados: postgres · N variables». `docker ps --filter name=deploya-datos-` lista el contenedor y `docker volume ls --filter name=deploya-datos-` su volumen. Recorrido automatizado: `e2e/` (ver su README).
+
+Para desplegar Nimbo: guía `docs/operations/deploya.md` en su repo (4 proyectos en una cuenta **Pro** o **Business**, recursos en el proyecto `nimbo-api` compartidos con los workers).

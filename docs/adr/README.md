@@ -26,3 +26,4 @@ Cuando la decisión es difícil de revertir o afecta a más de un módulo: elegi
 | [0008](0008-autoalojado-y-codigo-abierto.md) | Código abierto y autoalojado con un modo de instalación (Strategy por puerto) | Propuesto |
 | [0009](0009-piloto-en-aws-ec2-con-terraform.md) | Piloto en una EC2 `m7i-flex.large` de AWS creada con Terraform, con los compose existentes | Aceptado |
 | [0010](0010-escala-con-ecs-y-construcciones-en-fargate.md) | Escala con ECS sobre EC2 y construcciones en Fargate Spot, sin Kubernetes | Propuesto |
+| [0011](0011-landing-en-s3-y-cloudfront.md) | Landing pública en S3 + CloudFront y la app en `app.<dominio>` | Aceptado |

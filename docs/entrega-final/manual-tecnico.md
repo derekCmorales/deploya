@@ -84,7 +84,9 @@ El servidor de producción es una **EC2 `m7i-flex.large` en AWS** (2 vCPU, 8 GB;
 
 | Variable | Obligatoria | Qué es |
 |---|---|---|
-| `DOMINIO_BASE` | Sí | Dominio base: la web en la raíz, la API en `api.<dominio>`, cada proyecto en `<proyecto>.<dominio>` |
+| `DOMINIO_BASE` | Sí | Dominio base (`deploya.larasolutions.dev`): la API en `api.<dominio>`, cada proyecto en `<proyecto>.<dominio>` |
+| `HOST_WEB` | No | Host de la web. En la nube `app.<dominio>`, porque la raíz es la landing en CloudFront ([ADR 0011](../adr/0011-landing-en-s3-y-cloudfront.md)); sin valor, la raíz |
+| `URL_LANDING` | No | URL de la landing (`https://<dominio>`): a dónde lleva la web a quien entra a `/` sin sesión; sin valor, a `/ingresar` |
 | `ACME_CORREO` | Sí | Correo de la cuenta de Let's Encrypt |
 | `CF_DNS_API_TOKEN` | Sí | Token del proveedor DNS, solo sobre la zona |
 | `POSTGRES_USER`, `POSTGRES_DB` | Sí | Usuario y base (`deploya`) |

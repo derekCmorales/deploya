@@ -8,7 +8,7 @@ Referencia visual: canvas **Deploya v4.1** en Claude Design (34 pantallas, <http
 
 ## En una frase
 
-Un cliente se registra, verifica su correo, contrata un plan con pago simulado, pega la URL de un **repositorio público de GitHub con `Dockerfile` o con un stack que Deploya reconoce** (Node, Python, Go o sitio estático), y la plataforma lo construye, lo corre en un contenedor con los límites de su plan y lo publica en `https://<proyecto>.deploya.app`. Cada versión queda guardada y se puede volver a una anterior sin reconstruir. Un administrador puede ver usuarios y suspender cuentas.
+Un cliente se registra, verifica su correo, contrata un plan con pago simulado, pega la URL de un **repositorio público de GitHub con `Dockerfile` o con un stack que Deploya reconoce** (Node, Python, Go o sitio estático), y la plataforma lo construye, lo corre en un contenedor con los límites de su plan y lo publica en `https://<proyecto>.deploya.larasolutions.dev`. Cada versión queda guardada y se puede volver a una anterior sin reconstruir. Un administrador puede ver usuarios y suspender cuentas.
 
 ## Recorrido que se evalúa
 
@@ -160,7 +160,7 @@ Las pantallas no tienen UI propia para M4, M5 y M6: el motor de Derek es lo que 
 
 | Prioridad | Qué |
 |---|---|
-| Debe | Subdominio automático `<proyecto>.deploya.app` vía `EnrutamientoPuerto` (Traefik); en local `<proyecto>.localhost` |
+| Debe | Subdominio automático `<proyecto>.deploya.larasolutions.dev` vía `EnrutamientoPuerto` (Traefik); en local `<proyecto>.localhost` |
 | Debe | HTTPS con certificado comodín en el VPS |
 | Debe | Conmutación sin corte: el nuevo contenedor recibe tráfico antes de detener el anterior |
 
@@ -190,7 +190,7 @@ Sustituye la tabla §4.2 de la propuesta. Solo se aplican estos cuatro recursos.
 | Construcciones / mes | 30 | 150 | 500 | 2 000 |
 
 - Precio de 365 días: lo fija Javier en el seed (propuesta: precio reducido).
-- Todos los proyectos corren en un único VPS y se publican en `*.deploya.app` con HTTPS.
+- Todos los proyectos corren en un único VPS y se publican en `*.deploya.larasolutions.dev` con HTTPS.
 - Sandbox no vence, para no bloquear a un usuario nuevo; se decide así para simplificar §4.4.
 
 ## Estados

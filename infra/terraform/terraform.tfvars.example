@@ -1,7 +1,7 @@
 # Copia a terraform.tfvars (no se versiona) y ajusta. Nada de aquí es secreto: los secretos de la
 # plataforma van solo en .env.vps del servidor.
 
-dominio             = "deploya.app"
+dominio             = "deploya.larasolutions.dev"
 correos_presupuesto = ["operaciones@example.com"]
 
 # Valores por defecto (descomenta para cambiarlos)

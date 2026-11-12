@@ -7,6 +7,7 @@ Crea una **EC2 `m7i-flex.large` (2 vCPU, 8 GB) en us-east-2** (Ubuntu 24.04) que
 | `red.tf` | VPC propia, subred pública, Internet Gateway (sin NAT) y grupo de seguridad con 80/443; el 22 solo con `cidr_administracion` |
 | `iam.tf` | Perfil de instancia con solo `AmazonSSMManagedInstanceCore` (Session Manager) |
 | `main.tf` | EC2 con IMDSv2 de un salto, disco gp3 cifrado, Elastic IP y presupuesto de AWS Budgets |
+| `landing.tf` | Landing pública: bucket S3 privado, CloudFront con OAC, certificado de ACM en us-east-1, función de rutas y cabeceras de seguridad ([ADR 0011](../../docs/adr/0011-landing-en-s3-y-cloudfront.md)) |
 | `cloud-init.yml` + `preparar-servidor.sh` | Primer arranque: Docker CE y Compose oficiales, `daemon.json`, swap, sysctl, sshd sin contraseñas, unattended-upgrades, usuario `deploya`, clon en `/srv/deploya`, cron del manual §3.5 e imágenes base descargadas |
 
 **Ningún secreto pasa por Terraform.** El estado y el user_data son texto plano: `.env.vps` se copia a mano al servidor.
@@ -59,7 +60,7 @@ terraform output siguientes_pasos
 
 Después, en orden (el output `siguientes_pasos` los imprime con la IP y el ID reales):
 
-1. **DNS en Cloudflare**, a mano: registros A `<dominio>` y `*.<dominio>` hacia `ip_publica`, en **Solo DNS** (nube gris). Con el proxy naranja, Cloudflare termina TLS y agrega un salto que `PROXIES_DE_CONFIANZA=1` no espera.
+1. **DNS en Cloudflare**, a mano y en **Solo DNS** (nube gris), con lo que imprime `terraform output registros_dns`: A `*.<dominio>` hacia `ip_publica` (cubre `app.`, `api.` y las apps) y CNAME `<dominio>` y `www.<dominio>` hacia CloudFront (la landing). Con el proxy naranja, Cloudflare termina TLS y agrega un salto que `PROXIES_DE_CONFIANZA=1` no espera.
 2. **Confirmar** la suscripción del correo de AWS Budgets.
 3. **Esperar a cloud-init** (5 a 10 min): `terraform output -raw comando_ssm`, y dentro, `cloud-init status --wait && cat /var/lib/deploya/preparado`.
 4. **Copiar `.env.vps`** (de `.env.vps.example`, variables en el [manual técnico §3.2](../../docs/entrega-final/manual-tecnico.md#32-variables-de-envvps)). Dentro de la sesión de SSM:
@@ -72,8 +73,34 @@ Después, en orden (el output `siguientes_pasos` los imprime con la IP y el ID r
    ```bash
    scp -o ProxyCommand="aws ssm start-session --region us-east-2 --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p" .env.vps deploya@<id_instancia>:/srv/deploya/.env.vps
    ```
-5. **Publicar**, como `deploya` en `/srv/deploya`: `scripts/desplegar-vps.sh` (o `RAMA=… scripts/desplegar-vps.sh`).
-6. **Comprobar** desde tu equipo: `curl -I https://api.<dominio>/health` y `node e2e/vps.mjs` ([manual §3.4](../../docs/entrega-final/manual-tecnico.md#34-comprobar)).
+5. **Publicar**, como `deploya` en `/srv/deploya`: `scripts/desplegar-vps.sh` (o `RAMA=… scripts/desplegar-vps.sh`). Con `HOST_WEB=app.<dominio>` y `URL_LANDING=https://<dominio>` en `.env.vps`, la web queda en `app.` y la raíz es la landing.
+6. **Publicar la landing** desde el repo `deploya_landing` (sección siguiente).
+7. **Comprobar** desde tu equipo: `curl -I https://<dominio>`, `curl -I https://app.<dominio>`, `curl -I https://api.<dominio>/health` y `node e2e/vps.mjs` ([manual §3.4](../../docs/entrega-final/manual-tecnico.md#34-comprobar)).
+
+## Landing (S3 + CloudFront)
+
+La raíz `<dominio>` y `www.<dominio>` sirven la landing estática desde CloudFront; la web está en `app.<dominio>` ([ADR 0011](../../docs/adr/0011-landing-en-s3-y-cloudfront.md)). S3 y CloudFront no viven en la VPC: no hay grupos de seguridad que abrir. El bucket es privado y solo lo lee la distribución (Origin Access Control).
+
+**Primera vez** (ACM no emite el certificado hasta ver la validación en el DNS):
+
+```bash
+terraform apply -target=aws_acm_certificate.landing
+terraform output registros_dns_validacion_landing   # crear esos CNAME en Cloudflare (Solo DNS)
+terraform plan -out=piloto.tfplan && terraform apply piloto.tfplan   # espera la validación y crea CloudFront
+terraform output registros_dns                      # CNAME de <dominio> y www hacia CloudFront
+```
+
+Si `<dominio>` ya tenía un registro A hacia la EC2, bórralo antes de crear el CNAME. Los CNAME de validación se quedan: ACM los usa para renovar solo.
+
+**Publicar o actualizar la landing**, desde el repo `deploya_landing` con AWS CLI y credenciales de la cuenta:
+
+```bash
+LANDING_BUCKET=$(terraform -chdir=../deploya/infra/terraform output -raw landing_bucket) \
+LANDING_DISTRIBUCION=$(terraform -chdir=../deploya/infra/terraform output -raw landing_distribucion) \
+pnpm deploy:aws
+```
+
+Costo: la capa gratuita de CloudFront (1 TB de transferencia y 10 millones de peticiones al mes) cubre la landing; S3 son centavos por unos MB; el certificado de ACM es gratis.
 
 ## Decisiones que conviene saber
 
@@ -81,7 +108,7 @@ Después, en orden (el output `siguientes_pasos` los imprime con la IP y el ID r
 - **IMDSv2 con `http_put_response_hop_limit = 1`.** Los contenedores de los usuarios corren en redes bridge, un salto más allá del host: no alcanzan el token y, por tanto, tampoco las credenciales del perfil de instancia.
 - **`default-address-pools` en `daemon.json`.** Cada proyecto tiene su red; los rangos por defecto de Docker se acaban hacia las 30 redes. Con `172.16.0.0/12` en `/24` caben 4096. Por eso `cidr_vpc` no puede ser `172.x`.
 - **`ignore_changes = [ami, user_data]`.** Una AMI nueva o un cambio en cloud-init no recrean el servidor (perdería la base). Para reconstruirlo a propósito: respaldo y `terraform apply -replace=aws_instance.servidor`.
-- **DNS a mano y no con el proveedor de Cloudflare.** Son dos registros que no cambian (la IP es fija). El proveedor exige un token configurado aunque no cree nada, y ese token terminaría en una variable del operador; el de Traefik ya es sensible (ADR 0007) y no conviene sumar otro.
+- **DNS a mano y no con el proveedor de Cloudflare.** Son pocos registros que no cambian (la IP es fija y el dominio de CloudFront también). El proveedor exige un token configurado aunque no cree nada, y ese token terminaría en una variable del operador; el de Traefik ya es sensible (ADR 0007) y no conviene sumar otro.
 - **Créditos de CPU solo en la familia t.** `credit_specification` se agrega solo si `tipo_instancia` empieza con `t`; con `m7i-flex` AWS lo rechazaría, y ese tipo no tiene ráfagas que cobrar.
 - **Presupuesto sobre el costo bruto** (`include_credit = false`): con los créditos de AWS el costo neto se ve en 0 y los avisos no llegarían.
 - **`.terraform.lock.hcl` versionado**, con las sumas `zh:` de Linux, macOS y Windows (amd64 y arm64) de `hashicorp/aws` 5.80.0: todos instalan exactamente el mismo proveedor.

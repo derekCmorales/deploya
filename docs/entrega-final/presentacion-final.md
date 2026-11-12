@@ -192,10 +192,10 @@ Cada respuesta cabe en 30–40 s. Si la terna elige a otra persona, esa persona 
 
 - Precios de la competencia (Render, Heroku, Railway, Fly.io, DigitalOcean): públicos, sin fuente en el repositorio.
 - Mercado: «> 105 mil desarrolladores en Guatemala» (GitHub Innovation Graph 2023) y «LatAm entre las regiones que más crecen» (Octoverse 2024).
-- Costos de AWS en us-east-1: EC2 t3.large ~$67/mes y ~$16 la semana de la demo; costo por app $1.17–1.25; Fargate 24/7 por proyecto (~$18 / ~$36 / ~$72, con la memoria mínima que Fargate exige por vCPU: 0.5 vCPU → 1 GB, 1 → 2 GB, 2 → 4 GB); construcción en Fargate Spot ~$0.0015; EKS ~$73/mes.
+- Costos del piloto en us-east-2: EC2 m7i-flex.large (plan gratuito de AWS) ~$79/mes y ~$13 los 5 días del piloto; cifras de escala del ADR 0010 en us-east-1: costo por app $1.17–1.25; Fargate 24/7 por proyecto (~$18 / ~$36 / ~$72, con la memoria mínima que Fargate exige por vCPU: 0.5 vCPU → 1 GB, 1 → 2 GB, 2 → 4 GB); construcción en Fargate Spot ~$0.0015; EKS ~$73/mes.
 - Márgenes por plan, mezcla de 100 registrados, contribución ~$158, costo fijo ~$91, equilibrio ~58 registrados y el peor caso (~$13.8/mes por un Starter con 3 apps de 512 MB, calculado como $67 ÷ 7.3 GB × 1.5 GB).
 - Comisión de Recurrente (~4.5 % + ~Q2).
-- ADR 0010 (escala en AWS): **propuesto**; ADR 0009 (piloto EC2 t3.large con Terraform): aceptado. Los nombres de adaptadores (`ContenedorEcs`, construcción en Fargate) son tentativos.
+- ADR 0010 (escala en AWS): **propuesto**; ADR 0009 (piloto EC2 m7i-flex.large con Terraform): aceptado. Los nombres de adaptadores (`ContenedorEcs`, construcción en Fargate) son tentativos.
 
 ## Discrepancias con el repositorio
 
@@ -203,6 +203,6 @@ Cada respuesta cabe en 30–40 s. Si la terna elige a otra persona, esa persona 
 - **Suspender a `cliente@` revoca sus sesiones** (`administracion/suspension.service.ts`): a las 3:30 Eduardo ya no tiene sesión. Opciones: volver a iniciar sesión tras reactivar (≈ 5 s con el gestor de contraseñas) o mostrar las métricas con `demo@` en otra ventana.
 - **Las métricas son de CPU y memoria**, no de peticiones (el sprint excluyó transferencia y peticiones, [alcance.md](../alcance.md#sprint-fuera-de-alcance)); el tráfico simulado se ve como consumo, no como un contador de visitas.
 - **La sesión no dura 24 h**: vence a los 7 días sin actividad (`identidad/dominio/sesion.ts`). Las 24 h son del enlace de verificación; la recuperación dura 30 min.
-- **«VPS» en el repositorio** es el nombre del compose de producción (`docker-compose.vps.yml`, `.env.vps`); el piloto es la EC2 t3.large de AWS creada con Terraform (`infra/terraform/`, ADR 0009).
+- **«VPS» en el repositorio** es el nombre del compose de producción (`docker-compose.vps.yml`, `.env.vps`); el piloto es la EC2 m7i-flex.large de AWS creada con Terraform (`infra/terraform/`, ADR 0009).
 - **Correo real con Resend**: en [lanzamiento.md](lanzamiento.md) el paso L2 (SPF, DKIM y DMARC) figura pendiente al 8 de noviembre; confirmar en el servidor antes de decirlo.
 - **Changes archivados**: `openspec/changes/archive/` tiene 45 entradas; [guion-demo.md](guion-demo.md) dice «42+». El deck no da la cifra.

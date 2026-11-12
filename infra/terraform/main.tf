@@ -61,10 +61,14 @@ resource "aws_instance" "servidor" {
     instance_metadata_tags      = "disabled"
   }
 
+  # Solo la familia t tiene créditos de CPU; AWS rechaza este bloque en otros tipos (m7i-flex).
   # t3 en unlimited: las ráfagas (docker build) no se frenan al agotar créditos, y el excedente
   # sobre la línea base (30 % por vCPU en t3.large) se cobra a 0.05 USD por vCPU-hora. Ver ADR 0009.
-  credit_specification {
-    cpu_credits = var.creditos_cpu
+  dynamic "credit_specification" {
+    for_each = startswith(var.tipo_instancia, "t") ? [var.creditos_cpu] : []
+    content {
+      cpu_credits = credit_specification.value
+    }
   }
 
   # Toda la plataforma (PostgreSQL incluido) vive en este disco; los respaldos diarios también

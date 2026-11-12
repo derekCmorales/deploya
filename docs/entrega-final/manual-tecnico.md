@@ -69,7 +69,7 @@ pnpm check
 
 ### 3.1 Una sola vez
 
-El servidor de producción es una **EC2 `t3.large` en AWS** (us-east-1, Ubuntu 24.04) creada con Terraform: [infra/terraform/](../../infra/terraform/README.md), decisión y costos en el [ADR 0009](../adr/0009-piloto-en-aws-ec2-con-terraform.md). `docker-compose.vps.yml` es el compose de producción; «vps» es solo el nombre del archivo. `terraform apply` deja Docker, el usuario `deploya`, el clon en `/srv/deploya`, `/var/backups/deploya` y el cron de §3.5; `terraform output siguientes_pasos` imprime lo que falta. Ningún secreto pasa por Terraform.
+El servidor de producción es una **EC2 `m7i-flex.large` en AWS** (2 vCPU, 8 GB; us-east-2, Ubuntu 24.04) creada con Terraform: [infra/terraform/](../../infra/terraform/README.md), decisión y costos en el [ADR 0009](../adr/0009-piloto-en-aws-ec2-con-terraform.md). `docker-compose.vps.yml` es el compose de producción; «vps» es solo el nombre del archivo. `terraform apply` deja Docker, el usuario `deploya`, el clon en `/srv/deploya`, `/var/backups/deploya` y el cron de §3.5; `terraform output siguientes_pasos` imprime lo que falta. Ningún secreto pasa por Terraform.
 
 | Qué | Cómo |
 |---|---|

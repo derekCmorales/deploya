@@ -5,12 +5,12 @@ dominio             = "deploya.app"
 correos_presupuesto = ["operaciones@example.com"]
 
 # Valores por defecto (descomenta para cambiarlos)
-# region               = "us-east-1"
+# region               = "us-east-2"
 # entorno              = "piloto"
-# tipo_instancia       = "t3.large"
-# creditos_cpu         = "unlimited"   # "standard" frena la CPU en vez de cobrar ráfagas
-# tamano_disco_gb      = 40
-# tope_presupuesto_usd = 70          # un mes completo del piloto cuesta ≈ 68 USD (ADR 0009)
+# tipo_instancia       = "m7i-flex.large"   # "t3.large" solo con plan de pago de AWS
+# creditos_cpu         = "unlimited"   # solo familia t; "standard" frena la CPU en vez de cobrar ráfagas
+# tamano_disco_gb      = 70
+# tope_presupuesto_usd = 70          # 5 días ≈ 13 USD; un mes completo ≈ 79 USD (ADR 0009)
 # rama                 = "main"
 # proteccion_terminacion = true        # recomendado tras la demo
 

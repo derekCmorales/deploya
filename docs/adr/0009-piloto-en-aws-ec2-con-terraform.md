@@ -18,7 +18,7 @@ Fuerzas:
 
 ## Decisión
 
-Creamos el servidor con **Terraform** ([infra/terraform/](../../infra/terraform/)): **una EC2 `t3.large`** (2 vCPU, 8 GB) en **us-east-1** con Ubuntu 24.04 que corre **toda la plataforma** con los compose existentes (`docker-compose.yml` + `docker-compose.vps.yml`, el compose de producción; «vps» es solo el nombre histórico del archivo). Terraform crea la red (VPC propia, subred pública, sin NAT), el grupo de seguridad (80/443; 22 solo desde `cidr_administracion`), el perfil de instancia con solo `AmazonSSMManagedInstanceCore`, la EC2 con IMDSv2 de un salto y disco gp3 cifrado, la Elastic IP y un presupuesto de AWS Budgets. cloud-init deja Docker, el usuario `deploya`, el clon, el cron y las imágenes base listos. Los **secretos** (`.env.vps`) **nunca pasan por Terraform ni por user_data**: se copian a mano por SSM, y la publicación sigue siendo `scripts/desplegar-vps.sh`.
+Creamos el servidor con **Terraform** ([infra/terraform/](../../infra/terraform/)): **una EC2 `m7i-flex.large`** (2 vCPU, 8 GB) en **us-east-2** con Ubuntu 24.04 que corre **toda la plataforma** con los compose existentes (`docker-compose.yml` + `docker-compose.vps.yml`, el compose de producción; «vps» es solo el nombre histórico del archivo). Terraform crea la red (VPC propia, subred pública, sin NAT), el grupo de seguridad (80/443; 22 solo desde `cidr_administracion`), el perfil de instancia con solo `AmazonSSMManagedInstanceCore`, la EC2 con IMDSv2 de un salto y disco gp3 cifrado, la Elastic IP y un presupuesto de AWS Budgets. cloud-init deja Docker, el usuario `deploya`, el clon, el cron y las imágenes base listos. Los **secretos** (`.env.vps`) **nunca pasan por Terraform ni por user_data**: se copian a mano por SSM, y la publicación sigue siendo `scripts/desplegar-vps.sh`.
 
 ## Alternativas consideradas
 
@@ -32,19 +32,23 @@ Creamos el servidor con **Terraform** ([infra/terraform/](../../infra/terraform/
 
 ## Consecuencias
 
-**Costos del piloto** (us-east-1, bajo demanda, aprox.; verificar en la calculadora de AWS):
+> **Actualización (2026-11-12):** el primer `terraform apply` falló con `InvalidParameterCombination`: la cuenta está en el **plan gratuito** de AWS (cuentas desde julio de 2025), que solo deja lanzar tipos elegibles, y `t3.large` no lo es. Nos quedamos en el plan gratuito porque garantiza que AWS no cobra a la tarjeta (todo sale de los créditos) y el piloto dura 5 días. El tipo pasa a **`m7i-flex.large`**: el único x86 elegible con 8 GB, misma memoria y vCPU, sin créditos de CPU (`credit_specification` solo se envía a la familia t). Región: **us-east-2**. Con plan de pago, `t3.large` sigue siendo válido (`tipo_instancia`).
 
-| Concepto | USD/mes |
-|---|---|
-| EC2 `t3.large` (0.0832 USD/h × 730 h) | 60.74 |
-| gp3 40 GB (0.08 USD/GB-mes; 3000 IOPS y 125 MB/s incluidos) | 3.20 |
-| IPv4 pública / Elastic IP (0.005 USD/h) | 3.65 |
-| Salida a internet (primeros 100 GB gratis) | 0 |
-| SSM Session Manager, AWS Budgets (2 presupuestos gratis), cifrado con `aws/ebs` | 0 |
-| **Total base** | **≈ 67.6** |
+**Costos del piloto** (us-east-2, bajo demanda; precio de la EC2 tomado de la API de precios de AWS):
 
-- **Ráfagas de CPU (`t3` en `unlimited`):** la línea base de un `t3.large` es 30 % por vCPU (0.6 vCPU sostenida) y acumula créditos mientras está por debajo. Un `docker build` usa las dos vCPU unos minutos y lo pagan los créditos acumulados. Solo si la CPU pasa la línea base **de forma sostenida** se cobra el excedente a 0.05 USD por vCPU-hora: el peor caso (2 vCPU al 100 % todo el mes) suma ≈ 1.4 × 730 × 0.05 = **51.10 USD**. `creditos_cpu = "standard"` lo elimina a cambio de frenar la CPU al agotar créditos (mala idea en plena demo).
-- **Créditos:** con 150 USD alcanzan ≈ 2 meses de piloto. El tope por defecto del presupuesto (70 USD) cubre un mes completo del piloto (≈ 68 USD): avisa al 50 %, al 80 % y al 100 %, y antes por pronóstico si el gasto se dispara. El presupuesto mide el costo **bruto** (sin créditos); si no, los avisos nunca llegarían.
+| Concepto | USD/mes | USD en 5 días |
+|---|---|---|
+| EC2 `m7i-flex.large` (0.09576 USD/h × 730 h) | 69.90 | 11.49 |
+| gp3 70 GB (0.08 USD/GB-mes; 3000 IOPS y 125 MB/s incluidos) | 5.60 | 0.92 |
+| IPv4 pública / Elastic IP (0.005 USD/h) | 3.65 | 0.60 |
+| Salida a internet (primeros 100 GB gratis) | 0 | 0 |
+| SSM Session Manager, AWS Budgets (2 presupuestos gratis), cifrado con `aws/ebs` | 0 | 0 |
+| **Total base** | **≈ 79.2** | **≈ 13** |
+
+Referencia con plan de pago: `t3.large` cuesta 0.0832 USD/h (60.74 USD/mes).
+
+- **Ráfagas de CPU:** `m7i-flex` no tiene créditos ni excedente: el precio por hora es el total. Solo con `t3` (plan de pago) aplica lo siguiente. **`t3` en `unlimited`:** la línea base de un `t3.large` es 30 % por vCPU (0.6 vCPU sostenida) y acumula créditos mientras está por debajo. Un `docker build` usa las dos vCPU unos minutos y lo pagan los créditos acumulados. Solo si la CPU pasa la línea base **de forma sostenida** se cobra el excedente a 0.05 USD por vCPU-hora: el peor caso (2 vCPU al 100 % todo el mes) suma ≈ 1.4 × 730 × 0.05 = **51.10 USD**. `creditos_cpu = "standard"` lo elimina a cambio de frenar la CPU al agotar créditos (mala idea en plena demo).
+- **Créditos:** los 5 días del piloto cuestan ≈ 13 USD de los 150 USD; un mes completo, ≈ 79 USD. En el plan gratuito AWS no cobra a la tarjeta. El presupuesto (70 USD) avisa al 50 %, al 80 % y al 100 %, y antes por pronóstico: si la EC2 se queda encendida todo el mes, el aviso por pronóstico llega antes de agotar créditos. El presupuesto mide el costo **bruto** (sin créditos); si no, los avisos nunca llegarían.
 - **Capacidad estimada** con 8 GB: la plataforma (PostgreSQL, Redis, API, worker, web, Traefik) usa ≈ 1.5 GB y el sistema ≈ 0.5 GB; quedan ≈ 6 GB para apps. Una app pequeña real usa ≈ 128 MB (el límite del plan es un techo, 256 MB a 2 GB, no una reserva): **≈ 45 apps pequeñas**. La CPU es el límite antes que la memoria si varias apps tienen carga. Las 4 GB de swap son para los picos de construcción; los contenedores de usuarios no lo usan (`MemorySwap = Memory`).
 - **`TRABAJADOR_CONCURRENCIA` se queda en 1:** un build ya ocupa las dos vCPU; con dos a la vez las apps pierden CPU y el excedente se cobra. Se sube con 4 vCPU o más ([.env.vps.example](../../.env.vps.example)).
 - **Seguridad:** sin puerto 22 por defecto (SSM sale por 443); sshd sin contraseñas ni root; IMDSv2 obligatorio con `http_put_response_hop_limit = 1`, de modo que un contenedor en una red bridge (un salto más) no obtiene el token ni las credenciales del perfil; el perfil solo permite SSM; disco cifrado; unattended-upgrades sin reinicio automático. `docker.sock` en el worker sigue siendo el riesgo mayor del host: lo elimina el ADR 0010.

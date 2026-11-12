@@ -4,7 +4,7 @@ Guía operativa de `docker-compose.vps.yml`. Las decisiones están en [ADR 0005]
 
 ## 0. Crear el servidor en AWS con Terraform
 
-El servidor es una **EC2 `t3.large` en AWS** (us-east-1, Ubuntu 24.04) creada con [infra/terraform/](../infra/terraform/README.md) ([ADR 0009](adr/0009-piloto-en-aws-ec2-con-terraform.md)). `docker-compose.vps.yml` es el compose de producción: «vps» es solo el nombre del archivo. Terraform deja listo lo de «Servidor» de la tabla de §1 (Docker y Compose oficiales, usuario `deploya`, clon en `/srv/deploya`, 80/443 abiertos y administración por SSM sin puerto 22) y además el cron de [§3.5 del manual](entrega-final/manual-tecnico.md#35-operación-diaria-cron-del-servidor). **No** lleva secretos: `.env.vps` se copia a mano.
+El servidor es una **EC2 `m7i-flex.large` en AWS** (2 vCPU, 8 GB; us-east-2, Ubuntu 24.04) creada con [infra/terraform/](../infra/terraform/README.md) ([ADR 0009](adr/0009-piloto-en-aws-ec2-con-terraform.md)). `docker-compose.vps.yml` es el compose de producción: «vps» es solo el nombre del archivo. Terraform deja listo lo de «Servidor» de la tabla de §1 (Docker y Compose oficiales, usuario `deploya`, clon en `/srv/deploya`, 80/443 abiertos y administración por SSM sin puerto 22) y además el cron de [§3.5 del manual](entrega-final/manual-tecnico.md#35-operación-diaria-cron-del-servidor). **No** lleva secretos: `.env.vps` se copia a mano.
 
 ```bash
 cd infra/terraform

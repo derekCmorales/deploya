@@ -2,13 +2,13 @@
 # Los secretos de la plataforma viven solo en .env.vps del servidor (docs/infra-vps.md).
 
 variable "region" {
-  description = "Región de AWS. Las cifras del ADR 0009 son de us-east-1."
+  description = "Región de AWS. Las cifras del ADR 0009 son de us-east-2."
   type        = string
-  default     = "us-east-1"
+  default     = "us-east-2"
 
   validation {
     condition     = can(regex("^[a-z]{2}(-[a-z]+)+-[0-9]$", var.region))
-    error_message = "La región debe tener la forma de AWS, p. ej. us-east-1."
+    error_message = "La región debe tener la forma de AWS, p. ej. us-east-2."
   }
 }
 
@@ -34,18 +34,18 @@ variable "dominio" {
 }
 
 variable "tipo_instancia" {
-  description = "Tipo de la EC2. Decisión del dueño: t3.large (2 vCPU, 8 GB). Ver ADR 0009."
+  description = "Tipo de la EC2. m7i-flex.large (2 vCPU, 8 GB) es el único x86 con 8 GB que admite el plan gratuito de AWS; con plan de pago, t3.large también sirve. Ver ADR 0009."
   type        = string
-  default     = "t3.large"
+  default     = "m7i-flex.large"
 
   validation {
-    condition     = can(regex("^(t3|t3a|m6i|m7i)\\.(medium|large|xlarge|2xlarge)$", var.tipo_instancia))
-    error_message = "Usa un tipo x86 de propósito general (t3, t3a, m6i o m7i) de medium a 2xlarge: las recetas construyen imágenes amd64."
+    condition     = can(regex("^((t3|t3a|m6i|m7i)\\.(medium|large|xlarge|2xlarge)|m7i-flex\\.(large|xlarge|2xlarge))$", var.tipo_instancia))
+    error_message = "Usa un tipo x86 de propósito general (t3, t3a, m6i, m7i o m7i-flex) de medium a 2xlarge: las recetas construyen imágenes amd64."
   }
 }
 
 variable "creditos_cpu" {
-  description = "Modo de créditos de CPU de la familia t: unlimited (no se frena en ráfagas, pero cobra el excedente) o standard (se frena al agotar créditos, sin costo extra)."
+  description = "Modo de créditos de CPU; solo aplica a la familia t (con m7i-flex se ignora): unlimited (no se frena en ráfagas, pero cobra el excedente) o standard (se frena al agotar créditos, sin costo extra)."
   type        = string
   default     = "unlimited"
 

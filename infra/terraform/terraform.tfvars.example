@@ -7,7 +7,7 @@ correos_presupuesto = ["operaciones@example.com"]
 # Valores por defecto (descomenta para cambiarlos)
 # region               = "us-east-2"
 # entorno              = "piloto"
-# tipo_instancia       = "m7i-flex.large"   # "t3.large" solo con plan de pago de AWS
+# tipo_instancia       = "m7i-flex.large"   # piloto con Nimbo: "m7i-flex.xlarge", solo con plan de pago (docs/infra-vps.md §6.3)
 #                                           # piloto con Nimbo: "m7i-flex.xlarge" (16 GB, plan de pago; ADR 0012)
 # creditos_cpu         = "unlimited"   # solo familia t; "standard" frena la CPU en vez de cobrar ráfagas
 # tamano_disco_gb      = 80          # incluye los volúmenes de los recursos de datos (ADR 0012)

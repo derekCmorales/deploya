@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, GitBranch, GitCommitHorizontal, Hash, Link2, RotateCw } from "lucide-react";
+import { CircleCheck, FileText, GitBranch, GitCommitHorizontal, Hash, Link2, RotateCw } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
@@ -35,8 +35,8 @@ export function PasoRepositorio({ alta }: { alta: Alta }) {
         <p className="text-[13px] font-medium text-muted-foreground">Paso 1 · Repositorio</p>
         <h2 className="text-lg font-semibold tracking-[-0.02em]">¿Qué repositorio desplegamos?</h2>
         <p className="text-muted-foreground">
-          Repositorio público con un <span className="font-mono text-[13px] text-foreground">Dockerfile</span> en la raíz. El
-          lenguaje y las dependencias los defines tú ahí.
+          Repositorio público con un <span className="font-mono text-[13px] text-foreground">Dockerfile</span>, en la raíz o en
+          la ruta que indiques. El lenguaje y las dependencias los defines tú ahí.
         </p>
       </div>
 
@@ -83,6 +83,21 @@ export function PasoRepositorio({ alta }: { alta: Alta }) {
             <datalist id="ramas-repositorio">
               {validacion?.ramas.map((r) => <option key={r} value={r} />)}
             </datalist>
+          </div>
+        </Field>
+        <Field id="rutaDockerfile" label="Ruta del Dockerfile" error={errorDe("rutaDockerfile")} hint="Relativa a la raíz del repositorio.">
+          <div className="relative">
+            <FileText className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Input
+              id="rutaDockerfile"
+              autoComplete="off"
+              spellCheck={false}
+              value={alta.rutaDockerfile}
+              onChange={(e) => alta.cambiarRutaDockerfile(e.target.value)}
+              aria-invalid={!!errorDe("rutaDockerfile")}
+              aria-describedby="rutaDockerfile-msg"
+              className="pl-8 font-mono"
+            />
           </div>
         </Field>
         {validacion ? (

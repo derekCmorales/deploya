@@ -55,7 +55,8 @@ class FuenteDoble extends ProveedorFuente {
   async validar(consulta: ConsultaRepositorio): Promise<ValidacionRepositorio> {
     this.consultas.push(consulta);
     if (this.error) throw this.error;
-    const dockerfile = this.archivos.get("Dockerfile") ?? null;
+    const rutaDockerfile = consulta.rutaDockerfile ?? "Dockerfile";
+    const dockerfile = this.archivos.get(rutaDockerfile) ?? null;
     return {
       accesible: true,
       urlNormalizada: URL,
@@ -63,6 +64,7 @@ class FuenteDoble extends ProveedorFuente {
       rama: consulta.rama,
       ramas: ["main"],
       commit: { sha: "a1b2c3d", mensaje: "feat: hola", autor: "Derek", fecha: "2026-09-29T10:00:00Z" },
+      rutaDockerfile,
       dockerfile,
       puerto: 3000,
     };
@@ -180,6 +182,27 @@ describe("ProyectosService", () => {
       });
       expect(construccion.crearDespliegue).toHaveBeenCalledWith(proyecto.id, "alta");
       expect(despliegue).toEqual({ id: "despliegue-1", numero: 1, estado: "encolado" });
+    });
+
+    it("Ruta del Dockerfile en el alta: valida esa ruta, sugiere su EXPOSE y la guarda en el proyecto", async () => {
+      const { servicio, fuente } = montar();
+      fuente.archivos = new Map([["apps/api/Dockerfile", "FROM node\nEXPOSE 4000"]]);
+
+      const validacion = await servicio.validarRepositorio({ url: URL, rama: "main", rutaDockerfile: "apps/api/Dockerfile" });
+      const { proyecto } = await servicio.crear("usuario-1", alta({ rutaDockerfile: "apps/api/Dockerfile" }));
+
+      expect(validacion).toMatchObject({ rutaDockerfile: "apps/api/Dockerfile", puerto: 4000, deteccion: { receta: "dockerfile" } });
+      expect(proyecto).toMatchObject({ rutaDockerfile: "apps/api/Dockerfile", puertoInterno: 4000 });
+      expect(fuente.consultas.at(-1)).toEqual({ url: URL, rama: "main", rutaDockerfile: "apps/api/Dockerfile" });
+    });
+
+    it("Ruta del Dockerfile inexistente sin stack reconocido: rechaza el alta y no guarda nada", async () => {
+      const { servicio, fuente, repositorio } = montar();
+      const error = await servicio.crear("usuario-1", alta({ rutaDockerfile: "apps/web/Dockerfile" })).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(StackNoReconocidoEnAlta);
+      expect(fuente.consultas.at(-1)).toMatchObject({ rutaDockerfile: "apps/web/Dockerfile" });
+      expect(await repositorio.deUsuario("usuario-1")).toEqual([]);
     });
 
     it("Clave inválida en el alta no guarda el proyecto", async () => {
@@ -407,8 +430,19 @@ describe("ProyectosService", () => {
       await servicio.configurar("usuario-1", proyecto.id, { rama: "sin-dockerfile" });
 
       expect(await repositorio.porId(proyecto.id)).toMatchObject({ rama: "sin-dockerfile", urlRepositorio: URL });
-      expect(fuente.consultas).toEqual([{ url: URL, rama: "sin-dockerfile" }]);
+      expect(fuente.consultas).toEqual([{ url: URL, rama: "sin-dockerfile", rutaDockerfile: "Dockerfile" }]);
       expect(construccion.crearDespliegue).not.toHaveBeenCalled();
+    });
+
+    it("Cambiar la rama con un Dockerfile fuera de la raíz: valida con la ruta guardada en el proyecto", async () => {
+      const contexto = montar();
+      contexto.fuente.archivos = new Map([["apps/api/Dockerfile", "FROM node\nEXPOSE 3000"]]);
+      const { proyecto } = await contexto.servicio.crear("usuario-1", alta({ rutaDockerfile: "apps/api/Dockerfile" }));
+
+      await contexto.servicio.configurar("usuario-1", proyecto.id, { rama: "develop" });
+
+      expect(contexto.fuente.consultas.at(-1)).toEqual({ url: URL, rama: "develop", rutaDockerfile: "apps/api/Dockerfile" });
+      expect(await contexto.repositorio.porId(proyecto.id)).toMatchObject({ rama: "develop", rutaDockerfile: "apps/api/Dockerfile" });
     });
 
     it("Rama inexistente", async () => {
@@ -425,7 +459,7 @@ describe("ProyectosService", () => {
 
       await servicio.configurar("usuario-1", proyecto.id, { urlRepositorio: "https://github.com/derekCmorales/otro" });
 
-      expect(fuente.consultas).toEqual([{ url: "https://github.com/derekCmorales/otro", rama: "main" }]);
+      expect(fuente.consultas).toEqual([{ url: "https://github.com/derekCmorales/otro", rama: "main", rutaDockerfile: "Dockerfile" }]);
       expect((await repositorio.porId(proyecto.id))?.urlRepositorio).toBe(URL);
       fuente.error = new RepositorioNoAccesible(404);
       await expect(servicio.configurar("usuario-1", proyecto.id, { urlRepositorio: "https://github.com/derekCmorales/privado" })).rejects.toThrow(

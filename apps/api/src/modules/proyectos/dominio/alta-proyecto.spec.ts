@@ -1,5 +1,5 @@
 import { validarAltaProyecto, validarConsultaRepositorio } from "./alta-proyecto";
-import { DatosAltaInvalidos, UrlRepositorioInvalida } from "./errores";
+import { DatosAltaInvalidos, RutaInvalida, UrlRepositorioInvalida } from "./errores";
 
 const URL = "https://github.com/derekCmorales/hola-deploya";
 
@@ -32,11 +32,36 @@ describe("validarAltaProyecto", () => {
   it("rechaza una URL que no es de GitHub", () => {
     expect(() => validarAltaProyecto({ url: "https://gitlab.com/a/b", nombre: "hola" })).toThrow(UrlRepositorioInvalida);
   });
+
+  it("Ruta del Dockerfile en el alta: se normaliza como en Configuración", () => {
+    expect(validarAltaProyecto({ url: URL, nombre: "hola", rutaDockerfile: "./apps/api/Dockerfile" })).toEqual({
+      url: URL,
+      rama: "main",
+      nombre: "hola",
+      rutaDockerfile: "apps/api/Dockerfile",
+    });
+  });
+
+  it.each(["", "   ", undefined, null])("Ruta del Dockerfile vacía (%p): queda la raíz por omisión", (rutaDockerfile) => {
+    expect(validarAltaProyecto({ url: URL, nombre: "hola", rutaDockerfile })).not.toHaveProperty("rutaDockerfile");
+  });
+
+  it.each(["../Dockerfile", "apps//Dockerfile", "apps\\Dockerfile"])("Ruta del Dockerfile inválida (%p): RutaInvalida", (rutaDockerfile) => {
+    expect(() => validarAltaProyecto({ url: URL, nombre: "hola", rutaDockerfile })).toThrow(RutaInvalida);
+  });
 });
 
 describe("validarConsultaRepositorio", () => {
   it("normaliza la URL y usa main si no llega rama", () => {
     expect(validarConsultaRepositorio({ url: `${URL}/` })).toEqual({ url: URL, rama: "main" });
+  });
+
+  it("lleva la ruta del Dockerfile si llega", () => {
+    expect(validarConsultaRepositorio({ url: URL, rutaDockerfile: "/apps/web/Dockerfile" })).toEqual({
+      url: URL,
+      rama: "main",
+      rutaDockerfile: "apps/web/Dockerfile",
+    });
   });
 
   it("sin URL rechaza con UrlRepositorioInvalida", () => {

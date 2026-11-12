@@ -3,13 +3,16 @@ import type { AltaProyecto, ConsultaRepositorio } from "./proyecto";
 import type { EntradaVariable } from "./variable";
 import { PUERTO_MAXIMO, PUERTO_MINIMO, RAMA_POR_DEFECTO } from "./proyectos.constantes";
 import { repositorioDesdeUrl } from "./repositorio-github";
+import { rutaDockerfileDe } from "./ruta-dockerfile";
 
 type Cuerpo = Record<string, unknown>;
 
-/** `POST /proyectos/validar-repositorio`: URL de GitHub y rama opcional. */
+/** `POST /proyectos/validar-repositorio`: URL de GitHub, rama y ruta del Dockerfile opcionales. */
 export function validarConsultaRepositorio(cuerpo: unknown): ConsultaRepositorio {
   const datos = comoObjeto(cuerpo);
-  return { url: repositorioDesdeUrl(texto(datos.url)).url, rama: ramaDe(datos) };
+  const consulta = { url: repositorioDesdeUrl(texto(datos.url)).url, rama: ramaDe(datos) };
+  const rutaDockerfile = rutaOpcional(datos.rutaDockerfile);
+  return rutaDockerfile === undefined ? consulta : { ...consulta, rutaDockerfile };
 }
 
 /** `POST /proyectos`: reemplaza al DTO (el repo no usa class-validator). */
@@ -17,10 +20,10 @@ export function validarAltaProyecto(cuerpo: unknown): AltaProyecto {
   const datos = comoObjeto(cuerpo);
   const nombre = texto(datos.nombre);
   if (!nombre) throw new DatosAltaInvalidos("El nombre del proyecto es obligatorio.");
-  const { url, rama } = validarConsultaRepositorio(datos);
+  const consulta = validarConsultaRepositorio(datos);
   const puerto = puertoDe(datos.puerto);
   const variables = variablesDe(datos.variables);
-  const alta: AltaProyecto = { url, rama, nombre, ...(puerto === undefined ? {} : { puerto }) };
+  const alta: AltaProyecto = { ...consulta, nombre, ...(puerto === undefined ? {} : { puerto }) };
   return variables === undefined ? alta : { ...alta, variables };
 }
 
@@ -43,6 +46,11 @@ function comoObjeto(cuerpo: unknown): Cuerpo {
 
 function texto(valor: unknown): string {
   return typeof valor === "string" ? valor.trim() : "";
+}
+
+/** Vacía o ausente: el servicio usa `Dockerfile` en la raíz. */
+function rutaOpcional(valor: unknown): string | undefined {
+  return texto(valor) ? rutaDockerfileDe(valor) : undefined;
 }
 
 function ramaDe(datos: Cuerpo): string {

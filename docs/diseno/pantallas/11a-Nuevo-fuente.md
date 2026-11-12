@@ -10,7 +10,7 @@
 
 ## Qué es
 
-`Pasos` a la izquierda con recursos del plan; formulario: URL (valida contra GitHub), rama, nombre (define el subdominio), puerto desde `EXPOSE`; tarjeta de Dockerfile encontrado y último commit.
+`Pasos` a la izquierda con recursos del plan; formulario: URL (valida contra GitHub), rama, ruta del Dockerfile (opcional, por omisión `Dockerfile`; change `feat/m3-ruta-dockerfile-alta`), nombre (define el subdominio), puerto desde `EXPOSE` de ese Dockerfile; tarjeta de Dockerfile encontrado y último commit.
 
 ## Componentes
 
@@ -53,13 +53,16 @@ Paso 1 · Repositorio
 ¿Qué repositorio desplegamos?
 Repositorio público con un
 Dockerfile
-en la raíz. El lenguaje y las dependencias los defines tú ahí.
+, en la raíz o en la ruta que indiques. El lenguaje y las dependencias los defines tú ahí.
 URL del repositorio
 https://github.com/tienda-demo/api-tienda
 Accesible
 Repositorio público · 4 ramas
 Rama
 main
+Ruta del Dockerfile
+Dockerfile
+Relativa a la raíz del repositorio.
 Nombre del proyecto
 api-tienda
 URL:

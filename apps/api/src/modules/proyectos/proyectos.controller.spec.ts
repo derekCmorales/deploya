@@ -63,6 +63,7 @@ class FuenteDoble extends ProveedorFuente {
       rama,
       ramas: ["main"],
       commit: { sha: "a1b2c3d", mensaje: "feat: hola", autor: "Derek", fecha: "2026-09-29T10:00:00Z" },
+      rutaDockerfile: "Dockerfile",
       dockerfile: "FROM node\nEXPOSE 3000",
       puerto: 3000,
     };

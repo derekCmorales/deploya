@@ -97,7 +97,8 @@ export class ProyectosService {
   async crear(usuarioId: string, alta: AltaProyecto): Promise<ProyectoCreado> {
     await this.exigirCupo(usuarioId);
     await this.bloqueos.verificar(usuarioId);
-    const validacion = await this.validarRepositorio({ url: alta.url, rama: alta.rama });
+    const rutaDockerfile = alta.rutaDockerfile ?? RUTA_DOCKERFILE;
+    const validacion = await this.validarRepositorio({ url: alta.url, rama: alta.rama, rutaDockerfile });
     const subdominio = subdominioDesdeNombre(alta.nombre);
     if (esSubdominioReservado(subdominio, this.reservados) || chocaConRutaDeDatos(subdominio) || (await this.repositorio.existeSubdominio(subdominio))) {
       throw new SubdominioEnUso(subdominio);
@@ -109,7 +110,7 @@ export class ProyectosService {
       subdominio,
       urlRepositorio: validacion.urlNormalizada,
       rama: alta.rama,
-      rutaDockerfile: RUTA_DOCKERFILE,
+      rutaDockerfile,
       puertoInterno: alta.puerto ?? validacion.puerto,
       comandoInicio: null,
     });
@@ -131,6 +132,7 @@ export class ProyectosService {
       const validacion = await this.validarRepositorio({
         url: cambios.urlRepositorio ?? proyecto.urlRepositorio,
         rama: cambios.rama ?? proyecto.rama,
+        rutaDockerfile: cambios.rutaDockerfile ?? proyecto.rutaDockerfile,
       });
       if (cambios.urlRepositorio !== undefined) return this.repositorio.actualizar(proyecto.id, { ...cambios, urlRepositorio: validacion.urlNormalizada });
     }
@@ -173,7 +175,7 @@ export class ProyectosService {
 
   private async detectarOFallar(consulta: ConsultaRepositorio): Promise<ResultadoDeteccion> {
     try {
-      return await this.deteccion.detectar(this.fuente.lector(consulta));
+      return await this.deteccion.detectar(this.fuente.lector(consulta), consulta.rutaDockerfile);
     } catch (error) {
       if (error instanceof StackNoReconocido) throw new StackNoReconocidoEnAlta(consulta.rama, error.pista);
       throw error;

@@ -51,9 +51,21 @@ describe("FuenteGitHubPublica", () => {
       rama: "main",
       ramas: ["main", "roto"],
       commit: { sha: "a1b2c3d4", mensaje: "feat: hola", autor: "Derek", fecha: "2026-09-29T10:00:00Z" },
+      rutaDockerfile: "Dockerfile",
       dockerfile: DOCKERFILE,
       puerto: 3000,
     });
+  });
+
+  it("Ruta del Dockerfile: lo busca en esa ruta y toma su EXPOSE", async () => {
+    const { http, pedidas } = github({
+      ...VALIDO,
+      [`${BASE}/contents/apps/api/Dockerfile`]: { cuerpo: { type: "file", content: Buffer.from("FROM node\nEXPOSE 4000").toString("base64") } },
+    });
+    const validacion = await new FuenteGitHubPublica(http).validar({ ...consulta(), rutaDockerfile: "apps/api/Dockerfile" });
+
+    expect(validacion).toMatchObject({ rutaDockerfile: "apps/api/Dockerfile", puerto: 4000 });
+    expect(pedidas.map((p) => p.url)).toContain(`${BASE}/contents/apps/api/Dockerfile?ref=main`);
   });
 
   it("sin EXPOSE propone el puerto 8080", async () => {

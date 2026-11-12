@@ -24,6 +24,7 @@ import {
   resumenDockerfile,
   subdominioDesdeNombre,
   subtituloProyectos,
+  textoConstruccion,
   textoEtapa,
   urlProyecto,
 } from "../src/lib/proyectos.ts";
@@ -132,6 +133,16 @@ test("11e · cada código de la API se pinta donde dice el diseño", () => {
   assert.equal(bloqueoDespliegue("cuota-construcciones-agotada", "Usaste las 30 construcciones de tu plan este mes")?.accion, "Cambiar de plan");
   assert.equal(tituloDeteccion({ dockerfile: null, deteccion: { receta: "node", nombre: "Node.js 22", descripcion: "Node.js 22 · npm start" } }).titulo, "Stack detectado: Node.js 22 · receta Deploya");
   assert.deepEqual(errorDeAlta("fuente-no-disponible", "GitHub no respondió.", {}), { tipo: "aviso", mensaje: "GitHub no respondió." });
+});
+
+test("Ruta del Dockerfile en el alta: error junto al campo, tarjeta y línea «Construcción» con la ruta", () => {
+  const mensaje = "La ruta del Dockerfile es relativa al repositorio y no puede salir de él (sin «..»).";
+  assert.deepEqual(errorDeAlta("ruta-invalida", mensaje, {}), { tipo: "campo", campo: "rutaDockerfile", mensaje });
+  const dockerfile = "FROM node\nEXPOSE 3000";
+  assert.equal(tituloDeteccion({ dockerfile, rutaDockerfile: "apps/api/Dockerfile" }).titulo, "Dockerfile encontrado en apps/api/Dockerfile");
+  assert.equal(tituloDeteccion({ dockerfile, rutaDockerfile: "Dockerfile" }).titulo, "Dockerfile encontrado");
+  assert.equal(textoConstruccion({ rutaDockerfile: "apps/web/Dockerfile" }), "docker build · /apps/web/Dockerfile");
+  assert.equal(textoConstruccion({}), "docker build · /Dockerfile");
 });
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");

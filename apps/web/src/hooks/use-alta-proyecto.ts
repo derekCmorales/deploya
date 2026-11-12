@@ -7,6 +7,7 @@ import {
   errorDeAlta,
   nombreSugerido,
   puertoValido,
+  RUTA_DOCKERFILE,
   subdominioDesdeNombre,
   type ErrorAlta,
   type ValidacionRepositorio,
@@ -32,6 +33,7 @@ export function useAltaProyecto() {
   const [paso, setPaso] = useState<PasoAlta>("repositorio");
   const [url, setUrl] = useState("");
   const [rama, setRama] = useState(RAMA_INICIAL);
+  const [rutaDockerfile, setRutaDockerfile] = useState(RUTA_DOCKERFILE);
   const [nombre, setNombre] = useState("");
   const [nombreEditado, setNombreEditado] = useState(false);
   const [puerto, setPuerto] = useState("");
@@ -50,7 +52,7 @@ export function useAltaProyecto() {
     setOcupado(true);
     setError(null);
     try {
-      const v = await pedirApi<ValidacionRepositorio>("/proyectos/validar-repositorio", { metodo: "POST", cuerpo: { url, rama } });
+      const v = await pedirApi<ValidacionRepositorio>("/proyectos/validar-repositorio", { metodo: "POST", cuerpo: { url, rama, rutaDockerfile } });
       setValidacion(v);
       setUrl(v.urlNormalizada);
       setPuerto(String(v.puerto));
@@ -97,6 +99,7 @@ export function useAltaProyecto() {
         cuerpo: {
           url: validacion.urlNormalizada,
           rama,
+          rutaDockerfile,
           nombre,
           puerto: Number(puerto),
           variables: variablesDeAlta(variables),
@@ -117,6 +120,7 @@ export function useAltaProyecto() {
     paso,
     url,
     rama,
+    rutaDockerfile,
     nombre,
     puerto,
     variables,
@@ -130,6 +134,10 @@ export function useAltaProyecto() {
     },
     cambiarRama: (valor: string) => {
       setRama(valor);
+      invalidar();
+    },
+    cambiarRutaDockerfile: (valor: string) => {
+      setRutaDockerfile(valor);
       invalidar();
     },
     cambiarNombre: (valor: string) => {

@@ -58,7 +58,7 @@ variable "creditos_cpu" {
 variable "tamano_disco_gb" {
   description = "Disco raíz gp3 cifrado: sistema, imágenes de Docker (plataforma, proyectos y 5 versiones guardadas por proyecto), PostgreSQL y respaldos."
   type        = number
-  default     = 40
+  default     = 70
 
   validation {
     condition     = var.tamano_disco_gb >= 30 && var.tamano_disco_gb <= 500
@@ -136,7 +136,7 @@ variable "proteccion_terminacion" {
 variable "tope_presupuesto_usd" {
   description = "Tope mensual de AWS Budgets en USD (costo bruto, sin descontar créditos)."
   type        = number
-  default     = 40
+  default     = 70
 
   validation {
     condition     = var.tope_presupuesto_usd > 0 && var.tope_presupuesto_usd <= 1000

@@ -13,8 +13,11 @@ export function AppShell({
   nav,
   acciones,
   usuario,
+  inicio = "/",
 }: {
   children: ReactNode;
+  /** A dónde lleva la marca: el panel con sesión, la landing pública sin ella. */
+  inicio?: string;
   /** Navegación principal (p. ej. `<NavPrincipal items={…} />`). */
   nav?: ReactNode;
   /** Acciones a la derecha, antes del tema (búsqueda, chip de despliegue). */
@@ -24,8 +27,8 @@ export function AppShell({
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="relative z-10 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background pr-4 pl-6">
-        <Link href="/" aria-label="deploya, inicio" className="rounded-sm px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <header className="relative z-10 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background pr-3 pl-3 md:pr-4 md:pl-6">
+        <Link href={inicio} aria-label="deploya, inicio" className="rounded-sm px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Wordmark />
         </Link>
         {nav}

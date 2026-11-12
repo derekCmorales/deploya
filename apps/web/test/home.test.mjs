@@ -15,10 +15,18 @@ function archivos(dir) {
   });
 }
 
-test("el home nombra Deploya, lleva a registro, ingreso y planes, y enlaza el design system", () => {
+test("00 · la raíz es el panel de Inicio: sin el home de maqueta ni enlace al catálogo", () => {
   const page = leer("src/app/page.tsx");
-  assert.match(page, /Deploya/);
-  for (const ruta of ["/registro", "/ingresar", "/planes", "/sistema"]) assert.match(page, new RegExp(`href="${ruta}"`));
+  assert.match(page, /<Inicio \/>/);
+  assert.match(page, /RedirigeAConfigurar/);
+  assert.doesNotMatch(page, /\/sistema/);
+  assert.doesNotMatch(page, /design system/i);
+});
+
+test("00 · la navegación del panel empieza en Inicio y no muestra el catálogo", () => {
+  const nav = leer("src/components/shell/nav-panel.tsx");
+  assert.match(nav, /href: "\/", texto: "Inicio"/);
+  assert.doesNotMatch(nav, /\/sistema/);
 });
 
 test("el layout declara Geist, lang es y claro por defecto", () => {
@@ -66,8 +74,10 @@ test("los estados de despliegue siguen el núcleo v4.1", () => {
   }
 });
 
-test("el catálogo /sistema existe y usa los componentes del sistema", () => {
+test("el catálogo /sistema existe, usa los componentes del sistema y se oculta en producción", () => {
   const page = leer("src/app/sistema/page.tsx");
+  assert.match(page, /catalogoVisible\(process\.env\.NODE_ENV/);
+  assert.match(page, /notFound\(\)/);
   for (const c of ["RielEtapas", "EstadoDespliegue", "EstadoSuscripcion", "Bitacora", "Banner", "Meter"]) {
     assert.match(page, new RegExp(c), `falta ${c} en /sistema`);
   }

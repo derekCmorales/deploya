@@ -61,14 +61,14 @@ flowchart TB
     subgraph EXTERNOS["Sistemas externos"]
         GIT["GitHub<br/>repositorios públicos"]
         DOCKER["Docker Engine<br/>nodo único (VPS)"]
-        DNS["DNS comodín<br/>*.deploya.app"]
+        DNS["DNS comodín<br/>*.deploya.larasolutions.dev"]
         CA["Let's Encrypt<br/>certificado comodín"]
         CORREO["Proveedor SMTP<br/>Mailpit en desarrollo"]
     end
 
     CLIENTE -->|"panel web, HTTPS"| DEPLOYA
     ADMIN -->|"panel web, HTTPS"| DEPLOYA
-    CLIENTE -.->|"visita su app<br/>https://proyecto.deploya.app"| DOCKER
+    CLIENTE -.->|"visita su app<br/>https://proyecto.deploya.larasolutions.dev"| DOCKER
 
     DEPLOYA -->|"lee archivos y clona"| GIT
     DEPLOYA -->|"construye y corre contenedores"| DOCKER
@@ -104,7 +104,7 @@ flowchart TB
         WORKER["worker<br/>misma imagen de la API<br/>M4 construye · M5 ejecuta · M6 publica"]
         REDIS[("redis<br/>cola BullMQ «despliegues»")]
         BD[("postgres<br/>Prisma · schema del núcleo")]
-        EDGE["traefik v3<br/>proveedor de archivo<br/>*.localhost / *.deploya.app"]
+        EDGE["traefik v3<br/>proveedor de archivo<br/>*.localhost / *.deploya.larasolutions.dev"]
         MAILPIT["mailpit<br/>SMTP de desarrollo · :8025"]
     end
 
@@ -366,8 +366,10 @@ flowchart LR
     end
 
     subgraph EXTERNOS["Solo en el VPS (docker-compose.vps.yml)"]
-        LE["Let's Encrypt<br/>certificado comodín *.deploya.app"]
-        DNS["Proveedor DNS<br/>registros A · desafío DNS-01<br/>token solo de la zona"]
+        LE["Let's Encrypt<br/>certificado comodín *.&lt;dominio&gt;"]
+        DNS["Proveedor DNS<br/>A de * · CNAME de la raíz a CloudFront<br/>desafío DNS-01 · token solo de la zona"]
+        CF["CloudFront + ACM (us-east-1)<br/>landing en &lt;dominio&gt; y www · ADR 0011"]
+        S3[("S3 privado<br/>dist/ de la landing · solo por OAC")]
         SMTP["Proveedor SMTP<br/>Resend o Brevo · SPF y DKIM"]
     end
 
@@ -377,7 +379,9 @@ flowchart LR
     NAV -->|"localhost:3001"| API
     NAV -->|"hola-deploya.localhost"| TR
     NAV -->|"localhost:8025 (sin Mailpit en el VPS)"| MP
-    NAV -->|"https://deploya.app · https://api.deploya.app · https://hola-deploya.deploya.app"| TR
+    NAV -->|"https://app.&lt;dominio&gt; · https://api.&lt;dominio&gt; · https://hola-deploya.&lt;dominio&gt;"| TR
+    NAV -->|"https://&lt;dominio&gt; (landing)"| CF
+    CF -->|"lee con OAC"| S3
     TR -->|"emite y renueva por DNS-01"| LE
     LE -->|"verifica el TXT"| DNS
     TR -->|"escribe"| ACME
@@ -399,10 +403,10 @@ flowchart LR
     classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef cliente fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
     classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
-    class PG,RD,VOL,ACME data
+    class PG,RD,VOL,ACME,S3 data
     class API,WK,WEB,MP,TR app
     class C1,C2 cliente
-    class SOCK,NAV,LE,DNS,SMTP ext
+    class SOCK,NAV,LE,DNS,SMTP,CF ext
 ```
 
 ---

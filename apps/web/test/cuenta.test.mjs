@@ -104,10 +104,10 @@ test("03b · credenciales incorrectas, cuenta sin verificar y suspendida", () =>
 
 test("03 · tras iniciar sesión vuelve solo a rutas propias", () => {
   assert.equal(destinoTrasIngreso("/projects/nuevo"), "/projects/nuevo");
-  assert.equal(destinoTrasIngreso(null), "/projects");
-  assert.equal(destinoTrasIngreso("//evil.com"), "/projects");
-  assert.equal(destinoTrasIngreso("https://evil.com"), "/projects");
-  assert.equal(destinoTrasIngreso("/\\evil.com"), "/projects");
+  assert.equal(destinoTrasIngreso(null), "/");
+  assert.equal(destinoTrasIngreso("//evil.com"), "/");
+  assert.equal(destinoTrasIngreso("https://evil.com"), "/");
+  assert.equal(destinoTrasIngreso("/\\evil.com"), "/");
 });
 
 /** Guardia de diseño de una ilustración de acceso: la página la monta, es decorativa y no trae hex. */

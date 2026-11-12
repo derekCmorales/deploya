@@ -25,6 +25,7 @@ Cómo pasar de una pantalla del canvas Deploya v4.1 a código en `apps/web`, a m
 
 | Pantalla | Ruta | Grupo | Dueño |
 |---|---|---|---|
+| 00 Inicio | `/` | raíz | Derek |
 | 01 Registro | `/registro` | `(auth)` | Eddy |
 | 02 Verifica tu correo | `/verificar` | `(auth)` | Eddy |
 | 03 Iniciar sesión | `/ingresar` | `(auth)` | Eddy |

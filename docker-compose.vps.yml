@@ -39,7 +39,8 @@ services:
       # Solo lectura: la API muestra hasta cuándo vale el certificado (12b).
       - traefik_acme:/acme:ro
     environment:
-      URL_WEB: https://${DOMINIO_BASE:?Define DOMINIO_BASE en .env.vps}
+      # Base de los enlaces de los correos y origen de CORS: HOST_WEB (app.<dominio> en la nube, ADR 0011) o la raíz.
+      URL_WEB: https://${HOST_WEB:-${DOMINIO_BASE:?Define DOMINIO_BASE en .env.vps}}
       # La API solo se alcanza por Traefik: `req.ip` sale de su X-Forwarded-For (límite de intentos, SP-17).
       PROXIES_DE_CONFIANZA: 1
       CLAVE_CIFRADO_VARIABLES: ${CLAVE_CIFRADO_VARIABLES:?Define CLAVE_CIFRADO_VARIABLES en .env.vps (32 bytes)}
@@ -64,7 +65,8 @@ services:
       CERT_RESOLVER: letsencrypt
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
 
-  # La web se publica en la raíz: la URL de la API y el dominio de las apps se hornean al construir.
+  # La web se publica en HOST_WEB: la URL de la API, la de la landing y el dominio de las apps se
+  # hornean al construir.
   web:
     <<: *produccion
     build:
@@ -72,6 +74,7 @@ services:
         NEXT_PUBLIC_API_URL: https://api.${DOMINIO_BASE:?Define DOMINIO_BASE en .env.vps}
         NEXT_PUBLIC_DOMINIO_APPS: ${DOMINIO_BASE}
         NEXT_PUBLIC_ESQUEMA_APPS: https
+        NEXT_PUBLIC_URL_LANDING: ${URL_LANDING:-}
     ports: !reset []
 
   traefik:

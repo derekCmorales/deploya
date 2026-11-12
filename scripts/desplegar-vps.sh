@@ -20,6 +20,8 @@ set -a
 . "./$ARCHIVO_ENTORNO"
 set +a
 : "${DOMINIO_BASE:?Define DOMINIO_BASE en $ARCHIVO_ENTORNO}"
+# Host de la web: app.<dominio> en la nube (la raíz es la landing, ADR 0011); sin HOST_WEB, la raíz.
+HOST_WEB="${HOST_WEB:-$DOMINIO_BASE}"
 
 COMPOSE=(docker compose --env-file "$ARCHIVO_ENTORNO" -f docker-compose.yml -f docker-compose.vps.yml)
 
@@ -28,8 +30,8 @@ git fetch origin "$RAMA"
 git checkout "$RAMA"
 git pull --ff-only origin "$RAMA"
 
-echo "==> Rutas de la plataforma para $DOMINIO_BASE"
-sed "s/__DOMINIO_BASE__/${DOMINIO_BASE}/g" infra/traefik/plataforma.vps.yml > "$GENERADO"
+echo "==> Rutas de la plataforma para $DOMINIO_BASE (web en $HOST_WEB)"
+sed -e "s/__HOST_WEB__/${HOST_WEB}/g" -e "s/__DOMINIO_BASE__/${DOMINIO_BASE}/g" infra/traefik/plataforma.vps.yml > "$GENERADO"
 
 echo "==> Construyendo y levantando"
 "${COMPOSE[@]}" up -d --build
@@ -41,7 +43,8 @@ echo "==> Esperando a la API"
 for _ in $(seq 1 40); do
   if "${COMPOSE[@]}" exec -T api node -e "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then
     echo "API en línea: https://api.${DOMINIO_BASE}/health"
-    echo "Web: https://${DOMINIO_BASE}"
+    echo "Web: https://${HOST_WEB}"
+    [ -n "${URL_LANDING:-}" ] && echo "Landing: ${URL_LANDING} (CloudFront)"
     exit 0
   fi
   sleep 3

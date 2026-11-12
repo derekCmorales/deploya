@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, FolderGit2, Gauge, LayoutTemplate, Server, ShieldCheck, UserRound } from "lucide-react";
+import { CreditCard, FolderGit2, Gauge, LayoutDashboard, Server, ShieldCheck, UserRound } from "lucide-react";
 
 import { NavPrincipal, type ItemNav } from "@/components/shell/nav-principal";
 import { useModoInstalacion } from "@/hooks/use-modo-instalacion";
@@ -15,10 +15,10 @@ export const RUTA_PLANES = "/planes";
  * (rutas objetivo en docs/diseno/guia-construccion.md).
  */
 export const NAV_PANEL: ItemNav[] = [
+  { href: "/", texto: "Inicio", icono: LayoutDashboard },
   { href: "/projects", texto: "Proyectos", icono: FolderGit2 },
   { href: "/suscripcion", texto: "Suscripción", icono: CreditCard, activoEn: [RUTA_PLANES, "/pagos"] },
   { href: "/cuenta", texto: "Cuenta", icono: UserRound },
-  { href: "/sistema", texto: "Sistema", icono: LayoutTemplate },
 ];
 
 /** Solo para el rol Administrador (25); la API lo vuelve a exigir con `RolGuard`. */

@@ -81,7 +81,8 @@ escribir_entorno() {
 
 generar_plataforma() {
   mkdir -p "$(dirname "$GENERADO")"
-  sed "s/__DOMINIO_BASE__/${DOMINIO_BASE}/g" \
+  # Autoalojado: la web en la raíz del dominio (sin landing).
+  sed -e "s/__HOST_WEB__/${DOMINIO_BASE}/g" -e "s/__DOMINIO_BASE__/${DOMINIO_BASE}/g" \
     "${RAIZ}/infra/traefik/plataforma.vps.yml" > "$GENERADO"
 }
 

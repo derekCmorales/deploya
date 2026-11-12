@@ -18,7 +18,7 @@ providers:
     directory: /traefik/dinamico
     watch: true
 
-# Un solo certificado comodín (deploya.app + *.deploya.app) por DNS-01: HTTP-01 emitiría uno por
+# Un solo certificado comodín (deploya.larasolutions.dev + *.deploya.larasolutions.dev) por DNS-01: HTTP-01 emitiría uno por
 # proyecto y chocaría con los límites de Let's Encrypt. El correo del ACME llega por entorno
 # (TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL) y el token del proveedor DNS también:
 # nada de eso se versiona. Si el DNS no es Cloudflare, cambia `provider` y la variable del token

@@ -50,14 +50,14 @@ flowchart TB
     subgraph EXTERNOS["Sistemas externos"]
         GIT["GitHub<br/>repositorios públicos"]
         DOCKER["Docker Engine<br/>nodo único (VPS)"]
-        DNS["DNS comodín<br/>*.deploya.app"]
+        DNS["DNS comodín<br/>*.deploya.larasolutions.dev"]
         CA["Let's Encrypt<br/>certificado comodín"]
         CORREO["Proveedor SMTP<br/>Mailpit en desarrollo"]
     end
 
     CLIENTE -->|"panel web, HTTPS"| DEPLOYA
     ADMIN -->|"panel web, HTTPS"| DEPLOYA
-    CLIENTE -.->|"visita su app<br/>https://proyecto.deploya.app"| DOCKER
+    CLIENTE -.->|"visita su app<br/>https://proyecto.deploya.larasolutions.dev"| DOCKER
 
     DEPLOYA -->|"lee archivos y clona"| GIT
     DEPLOYA -->|"construye y corre contenedores"| DOCKER
@@ -92,7 +92,7 @@ flowchart TB
         WORKER["worker<br/>misma imagen de la API<br/>M4 construye · M5 ejecuta · M6 publica"]
         REDIS[("redis<br/>cola BullMQ «despliegues»")]
         BD[("postgres<br/>Prisma · schema del núcleo")]
-        EDGE["traefik v3<br/>proveedor de archivo<br/>*.localhost / *.deploya.app"]
+        EDGE["traefik v3<br/>proveedor de archivo<br/>*.localhost / *.deploya.larasolutions.dev"]
         MAILPIT["mailpit<br/>SMTP de desarrollo · :8025"]
     end
 

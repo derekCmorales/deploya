@@ -1,15 +1,18 @@
-# Rutas de la plataforma en el VPS (web en la raíz, API en api.). Entran al mismo directorio que las de
+# Rutas de la plataforma en el servidor: web en __HOST_WEB__ y API en api.__DOMINIO_BASE__. En la nube
+# HOST_WEB es app.<dominio> y la raíz es la landing en CloudFront (ADR 0011); en autoalojado la web
+# sigue en la raíz. Entran al mismo directorio que las de
 # los proyectos (/traefik/dinamico) como archivo de solo lectura: el nombre empieza con «_» y un
 # subdominio de proyecto nunca lo hace. El dominio base se fija con DOMINIO_BASE en la plantilla
-# generada por scripts/desplegar-vps.sh (no se versiona el dominio real aquí).
+# generada por scripts/desplegar-vps.sh o el instalador (no se versiona el dominio real aquí).
 http:
   routers:
     plataforma-web:
-      rule: "Host(`__DOMINIO_BASE__`)"
+      rule: "Host(`__HOST_WEB__`)"
       service: plataforma-web
       entryPoints: [websecure]
       tls:
         certResolver: letsencrypt
+        # El comodín sigue incluyendo la raíz: DNS-01 no necesita que la raíz apunte a la EC2.
         domains:
           - main: "__DOMINIO_BASE__"
             sans: ["*.__DOMINIO_BASE__"]

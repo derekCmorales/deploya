@@ -11,7 +11,7 @@ flowchart TB
         WORKER["worker<br/>misma imagen de la API<br/>M4 construye · M5 ejecuta · M6 publica"]
         REDIS[("redis<br/>cola BullMQ «despliegues»")]
         BD[("postgres<br/>Prisma · schema del núcleo")]
-        EDGE["traefik v3<br/>proveedor de archivo<br/>*.localhost / *.deploya.app"]
+        EDGE["traefik v3<br/>proveedor de archivo<br/>*.localhost / *.deploya.larasolutions.dev"]
         MAILPIT["mailpit<br/>SMTP de desarrollo · :8025"]
     end
 

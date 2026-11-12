@@ -7,11 +7,11 @@
 
 ## Contexto
 
-Desde el Avance 3 el entorno de pruebas es un VPS con `https://<proyecto>.deploya.app`. Cada alta y cada baja de un proyecto crea o borra un subdominio, y en la demo se hacen decenas. Let's Encrypt limita cuántos certificados se emiten por dominio y por semana, y un desafío HTTP-01 solo prueba **un** nombre: con él, cada proyecto nuevo pediría su propio certificado y esperaría a que el desafío pase antes de responder.
+Desde el Avance 3 el entorno de pruebas es un VPS con `https://<proyecto>.deploya.larasolutions.dev`. Cada alta y cada baja de un proyecto crea o borra un subdominio, y en la demo se hacen decenas. Let's Encrypt limita cuántos certificados se emiten por dominio y por semana, y un desafío HTTP-01 solo prueba **un** nombre: con él, cada proyecto nuevo pediría su propio certificado y esperaría a que el desafío pase antes de responder.
 
 ## Decisión
 
-Usamos **un certificado comodín** (`deploya.app` + `*.deploya.app`) emitido por **DNS-01** con el resolvedor `letsencrypt` de Traefik. Traefik lo emite una vez, lo renueva solo (cada 60 días) y lo guarda en `acme.json`. Las rutas dinámicas que escribe `EnrutamientoTraefikArchivo` solo nombran el resolvedor y los dominios (`tls.certResolver`, `domains`); no hay un certificado por proyecto. El dominio, el esquema y el resolvedor son configuración (`DOMINIO_BASE`, `ESQUEMA_PUBLICO`, `CERT_RESOLVER`), de modo que en desarrollo la misma clase publica `http://<proyecto>.localhost` sin TLS. El token del proveedor DNS tiene permiso **solo sobre la zona** y vive en `.env.vps` del servidor; nunca en el repositorio.
+Usamos **un certificado comodín** (`deploya.larasolutions.dev` + `*.deploya.larasolutions.dev`) emitido por **DNS-01** con el resolvedor `letsencrypt` de Traefik. Traefik lo emite una vez, lo renueva solo (cada 60 días) y lo guarda en `acme.json`. Las rutas dinámicas que escribe `EnrutamientoTraefikArchivo` solo nombran el resolvedor y los dominios (`tls.certResolver`, `domains`); no hay un certificado por proyecto. El dominio, el esquema y el resolvedor son configuración (`DOMINIO_BASE`, `ESQUEMA_PUBLICO`, `CERT_RESOLVER`), de modo que en desarrollo la misma clase publica `http://<proyecto>.localhost` sin TLS. El token del proveedor DNS tiene permiso **solo sobre la zona** y vive en `.env.vps` del servidor; nunca en el repositorio.
 
 ## Alternativas consideradas
 

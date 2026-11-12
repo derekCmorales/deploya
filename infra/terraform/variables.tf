@@ -24,12 +24,12 @@ variable "entorno" {
 }
 
 variable "dominio" {
-  description = "Dominio base de la plataforma (DOMINIO_BASE de .env.vps). Solo se usa para el cron de salud y los siguientes pasos."
+  description = "Dominio base de la plataforma (DOMINIO_BASE de .env.vps): la landing va en la raíz (CloudFront), la app en app., la API en api. y las apps en *. (EC2)."
   type        = string
 
   validation {
     condition     = can(regex("^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}$", var.dominio))
-    error_message = "El dominio va en minúsculas y sin esquema ni barra final, p. ej. deploya.app."
+    error_message = "El dominio va en minúsculas y sin esquema ni barra final, p. ej. deploya.larasolutions.dev."
   }
 }
 

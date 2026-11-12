@@ -72,7 +72,9 @@ resource "aws_instance" "servidor" {
   }
 
   # Toda la plataforma (PostgreSQL incluido) vive en este disco; los respaldos diarios también
-  # (/var/backups/deploya): copiarlos fuera del servidor es parte de la operación (manual §3.5).
+  # (/var/backups/deploya), y los volúmenes de los recursos de datos (ADR 0012) en
+  # /var/lib/docker/volumes. El snapshot diario de DLM (respaldos.tf) es la copia fuera del servidor;
+  # copiar /var/backups/deploya a otro lado sigue siendo parte de la operación (manual §3.5).
   root_block_device {
     volume_type           = "gp3"
     volume_size           = var.tamano_disco_gb
@@ -80,7 +82,8 @@ resource "aws_instance" "servidor" {
     throughput            = 125  # MB/s, también incluido.
     encrypted             = true # Con la clave administrada por AWS (aws/ebs): sin costo de KMS.
     delete_on_termination = true
-    tags                  = { Name = "${local.nombre}-raiz" }
+    # La etiqueta Respaldo es la que busca la política de snapshots de respaldos.tf (DLM).
+    tags = { Name = "${local.nombre}-raiz", Respaldo = local.etiqueta_respaldo }
   }
 
   tags = { Name = local.nombre }

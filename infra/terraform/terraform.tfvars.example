@@ -8,9 +8,13 @@ correos_presupuesto = ["operaciones@example.com"]
 # region               = "us-east-2"
 # entorno              = "piloto"
 # tipo_instancia       = "m7i-flex.large"   # "t3.large" solo con plan de pago de AWS
+#                                           # piloto con Nimbo: "m7i-flex.xlarge" (16 GB, plan de pago; ADR 0012)
 # creditos_cpu         = "unlimited"   # solo familia t; "standard" frena la CPU en vez de cobrar ráfagas
-# tamano_disco_gb      = 70
-# tope_presupuesto_usd = 70          # 5 días ≈ 13 USD; un mes completo ≈ 79 USD (ADR 0009)
+# tamano_disco_gb      = 80          # incluye los volúmenes de los recursos de datos (ADR 0012)
+# tope_presupuesto_usd = 70          # 5 días ≈ 13 USD; un mes completo ≈ 82 USD; con xlarge ≈ 152 (docs/costos.md)
+# snapshots_diarios    = true        # snapshot diario del disco con DLM (respaldos.tf)
+# retencion_snapshots  = 7
+# hora_snapshot_utc    = "04:00"     # después del respaldo lógico de las 03:00
 # rama                 = "main"
 # proteccion_terminacion = true        # recomendado tras la demo
 

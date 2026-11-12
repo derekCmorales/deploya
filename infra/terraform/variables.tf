@@ -33,8 +33,21 @@ variable "dominio" {
   }
 }
 
+# Escalar a 16 GB para el piloto con Nimbo (ADR 0012, docs/costos.md):
+#   tipo_instancia = "m7i-flex.xlarge"   # 4 vCPU, 16 GB, 0.19152 USD/h ≈ 139.81 USD/mes, sin créditos de CPU
+#   tipo_instancia = "t3.xlarge"         # 4 vCPU, 16 GB, 0.1664 USD/h ≈ 121.47 USD/mes, con créditos (línea base 40 %)
+# El default se queda en m7i-flex.large a propósito:
+#   1. Ninguno de los dos xlarge es elegible en el plan gratuito de AWS: el apply falla con
+#      InvalidParameterCombination hasta pasar la cuenta a plan de pago (los créditos se conservan,
+#      pero al agotarse AWS cobra a la tarjeta en vez de cerrar la cuenta).
+#   2. Un mes completo en xlarge (≈ 152 USD con disco, IPv4 y snapshots) rompe el tope de 70 USD del
+#      presupuesto; el piloto de 5 días con Nimbo (≈ 25 USD) sí cabe. 70 USD alcanzan ≈ 14 días.
+# El cambio de tipo es en sitio: Terraform detiene la EC2, cambia el tipo y la arranca (≈ 2 min de
+# corte; la Elastic IP, el disco y los volúmenes de datos se conservan; los contenedores vuelven por
+# su RestartPolicy). Con 4 vCPU se puede subir TRABAJADOR_CONCURRENCIA a 2. Al terminar el piloto,
+# volver a m7i-flex.large de la misma forma. Si se mantiene xlarge, subir tope_presupuesto_usd a 160.
 variable "tipo_instancia" {
-  description = "Tipo de la EC2. m7i-flex.large (2 vCPU, 8 GB) es el único x86 con 8 GB que admite el plan gratuito de AWS; con plan de pago, t3.large también sirve. Ver ADR 0009."
+  description = "Tipo de la EC2. m7i-flex.large (2 vCPU, 8 GB) es el único x86 con 8 GB que admite el plan gratuito de AWS; con plan de pago, t3.large también sirve. Para el piloto con Nimbo, m7i-flex.xlarge o t3.xlarge (16 GB, solo plan de pago); ver el comentario de arriba, ADR 0009 y ADR 0012."
   type        = string
   default     = "m7i-flex.large"
 
@@ -55,10 +68,18 @@ variable "creditos_cpu" {
   }
 }
 
+# 80 GB (antes 70) por los recursos de datos de ADR 0012, que viven en /var/lib/docker/volumes del
+# mismo disco. Cuenta aproximada: sistema y logs 6 + plataforma (imágenes, su PostgreSQL y 7 respaldos)
+# 5 + caché de BuildKit (poda semanal) 10 + imágenes de proyectos (≈ 30 × 5 versiones × 150 MB) 22 +
+# Nimbo (4 × 5 versiones × 400 MB) 8 + imágenes de datos 1 + volúmenes de datos 5 ≈ 57 GB, y el resto
+# es colchón para que un volumen que crece no llene el disco antes del aviso (ADR 0012 mide y avisa,
+# no corta). +10 GB = +0.80 USD/mes. Subirlo en un servidor ya creado es en sitio (ModifyVolume, sin
+# recrear la EC2); después, en el servidor: `sudo growpart /dev/nvme0n1 1 && sudo resize2fs /dev/nvme0n1p1`
+# (docs/infra-vps.md §5). Un disco EBS no se puede achicar.
 variable "tamano_disco_gb" {
-  description = "Disco raíz gp3 cifrado: sistema, imágenes de Docker (plataforma, proyectos y 5 versiones guardadas por proyecto), PostgreSQL y respaldos."
+  description = "Disco raíz gp3 cifrado: sistema, imágenes de Docker (plataforma, proyectos y 5 versiones guardadas por proyecto), PostgreSQL de la plataforma, respaldos y los volúmenes de los recursos de datos (ADR 0012)."
   type        = number
-  default     = 70
+  default     = 80
 
   validation {
     condition     = var.tamano_disco_gb >= 30 && var.tamano_disco_gb <= 500
@@ -151,5 +172,33 @@ variable "correos_presupuesto" {
   validation {
     condition     = length(var.correos_presupuesto) > 0 && alltrue([for c in var.correos_presupuesto : can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", c))])
     error_message = "Indica al menos un correo válido para los avisos del presupuesto."
+  }
+}
+
+variable "snapshots_diarios" {
+  description = "Crea la política de Data Lifecycle Manager que toma un snapshot diario del disco raíz (base de la plataforma, respaldos y volúmenes de datos). Es el respaldo mínimo fuera del servidor (ADR 0012)."
+  type        = bool
+  default     = true
+}
+
+variable "retencion_snapshots" {
+  description = "Cuántos snapshots diarios guarda DLM (uno por día). Son incrementales: ≈ 2 USD/mes con 7 a 0.05 USD/GB-mes (docs/costos.md)."
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.retencion_snapshots >= 1 && var.retencion_snapshots <= 30 && floor(var.retencion_snapshots) == var.retencion_snapshots
+    error_message = "retencion_snapshots es un entero entre 1 y 30."
+  }
+}
+
+variable "hora_snapshot_utc" {
+  description = "Hora UTC (HH:MM) del snapshot diario. Por defecto 04:00: después del respaldo lógico de las 03:00 (cron del servidor), para que el snapshot ya lo incluya."
+  type        = string
+  default     = "04:00"
+
+  validation {
+    condition     = can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]$", var.hora_snapshot_utc))
+    error_message = "hora_snapshot_utc va en formato HH:MM de 24 horas, p. ej. 04:00."
   }
 }

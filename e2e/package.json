@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "node smoke.mjs",
-    "recorrido": "node recorrido.mjs"
+    "recorrido": "node recorrido.mjs",
+    "recorrido:datos": "node recorrido-datos.mjs"
   }
 }

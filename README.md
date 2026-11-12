@@ -94,7 +94,7 @@ Necesitas [Docker](https://docs.docker.com/get-docker/) con Compose v2, y para t
 |---|---|
 | `apps/api` | NestJS: `src/modules/<modulo>` (M1–M10), `src/adapters` (puertos y stubs), `prisma/` |
 | `apps/web` | Next.js: rutas por grupo `(auth)`, `(billing)`, `(admin)`, `(projects)`; design system en `src/components` |
-| `e2e` | Smoke del compose (CI) y, en la entrega final, el recorrido e2e |
+| `e2e` | Smoke del compose (CI) y, en la entrega final, el recorrido e2e; `pnpm --filter @deploya/e2e recorrido:datos` recorre los recursos de datos (compose arriba y dockerd) |
 | `openspec` | Un spec por módulo en `specs/`, changes en curso en `changes/` y cerrados en `changes/archive/` |
 | `docs` | Todo lo de la tabla de arriba |
 | `scripts` | Validación de Mermaid y sincronización de diagramas; despliegue del VPS (`desplegar-vps.sh`) y, con el autoalojado, `instalar.sh`, `respaldar.sh` y `actualizar.sh` |

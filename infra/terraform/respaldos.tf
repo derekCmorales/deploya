@@ -43,7 +43,8 @@ resource "aws_iam_role_policy_attachment" "dlm" {
 resource "aws_dlm_lifecycle_policy" "diario" {
   count = var.snapshots_diarios ? 1 : 0
 
-  description        = "${local.nombre}: snapshot diario del disco, ${var.retencion_snapshots} dias"
+  # DLM solo acepta letras, dígitos, espacios, guiones y guiones bajos en la descripción.
+  description        = "${local.nombre} snapshot diario del disco ${var.retencion_snapshots} dias"
   execution_role_arn = aws_iam_role.dlm[0].arn
   state              = "ENABLED"
 
@@ -52,7 +53,7 @@ resource "aws_dlm_lifecycle_policy" "diario" {
     target_tags    = { Respaldo = local.etiqueta_respaldo }
 
     schedule {
-      name      = "diario-${var.hora_snapshot_utc}-utc"
+      name      = "diario-${replace(var.hora_snapshot_utc, ":", "h")}-utc"
       copy_tags = true
 
       create_rule {

@@ -6,6 +6,7 @@ Se generan desde las fuentes del canvas; si cambias una pantalla en el diseño, 
 
 | # | Pantalla | Ruta | Dueño | Entrega |
 |---|---|---|---|---|
+| 00 | [Inicio](00-Inicio.md) | `/` | Derek | Piloto |
 | 01 | [Registro](01-Registro.md) | `/registro` | Eddy | A1 |
 | 01b | [Registro · estados](01b-Registro-estados.md) | `/registro` | Eddy | A1 |
 | 02 | [Verifica tu correo](02-Verificar.md) | `/verificar?token=` | Eddy | A1 (reenvío con cuenta atrás: A2) |

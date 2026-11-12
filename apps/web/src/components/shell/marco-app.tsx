@@ -9,6 +9,9 @@ import { MenuUsuario, RUTA_INGRESAR } from "@/components/shell/menu-usuario";
 import { NavPanel, RUTA_PLANES } from "@/components/shell/nav-panel";
 import { Button } from "@/components/ui/button";
 import { useModoInstalacion } from "@/hooks/use-modo-instalacion";
+import { useSesion } from "@/hooks/use-sesion";
+import { URL_LANDING } from "@/lib/api";
+import { destinoMarca } from "@/lib/inicio";
 import { hayCobro } from "@/lib/instalacion";
 
 /** Grupo de rutas de las pantallas de acceso (01–05): llevan el header público, sin navegación del panel. */
@@ -47,6 +50,9 @@ function EnlacePlanes() {
  */
 export function MarcoApp({ children }: { children: ReactNode }) {
   const [grupo, pantalla] = useSelectedLayoutSegments();
+  const { estado } = useSesion();
+  const { modo } = useModoInstalacion();
+  const inicio = destinoMarca(estado === "con-sesion", modo, URL_LANDING);
 
   if (grupo === GRUPO_ACCESO && pantalla === ASISTENTE_INSTALACION) {
     return <AppShell acciones={<DominioActual />}>{children}</AppShell>;
@@ -55,6 +61,7 @@ export function MarcoApp({ children }: { children: ReactNode }) {
   if (grupo === GRUPO_ACCESO) {
     return (
       <AppShell
+        inicio={inicio}
         acciones={<EnlacePlanes />}
         usuario={
           <Button asChild variant="outline" size="sm">
@@ -68,7 +75,7 @@ export function MarcoApp({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AppShell nav={<NavPanel />} usuario={<MenuUsuario />}>
+    <AppShell nav={<NavPanel />} inicio={inicio} usuario={<MenuUsuario />}>
       {children}
     </AppShell>
   );

@@ -92,7 +92,8 @@ export function resultadoIngreso(estado: number, cuerpo: Record<string, unknown>
   return { tipo: "error", mensaje: MENSAJE_INGRESO };
 }
 
-export const DESTINO_POR_DEFECTO = "/projects";
+/** Tras iniciar sesión, el panel de Inicio (00). */
+export const DESTINO_POR_DEFECTO = "/";
 
 /** A dónde volver tras iniciar sesión: solo rutas propias («/x»), nunca otro sitio («//x», «https://…»). */
 export function destinoTrasIngreso(siguiente: string | null | undefined): string {

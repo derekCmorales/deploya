@@ -1,5 +1,6 @@
 import { CircleCheck, GitCommitHorizontal, Hammer, Play, Plus, RotateCw, Rocket } from "lucide-react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import {
@@ -28,6 +29,7 @@ import { Meter } from "@/components/ui/meter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { catalogoVisible } from "@/lib/catalogo";
 import type { TiemposDespliegue } from "@/lib/tiempos";
 
 import { Interactivos } from "./interactivos";
@@ -157,6 +159,7 @@ const desplieguesEtapas: TiemposDespliegue[] = [
 const medianaEtapas = 155000;
 
 export default function SistemaPage() {
+  if (!catalogoVisible(process.env.NODE_ENV, process.env.NEXT_PUBLIC_MOSTRAR_CATALOGO)) notFound();
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-8 py-10">
       <header className="flex flex-col gap-3">

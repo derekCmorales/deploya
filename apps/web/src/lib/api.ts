@@ -10,6 +10,8 @@ export const URL_API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001
 /** Dominio y esquema de las apps publicadas (`<subdominio>.localhost` en desarrollo). */
 export const DOMINIO_APPS = process.env.NEXT_PUBLIC_DOMINIO_APPS ?? "localhost";
 export const ESQUEMA_APPS = process.env.NEXT_PUBLIC_ESQUEMA_APPS ?? "http";
+/** Landing pública (otro sitio): a dónde lleva la raíz de la app a quien no tiene sesión. Vacía = `/ingresar`. */
+export const URL_LANDING = process.env.NEXT_PUBLIC_URL_LANDING ?? "";
 
 const SIN_CONEXION = 0;
 const HTTP_NO_AUTENTICADO = 401;

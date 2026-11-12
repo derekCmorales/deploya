@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { RedirigeConSesion } from "@/components/shell/redirige-con-sesion";
+
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { FormularioRegistro } from "./formulario-registro";
@@ -17,6 +19,7 @@ export default function RegistroPage() {
     <main className="grid min-h-full grid-cols-1 lg:grid-cols-[640px_1fr]">
       <section className="grid place-items-center p-6 sm:p-12">
         <Suspense fallback={<Skeleton className="h-96 w-[400px] max-w-full rounded-xl" />}>
+          <RedirigeConSesion />
           <FormularioRegistro />
         </Suspense>
       </section>

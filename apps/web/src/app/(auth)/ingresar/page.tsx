@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { RedirigeConSesion } from "@/components/shell/redirige-con-sesion";
+
 import { FormularioIngreso } from "./formulario-ingreso";
 import { IlustracionIngreso } from "./ilustracion-ingreso";
 
@@ -12,6 +14,7 @@ export default function IngresarPage() {
     <main className="grid min-h-full grid-cols-1 lg:grid-cols-[640px_1fr]">
       <section className="grid place-items-center p-6 sm:p-12">
         <Suspense>
+          <RedirigeConSesion />
           <FormularioIngreso />
         </Suspense>
       </section>

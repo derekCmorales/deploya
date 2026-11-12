@@ -35,7 +35,16 @@ describe("SP-06 · PoliticaCuotas", () => {
       cpus: 1,
       memoriaMb: 1024,
       construccionesMes: Number.POSITIVE_INFINITY,
+      maxRecursosDatos: Number.POSITIVE_INFINITY,
+      discoDatosMb: 512,
     });
+  });
+
+  it("Autoalojado sin tope: maxRecursosDatos sin límite y el disco del plan Autoalojado", async () => {
+    const cuota = await new LimitesDeInstalacion(new RepositorioConfiguracionInstalacionMemoria()).cuotaDe(suscripcion());
+
+    expect(cuota.maxRecursosDatos).toBe(Number.POSITIVE_INFINITY);
+    expect(cuota.discoDatosMb).toBe(suscripcion().plan.discoDatosMb);
   });
 
   it("Sin límite de proyectos", async () => {

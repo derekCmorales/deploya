@@ -44,4 +44,32 @@ describe("OrquestacionService", () => {
     ).rejects.toThrow(SaludNoAlcanzada);
     expect(motor.contenedores.eliminados).toEqual(["contenedor-deploya-hola-deploya-1"]);
   });
+
+  it("Comando de inicio: comandoInicio llega partido en argumentos a ContenedorPuerto.crear", async () => {
+    const motor = motorDePrueba();
+    const proyecto = proyectoDemo({ comandoInicio: `node dist/worker-optimizer.main.js --cola "optimizar imagenes"` });
+
+    await motor.orquestacion.aprovisionar({ proyecto, numero: 1, imagen: "img", variables: {} });
+
+    expect(motor.contenedores.creados[0].comando).toEqual(["node", "dist/worker-optimizer.main.js", "--cola", "optimizar imagenes"]);
+  });
+
+  it("Sin comando de inicio el contenedor usa el CMD de la imagen", async () => {
+    const motor = motorDePrueba();
+
+    await motor.orquestacion.aprovisionar({ proyecto: proyectoDemo({ comandoInicio: null }), numero: 1, imagen: "img", variables: {} });
+
+    expect(motor.contenedores.creados[0].comando).toBeUndefined();
+  });
+
+  it("Comando de inicio en la reversión: el contenedor de la versión anterior arranca con el comando actual", async () => {
+    const motor = motorDePrueba();
+    const primero = await motor.desplegar();
+    await motor.desplegar();
+    motor.proyectos.agregar(proyectoDemo({ comandoInicio: "node dist/worker.js" }));
+
+    await motor.revertir(primero.artefactoId!);
+
+    expect(motor.contenedores.creados.at(-1)?.comando).toEqual(["node", "dist/worker.js"]);
+  });
 });

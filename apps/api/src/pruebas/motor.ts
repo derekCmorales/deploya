@@ -14,6 +14,7 @@ import { ContenedorStub } from "../adapters/stubs/contenedor.stub";
 import { CuotaPlanStub } from "../adapters/stubs/cuota-plan.stub";
 import { EnrutamientoStub } from "../adapters/stubs/enrutamiento.stub";
 import { VariablesEntornoStub } from "../adapters/stubs/variables-entorno.stub";
+import { RecursosDatosDespliegueStub } from "../adapters/stubs/recursos-datos-despliegue.stub";
 import { VerificacionEntornoStub } from "../adapters/stubs/verificacion-entorno.stub";
 import { ConstruccionService } from "../modules/construccion/construccion.service";
 import { AccionesContenedorService } from "../modules/orquestacion/acciones/acciones-contenedor.service";
@@ -69,6 +70,7 @@ export function motorDePrueba() {
   const cuota = new CuotaPlanStub();
   const recetas = new RecetaProyectoMemoria();
   const variables = new VariablesEntornoStub();
+  const recursosDatos = new RecursosDatosDespliegueStub();
   const orquestacion = new OrquestacionService(contenedores, salud, cuota);
   const enrutamientoServicio = new EnrutamientoService(enrutamiento);
   const colaOperacion = new ColaOperacionMemoria();
@@ -76,11 +78,11 @@ export function motorDePrueba() {
   const accionesContenedor = new AccionesContenedorService([
     new ReiniciarManejador(despliegues, proyectos, orquestacion, enrutamientoServicio, reloj),
     new DetenerManejador(despliegues, orquestacion, enrutamientoServicio, reloj),
-    new EliminarManejador(orquestacion, enrutamientoServicio),
+    new EliminarManejador(orquestacion, enrutamientoServicio, recursosDatos),
   ]);
   const recepcion = new PasoRecepcion(clonador, despliegues, new DeteccionStackService(recetasEnOrden()), recetas);
   const construccion = new PasoConstruccion(constructorImagen, artefactos, despliegues, reloj);
-  const ejecucion = new PasoEjecucion(orquestacion, despliegues, variables, artefactos);
+  const ejecucion = new PasoEjecucion(orquestacion, despliegues, variables, artefactos, recursosDatos);
   const enrutamientoPaso = new PasoEnrutamiento(enrutamientoServicio, despliegues);
   const operacion = new PasoOperacion(orquestacion, despliegues);
   const planes = {
@@ -112,7 +114,7 @@ export function motorDePrueba() {
   return {
     reloj, despliegues, artefactos, proyectos, cola, clonador, constructorImagen,
     contenedores, salud, enrutamiento, cuota, recetas, bloqueos, orquestacion, servicio, pipeline,
-    colaOperacion, accionesProyecto, accionesContenedor, variables, reversion, retencion, planes, cancelaciones, vigia, certificado, accionesDespliegue, detalleProyectos, resumen,
+    colaOperacion, accionesProyecto, accionesContenedor, variables, recursosDatos, reversion, retencion, planes, cancelaciones, vigia, certificado, accionesDespliegue, detalleProyectos, resumen,
     /** Crea un despliegue y lo pasa por el pipeline sin temporizador de bitácora. */
     async desplegar(proyectoId = "proyecto-1") {
       const creado = await servicio.crearDespliegue(proyectoId);

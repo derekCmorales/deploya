@@ -21,6 +21,9 @@ import { MuestreoMetricas } from "./metricas/muestreo-metricas";
 import { TareaMuestreoMetricas } from "./metricas/tarea-muestreo";
 import { CuotaPlanPuerto } from "./puertos/cuota-plan.puerto";
 import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
+import { DatosTrabajadorModule } from "../datos/datos-trabajador.module";
+import { RecursosDatosMotor } from "./adaptadores/recursos-datos.motor";
+import { RecursosDatosDespliegue } from "./puertos/recursos-datos-despliegue.puerto";
 
 /**
  * Lo que M5 aporta al proceso trabajador: los pasos del pipeline (límites del plan de M2),
@@ -28,7 +31,7 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
  * y el muestreo de CPU y memoria cada 60 s.
  */
 @Module({
-  imports: [SuscripcionesModule, EnrutamientoTrabajadorModule, VariablesModule],
+  imports: [SuscripcionesModule, EnrutamientoTrabajadorModule, VariablesModule, DatosTrabajadorModule],
   providers: [
     OrquestacionService,
     PasoEjecucion,
@@ -36,6 +39,7 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
     RetencionArtefactos,
     { provide: CuotaPlanPuerto, useClass: CuotaPlanSuscripciones },
     { provide: VariablesEntornoPuerto, useClass: VariablesEntornoProyecto },
+    { provide: RecursosDatosDespliegue, useClass: RecursosDatosMotor },
     ReiniciarManejador,
     DetenerManejador,
     EliminarManejador,
@@ -49,6 +53,6 @@ import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
     puerto(ColaMuestreoPuerto, { docker: (c) => new ColaMuestreoBullMq(c.redisUrl), stub: () => new ColaMuestreoMemoria() }),
     TareaMuestreoMetricas,
   ],
-  exports: [OrquestacionService, PasoEjecucion, PasoOperacion, RetencionArtefactos, AccionesContenedorService, MuestreoMetricas],
+  exports: [OrquestacionService, PasoEjecucion, PasoOperacion, RetencionArtefactos, AccionesContenedorService, MuestreoMetricas, DatosTrabajadorModule],
 })
 export class OrquestacionTrabajadorModule {}

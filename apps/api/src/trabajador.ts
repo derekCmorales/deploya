@@ -2,7 +2,8 @@ import "reflect-metadata";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { CONFIGURACION_MOTOR, type ConfiguracionMotor } from "./adapters/configuracion-motor";
-import { consumirDespliegues, consumirOperaciones } from "./adapters/reales/cola-bullmq";
+import { consumirDatos, consumirDespliegues, consumirOperaciones } from "./adapters/reales/cola-bullmq";
+import { MotorDatosService } from "./modules/datos/motor-datos.service";
 import { consumirBitacoras } from "./adapters/reales/salida-contenedor-bullmq";
 import { PipelineDespliegue } from "./modules/construccion/pipeline/pipeline-despliegue";
 import { AccionesContenedorService } from "./modules/orquestacion/acciones/acciones-contenedor.service";
@@ -26,9 +27,11 @@ async function iniciar(): Promise<void> {
   const operaciones = consumirOperaciones(configuracion.redisUrl, (accion) => acciones.ejecutar(accion));
   const contenedores = app.get(ContenedorPuerto);
   const bitacoras = consumirBitacoras(configuracion.redisUrl, (contenedorId, consulta) => contenedores.bitacora(contenedorId, consulta));
-  registro.log(`Consumiendo las colas de despliegues (concurrencia ${configuracion.trabajadorConcurrencia}), de operación y de bitácoras`);
+  const motorDatos = app.get(MotorDatosService);
+  const datos = consumirDatos(configuracion.redisUrl, (comando) => motorDatos.ejecutar(comando));
+  registro.log(`Consumiendo las colas de despliegues (concurrencia ${configuracion.trabajadorConcurrencia}), de operación, de datos y de bitácoras`);
   const detener = async () => {
-    await Promise.all([consumidor.close(), operaciones.close(), bitacoras.close()]);
+    await Promise.all([consumidor.close(), operaciones.close(), datos.close(), bitacoras.close()]);
     await app.close();
     process.exit(0);
   };

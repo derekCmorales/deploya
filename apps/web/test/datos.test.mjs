@@ -217,3 +217,9 @@ test("18 · la ficha de la pestaña Datos está en el design system", () => {
   assert.ok(existsSync(join(repo, "docs/diseno/pantallas/18-Proyecto-datos.md")));
   assert.match(readFileSync(join(repo, "docs/diseno/pantallas/README.md"), "utf8"), /18-Proyecto-datos\.md/);
 });
+
+test("18 · en autoalojado (maximo null) no hay tope de bases de datos", () => {
+  const libre = lista({ recursos: [POSTGRES], limite: { usados: 1, maximo: null } });
+  assert.equal(limiteAlcanzado(libre.limite), false);
+  assert.equal(textoLimite({ usados: 1, maximo: null }), "1 base de datos · sin límite");
+});

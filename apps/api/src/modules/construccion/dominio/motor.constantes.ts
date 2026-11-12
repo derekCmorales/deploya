@@ -1,5 +1,17 @@
 /** Tiempos y límites del motor. Cambiarlos aquí cambia el comportamiento en todas partes. */
-export const TIEMPO_MAXIMO_CONSTRUCCION_MS = 10 * 60 * 1000;
+const MS_POR_MINUTO = 60 * 1000;
+/** Por omisión de `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN` (feat/m5-recursos-datos: un monorepo con varias apps no cabe en 10). */
+export const MINUTOS_MAXIMOS_CONSTRUCCION_POR_OMISION = 20;
+export const TIEMPO_MAXIMO_CONSTRUCCION_MS = MINUTOS_MAXIMOS_CONSTRUCCION_POR_OMISION * MS_POR_MINUTO;
+/** Token de Nest con el tope de `docker build` en milisegundos, leído de la configuración del motor. */
+export const TIEMPO_MAXIMO_CONSTRUCCION = Symbol("TIEMPO_MAXIMO_CONSTRUCCION");
+
+/** Minutos de la configuración → milisegundos; un valor ausente, no numérico o ≤ 0 vuelve al de omisión. */
+export function tiempoMaximoConstruccionMs(minutos: string | undefined): number {
+  const valor = Number(minutos);
+  if (!minutos || !Number.isFinite(valor) || valor <= 0) return TIEMPO_MAXIMO_CONSTRUCCION_MS;
+  return Math.round(valor * MS_POR_MINUTO);
+}
 export const TIEMPO_MAXIMO_SALUD_MS = 60 * 1000;
 export const INTERVALO_SALUD_MS = 1000;
 export const LINEAS_POR_PAGINA = 500;

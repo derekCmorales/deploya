@@ -20,6 +20,16 @@ describe("planesSemilla", () => {
     ]);
   });
 
+  it("Límites de recursos de datos por plan: 1/3/10/25 recursos y 512/2048/10240/25600 MB de disco", () => {
+    const tabla = planesSemilla().map((p) => [p.codigo, p.maxRecursosDatos, p.discoDatosMb]);
+    expect(tabla).toEqual([
+      ["sandbox", 1, 512],
+      ["starter", 3, 2048],
+      ["pro", 10, 10240],
+      ["business", 25, 25600],
+    ]);
+  });
+
   it("el precio de 365 días de los planes de pago es 10 × el de 30", () => {
     for (const plan of planesSemilla().filter((p) => p.precio30 > 0)) {
       expect(plan.precio365).toBe(plan.precio30 * 10);

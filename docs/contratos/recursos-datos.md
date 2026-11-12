@@ -87,3 +87,19 @@ interface VistaRecursoDatos {
 - Sin ruta pública salvo `s3`. Sin puertos publicados en el host.
 - Los contenedores de datos son imágenes fijas de Deploya: llevan `CapDrop: ALL` más solo `CHOWN`, `SETUID`, `SETGID`, `FOWNER`, `DAC_OVERRIDE` (los que exige el arranque de Postgres), `no-new-privileges`, límite de memoria y `RestartPolicy unless-stopped`. El código del usuario sigue sin capacidades.
 - La bitácora del despliegue dice qué recursos se conectaron y cuántas variables se inyectaron, nunca sus valores.
+
+## Desviaciones
+
+Lo que la implementación del motor (`apps/api`, change `feat-m5-recursos-datos`) fija donde el contrato no decía o no podía cumplirse al pie de la letra. Nada cambia nombres ni formas de arriba.
+
+- **`limite.maximo` en autoalojado es `null`.** El plan de una instalación autoalojada no tiene tope de recursos (`Infinity` en la API, que JSON serializa como `null`), igual que `maximo` de `GET /proyectos`. La web debe leer `null` como «sin límite» (ojo: en JS `n >= null` es `true`).
+- **`tiposDisponibles`** son los tipos que el proyecto **todavía no tiene conectados** (propios o compartidos), en el orden `postgres`, `redis`, `s3`. Llegar al tope del plan no los quita: eso lo dice `limite`.
+- **Códigos de los demás errores** (`{ codigo, mensaje }`): `404 PROYECTO_NO_ENCONTRADO` (proyecto ajeno o inexistente, también el destino de compartir), `404 RECURSO_NO_ENCONTRADO` (recurso que no está conectado a `:id`), `400 CONFIRMACION_NO_COINCIDE` y `400 DATOS_INVALIDOS` (tipo desconocido o cuerpo sin `proyectoId`).
+- **Compartir** solo se hace desde el proyecto **dueño** (desde uno compartido → 404). Compartir otra vez con el mismo proyecto es idempotente (200 con la vista). Compartir con el propio dueño → 409 `TIPO_YA_CONECTADO`. **Dejar de compartir** se puede desde el dueño o desde el propio proyecto compartido.
+- **Subdominios `-s3` reservados.** Un proyecto **nuevo** cuyo subdominio termina en `-s3` se rechaza con `409 subdominio-en-uso` (M3), para no quitarle la ruta pública al S3 de otro proyecto. Si el subdominio del dueño pasa de 60 caracteres, `<subdominio>-s3` no cabe en una etiqueta DNS: el S3 queda en `error` con el detalle del enrutador.
+- **Formatos de las variables:** `DATABASE_URL = postgresql://deploya:<contraseña>@<host>:5432/app`, `REDIS_URL = redis://default:<contraseña>@<host>:6379`, `S3_ENDPOINT = http://<host>:9000`, `S3_ACCESS_KEY = deploya` y `S3_SECRET_KEY` = la contraseña. `S3_PUBLIC_ENDPOINT` usa `ESQUEMA_PUBLICO` y `DOMINIO_BASE` (`http://<subdominio>-s3.localhost` en desarrollo). Un recurso en `error` no se inyecta.
+- **Postgres** sale con la extensión `vector` ya creada en la base `app` (`CREATE EXTENSION IF NOT EXISTS vector` al crearlo); el usuario `deploya` es superusuario de su instancia, así que una migración que la cree igual no falla.
+- **Capacidades:** las del contrato bastan. Verificado con Docker real (29.x): `pgvector/pgvector:pg17` inicializa y baja a `postgres`, `redis:7-alpine` y `pgsty/silo` arrancan con `CapDrop ALL` + `CHOWN, SETUID, SETGID, FOWNER, DAC_OVERRIDE` y `no-new-privileges`.
+- **S3:** `pgsty/silo` sin etiqueta (= `latest`, como dice la tabla); arranca con `server /data --address :9000` y `MINIO_BROWSER=off` (sin consola web). El bucket y el versionado se crean con `mc`, que viene en la imagen.
+- **Comando de inicio inválido** (más de 512 caracteres, comilla sin cerrar o no texto) → `400 comando-invalido` en `PATCH /proyectos/:id`. Vacío o `null` vuelve al `CMD` de la imagen; la vista lo devuelve como `null`.
+- **Disco:** el trabajador mide con `du -sm` cada 5 minutos (y al terminar de crear). Un recurso detenido conserva su última medición.

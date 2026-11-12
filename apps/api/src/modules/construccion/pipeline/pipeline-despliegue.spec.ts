@@ -14,7 +14,7 @@ describe("PipelineDespliegue (plan construcción, puertos en stub)", () => {
     ]);
     expect(despliegue.etapas.every((e) => e.estado === "completada")).toBe(true);
     expect(motor.constructorImagen.solicitudes[0]).toEqual(
-      expect.objectContaining({ etiqueta: "deploya/hola-deploya:1", rutaDockerfile: "Dockerfile", tiempoMaximoMs: 600_000 }),
+      expect.objectContaining({ etiqueta: "deploya/hola-deploya:1", rutaDockerfile: "Dockerfile", tiempoMaximoMs: 1_200_000 }),
     );
   });
 

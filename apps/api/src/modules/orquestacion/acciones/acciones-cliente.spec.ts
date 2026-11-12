@@ -1,3 +1,4 @@
+import type { DatosService } from "../../datos/datos.service";
 import { motorDePrueba, proyectoDemo } from "../../../pruebas/motor";
 import { ConstruccionFallida } from "../../construccion/dominio/errores";
 import { ContenedoresClienteM5 } from "../adaptadores/contenedores-cliente.m5";
@@ -90,10 +91,13 @@ describe("Contenedores de un cliente (M2-05 · tarea 3, M9-02)", () => {
   it("El adaptador ContenedoresClienteM5 delega en la Facade de M5", async () => {
     const motor = motorConDosProyectos();
     await motor.desplegar("proyecto-1");
-    const puerto = new ContenedoresClienteM5(motor.accionesProyecto);
+    const datos = { detenerTodosDe: jest.fn().mockResolvedValue({ encolados: 2 }), reanudarTodosDe: jest.fn().mockResolvedValue({ encolados: 2 }) };
+    const puerto = new ContenedoresClienteM5(motor.accionesProyecto, datos as unknown as DatosService);
 
-    expect(await puerto.detenerTodos("usuario-1")).toEqual({ encolados: 1 });
+    expect(await puerto.detenerTodos("usuario-1")).toEqual({ encolados: 3 });
     await motor.accionesContenedor.ejecutar(motor.colaOperacion.acciones[0]);
-    expect(await puerto.reanudarTodos("usuario-1")).toEqual({ encolados: 1 });
+    expect(await puerto.reanudarTodos("usuario-1")).toEqual({ encolados: 3 });
+    expect(datos.detenerTodosDe).toHaveBeenCalledWith("usuario-1");
+    expect(datos.reanudarTodosDe).toHaveBeenCalledWith("usuario-1");
   });
 });

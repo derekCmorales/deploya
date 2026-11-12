@@ -4,6 +4,9 @@ import { COLA_DESPLIEGUES, COLA_OPERACION } from "../../modules/construccion/dom
 import { ColaConstruccionPuerto } from "../../modules/construccion/puertos/cola-construccion.puerto";
 import type { AccionContenedor } from "../../modules/orquestacion/dominio/accion-contenedor";
 import { ColaOperacionPuerto } from "../../modules/orquestacion/puertos/cola-operacion.puerto";
+import { COLA_DATOS } from "../../modules/datos/datos.constantes";
+import type { ComandoDatos } from "../../modules/datos/dominio/comando-datos";
+import { ColaDatosPuerto } from "../../modules/datos/puertos/cola-datos.puerto";
 
 const TRABAJOS_CONSERVADOS = 1000;
 const INTENTOS_OPERACION = 3;
@@ -103,6 +106,42 @@ export class ColaOperacionBullMq extends ColaOperacionPuerto {
 /** Consumidor de la cola `operacion`; concurrencia 1 para no reiniciar y detener a la vez. */
 export function consumirOperaciones(redisUrl: string, manejador: (accion: AccionContenedor) => Promise<void>): Worker<AccionContenedor> {
   return new Worker<AccionContenedor>(COLA_OPERACION, (trabajo) => manejador(trabajo.data), {
+    connection: conexionRedis(redisUrl),
+    concurrency: 1,
+  });
+}
+
+/**
+ * Productor de la cola `datos` (feat/m5-recursos-datos). Sin `jobId` fijo: el orden importa
+ * (detener, iniciar, detener) y el consumidor va de uno en uno. Crear no se reintenta: el
+ * trabajador deja el recurso en `error` con el detalle; lo demás reintenta como una acción.
+ */
+export class ColaDatosBullMq extends ColaDatosPuerto {
+  private readonly cola: Queue<ComandoDatos>;
+
+  constructor(redisUrl: string) {
+    super();
+    this.cola = new Queue<ComandoDatos>(COLA_DATOS, { connection: conexionRedis(redisUrl) });
+  }
+
+  async encolar(comando: ComandoDatos): Promise<void> {
+    const reintenta = comando.accion !== "crear";
+    await this.cola.add(comando.accion, comando, {
+      attempts: reintenta ? INTENTOS_OPERACION : 1,
+      backoff: { type: "exponential", delay: ESPERA_INICIAL_OPERACION_MS },
+      removeOnComplete: true,
+      removeOnFail: TRABAJOS_CONSERVADOS,
+    });
+  }
+
+  async cerrar(): Promise<void> {
+    await this.cola.close();
+  }
+}
+
+/** Consumidor de la cola `datos`; concurrencia 1 para que crear, compartir y eliminar no se crucen. */
+export function consumirDatos(redisUrl: string, manejador: (comando: ComandoDatos) => Promise<void>): Worker<ComandoDatos> {
+  return new Worker<ComandoDatos>(COLA_DATOS, (trabajo) => manejador(trabajo.data), {
     connection: conexionRedis(redisUrl),
     concurrency: 1,
   });

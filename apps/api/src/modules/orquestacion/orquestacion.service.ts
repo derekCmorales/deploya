@@ -7,11 +7,18 @@ import {
   RUTA_SALUD,
   TIEMPO_MAXIMO_SALUD_MS,
 } from "../construccion/dominio/motor.constantes";
-import { ContenedorPuerto, type ContenedorCreado } from "./puertos/contenedor.puerto";
+import { argumentosDeComando } from "../../compartido/argumentos-comando";
+import { ContenedorPuerto, type ContenedorCreado, type EspecContenedor } from "./puertos/contenedor.puerto";
 import { CuotaPlanPuerto, type RecursosPlan } from "./puertos/cuota-plan.puerto";
 import { VerificacionEntornoPuerto, type ResultadoSalud } from "./puertos/verificacion-entorno.puerto";
 
 const MILISEGUNDOS_POR_SEGUNDO = 1000;
+
+/** Sin `comandoInicio` el contenedor usa el `CMD` de la imagen; con él, sus argumentos (despliegue, reversión). */
+function comandoDe(proyecto: ProyectoDesplegable): Pick<EspecContenedor, "comando"> {
+  const texto = proyecto.comandoInicio?.trim();
+  return texto ? { comando: argumentosDeComando(texto) } : {};
+}
 
 export interface SolicitudAprovisionamiento {
   proyecto: ProyectoDesplegable;
@@ -46,6 +53,7 @@ export class OrquestacionService {
       cpus: recursos.cpus,
       memoriaMb: recursos.memoriaMb,
       variables,
+      ...comandoDe(proyecto),
     });
     const salud = await this.salud.saludable({
       host: contenedor.host,

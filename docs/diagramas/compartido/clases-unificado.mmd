@@ -293,6 +293,8 @@ classDiagram
         +cpus Decimal
         +memoriaMb Integer
         +construccionesMes Integer
+        +maxRecursosDatos Integer
+        +discoDatosMb Integer
     }
     class RepositorioPlanes {
         <<abstract>>
@@ -574,6 +576,7 @@ classDiagram
         +rama String
         +rutaDockerfile String
         +puertoInterno Integer
+        +comandoInicio String
         +de(cuerpo) CambiosProyecto
     }
     class ProveedorFuente {
@@ -806,6 +809,7 @@ classDiagram
     class ContenedoresClienteM5 {
         <<Adapter>>
         -acciones AccionesProyectoService
+        -datos DatosService
     }
     class AccionContenedor {
         <<Command>>
@@ -837,6 +841,16 @@ classDiagram
         -orquestacion OrquestacionService
         -variablesEntorno VariablesEntornoPuerto
         -artefactos RepositorioArtefactos
+        -datos RecursosDatosDespliegue
+    }
+    class RecursosDatosDespliegue {
+        <<abstract>>
+        +paraDespliegue(proyecto) InyeccionDespliegue
+        +liberarProyecto(subdominio) void
+    }
+    class RecursosDatosMotor {
+        <<Adapter>>
+        -motor MotorDatosService
     }
     class VariablesEntornoPuerto {
         <<abstract>>
@@ -861,6 +875,143 @@ classDiagram
         +nanoCpus Integer
         +memoriaBytes Integer
         +desde(cuota) LimitesContenedor
+    }
+
+    %% ───────── M5 Recursos de datos (Derek · feat/m5-recursos-datos) ─────────
+    class DatosService {
+        <<Facade>>
+        -proyectos ProyectosLecturaPuerto
+        -repositorio RepositorioRecursosDatos
+        -cola ColaDatosPuerto
+        -cuota CuotaDatosPuerto
+        -secretos GeneradorSecretos
+        -cifrador CifradorVariables
+        -conexiones ConexionesDatos
+        +listar(usuarioId, proyectoId) ListaRecursosDatos
+        +crear(usuarioId, proyectoId, tipo) VistaRecursoDatos
+        +conexion(usuarioId, proyectoId, recursoId) ConexionRecursoDatos
+        +compartir(usuarioId, proyectoId, recursoId, destinoId) VistaRecursoDatos
+        +dejarDeCompartir(usuarioId, proyectoId, recursoId, destinoId) void
+        +eliminar(usuarioId, proyectoId, recursoId, confirmacion) void
+        +detenerTodosDe(usuarioId) ResultadoMasivoDatos
+        +reanudarTodosDe(usuarioId) ResultadoMasivoDatos
+    }
+    class MotorDatosService {
+        <<solo trabajador>>
+        -repositorio RepositorioRecursosDatos
+        -recursos RecursosDatosPuerto
+        -conexiones ConexionesDatos
+        -enrutamiento EnrutamientoService
+        +ejecutar(comando ComandoDatos) void
+        +paraDespliegue(proyecto) InyeccionDatos
+        +liberarProyecto(subdominio) void
+        +medirDiscos() Integer
+    }
+    class ConexionesDatos {
+        -cifrador CifradorVariables
+        +variablesDe(recurso, subdominioDueno) VariablesRecurso
+    }
+    class TipoRecursoDatos {
+        <<abstract · Strategy>>
+        +tipo TipoRecurso
+        +imagen String
+        +puerto Integer
+        +memoriaMb Integer
+        +rutaDatos String
+        +publico Boolean
+        +entorno(contrasena) Map~String, String~
+        +comando(contrasena) String[]
+        +preparacion(contrasena) ComandoPreparacion[]
+        +variables(conexion) VariablesRecurso
+    }
+    class PostgresRecurso
+    class RedisRecurso
+    class S3Recurso
+    class PoliticaRecursosDatos {
+        <<Specification pura>>
+        +verificarAlta(situacion) void
+        +verificarTipoLibre(tipos, tipo) void
+    }
+    class ComandoDatos {
+        <<Command>>
+        +accion crear|eliminar|detener|iniciar|conectar|desconectar
+        +recursoId String
+        +tipo TipoRecurso
+        +subdominioDueno String
+    }
+    class RepositorioRecursosDatos {
+        <<abstract · Repository>>
+        +crear(nuevo) RecursoDatos
+        +porId(id) RecursoDatos
+        +conectadosA(proyectoId) RecursoDatos[]
+        +deDuenos(proyectoIds) RecursoDatos[]
+        +disponibles() RecursoDatos[]
+        +compartir(recursoId, proyectoId) void
+        +dejarDeCompartir(recursoId, proyectoId) void
+        +cambiarEstado(id, estado, detalle) void
+        +registrarUso(id, usoDiscoMb, medidoEn) void
+        +eliminar(id) void
+    }
+    class RecursosDatosPuerto {
+        <<abstract>>
+        +crear(espec EspecRecursoDatos) void
+        +preparar(contenedor, comandos) void
+        +conectar(contenedor, red) void
+        +desconectar(contenedor, red) void
+        +iniciar(contenedor) void
+        +detener(contenedor) void
+        +eliminar(contenedor, volumen) void
+        +liberarProyecto(subdominio, red) void
+        +medirUsoMb(contenedor, ruta) Integer
+    }
+    class ColaDatosPuerto {
+        <<abstract>>
+        +encolar(comando ComandoDatos) void
+    }
+    class CuotaDatosPuerto {
+        <<abstract>>
+        +deUsuario(usuarioId) CuotaDatos
+    }
+    class GeneradorSecretos {
+        <<abstract>>
+        +contrasena(largo) String
+    }
+    class ColaMedicionDiscoPuerto {
+        <<abstract>>
+        +iniciar(manejador) void
+        +cerrar() void
+    }
+    class RecursosDatosDocker
+    class RecursosDatosStub
+    class RepositorioRecursosDatosPrisma
+    class RepositorioRecursosDatosMemoria
+    class ColaDatosBullMq
+    class ColaDatosMemoria
+    class CuotaDatosSuscripciones
+    class GeneradorSecretosCrypto
+    class RecursoDatos {
+        +id String
+        +proyectoId String
+        +tipo TipoRecurso
+        +estado EstadoRecursoDatos
+        +contenedor String
+        +volumen String
+        +contrasenaCifrada String
+        +usoDiscoMb Integer
+        +compartidoCon String[]
+    }
+    class TipoRecurso {
+        <<enumeration>>
+        postgres
+        redis
+        s3
+    }
+    class EstadoRecursoDatos {
+        <<enumeration>>
+        creando
+        disponible
+        detenido
+        error
     }
 
     %% ───────── M6 Enrutamiento (Derek) ─────────
@@ -945,6 +1096,16 @@ classDiagram
         +deProyecto(proyectoId) List~Artefacto~
         +disponiblesDe(proyectoId) List~Artefacto~
         +marcarNoDisponible(id) void
+    }
+    class EspecContenedor {
+        <<valor>>
+        +nombre String
+        +imagen String
+        +red String
+        +cpus Decimal
+        +memoriaMb Integer
+        +variables Map~String, String~
+        +comando String[]
     }
     class ContenedorPuerto {
         <<abstract>>
@@ -1434,6 +1595,38 @@ classDiagram
     DetenerManejador --> EnrutamientoService
     EliminarManejador --> OrquestacionService
     EliminarManejador --> EnrutamientoService
+    EliminarManejador --> RecursosDatosDespliegue : liberarProyecto
+    PasoEjecucion --> RecursosDatosDespliegue : paraDespliegue
+    RecursosDatosDespliegue <|-- RecursosDatosMotor
+    RecursosDatosMotor --> MotorDatosService
+    ContenedoresClienteM5 --> DatosService : detenerTodosDe, reanudarTodosDe
+    ContenedorPuerto ..> EspecContenedor
+    DatosService --> RepositorioRecursosDatos
+    DatosService --> ColaDatosPuerto
+    DatosService --> CuotaDatosPuerto
+    DatosService --> GeneradorSecretos
+    DatosService --> ConexionesDatos
+    DatosService ..> PoliticaRecursosDatos
+    MotorDatosService --> RepositorioRecursosDatos
+    MotorDatosService --> RecursosDatosPuerto
+    MotorDatosService --> ConexionesDatos
+    MotorDatosService --> EnrutamientoService : ruta <subdominio>-s3
+    MotorDatosService ..> ComandoDatos
+    MotorDatosService ..> TipoRecursoDatos
+    TipoRecursoDatos <|-- PostgresRecurso
+    TipoRecursoDatos <|-- RedisRecurso
+    TipoRecursoDatos <|-- S3Recurso
+    RecursosDatosPuerto <|-- RecursosDatosDocker
+    RecursosDatosPuerto <|-- RecursosDatosStub
+    RepositorioRecursosDatos <|-- RepositorioRecursosDatosPrisma
+    RepositorioRecursosDatos <|-- RepositorioRecursosDatosMemoria
+    ColaDatosPuerto <|-- ColaDatosBullMq
+    ColaDatosPuerto <|-- ColaDatosMemoria
+    CuotaDatosPuerto <|-- CuotaDatosSuscripciones
+    GeneradorSecretos <|-- GeneradorSecretosCrypto
+    ColaMedicionDiscoPuerto ..> MotorDatosService : medirDiscos cada 5 min
+    RecursoDatos --> TipoRecurso
+    RecursoDatos --> EstadoRecursoDatos
     VerificacionEntornoPuerto <|-- VerificacionHttp
     EnrutamientoPuerto <|-- EnrutamientoTraefikArchivo
     EnrutamientoTraefikArchivo --> ConfiguracionEnrutamiento

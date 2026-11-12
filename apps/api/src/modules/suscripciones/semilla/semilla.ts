@@ -13,6 +13,8 @@ export interface PlanSemilla {
   cpus: number;
   memoriaMb: number;
   construccionesMes: number;
+  maxRecursosDatos: number;
+  discoDatosMb: number;
   orden: number;
 }
 
@@ -101,6 +103,8 @@ const PLAN_AUTOALOJADO: PlanSemilla = {
   cpus: 0,
   memoriaMb: 0,
   construccionesMes: 0,
+  maxRecursosDatos: 0,
+  discoDatosMb: 25_600,
   orden: 1,
 };
 
@@ -122,6 +126,8 @@ function planesNube(): PlanSemilla[] {
       cpus: 0.25,
       memoriaMb: 256,
       construccionesMes: 30,
+      maxRecursosDatos: 1,
+      discoDatosMb: 512,
       orden: 1,
     },
     {
@@ -134,6 +140,8 @@ function planesNube(): PlanSemilla[] {
       cpus: 0.5,
       memoriaMb: 512,
       construccionesMes: 150,
+      maxRecursosDatos: 3,
+      discoDatosMb: 2_048,
       orden: 2,
     },
     {
@@ -146,6 +154,8 @@ function planesNube(): PlanSemilla[] {
       cpus: 1,
       memoriaMb: 1024,
       construccionesMes: 500,
+      maxRecursosDatos: 10,
+      discoDatosMb: 10_240,
       orden: 3,
     },
     {
@@ -158,6 +168,8 @@ function planesNube(): PlanSemilla[] {
       cpus: 2,
       memoriaMb: 2048,
       construccionesMes: 2000,
+      maxRecursosDatos: 25,
+      discoDatosMb: 25_600,
       orden: 4,
     },
   ];

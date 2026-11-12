@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import { Reloj } from "../../../compartido/reloj";
-import { etiquetaImagen, TIEMPO_MAXIMO_CONSTRUCCION_MS } from "../dominio/motor.constantes";
+import { etiquetaImagen, TIEMPO_MAXIMO_CONSTRUCCION, TIEMPO_MAXIMO_CONSTRUCCION_MS } from "../dominio/motor.constantes";
 import { ConstructorImagenPuerto } from "../puertos/constructor-imagen.puerto";
 import { RepositorioArtefactos } from "../puertos/repositorio-artefactos.puerto";
 import { RepositorioDespliegues } from "../puertos/repositorio-despliegues.puerto";
@@ -22,6 +22,8 @@ export class PasoConstruccion extends PasoPipeline {
     private readonly artefactos: RepositorioArtefactos,
     private readonly despliegues: RepositorioDespliegues,
     private readonly reloj: Reloj,
+    /** `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN` (20 por omisión). */
+    @Optional() @Inject(TIEMPO_MAXIMO_CONSTRUCCION) private readonly tiempoMaximoMs: number = TIEMPO_MAXIMO_CONSTRUCCION_MS,
   ) {
     super();
   }
@@ -33,7 +35,7 @@ export class PasoConstruccion extends PasoPipeline {
     const etiqueta = etiquetaImagen(proyecto.subdominio, despliegue.numero);
     bitacora.escribir(this.etapa, `docker build -f ${rutaDockerfile} -t ${etiqueta} .`);
     const imagen = await this.constructorImagen.construir(
-      { directorio, rutaDockerfile, etiqueta, tiempoMaximoMs: TIEMPO_MAXIMO_CONSTRUCCION_MS },
+      { directorio, rutaDockerfile, etiqueta, tiempoMaximoMs: this.tiempoMaximoMs },
       (texto) => bitacora.escribir(this.etapa, texto),
       contexto.senal,
     );

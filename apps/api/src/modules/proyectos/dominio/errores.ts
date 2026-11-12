@@ -28,6 +28,11 @@ export class DatosAltaInvalidos extends ErrorProyectos {
   readonly codigo = "datos-invalidos";
 }
 
+/** `comandoInicio` de más de 512 caracteres o con una comilla sin cerrar (feat/m5-recursos-datos). */
+export class ComandoInicioInvalido extends ErrorProyectos {
+  readonly codigo = "comando-invalido";
+}
+
 export class RepositorioNoAccesible extends ErrorProyectos {
   readonly codigo = "repositorio-no-accesible";
 

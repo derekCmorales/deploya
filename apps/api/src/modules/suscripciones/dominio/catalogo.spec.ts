@@ -11,7 +11,7 @@ describe("catalogoDe", () => {
   it("no expone id, orden ni activo", () => {
     const [plan] = catalogoDe(planesDePrueba());
     expect(Object.keys(plan).sort()).toEqual(
-      ["codigo", "construccionesMes", "cpus", "descripcion", "maxProyectos", "memoriaMb", "nombre", "precio30", "precio365"].sort(),
+      ["codigo", "construccionesMes", "cpus", "descripcion", "discoDatosMb", "maxProyectos", "maxRecursosDatos", "memoriaMb", "nombre", "precio30", "precio365"].sort(),
     );
   });
 });
@@ -39,6 +39,8 @@ describe("cuotaDeSuscripcion", () => {
       cpus: 1,
       memoriaMb: 1024,
       construccionesMes: 500,
+      maxRecursosDatos: 10,
+      discoDatosMb: 10_240,
     });
   });
 });

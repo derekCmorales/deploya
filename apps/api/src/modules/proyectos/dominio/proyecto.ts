@@ -8,6 +8,8 @@ export interface Proyecto {
   rama: string;
   rutaDockerfile: string;
   puertoInterno: number;
+  /** Sobrescribe el `CMD` de la imagen (feat/m5-recursos-datos); `null` o ausente = el de la imagen. */
+  comandoInicio?: string | null;
   creado: Date;
 }
 

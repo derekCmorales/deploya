@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { APP_FILTER } from "@nestjs/core";
+import { DatosModule } from "../datos/datos.module";
 import { IdentidadModule } from "../identidad/identidad.module";
 import { SuscripcionesModule } from "../suscripciones/suscripciones.module";
 import { AccionesProyectoService } from "./acciones/acciones-proyecto.service";
@@ -17,10 +18,10 @@ import { RechazosOrquestacionFilter } from "./rechazos-orquestacion.filter";
 /**
  * M5 en el proceso API: exporta `BloqueosService` (M4 y M3 lo llaman antes de construir) y
  * `AccionesProyectoService` (M3 pide borrar los recursos al eliminar) y `ContenedoresClientePuerto`
- * (M2 y M9 detienen o reanudan los contenedores de un cliente), `CuotaPlanPuerto` (M7 lee el plan del resumen) y sirve la reversión (M5-04); traduce sus rechazos a 409.
+ * (M2 y M9 detienen o reanudan los contenedores y los recursos de datos de un cliente), `CuotaPlanPuerto` (M7 lee el plan del resumen) y sirve la reversión (M5-04); traduce sus rechazos a 409.
  */
 @Module({
-  imports: [SuscripcionesModule, IdentidadModule],
+  imports: [SuscripcionesModule, IdentidadModule, DatosModule],
   controllers: [OrquestacionController, AccionesController, ReversionController],
   providers: [
     BloqueosService,

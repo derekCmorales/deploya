@@ -1,5 +1,6 @@
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { tiempoMaximoConstruccionMs } from "../modules/construccion/dominio/motor.constantes";
 import { configuracionEnrutamientoDesde, type ConfiguracionEnrutamiento } from "../modules/enrutamiento/configuracion-enrutamiento";
 
 export type ModoAdaptadores = "docker" | "stub";
@@ -18,6 +19,8 @@ export interface ConfiguracionMotor {
   directorioTrabajo: string;
   /** Proyecto de compose de deploya: cuenta sus contenedores en Admin · Instalación (SP-18). */
   proyectoCompose: string;
+  /** `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN` en milisegundos: tope de cada `docker build`. */
+  tiempoMaximoConstruccionMs: number;
 }
 
 export const CONFIGURACION_MOTOR = Symbol("CONFIGURACION_MOTOR");
@@ -34,5 +37,6 @@ export function configuracionDesde(entorno: NodeJS.ProcessEnv): ConfiguracionMot
     trabajadorConcurrencia: Number(entorno.TRABAJADOR_CONCURRENCIA ?? 1),
     directorioTrabajo: entorno.DIRECTORIO_TRABAJO ?? join(tmpdir(), "deploya"),
     proyectoCompose: entorno.COMPOSE_PROJECT_NAME ?? "deploya",
+    tiempoMaximoConstruccionMs: tiempoMaximoConstruccionMs(entorno.MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN),
   };
 }

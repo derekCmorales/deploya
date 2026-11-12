@@ -73,6 +73,8 @@ export interface ProyectoDesplegable {
   rama: string;
   rutaDockerfile: string;
   puertoInterno: number;
+  /** Sobrescribe el `CMD` de la imagen; se parte en argumentos sin shell (feat/m5-recursos-datos). */
+  comandoInicio?: string | null;
 }
 
 /** Comando serializable que viaja por la cola (patrón Command). */

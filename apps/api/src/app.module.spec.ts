@@ -5,6 +5,7 @@ import { ContenedoresClientePuerto } from "./modules/orquestacion/puertos/conten
 import { ResumenProyectoService } from "./modules/observabilidad/resumen/resumen-proyecto.service";
 import { ReversionService } from "./modules/orquestacion/reversion/reversion.service";
 import { AccionesDespliegueService } from "./modules/construccion/acciones/acciones-despliegue.service";
+import { DatosService } from "./modules/datos/datos.service";
 
 describe("AppModule (inyección de dependencias del proceso API)", () => {
   it("resuelve los servicios de M4, M5 y M7 de la entrega del 85 %", async () => {
@@ -17,6 +18,7 @@ describe("AppModule (inyección de dependencias del proceso API)", () => {
     expect(modulo.get(ReversionService, { strict: false })).toBeInstanceOf(ReversionService);
     expect(modulo.get(AccionesDespliegueService, { strict: false })).toBeInstanceOf(AccionesDespliegueService);
     expect(modulo.get(ContenedoresClientePuerto, { strict: false })).toBeDefined();
+    expect(modulo.get(DatosService, { strict: false })).toBeInstanceOf(DatosService);
   });
 
   it("registra /despliegues/tiempos antes que /despliegues/:numero para que «tiempos» no se lea como número", async () => {

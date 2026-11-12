@@ -94,13 +94,17 @@ function Cabecera({ lista }: { lista: ListaRecursosDatos }) {
         <p className="text-sm text-muted-foreground">Sus datos sobreviven a redespliegues, reversiones y reinicios de la app.</p>
       </div>
       <div className="flex w-[280px] max-w-full flex-col gap-1.5">
-        <Meter
-          label="Bases de datos del plan"
-          value={lista.limite.usados}
-          max={lista.limite.maximo}
-          valueLabel={textoLimite(lista.limite)}
-          tonoAlLimite="warn"
-        />
+        {lista.limite.maximo === null ? (
+          <p className="text-sm text-muted-foreground">{textoLimite(lista.limite)}</p>
+        ) : (
+          <Meter
+            label="Bases de datos del plan"
+            value={lista.limite.usados}
+            max={lista.limite.maximo}
+            valueLabel={textoLimite(lista.limite)}
+            tonoAlLimite="warn"
+          />
+        )}
         {lleno ? (
           <Link href={RUTA_PLANES} className="self-end text-xs font-medium underline underline-offset-4 hover:text-foreground">
             Ver planes

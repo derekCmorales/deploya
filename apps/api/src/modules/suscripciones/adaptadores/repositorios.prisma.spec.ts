@@ -16,6 +16,8 @@ const STARTER: PlanFila = {
   cpus: new Prisma.Decimal("0.50"),
   memoriaMb: 512,
   construccionesMes: 150,
+  maxRecursosDatos: 3,
+  discoDatosMb: 2048,
   orden: 2,
   activo: true,
 };

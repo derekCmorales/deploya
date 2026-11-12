@@ -174,9 +174,22 @@ describe("ProyectosController", () => {
       rama: "main",
       rutaDockerfile: "Dockerfile",
       puertoInterno: 8081,
+      comandoInicio: null,
     });
     expect(await repositorio.porId(proyecto.id)).toMatchObject({ nombre: "Hola demo", subdominio: "hola-deploya" });
     expect((await motor.ultimosDespliegues([proyecto.id]))[proyecto.id]).toMatchObject({ numero: 1 });
+  });
+
+  it("Comando de inicio: PATCH guarda comandoInicio, lo devuelve en VistaConfiguracion y null lo borra", async () => {
+    const { controlador, repositorio } = await montarApi();
+    const { proyecto } = await controlador.crear("usuario-1", { url: "https://github.com/derekCmorales/hola-deploya", nombre: "hola-deploya" });
+
+    const con = await controlador.configurar("usuario-1", proyecto.id, { comandoInicio: " node dist/worker-optimizer.main.js " });
+    const sin = await controlador.configurar("usuario-1", proyecto.id, { comandoInicio: null });
+
+    expect(con.comandoInicio).toBe("node dist/worker-optimizer.main.js");
+    expect(sin.comandoInicio).toBeNull();
+    expect((await repositorio.porId(proyecto.id))?.comandoInicio).toBeNull();
   });
 
   it("PATCH valida el cuerpo antes de llegar al servicio", async () => {

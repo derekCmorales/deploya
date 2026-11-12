@@ -33,7 +33,8 @@ export interface VistaRecursoDatos {
 
 export interface LimiteRecursosDatos {
   usados: number;
-  maximo: number;
+  /** `null` en autoalojado: sin límite. */
+  maximo: number | null;
 }
 
 /** `GET /proyectos/:id/datos`. */
@@ -89,11 +90,12 @@ export type ClienteDatos = ReturnType<typeof clienteDatos>;
 // ── Límites y tarjetas de creación ──────────────────────────────────────────
 
 export function limiteAlcanzado(limite: LimiteRecursosDatos): boolean {
-  return limite.usados >= limite.maximo;
+  return limite.maximo !== null && limite.usados >= limite.maximo;
 }
 
 /** «1 / 3 bases de datos del plan». */
 export function textoLimite(limite: LimiteRecursosDatos): string {
+  if (limite.maximo === null) return `${limite.usados} ${limite.usados === 1 ? "base de datos" : "bases de datos"} · sin límite`;
   return `${limite.usados} / ${limite.maximo} ${limite.maximo === 1 ? "base de datos" : "bases de datos"} del plan`;
 }
 

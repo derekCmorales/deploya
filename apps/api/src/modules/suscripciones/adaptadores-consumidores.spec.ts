@@ -12,6 +12,8 @@ const CUOTA_PRO: Cuota = {
   cpus: 1,
   memoriaMb: 1024,
   construccionesMes: 500,
+  maxRecursosDatos: 10,
+  discoDatosMb: 10240,
 };
 
 function facadeFalsa() {

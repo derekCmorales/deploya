@@ -24,6 +24,9 @@ export function cuotaDeInstalacion(suscripcion: Suscripcion, limites: LimitesIns
     cpus: limites.cpuPorProyecto,
     memoriaMb: limites.memoriaMbPorProyecto,
     construccionesMes: SIN_LIMITE,
+    // La 32 no fija recursos de datos: sin tope de cantidad y el disco del plan «Autoalojado» como aviso.
+    maxRecursosDatos: SIN_LIMITE,
+    discoDatosMb: suscripcion.plan.discoDatosMb,
   };
 }
 

@@ -1,4 +1,6 @@
 import { Module } from "@nestjs/common";
+import { CONFIGURACION_MOTOR, type ConfiguracionMotor } from "../../adapters/configuracion-motor";
+import { TIEMPO_MAXIMO_CONSTRUCCION } from "./dominio/motor.constantes";
 import { AvisosModule } from "../notificaciones/avisos/avisos.module";
 import { EnrutamientoTrabajadorModule } from "../enrutamiento/enrutamiento-trabajador.module";
 import { PasoEnrutamiento } from "../enrutamiento/paso-enrutamiento";
@@ -26,6 +28,7 @@ import { RetencionArtefactos } from "../orquestacion/retencion/retencion-artefac
   providers: [
     ...PROVEEDORES_DETECCION,
     PasoRecepcion,
+    { provide: TIEMPO_MAXIMO_CONSTRUCCION, useFactory: (motor: ConfiguracionMotor) => motor.tiempoMaximoConstruccionMs, inject: [CONFIGURACION_MOTOR] },
     PasoConstruccion,
     {
       provide: PLANES_PIPELINE,

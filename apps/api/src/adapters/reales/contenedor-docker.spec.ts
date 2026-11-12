@@ -45,6 +45,17 @@ describe("ContenedorDocker", () => {
     expect(host.MemorySwap).toBe(268_435_456);
   });
 
+  it("Comando de inicio: Cmd con los argumentos y sin shell; sin comando no se manda Cmd", async () => {
+    const { docker, registro } = dockerFalso();
+    const contenedores = new ContenedorDocker(docker, []);
+
+    await contenedores.crear({ ...espec, comando: ["node", "dist/worker.js"] });
+    await contenedores.crear(espec);
+
+    expect(registro.creados[0].Cmd).toEqual(["node", "dist/worker.js"]);
+    expect(registro.creados[1]).not.toHaveProperty("Cmd");
+  });
+
   it("Sin privilegios y en su red: CapDrop ALL, no-new-privileges y la red del proyecto", async () => {
     const { docker, registro } = dockerFalso();
 

@@ -36,6 +36,8 @@ export function planDesdePrisma(fila: PlanFila): Plan {
     cpus: numeroDe(fila.cpus),
     memoriaMb: fila.memoriaMb,
     construccionesMes: fila.construccionesMes,
+    maxRecursosDatos: fila.maxRecursosDatos,
+    discoDatosMb: fila.discoDatosMb,
     orden: fila.orden,
     activo: fila.activo,
   };

@@ -29,6 +29,16 @@ export const SUBDOMINIOS_DE_PLATAFORMA: readonly string[] = ["api", "www", "web"
 /** Token de Nest con los subdominios que un proyecto no puede usar en este entorno. */
 export const SUBDOMINIOS_RESERVADOS = Symbol("SUBDOMINIOS_RESERVADOS");
 
+/**
+ * El almacenamiento S3 de un proyecto se publica en `<subdominio>-s3.<dominio>` (recursos-datos.md):
+ * un proyecto nuevo que termine así podría quitarle la ruta al S3 de otro, así que no se admite.
+ */
+export const SUFIJOS_RUTAS_DE_DATOS: readonly string[] = ["-s3"];
+
+export function chocaConRutaDeDatos(subdominio: string): boolean {
+  return SUFIJOS_RUTAS_DE_DATOS.some((sufijo) => subdominio.endsWith(sufijo));
+}
+
 export function esSubdominioReservado(subdominio: string, reservados: readonly string[]): boolean {
   return reservados.includes(subdominio);
 }

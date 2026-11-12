@@ -9,6 +9,10 @@ export interface Plan {
   cpus: number;
   memoriaMb: number;
   construccionesMes: number;
+  /** Bases administradas por cuenta (feat/m5-recursos-datos). */
+  maxRecursosDatos: number;
+  /** Disco por recurso de datos: se mide y se avisa, no corta. */
+  discoDatosMb: number;
   orden: number;
   activo: boolean;
 }

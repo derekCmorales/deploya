@@ -1,6 +1,7 @@
 import { ClaveInvalida, ClaveReservada, DemasiadasVariables, ValorDemasiadoLargo } from "./errores";
 
-export const MAXIMO_VARIABLES = 50;
+/** 150 desde feat/m5-recursos-datos: un monorepo como Nimbo pasa de 50 sin contar las inyectadas. */
+export const MAXIMO_VARIABLES = 150;
 export const MAXIMO_BYTES_VALOR = 4096;
 export const MAXIMO_LARGO_CLAVE = 128;
 export const CLAVE_RESERVADA = "PORT";

@@ -113,3 +113,37 @@ test("Accesibilidad: un main por pantalla, medidores con nombre y bitácora con 
   assert.match(bitacora, /focus-visible:ring-2 focus-visible:ring-ring/, "la bitácora no muestra el foco");
   assert.match(bitacora, /text-faint select-none" aria-hidden/, "el número de línea no es decorativo");
 });
+
+/** Resuelve los imports locales de una página (`./`, `../`, `@/`) al archivo `.tsx` que importan. */
+function componentesLocales(ruta, fuente) {
+  const imports = [...fuente.matchAll(/from "((?:\.{1,2}|@)\/[^"]+)"/g)].map((m) => m[1]);
+  return imports.flatMap((spec) => {
+    const base = spec.startsWith("@/") ? join("src", spec.slice(2)) : join(ruta, "..", spec);
+    try {
+      return [[base, readFileSync(new URL(`../${base}.tsx`, import.meta.url), "utf8")]];
+    } catch {
+      return [];
+    }
+  });
+}
+
+test("Alto completo: un <main> sin altura no envuelve un contenedor con min-h-full (lateral cortado)", () => {
+  const raiz = fileURLToPath(new URL("../", import.meta.url));
+  const archivos = paginas(join(raiz, "src/app")).map((abs) => abs.slice(raiz.length));
+  for (const ruta of archivos) {
+    const fuente = leer(ruta);
+    if (!/<main>/.test(fuente)) continue;
+    for (const [componente, codigo] of componentesLocales(ruta, fuente)) {
+      assert.doesNotMatch(
+        codigo,
+        /min-h-full/,
+        `${ruta} envuelve ${componente} en un <main> sin altura: su min-h-full no se resuelve y la pantalla queda a medias`,
+      );
+    }
+  }
+
+  const nuevo = leer("src/app/(projects)/projects/nuevo/page.tsx");
+  assert.match(nuevo, /<main className="flex min-h-full flex-col">/, "el alta no llena el cuerpo del shell");
+  const asistente = leer("src/app/(projects)/projects/_componentes/asistente-alta.tsx");
+  assert.match(asistente, /className="grid flex-1 grid-cols-1/, "la rejilla del alta no crece hasta abajo");
+});

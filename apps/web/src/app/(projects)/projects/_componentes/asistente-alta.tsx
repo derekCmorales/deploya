@@ -41,10 +41,10 @@ export function AsistenteAlta() {
   };
 
   return (
-    <div className="grid min-h-full grid-cols-1 lg:grid-cols-[320px_1fr]">
+    <div className="grid flex-1 grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]">
       <LateralAlta actual={indice} lista={lista} />
       <form onSubmit={enviar} className="flex min-w-0 flex-col" noValidate aria-busy={alta.ocupado}>
-        <div className="flex max-w-[860px] flex-1 flex-col gap-6 px-12 py-8">
+        <div className="flex w-full max-w-[860px] flex-1 flex-col gap-6 px-4 py-8 sm:px-8 lg:px-12">
           {sinVigenciaActual && aviso ? (
             <Banner
               variant="bad"
@@ -75,7 +75,7 @@ export function AsistenteAlta() {
           {alta.paso === "variables" ? <PasoVariables alta={alta} /> : null}
           {alta.paso === "revisar" ? <PasoRevisar alta={alta} lista={lista} /> : null}
         </div>
-        <div className="sticky bottom-0 flex items-center gap-2 border-t border-border bg-background px-12 py-4">
+        <div className="sticky bottom-0 flex items-center gap-2 border-t border-border bg-background px-4 py-4 sm:px-8 lg:px-12">
           <span className="flex-1 text-xs text-muted-foreground">
             Paso {indice + 1} de {TOTAL_PASOS}
           </span>

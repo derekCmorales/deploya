@@ -1,0 +1,19 @@
+# Copia a terraform.tfvars (no se versiona) y ajusta. Nada de aquí es secreto: los secretos de la
+# plataforma van solo en .env.vps del servidor.
+
+dominio             = "deploya.app"
+correos_presupuesto = ["operaciones@example.com"]
+
+# Valores por defecto (descomenta para cambiarlos)
+# region               = "us-east-1"
+# entorno              = "piloto"
+# tipo_instancia       = "t3.large"
+# creditos_cpu         = "unlimited"   # "standard" frena la CPU en vez de cobrar ráfagas
+# tamano_disco_gb      = 40
+# tope_presupuesto_usd = 40
+# rama                 = "main"
+# proteccion_terminacion = true        # recomendado tras la demo
+
+# SSH opcional. Sin cidr_administracion no hay puerto 22 (la vía normal es SSM).
+# clave_publica_ssh   = "ssh-ed25519 AAAA... operador@equipo"
+# cidr_administracion = "203.0.113.7/32"

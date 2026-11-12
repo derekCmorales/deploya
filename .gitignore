@@ -13,3 +13,12 @@ apps/api/dist
 # VPS: el archivo generado por scripts/desplegar-vps.sh y los secretos nunca se versionan.
 .env.vps
 infra/traefik/plataforma.generada.yml
+
+# Terraform (infra/terraform): estado y variables locales. El estado es texto plano.
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/*.tfvars
+!infra/terraform/*.tfvars.example
+infra/terraform/*.tfplan
+infra/terraform/crash.log

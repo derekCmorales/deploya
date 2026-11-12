@@ -10,7 +10,7 @@
 
 ## Qué es
 
-Banner de cambios sin aplicar con Descartar / Guardar / Guardar y desplegar; mostrar u ocultar cada valor; variable nueva marcada.
+Banner de cambios sin aplicar con Descartar / Guardar / Guardar y desplegar; mostrar u ocultar cada valor; variable nueva marcada. Hasta 150 variables por proyecto; «Pegar .env» abre un `Dialog` con `Textarea` que lee líneas `CLAVE=valor` (ignora vacías y comentarios, quita comillas) y las suma al borrador.
 
 ## Componentes
 
@@ -72,4 +72,8 @@ production
 CLAVE
 valor
 Añadir variable
+Pegar .env
+Una variable por línea, CLAVE=valor. Ignoramos líneas vacías y comentarios con #, y quitamos las comillas.
+Contenido del .env
+Agregar al borrador
 ```

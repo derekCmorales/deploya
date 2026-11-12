@@ -8,11 +8,14 @@ import {
   ErrorCatalogo,
   obtenerPlanes,
   RECURSOS,
+  recursosDelCatalogo,
   textoCpu,
+  textoGb,
   textoMemoria,
   textoMiles,
   textoPeriodo,
   textoPrecio,
+  valorRecurso,
 } from "../src/lib/planes.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -97,4 +100,23 @@ test("los textos fijos de la ficha 06 están en la pantalla", () => {
   ]) {
     assert.ok(pantalla.includes(texto), `falta «${texto}»`);
   }
+});
+
+test("06 · filas de datos solo si el catálogo trae maxRecursosDatos y discoDatosMb", () => {
+  assert.deepEqual(recursosDelCatalogo([SANDBOX, PRO]).map((r) => r.etiqueta), RECURSOS.map((r) => r.etiqueta));
+  const conDatos = [
+    { ...SANDBOX, maxRecursosDatos: 1, discoDatosMb: 512 },
+    { ...PRO, maxRecursosDatos: 10, discoDatosMb: 10240 },
+  ];
+  const filas = recursosDelCatalogo(conDatos);
+  assert.deepEqual(filas.slice(-2).map((r) => r.etiqueta), ["Bases de datos", "Disco por base"]);
+  assert.deepEqual(conDatos.map((plan) => valorRecurso(plan, filas.at(-1))), ["0.5 GB", "10 GB"]);
+  assert.deepEqual(conDatos.map((plan) => valorRecurso(plan, filas.at(-2))), ["1", "10"]);
+});
+
+test("06 · un plan sin el campo muestra «—» y el disco se lee en GB", () => {
+  const filas = recursosDelCatalogo([{ ...PRO, maxRecursosDatos: 10 }, SANDBOX]);
+  assert.equal(valorRecurso(SANDBOX, filas.at(-1)), "—");
+  assert.deepEqual([512, 2048, 10240, 25600].map(textoGb), ["0.5 GB", "2 GB", "10 GB", "25 GB"]);
+  assert.match(leer("src/app/(billing)/planes/_componentes/tabla-planes.tsx"), /recursosDelCatalogo\(planes\)/);
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, FolderGit2, GitBranch, Hash, type LucideIcon } from "lucide-react";
+import { FileText, FolderGit2, GitBranch, Hash, Terminal, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProyectos } from "@/hooks/use-proyectos";
 import { DOMINIO_APPS, ESQUEMA_APPS, ErrorApi, pedirApi } from "@/lib/api";
 import {
+  COMANDO_INICIO_MAXIMO,
   EVENTO_PROYECTO_ACTUALIZADO,
   borradorDe,
   cambiosDe,
@@ -28,6 +29,8 @@ import { cn } from "@/lib/utils";
 import { EliminarProyecto, type ConteosProyecto } from "./eliminar-proyecto";
 
 type ErroresCampo = Partial<Record<CampoConfiguracion, string>>;
+
+const TEXTO_AYUDA_COMANDO = "Sobrescribe el CMD de la imagen. Útil para correr un worker con la misma imagen, p. ej. node dist/worker.js";
 
 /** Pantalla 19: General, Fuente y Contenedor con borrador local; «Zona de peligro» abre 19b. */
 export function PanelConfiguracion({ proyectoId }: { proyectoId: string }) {
@@ -120,6 +123,18 @@ function Formulario({ proyecto }: { proyecto: DatosProyecto & { id: string } }) 
           <Campo id="rutaDockerfile" etiqueta="Ruta del Dockerfile" icono={FileText} valor={borrador.rutaDockerfile} error={errores.rutaDockerfile} alCambiar={(v) => editar("rutaDockerfile", v)} mono className="min-w-48 flex-[2_1_0]" />
           <Campo id="puertoInterno" etiqueta="Puerto interno" icono={Hash} valor={borrador.puertoInterno} error={errores.puertoInterno} alCambiar={(v) => editar("puertoInterno", v)} mono className="min-w-32 flex-[1_1_0]" />
         </div>
+        <Campo
+          id="comandoInicio"
+          etiqueta="Comando de inicio (opcional)"
+          icono={Terminal}
+          valor={borrador.comandoInicio}
+          error={errores.comandoInicio}
+          pista={TEXTO_AYUDA_COMANDO}
+          placeholder="node dist/worker.js"
+          maximo={COMANDO_INICIO_MAXIMO}
+          alCambiar={(v) => editar("comandoInicio", v)}
+          mono
+        />
       </Seccion>
       {aviso ? <Banner variant="bad" title="No pudimos guardar los cambios" className="mt-4">{aviso}</Banner> : null}
       {guardado ? <Banner variant="muted" title="Cambios guardados" className="mt-4">Aplican en el próximo despliegue.</Banner> : null}
@@ -158,6 +173,9 @@ function Campo({
   mono,
   icono: Icono,
   className,
+  pista,
+  placeholder,
+  maximo,
 }: {
   id: CampoConfiguracion;
   etiqueta: string;
@@ -167,9 +185,13 @@ function Campo({
   mono?: boolean;
   icono?: LucideIcon;
   className?: string;
+  pista?: string;
+  placeholder?: string;
+  maximo?: number;
 }) {
+  const descrito = error || pista ? `${id}-msg` : undefined;
   return (
-    <Field id={id} label={etiqueta} error={error} className={className}>
+    <Field id={id} label={etiqueta} error={error} hint={pista} className={className}>
       <div className="relative">
         {Icono ? <Icono aria-hidden className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" /> : null}
         <Input
@@ -178,8 +200,10 @@ function Campo({
           className={cn(mono && "font-mono", Icono && "pl-8")}
           onChange={(e) => alCambiar(e.target.value)}
           autoComplete="off"
+          placeholder={placeholder}
+          maxLength={maximo}
           aria-invalid={!!error}
-          aria-describedby={error ? `${id}-msg` : undefined}
+          aria-describedby={descrito}
         />
       </div>
     </Field>

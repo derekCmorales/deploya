@@ -2,6 +2,7 @@ export * from "./estados";
 export { Wordmark } from "./wordmark";
 export { EstadoDespliegue } from "./estado-despliegue";
 export { EstadoSuscripcion } from "./estado-suscripcion";
+export { EstadoRecursoDatos } from "./estado-recurso-datos";
 export { RielEtapas } from "./riel-etapas";
 export { Bitacora, type LineaBitacora } from "./bitacora";
 export { Pasos } from "./pasos";

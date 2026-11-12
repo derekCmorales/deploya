@@ -24,7 +24,7 @@ import { AccionesContenedor } from "./acciones-contenedor";
 import { BotonDesplegar } from "./boton-desplegar";
 
 /**
- * Cabecera y pestañas de 13–19: Resumen, Despliegues, Métricas, Bitácoras, Variables y Configuración. Un proyecto que
+ * Cabecera y pestañas de 13–19: Resumen, Despliegues, Métricas, Bitácoras, Variables, Datos y Configuración. Un proyecto que
  * no está en la lista es el 404 de 28; si la API no responde, el error de conexión de 28 (WEB-02).
  */
 export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
@@ -37,6 +37,7 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
   const metricas = `/projects/${proyectoId}/metricas`;
   const bitacoras = `/projects/${proyectoId}/bitacoras`;
   const variables = `/projects/${proyectoId}/variables`;
+  const datosProyecto = `/projects/${proyectoId}/datos`;
   const configuracion = `/projects/${proyectoId}/configuracion`;
 
   return (
@@ -67,6 +68,9 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
         </Link>
         <Link href={variables} aria-current={ruta === variables ? "page" : undefined}>
           Variables
+        </Link>
+        <Link href={datosProyecto} aria-current={ruta === datosProyecto ? "page" : undefined}>
+          Datos
         </Link>
         <Link href={configuracion} aria-current={ruta === configuracion ? "page" : undefined}>
           Configuración

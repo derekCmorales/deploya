@@ -39,6 +39,8 @@ export interface ProyectoEnLista {
   rama: string;
   rutaDockerfile: string;
   puertoInterno: number;
+  /** Contrato recursos-datos: sobrescribe el `CMD`. Opcional hasta que la API lo devuelva en la lista. */
+  comandoInicio?: string | null;
   creado: string;
   ultimoDespliegue: ResumenDespliegue | null;
 }

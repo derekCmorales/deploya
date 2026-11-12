@@ -7,10 +7,12 @@ import { useSondeo } from "@/hooks/use-sondeo";
 import { ErrorApi, pedirApi } from "@/lib/api";
 import { rutaDespliegue } from "@/lib/despliegues";
 import {
+  combinarVariables,
   contarCambios,
   cuerpoVariables,
   errorClave,
   filasDesdeGuardadas,
+  type FilaAlta,
   type FilaVariable,
   type VariableGuardada,
 } from "@/lib/variables";
@@ -91,6 +93,7 @@ export function useVariablesProyecto(proyectoId: string) {
     guardar: () => guardar(false),
     guardarYDesplegar: () => guardar(true),
     mostrar,
+    pegar: (pegadas: readonly FilaAlta[]) => setBorrador(combinarVariables(filas, pegadas)),
     anadir: () => setBorrador([...filas, { clave: "", valor: "", editada: false, nueva: true }]),
     editar: (indice: number, cambio: Partial<FilaVariable>) => actualizar(indice, { ...cambio, editada: true, oculta: false }),
   };

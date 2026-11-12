@@ -69,14 +69,16 @@ pnpm check
 
 ### 3.1 Una sola vez
 
+El servidor de producción es una **EC2 `t3.large` en AWS** (us-east-1, Ubuntu 24.04) creada con Terraform: [infra/terraform/](../../infra/terraform/README.md), decisión y costos en el [ADR 0009](../adr/0009-piloto-en-aws-ec2-con-terraform.md). `docker-compose.vps.yml` es el compose de producción; «vps» es solo el nombre del archivo. `terraform apply` deja Docker, el usuario `deploya`, el clon en `/srv/deploya`, `/var/backups/deploya` y el cron de §3.5; `terraform output siguientes_pasos` imprime lo que falta. Ningún secreto pasa por Terraform.
+
 | Qué | Cómo |
 |---|---|
-| Servidor | Ubuntu 24.04, 2 vCPU y 4 GB, Docker Engine y Compose 2.24 o más, usuario sin root en el grupo `docker`, firewall con 22, 80 y 443 abiertos |
+| Servidor | `cd infra/terraform && terraform apply` (EC2 con 80 y 443 abiertos, administración por SSM sin puerto 22). En otro proveedor, a mano: Ubuntu 24.04, 2 vCPU y 4 GB o más, Docker Engine y Compose 2.24 o más, usuario sin root en el grupo `docker`, firewall con 80 y 443 |
 | DNS | Registros A de `<dominio>` y de `*.<dominio>` hacia la IP del servidor |
 | Token DNS | Cloudflare: *API Token* con `Zone · DNS · Edit` solo sobre la zona. Con otro proveedor, cambia `provider` en [traefik.vps.yml](../../infra/traefik/traefik.vps.yml) y la variable del token en [docker-compose.vps.yml](../../docker-compose.vps.yml) |
 | Correo | Resend con el dominio verificado: SPF, DKIM y DMARC. Pasos en [correo-produccion.md](../correo-produccion.md) |
-| Código | `git clone https://github.com/derekCmorales/deploya.git` en el servidor |
-| Entorno | `cp .env.vps.example .env.vps`, rellenarlo y `chmod 600 .env.vps`. **Nunca se sube** |
+| Código | Lo clona cloud-init en `/srv/deploya`. A mano: `git clone https://github.com/derekCmorales/deploya.git` en el servidor |
+| Entorno | `cp .env.vps.example .env.vps`, rellenarlo y `chmod 600 .env.vps`; a la EC2 se copia por SSM ([infra/terraform/README.md](../../infra/terraform/README.md#flujo)). **Nunca se sube** |
 
 ### 3.2 Variables de `.env.vps`
 
@@ -134,13 +136,15 @@ Despliega y espera Saludable con HTTPS, revierte a la primera imagen y vuelve si
 
 ### 3.5 Operación diaria (cron del servidor)
 
-`/etc/cron.d/deploya` (cambia `/srv/deploya` por la ruta del clon y `deploya` por el usuario):
+`/etc/cron.d/deploya` (en la EC2 lo instala Terraform con el dominio ya puesto; a mano, cambia `/srv/deploya` por la ruta del clon y `deploya` por el usuario):
 
 ```text
 # Respaldo diario a las 03:00 (guarda 7) con los compose del VPS
 0 3 * * * deploya cd /srv/deploya && DEPLOYA_ENV=/srv/deploya/.env.vps DEPLOYA_ARCHIVOS_COMPOSE="docker-compose.yml docker-compose.vps.yml" scripts/respaldar.sh >> /var/log/deploya-respaldo.log 2>&1
 # Imágenes sin uso, cada domingo (las de las versiones guardadas siguen en uso por sus artefactos)
 30 4 * * 0 deploya docker image prune -f >> /var/log/deploya-prune.log 2>&1
+# Caché de BuildKit de más de 7 días, cada domingo: no toca imágenes, solo capas de construcción
+45 4 * * 0 deploya docker builder prune -f --filter until=168h >> /var/log/deploya-prune.log 2>&1
 # Salud de la API cada 5 min: deja una línea en el log del sistema si falla
 */5 * * * * deploya curl -fsS --max-time 10 https://api.<dominio>/health > /dev/null || logger -t deploya "api.<dominio>/health no responde"
 ```

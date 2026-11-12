@@ -10,7 +10,7 @@ correos_presupuesto = ["operaciones@example.com"]
 # tipo_instancia       = "t3.large"
 # creditos_cpu         = "unlimited"   # "standard" frena la CPU en vez de cobrar ráfagas
 # tamano_disco_gb      = 40
-# tope_presupuesto_usd = 40
+# tope_presupuesto_usd = 70          # 40 cubre la demo; un mes completo cuesta ≈ 68 USD (ADR 0009)
 # rama                 = "main"
 # proteccion_terminacion = true        # recomendado tras la demo
 

@@ -24,3 +24,5 @@ Cuando la decisión es difícil de revertir o afecta a más de un módulo: elegi
 | [0006](0006-polling-en-vez-de-websocket.md) | Polling cada 3 s en vez de WebSocket o SSE | Aceptado |
 | [0007](0007-certificado-comodin-por-dns-01.md) | Certificado comodín por DNS-01 en el VPS | Aceptado |
 | [0008](0008-autoalojado-y-codigo-abierto.md) | Código abierto y autoalojado con un modo de instalación (Strategy por puerto) | Propuesto |
+| [0009](0009-piloto-en-aws-ec2-con-terraform.md) | Piloto en una EC2 `t3.large` de AWS creada con Terraform, con los compose existentes | Aceptado |
+| [0010](0010-escala-con-ecs-y-construcciones-en-fargate.md) | Escala con ECS sobre EC2 y construcciones en Fargate Spot, sin Kubernetes | Propuesto |

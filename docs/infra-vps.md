@@ -2,11 +2,24 @@
 
 Guía operativa de `docker-compose.vps.yml`. Las decisiones están en [ADR 0005](adr/0005-traefik-proveedor-de-archivo.md) y [ADR 0007](adr/0007-certificado-comodin-por-dns-01.md); el diagrama, en [despliegue-infraestructura.mmd](diagramas/compartido/despliegue-infraestructura.mmd). Manual completo (variables, cron de respaldos y salud, problemas comunes): [entrega-final/manual-tecnico.md](entrega-final/manual-tecnico.md#3-vps-de-la-nube-producción). Lo de este documento **se verifica a mano en el servidor**: las pruebas unitarias no tocan DNS, certificados ni correo ([ingenieria.md §5.5](ingenieria.md)).
 
+## 0. Crear el servidor en AWS con Terraform
+
+El servidor es una **EC2 `t3.large` en AWS** (us-east-1, Ubuntu 24.04) creada con [infra/terraform/](../infra/terraform/README.md) ([ADR 0009](adr/0009-piloto-en-aws-ec2-con-terraform.md)). `docker-compose.vps.yml` es el compose de producción: «vps» es solo el nombre del archivo. Terraform deja listo lo de «Servidor» de la tabla de §1 (Docker y Compose oficiales, usuario `deploya`, clon en `/srv/deploya`, 80/443 abiertos y administración por SSM sin puerto 22) y además el cron de [§3.5 del manual](entrega-final/manual-tecnico.md#35-operación-diaria-cron-del-servidor). **No** lleva secretos: `.env.vps` se copia a mano.
+
+```bash
+cd infra/terraform
+cp terraform.tfvars.example terraform.tfvars   # dominio y correos del presupuesto
+terraform init && terraform apply
+terraform output siguientes_pasos               # DNS, cloud-init, .env.vps, desplegar
+```
+
+Luego: registros A en Cloudflare en «Solo DNS» hacia `ip_publica`, `cloud-init status --wait` por `terraform output -raw comando_ssm`, `.env.vps` con `chmod 600` y §2. El resto de §1 (DNS, token, correo, entorno) sigue igual.
+
 ## 1. Una sola vez
 
 | Qué | Cómo |
 |---|---|
-| Servidor | Ubuntu 24.04, 2 vCPU y 4 GB, Docker Engine y Compose 2.24 o más, usuario sin root en el grupo `docker`, firewall con 22, 80 y 443 |
+| Servidor | Lo crea Terraform (§0). A mano en otro proveedor: Ubuntu 24.04, 2 vCPU y 4 GB o más, Docker Engine y Compose 2.24 o más, usuario sin root en el grupo `docker`, firewall con 80 y 443 (y 22 solo desde tu IP) |
 | DNS | Registro A de `<dominio>` y de `*.<dominio>` hacia la IP del servidor |
 | Token DNS | Cloudflare: *API Token* con `Zone · DNS · Edit` solo sobre la zona. Con otro proveedor, cambia `provider` en [traefik.vps.yml](../infra/traefik/traefik.vps.yml) y el nombre de la variable del token en [docker-compose.vps.yml](../docker-compose.vps.yml) |
 | Correo | Resend con el dominio verificado (SPF, DKIM y DMARC). Se configura solo con variables SMTP (ADR 0001): pasos en [correo-produccion.md](correo-produccion.md) |

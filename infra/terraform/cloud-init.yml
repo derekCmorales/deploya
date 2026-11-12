@@ -1,0 +1,142 @@
+#cloud-config
+# Plantilla de Terraform (templatefile, main.tf). Corre una sola vez, en el primer arranque de la EC2.
+# NADA de este archivo es secreto: el user_data se lee desde la API de EC2 y queda en el estado.
+# Las variables de la plataforma (.env.vps) se copian después, a mano (docs/infra-vps.md §0).
+
+hostname: deploya
+ssh_pwauth: false
+disable_root: true
+
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - git
+  - gnupg
+  - jq
+  - unattended-upgrades
+
+# 4 GB de swap: colchón para los picos de `docker build` (la web de Next.js) y de la plataforma.
+# Los contenedores de los usuarios no lo usan: el worker fija MemorySwap = Memory.
+swap:
+  filename: /swapfile
+  size: 4G
+  maxsize: 4G
+
+users:
+  - default
+  - name: deploya
+    gecos: Operador de Deploya
+    shell: /bin/bash
+    lock_passwd: true
+%{ if clave_publica_ssh != "" ~}
+    ssh_authorized_keys:
+      - ${clave_publica_ssh}
+%{ endif ~}
+
+write_files:
+  - path: /etc/deploya/servidor.env
+    permissions: "0644"
+    content: |
+      # Escrito por cloud-init (Terraform). Sin secretos.
+      DOMINIO='${dominio}'
+      REPOSITORIO='${repositorio}'
+      RAMA='${rama}'
+
+  # Rotación de logs (10 MB × 3) por defecto para TODO contenedor, también los de los usuarios,
+  # que el worker crea sin LogConfig. live-restore: reiniciar dockerd no tumba las apps.
+  # Redes: cada proyecto tiene su red bridge y los rangos por defecto de Docker se agotan hacia
+  # las ~30 redes; 172.16.0.0/12 en /24 da 4096. La VPC usa 10.x: no se cruzan.
+  - path: /etc/docker/daemon.json
+    permissions: "0644"
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": { "max-size": "10m", "max-file": "3" },
+        "live-restore": true,
+        "features": { "buildkit": true },
+        "default-address-pools": [{ "base": "172.16.0.0/12", "size": 24 }]
+      }
+
+  - path: /etc/sysctl.d/60-deploya.conf
+    permissions: "0644"
+    content: |
+      # Usar swap solo bajo presión real de memoria.
+      vm.swappiness = 10
+      vm.vfs_cache_pressure = 50
+      # Redis necesita overcommit para guardar en segundo plano sin fallar.
+      vm.overcommit_memory = 1
+      # Muchos contenedores y Traefik vigilando /traefik/dinamico.
+      fs.inotify.max_user_instances = 1024
+      net.core.somaxconn = 4096
+
+  # Va antes que 50-cloud-init.conf: en sshd manda el primer valor que aparece.
+  - path: /etc/ssh/sshd_config.d/10-deploya.conf
+    permissions: "0644"
+    content: |
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PermitRootLogin no
+
+  - path: /etc/apt/apt.conf.d/20auto-upgrades
+    permissions: "0644"
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      APT::Periodic::AutocleanInterval "7";
+
+  # Parches de seguridad de Ubuntu sí; reiniciar el servidor solo, no (cortaría las apps). El
+  # repositorio de Docker no está en los orígenes de unattended-upgrades: Docker se actualiza a mano.
+  - path: /etc/apt/apt.conf.d/52deploya-unattended
+    permissions: "0644"
+    content: |
+      Unattended-Upgrade::Automatic-Reboot "false";
+      Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+      Unattended-Upgrade::Remove-Unused-Dependencies "true";
+
+  # needrestart no reinicia Docker ni containerd tras un parche de bibliotecas.
+  - path: /etc/needrestart/conf.d/60-deploya.conf
+    permissions: "0644"
+    content: |
+      $nrconf{override_rc}->{qr(^docker)} = 0;
+      $nrconf{override_rc}->{qr(^containerd)} = 0;
+
+  # Operación diaria del manual técnico §3.5, con el clon en /srv/deploya y el usuario deploya.
+  # Horas en UTC (la zona del servidor).
+  - path: /etc/cron.d/deploya
+    permissions: "0644"
+    content: |
+      SHELL=/bin/bash
+      PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      # Respaldo diario a las 03:00 (guarda 7) con los compose del VPS
+      0 3 * * * deploya cd /srv/deploya && DEPLOYA_ENV=/srv/deploya/.env.vps DEPLOYA_ARCHIVOS_COMPOSE="docker-compose.yml docker-compose.vps.yml" scripts/respaldar.sh >> /var/log/deploya-respaldo.log 2>&1
+      # Imágenes sin uso, cada domingo (las de las versiones guardadas siguen en uso por sus artefactos)
+      30 4 * * 0 deploya docker image prune -f >> /var/log/deploya-prune.log 2>&1
+      # Caché de BuildKit de más de 7 días, cada domingo: no toca imágenes, solo capas de construcción
+      45 4 * * 0 deploya docker builder prune -f --filter until=168h >> /var/log/deploya-prune.log 2>&1
+      # Salud de la API cada 5 min: deja una línea en el log del sistema si falla
+      */5 * * * * deploya curl -fsS --max-time 10 https://api.${dominio}/health > /dev/null || logger -t deploya "api.${dominio}/health no responde"
+
+  - path: /etc/logrotate.d/deploya
+    permissions: "0644"
+    content: |
+      /var/log/deploya-respaldo.log /var/log/deploya-prune.log {
+        weekly
+        rotate 8
+        compress
+        missingok
+        notifempty
+        su deploya deploya
+        create 0640 deploya deploya
+      }
+
+  - path: /usr/local/sbin/deploya-preparar.sh
+    permissions: "0755"
+    content: |
+      ${indent(6, preparar)}
+
+runcmd:
+  - [bash, /usr/local/sbin/deploya-preparar.sh]
+
+final_message: "Deploya: servidor preparado en $UPTIME s. Siguiente paso: .env.vps y scripts/desplegar-vps.sh"

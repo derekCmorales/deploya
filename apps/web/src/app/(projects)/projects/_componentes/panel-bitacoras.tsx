@@ -64,7 +64,7 @@ export function PanelBitacoras({ proyectoId }: { proyectoId: string }) {
   const actualizado = textoActualizado(leidoEn, ahora);
 
   return (
-    <div className="flex flex-col gap-4 px-8 py-6">
+    <div className="flex flex-col gap-4 px-4 sm:px-8 py-6">
       <div className="flex flex-wrap items-center gap-3">
         <Segmented<FiltroNivel> value={nivel} onValueChange={setNivel} aria-label="Nivel" options={OPCIONES_NIVEL} />
         <div className="relative w-full max-w-sm">

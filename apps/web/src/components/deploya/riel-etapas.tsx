@@ -50,12 +50,12 @@ function RielEtapas({ etapas, size = "sm", detalle, saludable, className }: Riel
       {ETAPAS.map((n, i) => {
         const e = etapas[i] ?? "pendiente";
         return (
-          <li key={n} className="flex flex-col gap-2">
+          <li key={n} className="flex min-w-0 flex-col gap-2">
             <span
               className={cn("block h-[5px] rounded-[2px]", saludable && e === "completada" ? "bg-ok" : TONO[e])}
               aria-hidden
             />
-            <span className="flex items-baseline justify-between gap-2 text-[13px]">
+            <span className="flex flex-wrap items-baseline justify-between gap-x-2 text-[13px]">
               <span className={cn("font-medium", e === "pendiente" && "text-muted-foreground")}>{n}</span>
               <span className="tnum text-xs text-muted-foreground">{detalle?.[i]?.duracion ?? "—"}</span>
             </span>

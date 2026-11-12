@@ -41,7 +41,7 @@ export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
   const configuracion = `/projects/${proyectoId}/configuracion`;
 
   return (
-    <header className="flex flex-col gap-4 border-b border-border px-8 pt-6">
+    <header className="flex flex-col gap-4 border-b border-border px-4 sm:px-8 pt-6">
       <nav aria-label="Ruta" className="flex items-center gap-2 font-mono text-[13px] text-muted-foreground">
         <Link href="/projects" className="hover:text-foreground">
           proyectos

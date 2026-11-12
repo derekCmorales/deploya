@@ -83,7 +83,7 @@ function Vista({
   const transcurrido = despliegue.creado ? tiempoTranscurrido(despliegue.creado, despliegue.terminado ?? ahora) : null;
 
   return (
-    <div className="flex flex-col gap-6 px-8 py-6">
+    <div className="flex flex-col gap-6 px-4 sm:px-8 py-6">
       <Cabecera proyectoId={proyectoId} despliegue={despliegue} transcurrido={transcurrido} etiqueta={etiqueta} alAccionar={alAccionar} />
       <RielEtapas
         size="lg"
@@ -313,7 +313,7 @@ function Dato({ titulo, valor }: { titulo: string; valor: string }) {
 
 function Cargando() {
   return (
-    <div className="flex flex-col gap-4 px-8 py-6" aria-busy="true" aria-label="Cargando despliegue">
+    <div className="flex flex-col gap-4 px-4 sm:px-8 py-6" aria-busy="true" aria-label="Cargando despliegue">
       <Skeleton className="h-8 w-72" />
       <Skeleton className="h-4 w-full" />
       <Skeleton className="h-40 w-full" />

@@ -61,7 +61,7 @@ export function PanelResumen({ proyectoId }: { proyectoId: string }) {
   if (cargando || !datos) return <Cargando />;
 
   return (
-    <div className="flex flex-col gap-6 px-8 py-6">
+    <div className="flex flex-col gap-6 px-4 sm:px-8 py-6">
       <div className="flex flex-wrap items-stretch gap-6">
         <EstadoActual resumen={datos} actualizado={textoActualizado(actualizado, ahora)} ahora={new Date(ahora)} />
         <Recursos resumen={datos} />
@@ -227,7 +227,7 @@ function itemDe(hito: HitoLineaTiempo) {
 
 function Cargando() {
   return (
-    <div className="flex flex-col gap-4 px-8 py-6" aria-busy="true" aria-label="Cargando resumen">
+    <div className="flex flex-col gap-4 px-4 sm:px-8 py-6" aria-busy="true" aria-label="Cargando resumen">
       <Skeleton className="h-40 w-full" />
       <Skeleton className="h-40 w-full" />
     </div>

@@ -18,14 +18,14 @@ const TabsList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn("flex gap-0.5 border-b border-border", className)}
+    className={cn("flex gap-0.5 overflow-x-auto border-b border-border", className)}
     {...props}
   />
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 const tabClass =
-  "relative inline-flex h-10 items-center gap-2 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4 after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-transparent";
+  "relative inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4 after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-transparent";
 
 const TabsTrigger = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Trigger>,
@@ -60,7 +60,7 @@ function TabsNav({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
     <nav
       className={cn(
-        "flex gap-0.5 border-b border-border [&>a]:relative [&>a]:inline-flex [&>a]:h-10 [&>a]:items-center [&>a]:gap-2 [&>a]:px-3 [&>a]:text-sm [&>a]:font-medium [&>a]:text-muted-foreground [&>a:hover]:text-foreground [&>a[aria-current=page]]:text-foreground [&>a[aria-current=page]]:after:absolute [&>a[aria-current=page]]:after:inset-x-2 [&>a[aria-current=page]]:after:-bottom-px [&>a[aria-current=page]]:after:h-0.5 [&>a[aria-current=page]]:after:rounded-full [&>a[aria-current=page]]:after:bg-foreground",
+        "flex gap-0.5 overflow-x-auto border-b border-border [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>a]:relative [&>a]:inline-flex [&>a]:shrink-0 [&>a]:whitespace-nowrap [&>a]:h-10 [&>a]:items-center [&>a]:gap-2 [&>a]:px-3 [&>a]:text-sm [&>a]:font-medium [&>a]:text-muted-foreground [&>a:hover]:text-foreground [&>a[aria-current=page]]:text-foreground [&>a[aria-current=page]]:after:absolute [&>a[aria-current=page]]:after:inset-x-2 [&>a[aria-current=page]]:after:-bottom-px [&>a[aria-current=page]]:after:h-0.5 [&>a[aria-current=page]]:after:rounded-full [&>a[aria-current=page]]:after:bg-foreground",
         className,
       )}
       {...props}

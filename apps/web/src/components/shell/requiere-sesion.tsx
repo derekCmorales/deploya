@@ -31,7 +31,7 @@ export function RequiereSesion({ children }: { children: ReactNode }) {
   if (estado === "con-sesion") return <>{children}</>;
   if (estado === "sin-conexion") {
     return (
-      <div className="px-8 pt-6">
+      <div className="px-4 sm:px-8 pt-6">
         <Banner
           variant="bad"
           title="No pudimos conectar con la API."
@@ -51,7 +51,7 @@ export function RequiereSesion({ children }: { children: ReactNode }) {
   return (
     <>
       <div
-        className={vencida ? "flex flex-col gap-3 px-8 pt-6 opacity-35" : "flex flex-col gap-3 px-8 pt-6"}
+        className={vencida ? "flex flex-col gap-3 px-4 sm:px-8 pt-6 opacity-35" : "flex flex-col gap-3 px-4 sm:px-8 pt-6"}
         aria-busy={!vencida}
         aria-label={vencida ? undefined : "Comprobando la sesión"}
       >

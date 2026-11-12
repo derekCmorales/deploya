@@ -89,7 +89,7 @@ export function PanelHistorial({ proyectoId }: { proyectoId: string }) {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-8 py-6">
+    <div className="flex flex-col gap-5 px-4 sm:px-8 py-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Segmented
           aria-label="Filtrar despliegues"
@@ -144,7 +144,7 @@ function Tabla({
   if (cargando && filas.length === 0) return <Skeleton className="h-64 w-full" aria-busy="true" aria-label="Cargando despliegues" />;
   if (filas.length === 0) return <p className="text-sm text-muted-foreground">Todavía no hay despliegues con este filtro.</p>;
   return (
-    <Table footer={pie}>
+    <Table footer={pie} className="min-w-[760px]">
       <TableHeader>
         <TableRow>
           <TableHead>Versión</TableHead>
@@ -178,8 +178,8 @@ function Tabla({
                 "—"
               )}
             </TableCell>
-            <TableCell className="text-muted-foreground">{fechaFila(fila.creado, ahora)}</TableCell>
-            <TableCell className="tnum text-muted-foreground">{duracionFila(fila.duracionMs)}</TableCell>
+            <TableCell className="whitespace-nowrap text-muted-foreground">{fechaFila(fila.creado, ahora)}</TableCell>
+            <TableCell className="tnum whitespace-nowrap text-muted-foreground">{duracionFila(fila.duracionMs)}</TableCell>
             <TableCell>
               <EstadoDespliegue estado={fila.estado as EstadoDespliegueValor} />
             </TableCell>

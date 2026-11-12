@@ -15,7 +15,7 @@ const ERROR_DE_RENDER = { codigo: "error-de-render" } as const;
 export function ErrorDePantalla({ reset }: { reset: () => void }) {
   const ruta = usePathname();
   return (
-    <div className="px-8 py-10">
+    <div className="px-4 sm:px-8 py-10">
       <ErrorConexionApi
         error={ERROR_DE_RENDER}
         ruta={ruta}

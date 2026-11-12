@@ -55,7 +55,7 @@ export function ErrorConexionApi({
   }, [faltan, onReintentar, reintentoAutomatico]);
 
   return (
-    <section className="flex flex-col items-center gap-3.5 rounded-xl border border-border bg-card px-8 py-12 text-center" role="alert">
+    <section className="flex flex-col items-center gap-3.5 rounded-xl border border-border bg-card px-4 sm:px-8 py-12 text-center" role="alert">
       <span className="grid size-12 place-items-center rounded-xl border border-border-strong bg-background text-muted-foreground">
         <WifiOff className="size-5" aria-hidden />
       </span>

@@ -62,7 +62,7 @@ export function PanelMetricas({ proyectoId }: { proyectoId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-6 px-8 py-6">
+    <div className="flex flex-col gap-6 px-4 sm:px-8 py-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Segmented<RangoMetricas>
           value={rango}

@@ -26,7 +26,7 @@ export function AppShell({
   usuario?: ReactNode;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <header className="relative z-10 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background pr-3 pl-3 md:pr-4 md:pl-6">
         <Link href={inicio} aria-label="deploya, inicio" className="rounded-sm px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Wordmark />
@@ -37,7 +37,7 @@ export function AppShell({
         <ThemeToggle />
         {usuario}
       </header>
-      <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+      <div className="relative min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">{children}</div>
     </div>
   );
 }

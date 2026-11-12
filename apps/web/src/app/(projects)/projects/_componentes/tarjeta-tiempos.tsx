@@ -100,7 +100,7 @@ export function TarjetaTiempos({ proyectoId }: { proyectoId: string }) {
 }
 
 function Marco({ children }: { children: ReactNode }) {
-  return <div className="px-8 pt-6">{children}</div>;
+  return <div className="px-4 sm:px-8 pt-6">{children}</div>;
 }
 
 function Datos({ indicadores }: { indicadores: IndicadoresTiempos }) {

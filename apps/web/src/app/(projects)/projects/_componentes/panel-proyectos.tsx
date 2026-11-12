@@ -29,7 +29,7 @@ export function PanelProyectos() {
   const subtitulo = lista ? subtituloProyectos(lista) : null;
 
   return (
-    <main className="flex min-h-full flex-col gap-5 px-8 pt-6 pb-8">
+    <main className="flex min-h-full flex-col gap-5 px-4 sm:px-8 pt-6 pb-8">
       <header className="flex flex-col gap-1.5">
         <p className="text-[13px] font-medium text-muted-foreground">Proyectos</p>
         <h1 className="text-[28px] leading-[34px] font-semibold tracking-[-0.032em]">Proyectos</h1>

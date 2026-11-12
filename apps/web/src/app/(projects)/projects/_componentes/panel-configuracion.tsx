@@ -42,7 +42,7 @@ export function PanelConfiguracion({ proyectoId }: { proyectoId: string }) {
   if (cargando || !datos) return <Cargando />;
   if (!proyecto) return <Banner variant="bad" title="No encontramos este proyecto">Puede que ya no exista.</Banner>;
   return (
-    <div className="flex max-w-[1040px] flex-col px-8 py-6">
+    <div className="flex max-w-[1040px] flex-col px-4 sm:px-8 py-6">
       <Formulario key={proyecto.id} proyecto={proyecto} />
       <EliminarConNavegacion
         proyecto={proyecto}
@@ -154,12 +154,12 @@ function Formulario({ proyecto }: { proyecto: DatosProyecto & { id: string } }) 
 /** Fila de 19: título y explicación en 280px a la izquierda, campos a la derecha. */
 function Seccion({ id, titulo, descripcion, children }: { id: string; titulo: string; descripcion: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="flex flex-wrap items-start gap-x-8 gap-y-4 border-b border-border py-[22px]">
-      <div className="flex w-[280px] flex-none flex-col gap-1.5">
+    <section id={id} className="flex flex-col gap-4 border-b border-border py-[22px] md:flex-row md:flex-wrap md:items-start md:gap-x-8">
+      <div className="flex w-full flex-col gap-1.5 md:w-[280px] md:flex-none">
         <h2 className="text-sm font-semibold">{titulo}</h2>
         <p className="text-xs text-muted-foreground">{descripcion}</p>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-4">{children}</div>
+      <div className="flex w-full min-w-0 flex-col gap-4 md:w-auto md:flex-1">{children}</div>
     </section>
   );
 }
@@ -236,7 +236,7 @@ function useConteos(proyectoId: string): ConteosProyecto | null {
 
 function Cargando() {
   return (
-    <div className="flex max-w-[1040px] flex-col gap-4 px-8 py-6" aria-busy="true" aria-label="Cargando configuración">
+    <div className="flex max-w-[1040px] flex-col gap-4 px-4 sm:px-8 py-6" aria-busy="true" aria-label="Cargando configuración">
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />

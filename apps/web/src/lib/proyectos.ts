@@ -65,10 +65,15 @@ export interface ValidacionRepositorio {
   rama: string;
   ramas: string[];
   commit: { sha: string; mensaje: string; autor: string; fecha: string };
+  /** Ruta consultada; `Dockerfile` si no se eligió otra. */
+  rutaDockerfile?: string;
   dockerfile: string | null;
   puerto: number;
   deteccion?: { receta: string; nombre: string; descripcion: string };
 }
+
+/** Ruta por omisión del Dockerfile en el alta (11a) y en Configuración (19). */
+export const RUTA_DOCKERFILE = "Dockerfile";
 
 /** `GET /despliegues/:id` y la consulta por número (10, 12, 12b, 12c). */
 export interface VistaDespliegue {
@@ -178,18 +183,22 @@ export function shaCorto(sha: string): string {
 }
 
 /** Tarjeta de 11a: Dockerfile propio o «Stack detectado: Node.js 22 · receta Deploya». */
-export function tituloDeteccion(validacion: Pick<ValidacionRepositorio, "dockerfile" | "deteccion">): { titulo: string; detalle: string } {
+export function tituloDeteccion(
+  validacion: Pick<ValidacionRepositorio, "dockerfile" | "deteccion" | "rutaDockerfile">,
+): { titulo: string; detalle: string } {
   const deteccion = validacion.deteccion;
   if (deteccion && deteccion.receta !== "dockerfile") {
     return { titulo: `Stack detectado: ${deteccion.nombre} · receta Deploya`, detalle: deteccion.descripcion };
   }
-  return { titulo: "Dockerfile encontrado", detalle: validacion.dockerfile ? resumenDockerfile(validacion.dockerfile) : "Dockerfile en la raíz" };
+  const ruta = validacion.rutaDockerfile ?? RUTA_DOCKERFILE;
+  const titulo = ruta === RUTA_DOCKERFILE ? "Dockerfile encontrado" : `Dockerfile encontrado en ${ruta}`;
+  return { titulo, detalle: validacion.dockerfile ? resumenDockerfile(validacion.dockerfile) : "Dockerfile en la raíz" };
 }
 
 /** Línea «Construcción» de 11d. */
-export function textoConstruccion(validacion: Pick<ValidacionRepositorio, "deteccion">): string {
+export function textoConstruccion(validacion: Pick<ValidacionRepositorio, "deteccion" | "rutaDockerfile">): string {
   if (validacion.deteccion && validacion.deteccion.receta !== "dockerfile") return validacion.deteccion.descripcion;
-  return "docker build · /Dockerfile";
+  return `docker build · /${validacion.rutaDockerfile ?? RUTA_DOCKERFILE}`;
 }
 
 export interface BloqueoDespliegue {
@@ -259,12 +268,13 @@ export type ErrorAlta =
   | { tipo: "sin-dockerfile"; rama: string }
   | { tipo: "stack-no-reconocido"; rama: string; pista: string; mensaje: string }
   | { tipo: "bloqueo"; codigo: string; titulo: string; accion: "Renovar" | "Cambiar de plan"; mensaje: string }
-  | { tipo: "campo"; campo: "url" | "rama" | "nombre" | "puerto"; mensaje: string }
+  | { tipo: "campo"; campo: "url" | "rama" | "rutaDockerfile" | "nombre" | "puerto"; mensaje: string }
   | { tipo: "aviso"; mensaje: string };
 
-const CAMPO_POR_CODIGO: Record<string, "url" | "rama" | "nombre"> = {
+const CAMPO_POR_CODIGO: Record<string, "url" | "rama" | "rutaDockerfile" | "nombre"> = {
   "url-invalida": "url",
   "rama-no-encontrada": "rama",
+  "ruta-invalida": "rutaDockerfile",
   "subdominio-en-uso": "nombre",
 };
 

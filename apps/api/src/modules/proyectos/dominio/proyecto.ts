@@ -20,6 +20,8 @@ export interface AltaProyecto {
   url: string;
   rama: string;
   nombre: string;
+  /** Relativa al repositorio; sin ella, `Dockerfile` en la raíz. */
+  rutaDockerfile?: string;
   puerto?: number;
   /** Paso 11c. Cada entrada trae valor: todavía no hay cifrado previo que conservar. */
   variables?: { clave: string; valor: string }[];
@@ -28,6 +30,8 @@ export interface AltaProyecto {
 export interface ConsultaRepositorio {
   url: string;
   rama: string;
+  /** Dónde buscar el Dockerfile; sin ella, en la raíz. */
+  rutaDockerfile?: string;
 }
 
 export interface CommitFuente {
@@ -45,6 +49,8 @@ export interface ValidacionRepositorio {
   rama: string;
   ramas: string[];
   commit: CommitFuente;
+  /** Ruta que se consultó (`Dockerfile` si no llegó ninguna). */
+  rutaDockerfile: string;
   /** `null` si no hay Dockerfile: la receta de M4 decide cómo se construye. */
   dockerfile: string | null;
   /** `EXPOSE` del Dockerfile, el de la receta, o el puerto por defecto. */

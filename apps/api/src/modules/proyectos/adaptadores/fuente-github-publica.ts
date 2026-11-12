@@ -37,13 +37,13 @@ export class FuenteGitHubPublica extends ProveedorFuente {
     super();
   }
 
-  async validar({ url, rama }: ConsultaRepositorio): Promise<ValidacionRepositorio> {
+  async validar({ url, rama, rutaDockerfile = RUTA_DOCKERFILE }: ConsultaRepositorio): Promise<ValidacionRepositorio> {
     const repositorio = repositorioDesdeUrl(url);
     const base = `${this.api}/repos/${repositorio.dueno}/${repositorio.nombre}`;
     await this.exigir(await this.pedir(base));
     const ramas = await this.ramas(base);
     const commit = await this.ultimoCommit(base, rama);
-    const dockerfile = await this.dockerfile(base, rama);
+    const dockerfile = await this.dockerfile(base, rama, rutaDockerfile);
     return {
       accesible: true,
       urlNormalizada: repositorio.url,
@@ -51,6 +51,7 @@ export class FuenteGitHubPublica extends ProveedorFuente {
       rama,
       ramas,
       commit,
+      rutaDockerfile,
       dockerfile,
       puerto: dockerfile ? (puertoDesdeExpose(dockerfile) ?? PUERTO_POR_DEFECTO) : PUERTO_POR_DEFECTO,
     };
@@ -76,8 +77,9 @@ export class FuenteGitHubPublica extends ProveedorFuente {
   }
 
   /** `null` si no hay archivo: el servicio pide la receta a M4 antes de rechazar. */
-  private async dockerfile(base: string, rama: string): Promise<string | null> {
-    const respuesta = await this.pedir(`${base}/contents/${RUTA_DOCKERFILE}?ref=${encodeURIComponent(rama)}`);
+  private async dockerfile(base: string, rama: string, ruta: string): Promise<string | null> {
+    const rutaCodificada = ruta.split("/").map(encodeURIComponent).join("/");
+    const respuesta = await this.pedir(`${base}/contents/${rutaCodificada}?ref=${encodeURIComponent(rama)}`);
     if (respuesta.status === HTTP_NO_ENCONTRADO) return null;
     const contenido = (await (await this.exigir(respuesta)).json()) as ContenidoGitHub | unknown[];
     if (Array.isArray(contenido) || contenido.type !== "file") return null;

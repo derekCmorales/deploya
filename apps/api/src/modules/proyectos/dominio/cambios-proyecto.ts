@@ -1,8 +1,9 @@
 import { argumentosDeComando, ComandoMalFormado, LARGO_MAXIMO_COMANDO } from "../../../compartido/argumentos-comando";
-import { ComandoInicioInvalido, DatosAltaInvalidos, PuertoInvalido, RutaInvalida } from "./errores";
+import { ComandoInicioInvalido, DatosAltaInvalidos, PuertoInvalido } from "./errores";
 import type { Proyecto } from "./proyecto";
 import { LONGITUD_MAX_NOMBRE, PUERTO_MAXIMO, PUERTO_MINIMO, RAMA_POR_DEFECTO } from "./proyectos.constantes";
 import { repositorioDesdeUrl } from "./repositorio-github";
+import { rutaDockerfileDe } from "./ruta-dockerfile";
 
 /**
  * Lo único que se puede cambiar de un proyecto (19). El subdominio no está en el tipo: es fijo
@@ -24,7 +25,7 @@ export function cambiosProyectoDe(cuerpo: unknown): CambiosProyecto {
     ...(datos.nombre === undefined ? {} : { nombre: nombreDe(datos.nombre) }),
     ...(datos.urlRepositorio === undefined ? {} : { urlRepositorio: repositorioDesdeUrl(texto(datos.urlRepositorio)).url }),
     ...(datos.rama === undefined ? {} : { rama: ramaDe(datos.rama) }),
-    ...(datos.rutaDockerfile === undefined ? {} : { rutaDockerfile: rutaDe(datos.rutaDockerfile) }),
+    ...(datos.rutaDockerfile === undefined ? {} : { rutaDockerfile: rutaDockerfileDe(datos.rutaDockerfile) }),
     ...(datos.puertoInterno === undefined ? {} : { puertoInterno: puertoDe(datos.puertoInterno) }),
     ...(datos.comandoInicio === undefined ? {} : { comandoInicio: comandoDe(datos.comandoInicio) }),
   };
@@ -47,15 +48,6 @@ function nombreDe(valor: unknown): string {
 
 function ramaDe(valor: unknown): string {
   return texto(valor) || RAMA_POR_DEFECTO;
-}
-
-/** «/Dockerfile», «./Dockerfile» y «Dockerfile» son lo mismo; «..», segmentos vacíos y `\` no se aceptan. */
-function rutaDe(valor: unknown): string {
-  const ruta = texto(valor).replace(/^(\.?\/)+/, "");
-  const segmentos = ruta.split("/");
-  const invalida = !ruta || ruta.includes("\\") || ruta.includes("\0") || segmentos.some((s) => s === ".." || s === "");
-  if (invalida) throw new RutaInvalida();
-  return ruta;
 }
 
 /**

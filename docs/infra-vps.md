@@ -141,26 +141,99 @@ sudo umount /mnt/snapshot
 
 Al final, `aws ec2 detach-volume --volume-id <vol-…>` y `aws ec2 delete-volume --volume-id <vol-…>` (el volumen temporal cobra 0.08 USD/GB-mes mientras exista). Si el volumen de Docker ya no existe (el recurso se eliminó), recrea el recurso desde la pestaña *Datos* del mismo proyecto dueño (vuelve el mismo nombre de contenedor y volumen, con contraseña nueva) y copia con el mismo `rsync`. En PostgreSQL el directorio copiado trae la contraseña vieja del rol `deploya`: tras `docker start`, ajústala a la nueva (la de `GET /proyectos/:id/datos/:recursoId/conexion`) con `docker exec -it "$VOL" psql -U deploya -d app -c '\password deploya'`, que la pide sin dejarla en el historial.
 
-## 6. Publicar la versión con recursos de datos (Nimbo y apps de varios servicios)
+## 6. Actualizar AWS y publicar la versión con recursos de datos (Nimbo)
 
-Orden único, la primera vez que se publica `feat/m5-recursos-datos`:
+Orden único, la primera vez que se publica `feat/m5-recursos-datos`. **Ruta normal: §6.1 → §6.2 → §6.4 → §6.5, en el nodo de 8 GB y con la cuenta en el plan gratuito**; §6.3 es el plan B. Cada paso dice **qué** se hace y **por qué**; las cifras salen de [costos.md](costos.md) y la decisión, del [ADR 0012](adr/0012-recursos-de-datos-en-el-nodo.md). Todo lo de Terraform se corre desde tu equipo, en `infra/terraform`, con las credenciales exportadas (Terraform no lee la sesión de `aws login`):
 
-| # | Paso | Cómo |
-|---|---|---|
-| 1 | Infra | `cd infra/terraform && terraform apply`: disco de 80 GB y snapshots diarios (DLM, 7 días). Para el piloto con Nimbo, `tipo_instancia = "m7i-flex.xlarge"` (16 GB; cuesta, ver [costos.md](costos.md)) y volver a `m7i-flex.large` al terminar |
-| 2 | Disco | En el servidor, si creció el volumen: `sudo growpart /dev/nvme0n1 1 && sudo resize2fs /dev/nvme0n1p1` (`lsblk` para confirmar el dispositivo) |
-| 3 | Entorno | En `.env.vps`, opcional: `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN=20`. `DOMINIO_BASE` ya existe y ahora también lo lee la API (URL pública del S3) |
-| 4 | Imágenes de datos | `docker pull pgvector/pgvector:pg17 redis:7-alpine pgsty/silo` (evita que el primer «Crear» espere la descarga) |
-| 5 | Publicar | `scripts/desplegar-vps.sh`: aplica la migración `20261112120000_recursos_datos` (tablas nuevas, `Plan.maxRecursosDatos`, `Plan.discoDatosMb`, `Proyecto.comandoInicio`) y el seed con los límites por plan |
-| 6 | Landing | En `deploya_landing`: `pnpm deploy:aws` (sección Datos y precios con bases y disco) |
+```bash
+cd infra/terraform
+eval "$(aws configure export-credentials --profile <perfil> --format env)"
+```
 
-Comprobación (2 minutos):
+### 6.1 Qué cambia en AWS y por qué
+
+`terraform plan` contra el piloto en línea (12-nov-2026) da **`3 to add, 1 to change, 0 to destroy`**: nada se recrea ni se borra, y todo funciona en el plan gratuito.
+
+| Recurso | Cambio | Por qué | Costo |
+|---|---|---|---|
+| `aws_instance.servidor` → disco raíz | 70 → **80 GB**, en sitio (`ModifyVolume`), y etiqueta `Respaldo=dlm-diario-<entorno>` | Los volúmenes de los recursos de datos viven en `/var/lib/docker/volumes` del mismo disco; la cuenta de [variables.tf](../infra/terraform/variables.tf) da ≈ 57 GB comprometidos y el resto es colchón, porque el disco de datos se mide y se avisa, no se corta. La etiqueta es la que busca DLM | +0.80 USD/mes |
+| `aws_iam_role.dlm` + adjunto | Nuevo rol que asume `dlm.amazonaws.com` con la política administrada `AWSDataLifecycleManagerServiceRole` | DLM necesita permiso para crear, etiquetar y borrar snapshots. Se usa la política administrada de AWS: solo snapshots de EBS, nada más (mínimo privilegio sin escribir JSON propio) | 0 |
+| `aws_dlm_lifecycle_policy.diario` | Snapshot diario 04:00 UTC, guarda 7 | El nodo ahora guarda **datos de clientes**: perder el disco ya no es «redesplegar». Es el respaldo mínimo **fuera del nodo** (vive en S3 de AWS, sobrevive a un disco dañado y a `terraform destroy`). 04:00 va después del `pg_dump` de las 03:00, así el snapshot ya lo incluye | ≈ 2 USD/mes (incremental) |
+| `tipo_instancia` | **No cambia: se queda en `m7i-flex.large` (8 GB)**. El xlarge es solo plan B (§6.3) | Nimbo se usa para la presentación, solo en el nodo. En uso **real** el peor momento es ≈ 6.5 de 8 GB (sistema y plataforma ≈ 2, Nimbo ≈ 2.5, una construcción ≈ 2) más 4 GB de swap para construir. El 88 % de memoria **comprometida** solo es un problema con otros clientes compartiendo el nodo. Y es el tipo más grande que deja el plan gratuito (consultado: `free-tier-eligible` llega a 8 GB) | 0 (≈ 13.5 USD por 5 días, como hoy) |
+
+Lo que **no** cambia: VPC, grupo de seguridad (sigue sin puerto 22 ni puertos de bases: los recursos de datos no publican puertos en el host), Elastic IP, IAM de SSM, landing (S3 + CloudFront) y presupuesto. No se usa RDS ni ElastiCache: ≈ 23 USD por proyecto contra ≈ 1.5 USD de ingreso (ADR 0012, alternativas).
+
+### 6.2 Disco y snapshots (sirve en el plan gratuito)
+
+```bash
+terraform plan -out=datos.tfplan        # debe decir 3 to add, 1 to change, 0 to destroy
+terraform apply datos.tfplan
+terraform output politica_snapshots     # policy-…
+aws dlm get-lifecycle-policies --region us-east-2 --query 'Policies[].[PolicyId,State,Description]' --output table
+```
+
+Luego, en el servidor (`terraform output -raw comando_ssm`), crecer la partición y el sistema de archivos, porque AWS agranda el volumen pero no la partición:
+
+```bash
+lsblk                                                  # nvme0n1 ya muestra 80G
+sudo growpart /dev/nvme0n1 1 && sudo resize2fs /dev/nvme0n1p1
+df -h /                                                # ≈ 78G
+```
+
+**Por qué separado del cambio de tipo:** esto funciona con la cuenta en el plan gratuito; el xlarge no. Si van juntos y la cuenta sigue en plan gratuito, el apply queda a medias con `InvalidParameterCombination`. AWS permite una modificación del volumen cada 6 horas: no repitas el paso si algo falla después, sigue desde aquí.
+
+### 6.3 Plan B: permitir el `m7i-flex.xlarge`
+
+**No es parte de la ruta normal.** Úsalo solo si, con Nimbo en marcha, `free -h` muestra el swap lleno o `docker stats` muestra reinicios por falta de memoria (OOM). Mientras tanto la cuenta se queda en el plan gratuito.
+
+
+Al 12-nov-2026 la cuenta está en **plan gratuito, activo, con 120 USD de crédito** (vence el 12-may-2027): `aws freetier get-account-plan-state --region us-east-1`. Ese plan **no deja lanzar ningún tipo de 16 GB**. Para permitirlo hay que pasar la cuenta a **plan de pago**:
+
+1. Consola de AWS → *Billing and Cost Management* → *Free Tier* (o el aviso «Upgrade plan» del panel) → **Upgrade to paid plan**. Lo hace el dueño de la cuenta (usuario raíz o alguien con permisos de facturación); no hay API ni recurso de Terraform para esto, a propósito.
+2. Comprobar: `aws freetier get-account-plan-state --region us-east-1` → `"accountPlanType": "PAID"`.
+
+**Por qué es aceptable:**
+
+- Los **créditos se conservan**: 5 días en xlarge (≈ 25 USD) salen de los 120 y quedan ≈ 95.
+- El presupuesto de 70 USD (`tope_presupuesto_usd`, avisos al 50, 80 y 100 % reales y al 100 % pronosticado) **sigue activo** y avisa por correo antes de que el gasto se salga de lo previsto. No hace falta subirlo para 5 días.
+- Se elige `m7i-flex.xlarge` y no `t3.xlarge` (18 USD/mes más barato) porque no tiene créditos de CPU que agotar ni excedente que cobrar: el peor caso de `t3.xlarge` en `unlimited` suma 87.60 USD/mes, justo lo que no queremos en una cuenta que ya cobra a tarjeta.
+
+**Riesgo y cómo se acota:** en plan de pago, cuando los créditos se acaban **AWS cobra a la tarjeta en lugar de cerrar la cuenta**, y **no se puede volver** al plan gratuito. Se acota con (a) el presupuesto de 70 USD, (b) volver a `m7i-flex.large` al terminar el piloto (§6.6) y (c) la fecha de destrucción del piloto. Un mes entero en xlarge (≈ 152 USD) pasa del tope y de los créditos: **no dejarlo encendido así**.
+
+Cambio de tipo (≈ 2 minutos de corte; la Elastic IP, el disco y los volúmenes de datos se conservan, los contenedores vuelven solos por su `restart: unless-stopped`):
+
+```bash
+# en terraform.tfvars:
+#   tipo_instancia = "m7i-flex.xlarge"
+terraform plan -out=xlarge.tfplan       # solo instance_type: "m7i-flex.large" -> "m7i-flex.xlarge"
+terraform apply xlarge.tfplan
+```
+
+### 6.4 Servidor y publicación
+
+| # | Paso | Cómo | Por qué |
+|---|---|---|---|
+| 1 | Entorno | En `.env.vps`: `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN=20` y `TRABAJADOR_CONCURRENCIA=1` (el valor por defecto; `2` solo con el xlarge) | Los cuatro proyectos de Nimbo (Next.js y NestJS) tardan más que el tope por defecto. En 8 GB, una construcción a la vez es lo que deja margen de memoria a Nimbo en marcha; con 4 vCPU cabrían dos. `DOMINIO_BASE` ya existe y ahora también lo lee la API (URL pública del S3) |
+| 2 | Imágenes de datos | `docker pull pgvector/pgvector:pg17 redis:7-alpine pgsty/silo` | Que el primer «Crear» no espere la descarga y no choque con el tiempo de espera del trabajador |
+| 3 | Publicar | `scripts/desplegar-vps.sh` | Aplica la migración `20261112120000_recursos_datos` (tablas nuevas, `Plan.maxRecursosDatos`, `Plan.discoDatosMb`, `Proyecto.comandoInicio`) y el seed con los límites por plan; ambos son idempotentes |
+| 4 | Landing | En `deploya_landing`: `pnpm deploy:aws` | La sección *Datos y precios* anuncia bases y disco; sin esto la landing promete menos de lo que hay |
+
+### 6.5 Comprobación
 
 ```bash
 curl -s https://api.<dominio>/datos/health                 # {"status":"ok"} o equivalente
 curl -s https://api.<dominio>/suscripciones/planes | grep -c maxRecursosDatos
+free -h                                                    # con Nimbo en marcha: swap casi libre fuera de las construcciones
+docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' | sort
 ```
 
-En la web: un proyecto → pestaña **Datos** → *Crear PostgreSQL* → pasa a **Disponible** → *Desplegar* → la bitácora de Ejecución dice «Recursos conectados: postgres · N variables». `docker ps --filter name=deploya-datos-` lista el contenedor y `docker volume ls --filter name=deploya-datos-` su volumen. Recorrido automatizado: `e2e/` (ver su README).
+En la web: un proyecto → pestaña **Datos** → *Crear PostgreSQL* → pasa a **Disponible** → *Desplegar* → la bitácora de Ejecución dice «Recursos conectados: postgres · N variables». `docker ps --filter name=deploya-datos-` lista el contenedor y `docker volume ls --filter name=deploya-datos-` su volumen. Al día siguiente, `aws ec2 describe-snapshots --owner-ids self --filters Name=tag:CreadoPor,Values=dlm` muestra el primer snapshot. Recorrido automatizado: `e2e/` (ver su README).
 
 Para desplegar Nimbo: guía `docs/operations/deploya.md` en su repo (4 proyectos en una cuenta **Pro** o **Business**, recursos en el proyecto `nimbo-api` compartidos con los workers).
+
+### 6.6 Al terminar el piloto con Nimbo
+
+Despliega los 4 proyectos de Nimbo **uno por uno** (primero `nimbo-api` con sus recursos) y no subas otras apps pesadas mientras dure la presentación.
+
+- **Si el nodo sigue y se abre a más usuarios:** detén o borra los proyectos y recursos de Nimbo: sus límites (5.25 GB) no dejan sitio a otros clientes en 8 GB. Si usaste el plan B, vuelve con `tipo_instancia = "m7i-flex.large"` (o borra la línea), `terraform apply` y `TRABAJADOR_CONCURRENCIA=1`. El disco de 80 GB **no se puede achicar**; se queda.
+- **Si el piloto se destruye:** `scripts/respaldar.sh`, copiar `/var/backups/deploya` fuera, guardar `CLAVE_CIFRADO_VARIABLES`, `terraform destroy` y luego borrar a mano los snapshots de DLM (sobreviven al destroy y cobran 0.05 USD/GB-mes) y el token de Cloudflare. Detalle en [infra/terraform/README.md](../infra/terraform/README.md).

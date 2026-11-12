@@ -115,13 +115,15 @@ Por memoria es un cliente **Pro** (4 de 10 proyectos de 1 GB; 3 de 10 recursos),
 
 **¿Cabe en el nodo actual (`m7i-flex.large`, 6 GB)?** Por límites, Nimbo solo ya compromete el **88 %** de la memoria disponible; por uso real deja ≈ 2.3 GB del 80 % útil para todos los demás (≈ 12 clientes Sandbox, o 7 Starter). Una construcción de Nimbo (≈ 2 GB) en el momento en que su `optimizer` llega a su límite empuja el host al swap y a las apps de todos al OOM. **No conviene.**
 
+> **Decisión del piloto (12-nov-2026):** Nimbo se usa **solo para la presentación**, sin otros clientes en el nodo, así que se queda en `m7i-flex.large` (8 GB, plan gratuito): en uso real el peor momento es ≈ 6.5 de 8 GB más 4 GB de swap. Lo de abajo aplica si Nimbo convive con otros clientes, y es el plan B de [infra-vps.md §6.3](infra-vps.md#63-plan-b-permitir-el-m7i-flexxlarge).
+
 **Instancia recomendada:** **`m7i-flex.xlarge`** (4 vCPU, 16 GB) **solo mientras dure el piloto con Nimbo**, y de vuelta a `m7i-flex.large` al terminar. Nimbo usa 5.25 de 14 GB comprometidos (38 %) y ≈ 2.5 de 11.2 GB reales útiles; quedan ≈ 8.7 GB reales para el resto (≈ 45 Sandbox o ≈ 27 Starter). Se elige `m7i-flex` y no `t3.xlarge` (18 USD/mes más barato) porque no tiene créditos que agotar ni excedente que cobrar (peor caso de `t3.xlarge`: + 87.60 USD/mes); con presupuesto ajustado y carga baja, `t3.xlarge` con `creditos_cpu = "standard"` también sirve.
 
 | | 5 días | 14 días | Mes completo |
 |---|---|---|---|
 | `m7i-flex.xlarge` + 80 GB + IPv4 + snapshots | **24.96** | 69.90 | **151.86** |
 | Contra el tope de 70 USD | 36 % | ≈ 100 % | **217 %** |
-| Contra los 150 USD de créditos | 17 % | 47 % | 101 % |
+| Contra los 120 USD de créditos (saldo al 12-nov) | 17 % | 47 % | 101 % |
 
 - **El piloto de 5 días con Nimbo cabe holgado** en el tope de 70 USD (≈ 25 USD). **Un mes completo no** (≈ 152 USD): o se vuelve a `m7i-flex.large` al terminar, o se sube `tope_presupuesto_usd` a 160 sabiendo que se agotan los créditos.
 - Requiere pasar la cuenta a **plan de pago** (ningún xlarge es elegible en el gratuito).

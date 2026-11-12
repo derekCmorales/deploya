@@ -8,13 +8,9 @@ import {
 } from "../../modules/orquestacion/puertos/contenedor.puerto";
 import { PREFIJO_IMAGEN, redDeProyecto } from "../../modules/construccion/dominio/motor.constantes";
 import { limitesDesde } from "../../modules/orquestacion/dominio/limites-contenedor";
+import { asegurarRed, ESTADO_CONFLICTO, ESTADO_NO_EXISTE, ESTADO_YA_HECHO, ETIQUETA_DEPLOYA, ignorarEstados } from "./redes-docker";
 
 const SEGUNDOS_PARA_DETENER = 10;
-const ESTADO_YA_HECHO = 304;
-const ESTADO_NO_EXISTE = 404;
-const ESTADO_PROHIBIDO = 403;
-const ESTADO_CONFLICTO = 409;
-const ETIQUETA_DEPLOYA = "app.deploya.proyecto";
 /** Cabecera de cada trama de `docker logs` sin TTY: flujo (1 byte), 3 de relleno y el largo (4 bytes). */
 const CABECERA_TRAMA = 8;
 const POSICION_LARGO = 4;
@@ -65,6 +61,7 @@ export class ContenedorDocker extends ContenedorPuerto {
       Image: espec.imagen,
       Env: Object.entries({ ...espec.variables, PORT: String(espec.puertoInterno) }).map(([k, v]) => `${k}=${v}`),
       Labels: { [ETIQUETA_DEPLOYA]: espec.red },
+      ...(espec.comando?.length ? { Cmd: espec.comando } : {}),
       HostConfig: {
         NanoCpus: limites.nanoCpus,
         Memory: limites.memoriaBytes,
@@ -126,27 +123,15 @@ export class ContenedorDocker extends ContenedorPuerto {
     return lineasDeSalida(demultiplexar(salida));
   }
 
-  private async asegurarRed(nombre: string): Promise<void> {
-    const existentes = await this.docker.listNetworks({ filters: { name: [nombre] } });
-    if (!existentes.some((red) => red.Name === nombre)) {
-      await this.docker.createNetwork({ Name: nombre, Driver: "bridge", Labels: { [ETIQUETA_DEPLOYA]: nombre } });
-    }
-    const red = this.docker.getNetwork(nombre);
-    for (const servicio of this.serviciosConectados) {
-      // Ya conectado: Docker responde 403 o 409 según la versión.
-      await this.ignorar([ESTADO_PROHIBIDO, ESTADO_CONFLICTO], () => red.connect({ Container: servicio }));
-    }
+  private asegurarRed(nombre: string): Promise<void> {
+    return asegurarRed(this.docker, nombre, this.serviciosConectados);
   }
 
   private async eliminarSiExiste(nombre: string): Promise<void> {
     await this.ignorar([ESTADO_NO_EXISTE], () => this.docker.getContainer(nombre).remove({ force: true }));
   }
 
-  private async ignorar(estados: number[], accion: () => Promise<unknown>): Promise<void> {
-    try {
-      await accion();
-    } catch (error) {
-      if (!estados.includes((error as { statusCode?: number }).statusCode ?? 0)) throw error;
-    }
+  private ignorar(estados: number[], accion: () => Promise<unknown>): Promise<void> {
+    return ignorarEstados(estados, accion);
   }
 }

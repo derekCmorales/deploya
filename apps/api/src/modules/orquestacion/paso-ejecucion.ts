@@ -5,11 +5,14 @@ import { RepositorioArtefactos } from "../construccion/puertos/repositorio-artef
 import { RepositorioDespliegues } from "../construccion/puertos/repositorio-despliegues.puerto";
 import { PUERTO_RECETAS } from "../construccion/deteccion/deteccion.constantes";
 import { OrquestacionService } from "./orquestacion.service";
+import { fusionarVariables, textoInyeccion } from "./dominio/variables-contenedor";
+import { RecursosDatosDespliegue } from "./puertos/recursos-datos-despliegue.puerto";
 import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
 
 /**
  * Etapa 3 · Ejecución: contenedor con los límites del plan y las variables del proyecto
- * (M3-03), y verificación de salud. La bitácora dice cuántas variables, nunca cuáles.
+ * (M3-03) más las de sus recursos de datos (las del usuario ganan), y verificación de salud. La
+ * bitácora dice qué recursos se conectaron y cuántas variables, nunca sus valores.
  * En una reversión (M5-04) no hubo Construcción: la imagen es la del artefacto que se reusa.
  */
 @Injectable()
@@ -22,6 +25,7 @@ export class PasoEjecucion extends PasoPipeline {
     private readonly despliegues: RepositorioDespliegues,
     private readonly variablesEntorno: VariablesEntornoPuerto,
     private readonly artefactos: RepositorioArtefactos,
+    private readonly datos: RecursosDatosDespliegue,
   ) {
     super();
   }
@@ -29,7 +33,9 @@ export class PasoEjecucion extends PasoPipeline {
   async ejecutar(contexto: ContextoDespliegue): Promise<void> {
     const { despliegue, proyecto, bitacora } = contexto;
     contexto.imagen ??= await this.imagenReutilizada(contexto);
-    const variables = await this.variablesEntorno.deProyecto(proyecto.id);
+    const delUsuario = await this.variablesEntorno.deProyecto(proyecto.id);
+    const inyeccion = await this.datos.paraDespliegue(proyecto);
+    const { variables, inyectadas } = fusionarVariables(delUsuario, inyeccion.variables);
     const { contenedor, recursos, salud } = await this.aprovisionar(contexto, variables);
     contexto.contenedor = contenedor;
     await this.despliegues.cambiarEstado(despliegue.id, this.estado, {
@@ -38,8 +44,9 @@ export class PasoEjecucion extends PasoPipeline {
       memoriaMb: recursos.memoriaMb,
     });
     bitacora.escribir(this.etapa, `Contenedor iniciado · ${recursos.cpus} vCPU · ${recursos.memoriaMb} MB`);
-    const cantidad = Object.keys(variables).length;
+    const cantidad = Object.keys(delUsuario).length;
     if (cantidad > 0) bitacora.escribir(this.etapa, textoVariables(cantidad));
+    if (inyeccion.recursos.length > 0) bitacora.escribir(this.etapa, textoInyeccion(inyeccion.recursos, inyectadas));
     bitacora.escribir(this.etapa, `Verificación de salud OK · ${salud.detalle} en ${salud.milisegundos} ms`);
   }
 

@@ -10,7 +10,7 @@ La API no llama a Docker ni al enrutador de borde: los servicios dependen de pue
 |---|---|---|---|
 | `ColaConstruccionPuerto` | `ColaBullMq` (cola `despliegues`) | `ColaMemoria` | M4 |
 | `ClonadorRepositorioPuerto` | `ClonadorGit` (`execFile`, solo https públicos) | `ClonadorStub` | M4 |
-| `ConstructorImagenPuerto` | `ConstructorDocker` (dockerode, 10 min) | `ConstructorImagenStub` | M4 |
+| `ConstructorImagenPuerto` | `ConstructorDocker` (dockerode, `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN`, 20 por omisión) | `ConstructorImagenStub` | M4 |
 | `ColaOperacionPuerto` | `ColaOperacionBullMq` (cola `operacion`, 3 reintentos) | `ColaOperacionMemoria` | M5 |
 | `LectorFuente` (trabajador) | `LectorFuenteLocal` vía `ClonadorGit.lector` | `LectorFuenteMemoria` | M4 |
 | `RepositorioDespliegues`, `RepositorioArtefactos` | `*Prisma` | `*Memoria` | M4 |
@@ -21,7 +21,12 @@ La API no llama a Docker ni al enrutador de borde: los servicios dependen de pue
 | `CuotaPlanPuerto` | `CuotaPlanSuscripciones` sobre `cuotaDe` de M2 (en el módulo de M5) | `CuotaPlanStub` (Sandbox) | M5 |
 | `VariablesEntornoPuerto` | `VariablesEntornoPendientes` (sin variables) hasta que M3-03 exporte `descifradasDe` | `VariablesEntornoStub` | M5 |
 | `EnrutamientoPuerto` | `EnrutamientoTraefikArchivo` (ADR 0005) | `EnrutamientoStub` | M6 |
+| `RecursosDatosPuerto` (trabajador) | `RecursosDatosDocker` (volumen, sin puertos, `CapDrop ALL` + 5 capacidades, `docker exec` de preparación y `du`) | `RecursosDatosStub` | datos |
+| `ColaDatosPuerto` | `ColaDatosBullMq` (cola `datos`, concurrencia 1) | `ColaDatosMemoria` | datos |
+| `RepositorioRecursosDatos` | `RepositorioRecursosDatosPrisma` | `RepositorioRecursosDatosMemoria` | datos |
 
 Los stubs cumplen el mismo contrato que los reales (LSP) y se usan en las pruebas unitarias (`src/pruebas/motor.ts`).
 
 La API y el trabajador comparten despliegues, artefactos y proyectos por PostgreSQL (los repositorios en memoria quedan para las pruebas). **Pendiente de otros equipos:** el adaptador de `VariablesEntornoPuerto` sobre `VariablesProyectoService.descifradasDe` (M3-03, Eduardo).
+
+Prueba de integración con Docker real de los recursos de datos (no corre en `pnpm test`): `DEPLOYA_PRUEBAS_DOCKER=1 pnpm --filter @deploya/api exec jest recursos-datos-docker.int` (necesita dockerd y las imágenes `pgvector/pgvector:pg17`, `redis:7-alpine` y `pgsty/silo`).

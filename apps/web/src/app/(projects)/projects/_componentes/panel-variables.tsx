@@ -11,9 +11,10 @@ import { useMiSuscripcion } from "@/hooks/use-suscripcion";
 import { useVariablesProyecto } from "@/hooks/use-variables-proyecto";
 import { bloqueoDespliegue, haceCuanto } from "@/lib/proyectos";
 import { avisoEstado, sinVigencia } from "@/lib/suscripcion";
-import { errorClave, textoCambios, valorVisible, type FilaVariable } from "@/lib/variables";
+import { MAXIMO_VARIABLES, errorClave, textoCambios, valorVisible, type FilaVariable } from "@/lib/variables";
 
 import { BannerBloqueo } from "./banner-bloqueo";
+import { PegarEnv } from "./pegar-env";
 
 /** Pantalla 17. Los cambios no tocan el contenedor hasta el próximo despliegue. */
 export function PanelVariables({ proyectoId }: { proyectoId: string }) {
@@ -53,10 +54,16 @@ export function PanelVariables({ proyectoId }: { proyectoId: string }) {
           ))}
         </tbody>
       </table>
-      <Button type="button" variant="outline" size="sm" className="self-start" onClick={variables.anadir}>
-        <Plus />
-        Añadir variable
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={variables.anadir} disabled={variables.filas.length >= MAXIMO_VARIABLES}>
+          <Plus />
+          Añadir variable
+        </Button>
+        <PegarEnv filas={variables.filas} onPegar={variables.pegar} />
+        <span className="tnum text-xs text-muted-foreground">
+          {variables.filas.filter((fila) => fila.clave.trim() !== "").length} / {MAXIMO_VARIABLES}
+        </span>
+      </div>
     </div>
   );
 }

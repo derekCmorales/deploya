@@ -18,5 +18,7 @@ export function cuotaDeSuscripcion(suscripcion: Suscripcion): Cuota {
     cpus: plan.cpus,
     memoriaMb: plan.memoriaMb,
     construccionesMes: plan.construccionesMes,
+    maxRecursosDatos: plan.maxRecursosDatos,
+    discoDatosMb: plan.discoDatosMb,
   };
 }

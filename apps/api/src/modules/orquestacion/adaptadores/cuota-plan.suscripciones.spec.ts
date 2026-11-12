@@ -10,6 +10,8 @@ const CUOTA_STARTER: Cuota = {
   cpus: 0.5,
   memoriaMb: 512,
   construccionesMes: 100,
+  maxRecursosDatos: 3,
+  discoDatosMb: 2048,
 };
 
 describe("CuotaPlanSuscripciones.planDe (M7-02)", () => {

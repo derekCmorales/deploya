@@ -46,4 +46,7 @@ export interface Cuota {
   cpus: number;
   memoriaMb: number;
   construccionesMes: number;
+  /** Recursos de datos por cuenta; `SIN_LIMITE` en autoalojado. */
+  maxRecursosDatos: number;
+  discoDatosMb: number;
 }

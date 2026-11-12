@@ -104,6 +104,8 @@ model Plan {
   cpus              Decimal  @db.Decimal(4, 2) // vCPU por proyecto
   memoriaMb         Int // por proyecto
   construccionesMes Int
+  maxRecursosDatos  Int      @default(1) // bases administradas por cuenta (feat/m5-recursos-datos)
+  discoDatosMb      Int      @default(512) // por recurso: se mide y se avisa, no corta
   orden             Int
   activo            Boolean  @default(true)
 
@@ -190,15 +192,18 @@ model Proyecto {
   rama               String             @default("main")
   rutaDockerfile     String             @default("Dockerfile")
   puertoInterno      Int                @default(8080)
+  comandoInicio      String?            @db.VarChar(512) // sobrescribe el CMD de la imagen; null = el de la imagen
   receta             RecetaConstruccion @default(dockerfile) // la última que detectó M4
   despliegueActivoId String?            @unique // el que atiende tráfico; lo escribe M5
   despliegueActivo   Despliegue?        @relation("DespliegueActivo", fields: [despliegueActivoId], references: [id], onDelete: SetNull)
   creado             DateTime           @default(now())
   actualizado        DateTime           @updatedAt
 
-  variables   VariableEntorno[]
-  despliegues Despliegue[]      @relation("DesplieguesDelProyecto")
-  artefactos  Artefacto[]
+  variables                VariableEntorno[]
+  despliegues              Despliegue[]             @relation("DesplieguesDelProyecto")
+  artefactos               Artefacto[]
+  recursosDatos            RecursoDatos[]
+  recursosDatosCompartidos RecursoDatosCompartido[]
 
   @@unique([usuarioId, nombre])
 }
@@ -359,7 +364,7 @@ model ConfiguracionInstalacion {
   hashCodigo           String?
   codigoVence          DateTime?
   politicaRegistro     PoliticaRegistro @default(invitacion)
-  cpuPorProyecto       Decimal          @db.Decimal(4, 2) @default(1)
+  cpuPorProyecto       Decimal          @default(1) @db.Decimal(4, 2)
   memoriaMbPorProyecto Int              @default(1024)
   proyectosPorUsuario  Int?
   // SP-17 · correo de la instalación (asistente 31). Con datos aquí, mandan sobre SMTP_* del .env.
@@ -387,4 +392,49 @@ model Invitacion {
   creado    DateTime  @default(now())
 
   @@index([vence])
+}
+
+// M5 · Derek (feat/m5-recursos-datos). Base administrada con volumen persistente; vive en la red
+// del proyecto dueño y en la de los proyectos con los que se comparte. Estados ≠ despliegue y suscripción.
+enum TipoRecursoDatos {
+  postgres
+  redis
+  s3
+}
+
+enum EstadoRecursoDatos {
+  creando
+  disponible
+  detenido
+  error
+}
+
+model RecursoDatos {
+  id                String                   @id @default(uuid())
+  proyectoId        String // dueño: al borrarlo cae la fila (el trabajador borra antes contenedor y volumen)
+  proyecto          Proyecto                 @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  tipo              TipoRecursoDatos
+  estado            EstadoRecursoDatos       @default(creando)
+  detalle           String?
+  contenedor        String // deploya-datos-<subdominio>-<tipo>; también es el host en la red
+  volumen           String
+  contrasenaCifrada String // AES-GCM con CLAVE_CIFRADO_VARIABLES; nunca en claro
+  usoDiscoMb        Int?
+  medidoEn          DateTime?
+  creado            DateTime                 @default(now())
+  actualizado       DateTime                 @updatedAt
+  compartidos       RecursoDatosCompartido[]
+
+  @@unique([proyectoId, tipo])
+}
+
+model RecursoDatosCompartido {
+  recursoId  String
+  recurso    RecursoDatos @relation(fields: [recursoId], references: [id], onDelete: Cascade)
+  proyectoId String
+  proyecto   Proyecto     @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  creado     DateTime     @default(now())
+
+  @@id([recursoId, proyectoId])
+  @@index([proyectoId])
 }

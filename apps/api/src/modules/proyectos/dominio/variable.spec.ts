@@ -16,6 +16,13 @@ describe("ClaveVariable", () => {
     expect(() => validarConjuntoVariables([{ clave: "PORT", valor: "8080" }])).toThrow(ClaveReservada);
   });
 
+  it("Hasta 150 variables: 150 pasan y la 151 se rechaza", () => {
+    const justas = Array.from({ length: 150 }, (_, i) => ({ clave: `VAR_${i}`, valor: "x" }));
+    expect(MAXIMO_VARIABLES).toBe(150);
+    expect(() => validarConjuntoVariables(justas)).not.toThrow();
+    expect(() => validarConjuntoVariables([...justas, { clave: "OTRA", valor: "x" }])).toThrow(DemasiadasVariables);
+  });
+
   it("límites de valor y cantidad", () => {
     expect(() => validarConjuntoVariables([{ clave: "SALUDO", valor: "a".repeat(MAXIMO_BYTES_VALOR + 1) }])).toThrow(ValorDemasiadoLargo);
     const demasiadas = Array.from({ length: MAXIMO_VARIABLES + 1 }, (_, i) => ({ clave: `VAR_${i}`, valor: "x" }));

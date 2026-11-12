@@ -71,3 +71,8 @@ output "siguientes_pasos" {
     8. Guarda CLAVE_CIFRADO_VARIABLES fuera del servidor y copia /var/backups/deploya a otro lado.
   PASOS
 }
+
+output "politica_snapshots" {
+  description = "ID de la política de DLM que toma el snapshot diario del disco (null si snapshots_diarios = false)."
+  value       = var.snapshots_diarios ? aws_dlm_lifecycle_policy.diario[0].id : null
+}

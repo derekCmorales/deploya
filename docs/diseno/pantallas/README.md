@@ -34,6 +34,7 @@ Se generan desde las fuentes del canvas; si cambias una pantalla en el diseño, 
 | 13 | [Proyecto · Resumen](13-Proyecto-resumen.md) | `/projects/[proyecto]` | Derek (actividad: Eduardo) | A3 |
 | 14 | [Proyecto · Despliegues](14-Proyecto-despliegues.md) | `/projects/[proyecto]/despliegues` | Derek | A3 |
 | 17 | [Proyecto · Variables de entorno](17-Proyecto-variables.md) | `/projects/[proyecto]/variables` | Eduardo | A2 |
+| 18 | [Proyecto · Datos](18-Proyecto-datos.md) | `/projects/[proyecto]/datos` | Eduardo (datos: Derek) | Sprint |
 | 19 | [Proyecto · Configuración](19-Proyecto-configuracion.md) | `/projects/[proyecto]/configuracion` | Derek | A3 |
 | 19b | [Eliminar proyecto · confirmación](19b-Eliminar-dialogo.md) | `/projects/[proyecto]/configuracion` | Derek | A3 |
 | 24 | [Correos del sistema](24-Correos.md) | `— (plantillas M10)` | Eddy | A1 (recuperación: A2) |

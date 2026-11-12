@@ -12,6 +12,8 @@
 
 Pública. `Segmented` 30 / 365 días; cuatro planes; tabla de recursos v4.1; con sesión marca «Plan actual».
 
+Las filas «Bases de datos» (`maxRecursosDatos`) y «Disco por base» (`discoDatosMb`, en GB) aparecen solo si el catálogo las trae ([recursos-datos.md](../../contratos/recursos-datos.md)); un plan sin el campo muestra «—».
+
 ## Componentes
 
 - `AppShell` — header de 56px
@@ -77,6 +79,16 @@ Construcciones / mes
 150
 500
 2 000
+Bases de datos
+1
+3
+10
+25
+Disco por base
+0.5 GB
+2 GB
+10 GB
+25 GB
 Todos los proyectos corren en un único servidor (VPS) y se publican en un subdominio
 *.deploya.app
 con HTTPS.

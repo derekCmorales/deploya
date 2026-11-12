@@ -1,4 +1,4 @@
-import { Cpu, FolderGit2, Globe, Package, Pencil, Terminal, Variable, type LucideIcon } from "lucide-react";
+import { Cpu, Database, FolderGit2, Globe, Package, Pencil, Terminal, Variable, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { RielEtapas } from "@/components/deploya/riel-etapas";
@@ -13,6 +13,8 @@ import { variablesDeAlta } from "@/lib/variables";
 import { BannerBloqueo } from "./banner-bloqueo";
 
 type Alta = ReturnType<typeof useAltaProyecto>;
+
+export const NOTA_DATOS = "Después de crear el proyecto podrás agregar PostgreSQL, Redis o S3 desde la pestaña Datos.";
 
 const SIN_EMPEZAR = ["pendiente", "pendiente", "pendiente", "pendiente", "pendiente"] as const;
 
@@ -67,6 +69,11 @@ export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos
           </Fila>
         </dl>
       </Card>
+
+      <p className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Database className="size-3.5 shrink-0" aria-hidden />
+        {NOTA_DATOS}
+      </p>
 
       <div className="flex flex-col gap-3">
         <p className="text-xs font-medium text-muted-foreground">Qué pasará</p>

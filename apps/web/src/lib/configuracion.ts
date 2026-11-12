@@ -9,6 +9,8 @@ export interface DatosProyecto {
   rama: string;
   rutaDockerfile: string;
   puertoInterno: number;
+  /** Sobrescribe el `CMD` de la imagen; `null` = el de la imagen. Opcional por si la API aún no lo devuelve. */
+  comandoInicio?: string | null;
 }
 
 /** El formulario edita texto: el puerto y la ruta se normalizan al enviar. */
@@ -18,11 +20,12 @@ export interface BorradorProyecto {
   rama: string;
   rutaDockerfile: string;
   puertoInterno: string;
+  comandoInicio: string;
 }
 
 export type CampoConfiguracion = keyof BorradorProyecto;
 
-/** Cuerpo de `PATCH /proyectos/:id`: solo lo que cambió. */
+/** Cuerpo de `PATCH /proyectos/:id`: solo lo que cambió. Comando vacío = `null` (vuelve al de la imagen). */
 export type CambiosConfiguracion = Partial<DatosProyecto>;
 
 /** `PATCH` guardó: el marco del proyecto vuelve a leer la lista para mostrar el nombre nuevo. */
@@ -31,6 +34,7 @@ export const EVENTO_PROYECTO_ACTUALIZADO = "deploya:proyecto-actualizado";
 const NOMBRE_MAXIMO = 64;
 const PUERTO_MINIMO = 1;
 const PUERTO_MAXIMO = 65535;
+export const COMANDO_INICIO_MAXIMO = 512;
 
 /** La API guarda `Dockerfile`; la ficha lo muestra como `/Dockerfile`. */
 export function rutaNormalizada(ruta: string): string {
@@ -44,6 +48,7 @@ export function borradorDe(proyecto: DatosProyecto): BorradorProyecto {
     rama: proyecto.rama,
     rutaDockerfile: `/${rutaNormalizada(proyecto.rutaDockerfile)}`,
     puertoInterno: String(proyecto.puertoInterno),
+    comandoInicio: proyecto.comandoInicio ?? "",
   };
 }
 
@@ -57,6 +62,8 @@ export function cambiosDe(original: BorradorProyecto, borrador: BorradorProyecto
     cambios.rutaDockerfile = rutaNormalizada(borrador.rutaDockerfile);
   }
   if (borrador.puertoInterno.trim() !== original.puertoInterno.trim()) cambios.puertoInterno = Number(borrador.puertoInterno);
+  const comando = borrador.comandoInicio.trim();
+  if (comando !== original.comandoInicio.trim()) cambios.comandoInicio = comando === "" ? null : comando;
   return cambios;
 }
 
@@ -84,6 +91,9 @@ export function erroresDeBorrador(borrador: BorradorProyecto): ErroresBorrador {
   if (!/^\d+$/.test(borrador.puertoInterno.trim()) || puerto < PUERTO_MINIMO || puerto > PUERTO_MAXIMO) {
     errores.puertoInterno = `El puerto debe ser un entero entre ${PUERTO_MINIMO} y ${PUERTO_MAXIMO}.`;
   }
+  if (borrador.comandoInicio.trim().length > COMANDO_INICIO_MAXIMO) {
+    errores.comandoInicio = `El comando admite hasta ${COMANDO_INICIO_MAXIMO} caracteres.`;
+  }
   return errores;
 }
 
@@ -99,6 +109,7 @@ const CAMPO_POR_CODIGO: Record<string, CampoConfiguracion> = {
   "rama-no-encontrada": "rama",
   "ruta-invalida": "rutaDockerfile",
   "puerto-invalido": "puertoInterno",
+  "comando-invalido": "comandoInicio",
 };
 
 /** Cada `codigo` de la API se pinta bajo su campo; lo demás (sin red, GitHub caído) va en un aviso general. */

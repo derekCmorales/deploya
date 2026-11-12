@@ -1,4 +1,4 @@
-import { Check, Cpu, FolderGit2, Hammer, Info, MemoryStick, type LucideIcon } from "lucide-react";
+import { Check, Cpu, Database, FolderGit2, Hammer, HardDrive, Info, MemoryStick, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   esGratuito,
-  RECURSOS,
+  recursosDelCatalogo,
   textoPeriodo,
   textoPrecio,
+  valorRecurso,
   type ClaveRecurso,
   type PlanCatalogo,
   type Vigencia,
@@ -21,6 +22,8 @@ const ICONOS: Record<ClaveRecurso, LucideIcon> = {
   cpus: Cpu,
   memoriaMb: MemoryStick,
   construccionesMes: Hammer,
+  maxRecursosDatos: Database,
+  discoDatosMb: HardDrive,
 };
 
 interface TablaPlanesProps {
@@ -34,6 +37,7 @@ interface TablaPlanesProps {
 
 export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada = false }: TablaPlanesProps) {
   const esActual = (plan: PlanCatalogo) => plan.codigo === codigoActual;
+  const recursos = recursosDelCatalogo(planes);
   const columna = (plan: PlanCatalogo, ultima = false) =>
     cn(esActual(plan) && "border-x border-border-strong bg-card", esActual(plan) && ultima && "rounded-b-[14px] border-b");
 
@@ -88,9 +92,9 @@ export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada 
               </div>
             ))}
           </div>
-          {RECURSOS.map((recurso, i) => {
+          {recursos.map((recurso, i) => {
             const Icono = ICONOS[recurso.clave];
-            const ultima = i === RECURSOS.length - 1;
+            const ultima = i === recursos.length - 1;
             return (
               <div role="row" key={recurso.clave} className="contents">
                 <div role="rowheader" className="flex items-center gap-2 border-t border-border py-3 text-sm">
@@ -103,7 +107,7 @@ export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada 
                     key={plan.codigo}
                     className={cn("border-t border-border px-5 py-3 font-mono text-[13px]", columna(plan, ultima))}
                   >
-                    {recurso.formato(plan[recurso.clave])}
+                    {valorRecurso(plan, recurso)}
                   </div>
                 ))}
               </div>

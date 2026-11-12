@@ -6,6 +6,8 @@ export interface EspecContenedor {
   cpus: number;
   memoriaMb: number;
   variables: Record<string, string>;
+  /** `Proyecto.comandoInicio` ya partido en argumentos: reemplaza el `CMD` de la imagen (sin shell). */
+  comando?: string[];
 }
 
 export interface ContenedorCreado {

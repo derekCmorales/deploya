@@ -28,6 +28,15 @@ describe("AdaptersModule", () => {
       enrutamiento: { dominioBase: "localhost", esquema: "http", certResolver: null },
       acmeArchivo: "/acme/acme.json",
       trabajadorConcurrencia: 1,
+      tiempoMaximoConstruccionMs: 20 * 60 * 1000,
     }));
+  });
+
+  it("Tiempo de construcción configurable: MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN=30 da 30 minutos", () => {
+    expect(configuracionDesde({ MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN: "30" }).tiempoMaximoConstruccionMs).toBe(30 * 60 * 1000);
+  });
+
+  it.each(["0", "-5", "abc", ""])("un tiempo de construcción inválido (%p) vuelve a los 20 minutos por omisión", (valor) => {
+    expect(configuracionDesde({ MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN: valor }).tiempoMaximoConstruccionMs).toBe(20 * 60 * 1000);
   });
 });

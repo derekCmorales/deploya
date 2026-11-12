@@ -48,6 +48,8 @@ describe("SuscripcionesController", () => {
       cpus: 0.25,
       memoriaMb: 256,
       construccionesMes: 30,
+      maxRecursosDatos: 1,
+      discoDatosMb: 512,
     });
   });
 

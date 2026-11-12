@@ -33,6 +33,7 @@ import {
   type ResumenProyecto,
 } from "@/lib/resumen";
 
+import { TarjetaDatosResumen } from "./tarjeta-datos-resumen";
 import { TarjetaUltimas24h } from "./tarjeta-ultimas-24h";
 
 const ICONO_HITO: Record<string, LucideIcon> = {
@@ -67,6 +68,7 @@ export function PanelResumen({ proyectoId }: { proyectoId: string }) {
       </div>
       <div className="flex flex-wrap items-stretch gap-6">
         <UltimoDespliegue resumen={datos} />
+        <TarjetaDatosResumen proyectoId={proyectoId} />
       </div>
       <TarjetaUltimas24h proyectoId={proyectoId} />
     </div>

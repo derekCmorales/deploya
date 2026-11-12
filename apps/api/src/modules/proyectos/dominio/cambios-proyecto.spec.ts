@@ -1,5 +1,5 @@
 import { cambiosProyectoDe } from "./cambios-proyecto";
-import { DatosAltaInvalidos, PuertoInvalido, RutaInvalida, UrlRepositorioInvalida } from "./errores";
+import { ComandoInicioInvalido, DatosAltaInvalidos, PuertoInvalido, RutaInvalida, UrlRepositorioInvalida } from "./errores";
 
 describe("CambiosProyecto (M3-04)", () => {
   it("solo lleva lo que vino en el cuerpo", () => {
@@ -68,5 +68,20 @@ describe("CambiosProyecto (M3-04)", () => {
     it.each([0, 65536, -1, 80.5, "abc", "", null, true])("%j es PuertoInvalido", (puerto) => {
       expect(() => cambiosProyectoDe({ puertoInterno: puerto })).toThrow(PuertoInvalido);
     });
+  });
+
+  it("Comando de inicio: se recorta, un texto en blanco o null vuelve al CMD de la imagen", () => {
+    expect(cambiosProyectoDe({ comandoInicio: "  node dist/main.js  " })).toEqual({ comandoInicio: "node dist/main.js" });
+    expect(cambiosProyectoDe({ comandoInicio: "   " })).toEqual({ comandoInicio: null });
+    expect(cambiosProyectoDe({ comandoInicio: null })).toEqual({ comandoInicio: null });
+  });
+
+  it("Comando de inicio demasiado largo: más de 512 caracteres se rechaza con comando-invalido", () => {
+    expect(() => cambiosProyectoDe({ comandoInicio: `node ${"a".repeat(512)}` })).toThrow(ComandoInicioInvalido);
+  });
+
+  it("Comando con comilla sin cerrar o que no es texto se rechaza con comando-invalido", () => {
+    expect(() => cambiosProyectoDe({ comandoInicio: `node "dist/main.js` })).toThrow(ComandoInicioInvalido);
+    expect(() => cambiosProyectoDe({ comandoInicio: 42 })).toThrow(ComandoInicioInvalido);
   });
 });

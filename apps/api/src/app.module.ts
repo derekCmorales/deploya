@@ -14,6 +14,7 @@ import { ConstruccionModule } from "./modules/construccion/construccion.module";
 import { OrquestacionModule } from "./modules/orquestacion/orquestacion.module";
 import { EnrutamientoModule } from "./modules/enrutamiento/enrutamiento.module";
 import { HerramientasModule } from "./modules/herramientas/herramientas.module";
+import { DatosModule } from "./modules/datos/datos.module";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { HerramientasModule } from "./modules/herramientas/herramientas.module";
     OrquestacionModule,
     EnrutamientoModule,
     HerramientasModule,
+    DatosModule,
   ],
   controllers: [HealthController],
 })

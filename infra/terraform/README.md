@@ -7,6 +7,7 @@ Crea una **EC2 `m7i-flex.large` (2 vCPU, 8 GB) en us-east-2** (Ubuntu 24.04) que
 | `red.tf` | VPC propia, subred pública, Internet Gateway (sin NAT) y grupo de seguridad con 80/443; el 22 solo con `cidr_administracion` |
 | `iam.tf` | Perfil de instancia con solo `AmazonSSMManagedInstanceCore` (Session Manager) |
 | `main.tf` | EC2 con IMDSv2 de un salto, disco gp3 cifrado, Elastic IP y presupuesto de AWS Budgets |
+| `respaldos.tf` | Snapshot diario del disco con Data Lifecycle Manager (7 días) y su rol IAM: respaldo mínimo de la base y de los volúmenes de los recursos de datos ([ADR 0012](../../docs/adr/0012-recursos-de-datos-en-el-nodo.md)) |
 | `landing.tf` | Landing pública: bucket S3 privado, CloudFront con OAC, certificado de ACM en us-east-1, función de rutas y cabeceras de seguridad ([ADR 0011](../../docs/adr/0011-landing-en-s3-y-cloudfront.md)) |
 | `cloud-init.yml` + `preparar-servidor.sh` | Primer arranque: Docker CE y Compose oficiales, `daemon.json`, swap, sysctl, sshd sin contraseñas, unattended-upgrades, usuario `deploya`, clon en `/srv/deploya`, cron del manual §3.5 e imágenes base descargadas |
 
@@ -116,6 +117,6 @@ Costo: la capa gratuita de CloudFront (1 TB de transferencia y 10 millones de pe
 
 ## Costo y destruir
 
-Con `m7i-flex.large` (0.0958 USD/h), disco de 70 GB e IPv4: **≈ 13 USD por 5 días** y ≈ 79 USD por un mes completo, descontados de los créditos ([ADR 0009](../../docs/adr/0009-piloto-en-aws-ec2-con-terraform.md#consecuencias)). La Elastic IP cobra aunque la EC2 no exista, así que no dejes un apply a medias por días: termínalo o destrúyelo.
+Con `m7i-flex.large` (0.09576 USD/h), disco de 80 GB, IPv4 y snapshots: **≈ 13.5 USD por 5 días** y ≈ 82 USD por un mes completo, descontados de los créditos. Con `m7i-flex.xlarge` para el piloto con Nimbo: ≈ 25 USD por 5 días y ≈ 152 USD por mes. Modelo completo: [docs/costos.md](../../docs/costos.md). La Elastic IP cobra aunque la EC2 no exista, así que no dejes un apply a medias por días: termínalo o destrúyelo.
 
-`terraform destroy` borra **todo** lo que creó Terraform, también la EC2 **con su disco** (base y respaldos locales incluidos). Antes: `scripts/respaldar.sh`, copiar `/var/backups/deploya` fuera y guardar `CLAVE_CIFRADO_VARIABLES`. Con `proteccion_terminacion = true`, primero ponla en `false` y aplica. Al final, `terraform state list` debe salir vacío.
+`terraform destroy` borra **todo** lo que creó Terraform, también la EC2 **con su disco** (base y respaldos locales incluidos). Antes: `scripts/respaldar.sh`, copiar `/var/backups/deploya` fuera y guardar `CLAVE_CIFRADO_VARIABLES`. Con `proteccion_terminacion = true`, primero ponla en `false` y aplica. Los **snapshots de DLM no se borran** con el destroy (son la última copia): bórralos a mano cuando ya no hagan falta (`aws ec2 describe-snapshots --owner-ids self --filters Name=tag:CreadoPor,Values=dlm`), porque siguen cobrando 0.05 USD/GB-mes. Al final, `terraform state list` debe salir vacío.

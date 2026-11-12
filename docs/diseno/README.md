@@ -116,7 +116,7 @@ Un solo set: **Lucide** (`lucide-react`), trazo 2, 24×24, `currentColor`. 16px 
 
 ## Estados (vocabularios cerrados)
 
-Nunca armes el badge a mano: `EstadoDespliegue`, `EstadoSuscripcion`. Los valores viven en `components/deploya/estados.ts`.
+Nunca armes el badge a mano: `EstadoDespliegue`, `EstadoSuscripcion`, `EstadoRecursoDatos`. Los valores viven en `components/deploya/estados.ts`.
 
 | Despliegue | Icono | Tono |
 |---|---|---|
@@ -167,7 +167,7 @@ Importa desde `@/components/...`. Catálogo vivo: `/sistema`.
 |---|---|
 | `Wordmark` | Marca. |
 | `RielEtapas` | Cinco etapas. `size="sm"` en listas (55px), `size="lg"` en cabeceras con duración. |
-| `EstadoDespliegue`, `EstadoSuscripcion` | Badges canónicos. |
+| `EstadoDespliegue`, `EstadoSuscripcion`, `EstadoRecursoDatos` | Badges canónicos (el de recursos de datos es otro vocabulario: creando, disponible, detenido, error). |
 | `Bitacora` | Líneas numeradas en mono; `nivel="error"` resalta; `enCurso` muestra cursor. Contenido no confiable: solo texto. |
 | `Pasos` | Asistente de alta (Repositorio · Variables · Revisar). Hecho en tinta (`foreground` con el check en `background`), en curso en `signal`, pendiente en `border-strong`; nunca `ok`. Un paso `deshabilitado` nunca se marca como hecho. |
 | `RequisitosContrasena` + `REGLAS_CONTRASENA`, `contrasenaValida` | Reglas de contraseña compartidas por 01, 04 y 05b. |

@@ -6,8 +6,10 @@ import type { ReactNode } from "react";
 import {
   Bitacora,
   ESTADOS_DESPLIEGUE,
+  ESTADOS_RECURSO_DATOS,
   ESTADOS_SUSCRIPCION,
   EstadoDespliegue,
+  EstadoRecursoDatos,
   EstadoSuscripcion,
   GraficaEtapas,
   GraficaRitmo,
@@ -229,7 +231,7 @@ export default function SistemaPage() {
         </div>
       </Seccion>
 
-      <Seccion titulo="Estados" nota="Despliegue y suscripción son vocabularios distintos. Nunca los mezcles ni armes el badge a mano.">
+      <Seccion titulo="Estados" nota="Despliegue, suscripción y recurso de datos son vocabularios distintos. Nunca los mezcles ni armes el badge a mano.">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">
             {ESTADOS_DESPLIEGUE.map((e) => (
@@ -239,6 +241,11 @@ export default function SistemaPage() {
           <div className="flex flex-wrap gap-2">
             {ESTADOS_SUSCRIPCION.map((e) => (
               <EstadoSuscripcion key={e} estado={e} />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {ESTADOS_RECURSO_DATOS.map((e) => (
+              <EstadoRecursoDatos key={e} estado={e} />
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-2">

@@ -18,6 +18,14 @@ describe("Acciones del cliente (M5-02)", () => {
     expect(motor.enrutamiento.retiradas).toEqual(["hola-deploya"]);
   });
 
+  it("Eliminar proyecto dueño: el manejador también libera sus recursos de datos (Docker no cae en cascada)", async () => {
+    const motor = motorDePrueba();
+
+    await motor.accionesContenedor.ejecutar({ tipo: "eliminar", proyectoId: "proyecto-1", subdominio: "hola-deploya" });
+
+    expect(motor.recursosDatos.liberados).toEqual(["hola-deploya"]);
+  });
+
   it("Reiniciar", async () => {
     const motor = motorDePrueba();
     const desplegado = await motor.desplegar();

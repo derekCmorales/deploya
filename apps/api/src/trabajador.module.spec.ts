@@ -6,6 +6,8 @@ import { AccionesContenedorService } from "./modules/orquestacion/acciones/accio
 import { RetencionArtefactos } from "./modules/orquestacion/retencion/retencion-artefactos";
 import { TareaCicloDiaria } from "./modules/suscripciones/ciclo/tarea-ciclo-diaria";
 import { TrabajadorModule } from "./trabajador.module";
+import { MotorDatosService } from "./modules/datos/motor-datos.service";
+import { RecursosDatosPuerto } from "./modules/datos/puertos/recursos-datos.puerto";
 
 describe("TrabajadorModule (inyección de dependencias)", () => {
   it("arma el pipeline con sus planes, la vigía de cancelación y la retención de artefactos", async () => {
@@ -18,6 +20,8 @@ describe("TrabajadorModule (inyección de dependencias)", () => {
     expect(modulo.get(VigiaCancelacion)).toBeInstanceOf(VigiaCancelacion);
     expect(modulo.get(RetencionArtefactos)).toBeInstanceOf(RetencionArtefactos);
     expect(modulo.get(AccionesContenedorService)).toBeInstanceOf(AccionesContenedorService);
+    expect(modulo.get(MotorDatosService)).toBeInstanceOf(MotorDatosService);
+    expect(modulo.get(RecursosDatosPuerto)).toBeDefined();
   });
 
   it("registra la tarea diaria del ciclo §4.4 (M2-05) con el puerto de contenedores de M5", async () => {

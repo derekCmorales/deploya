@@ -18,6 +18,10 @@ export type EstadoDespliegueValor = (typeof ESTADOS_DESPLIEGUE)[number];
 export const ESTADOS_SUSCRIPCION = ["activa", "por-vencer", "vencida", "suspendida", "cancelada"] as const;
 export type EstadoSuscripcionValor = (typeof ESTADOS_SUSCRIPCION)[number];
 
+/** Recursos de datos (bases administradas, contrato recursos-datos): ≠ despliegue y ≠ suscripción. */
+export const ESTADOS_RECURSO_DATOS = ["creando", "disponible", "detenido", "error"] as const;
+export type EstadoRecursoDatosValor = (typeof ESTADOS_RECURSO_DATOS)[number];
+
 export const ESTADOS_CUENTA = ["pendiente", "activa", "suspendida"] as const;
 export type EstadoCuentaValor = (typeof ESTADOS_CUENTA)[number];
 

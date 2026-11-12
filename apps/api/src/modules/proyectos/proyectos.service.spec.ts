@@ -278,6 +278,13 @@ describe("ProyectosService", () => {
       expect(await repositorio.deUsuario("usuario-1")).toHaveLength(2);
     });
 
+    it("Subdominio que choca con una ruta S3: un nombre que termina en -s3 recibe SubdominioEnUso", async () => {
+      const { servicio, repositorio } = montar();
+
+      await expect(servicio.crear("usuario-1", alta({ nombre: "tienda-s3" }))).rejects.toThrow(SubdominioEnUso);
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
+    });
+
     it("Subdominio duplicado: otro usuario con el mismo nombre recibe SubdominioEnUso", async () => {
       const { servicio } = montar();
       await servicio.crear("usuario-1", alta());

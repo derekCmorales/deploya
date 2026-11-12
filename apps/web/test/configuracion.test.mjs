@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  COMANDO_INICIO_MAXIMO,
   borradorDe,
   cambiosDe,
   erroresDeBorrador,
@@ -27,6 +28,7 @@ test("19 · el borrador muestra la ruta como /Dockerfile y el puerto como texto"
     rama: "main",
     rutaDockerfile: "/Dockerfile",
     puertoInterno: "8080",
+    comandoInicio: "",
   });
 });
 
@@ -89,4 +91,23 @@ test("19b · los conteos se escriben en singular y plural", () => {
   assert.equal(textoVariables(0), "0 variables de entorno cifradas");
   assert.equal(textoHistorial(14), "El historial de 14 despliegues");
   assert.equal(textoHistorial(1), "El historial de 1 despliegue");
+});
+
+test("19 · comando de inicio: se envía recortado, vacío = null y sin cambios no se envía", () => {
+  const original = borradorDe(proyecto);
+  assert.deepEqual(cambiosDe(original, { ...original, comandoInicio: "  node dist/worker.js " }), { comandoInicio: "node dist/worker.js" });
+
+  const conComando = borradorDe({ ...proyecto, comandoInicio: "node dist/worker.js" });
+  assert.equal(conComando.comandoInicio, "node dist/worker.js");
+  assert.deepEqual(cambiosDe(conComando, { ...conComando, comandoInicio: "   " }), { comandoInicio: null });
+  assert.deepEqual(cambiosDe(conComando, { ...conComando }), {});
+  assert.equal(borradorDe({ ...proyecto, comandoInicio: null }).comandoInicio, "");
+});
+
+test("19 · comando de inicio admite hasta 512 caracteres", () => {
+  const ok = borradorDe(proyecto);
+  assert.equal(COMANDO_INICIO_MAXIMO, 512);
+  assert.deepEqual(erroresDeBorrador({ ...ok, comandoInicio: "a".repeat(512) }), {});
+  assert.deepEqual(Object.keys(erroresDeBorrador({ ...ok, comandoInicio: "a".repeat(513) })), ["comandoInicio"]);
+  assert.equal(errorDeGuardado("comando-invalido", "x").campo, "comandoInicio");
 });

@@ -12,6 +12,9 @@ export interface PlanCatalogo {
   cpus: number;
   memoriaMb: number;
   construccionesMes: number;
+  /** Contrato recursos-datos: bases por cuenta y disco por base. Opcionales hasta que el catálogo los traiga. */
+  maxRecursosDatos?: number;
+  discoDatosMb?: number;
 }
 
 export type Vigencia = "30" | "365";
@@ -21,7 +24,7 @@ export const VIGENCIAS: { value: Vigencia; label: string }[] = [
   { value: "365", label: "365 días" },
 ];
 
-export type ClaveRecurso = "maxProyectos" | "cpus" | "memoriaMb" | "construccionesMes";
+export type ClaveRecurso = "maxProyectos" | "cpus" | "memoriaMb" | "construccionesMes" | "maxRecursosDatos" | "discoDatosMb";
 
 const MB_POR_GB = 1024;
 
@@ -51,12 +54,43 @@ export function textoMemoria(memoriaMb: number): string {
   return memoriaMb >= MB_POR_GB && memoriaMb % MB_POR_GB === 0 ? `${memoriaMb / MB_POR_GB} GB` : `${memoriaMb} MB`;
 }
 
-export const RECURSOS: { clave: ClaveRecurso; etiqueta: string; formato: (valor: number) => string }[] = [
+/** «512 MB» → «0.5 GB»; el disco por base se lee en GB en la ficha 06. */
+export function textoGb(mb: number): string {
+  const gb = mb / MB_POR_GB;
+  return `${Number.isInteger(gb) ? gb : Number(gb.toFixed(2))} GB`;
+}
+
+export interface FilaRecurso {
+  clave: ClaveRecurso;
+  etiqueta: string;
+  formato: (valor: number) => string;
+}
+
+export const RECURSOS: FilaRecurso[] = [
   { clave: "maxProyectos", etiqueta: "Proyectos", formato: textoMiles },
   { clave: "cpus", etiqueta: "CPU por proyecto", formato: textoCpu },
   { clave: "memoriaMb", etiqueta: "Memoria por proyecto", formato: textoMemoria },
   { clave: "construccionesMes", etiqueta: "Construcciones / mes", formato: textoMiles },
 ];
+
+/** Filas de recursos de datos: solo aparecen si algún plan del catálogo las trae. */
+export const RECURSOS_DATOS: FilaRecurso[] = [
+  { clave: "maxRecursosDatos", etiqueta: "Bases de datos", formato: textoMiles },
+  { clave: "discoDatosMb", etiqueta: "Disco por base", formato: textoGb },
+];
+
+const SIN_DATO = "—";
+
+export function recursosDelCatalogo(planes: readonly PlanCatalogo[]): FilaRecurso[] {
+  const opcionales = RECURSOS_DATOS.filter((fila) => planes.some((plan) => typeof plan[fila.clave] === "number"));
+  return [...RECURSOS, ...opcionales];
+}
+
+/** Valor de la celda; un plan que no trae el campo muestra «—» en vez de romper. */
+export function valorRecurso(plan: PlanCatalogo, fila: FilaRecurso): string {
+  const valor = plan[fila.clave];
+  return typeof valor === "number" ? fila.formato(valor) : SIN_DATO;
+}
 
 export class ErrorCatalogo extends Error {
   readonly estado: number;

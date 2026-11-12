@@ -10,7 +10,7 @@
 
 ## Qué es
 
-General, Fuente, Contenedor; «Zona de peligro» con Eliminar proyecto.
+General, Fuente, Contenedor (con «Comando de inicio» opcional, máx. 512 caracteres; vacío = el `CMD` de la imagen); «Zona de peligro» con Eliminar proyecto.
 
 ## Componentes
 
@@ -60,6 +60,9 @@ Ruta del Dockerfile
 /Dockerfile
 Puerto interno
 8080
+Comando de inicio (opcional)
+node dist/worker.js
+Sobrescribe el CMD de la imagen. Útil para correr un worker con la misma imagen, p. ej. node dist/worker.js
 Los cambios aplican en el próximo despliegue.
 Descartar
 Guardar cambios

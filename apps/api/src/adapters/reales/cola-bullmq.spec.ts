@@ -1,5 +1,5 @@
 import { Job } from "bullmq";
-import { ColaBullMq, idTrabajoOperacion } from "./cola-bullmq";
+import { ColaBullMq, ColaDatosBullMq, idTrabajoOperacion } from "./cola-bullmq";
 
 const cola = { getJob: jest.fn(), add: jest.fn(), close: jest.fn() };
 
@@ -49,5 +49,25 @@ describe("ColaBullMq.quitar (M4-02)", () => {
     cola.getJob.mockResolvedValue({ remove: jest.fn().mockRejectedValue(new Error("Job d1 is locked")) });
 
     expect(await new ColaBullMq("redis://redis:6379").quitar("d1")).toBe(false);
+  });
+});
+
+describe("ColaDatosBullMq (feat/m5-recursos-datos)", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("crear va con un solo intento: el trabajador deja el recurso en error con su detalle", async () => {
+    await new ColaDatosBullMq("redis://redis:6379").encolar({ accion: "crear", recursoId: "r1" });
+
+    expect(cola.add).toHaveBeenCalledWith("crear", { accion: "crear", recursoId: "r1" }, expect.objectContaining({ attempts: 1 }));
+  });
+
+  it("eliminar reintenta y no fija jobId, para no perder el orden entre comandos iguales", async () => {
+    const comando = { accion: "eliminar" as const, recursoId: "r1", tipo: "postgres" as const, subdominioDueno: "nimbo" };
+
+    await new ColaDatosBullMq("redis://redis:6379").encolar(comando);
+
+    const opciones = cola.add.mock.calls[0][2] as Record<string, unknown>;
+    expect(opciones.attempts).toBe(3);
+    expect(opciones).not.toHaveProperty("jobId");
   });
 });

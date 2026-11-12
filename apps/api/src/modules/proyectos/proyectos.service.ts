@@ -15,7 +15,7 @@ import {
 } from "./dominio/errores";
 import type { AltaProyecto, ConsultaRepositorio, Proyecto, ValidacionRepositorio } from "./dominio/proyecto";
 import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
-import { esSubdominioReservado, SUBDOMINIOS_RESERVADOS, subdominioDesdeNombre } from "./dominio/subdominio";
+import { chocaConRutaDeDatos, esSubdominioReservado, SUBDOMINIOS_RESERVADOS, subdominioDesdeNombre } from "./dominio/subdominio";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
@@ -38,11 +38,13 @@ export interface ListaProyectos {
 }
 
 /** Cuerpo de `PATCH /proyectos/:id` (contrato v3). */
-export type VistaConfiguracion = Pick<Proyecto, "id" | "nombre" | "subdominio" | "urlRepositorio" | "rama" | "rutaDockerfile" | "puertoInterno">;
+export type VistaConfiguracion = Pick<Proyecto, "id" | "nombre" | "subdominio" | "urlRepositorio" | "rama" | "rutaDockerfile" | "puertoInterno"> & {
+  comandoInicio: string | null;
+};
 
 export function vistaConfiguracion(proyecto: Proyecto): VistaConfiguracion {
   const { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno } = proyecto;
-  return { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno };
+  return { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno, comandoInicio: proyecto.comandoInicio ?? null };
 }
 
 export interface ProyectoCreado {
@@ -97,7 +99,9 @@ export class ProyectosService {
     await this.bloqueos.verificar(usuarioId);
     const validacion = await this.validarRepositorio({ url: alta.url, rama: alta.rama });
     const subdominio = subdominioDesdeNombre(alta.nombre);
-    if (esSubdominioReservado(subdominio, this.reservados) || (await this.repositorio.existeSubdominio(subdominio))) throw new SubdominioEnUso(subdominio);
+    if (esSubdominioReservado(subdominio, this.reservados) || chocaConRutaDeDatos(subdominio) || (await this.repositorio.existeSubdominio(subdominio))) {
+      throw new SubdominioEnUso(subdominio);
+    }
     if (alta.variables) validarConjuntoVariables(alta.variables);
     const proyecto = await this.repositorio.guardar({
       usuarioId,
@@ -107,6 +111,7 @@ export class ProyectosService {
       rama: alta.rama,
       rutaDockerfile: RUTA_DOCKERFILE,
       puertoInterno: alta.puerto ?? validacion.puerto,
+      comandoInicio: null,
     });
     if (alta.variables?.length) await this.variables.reemplazar(usuarioId, proyecto.id, alta.variables);
     const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");

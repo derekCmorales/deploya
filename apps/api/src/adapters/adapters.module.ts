@@ -59,6 +59,14 @@ import { ContenedorStub } from "./stubs/contenedor.stub";
 import { MetricasContenedorStub } from "./stubs/metricas-contenedor.stub";
 import { EnrutamientoStub } from "./stubs/enrutamiento.stub";
 import { VerificacionEntornoStub } from "./stubs/verificacion-entorno.stub";
+import { ColaDatosPuerto } from "../modules/datos/puertos/cola-datos.puerto";
+import { RecursosDatosPuerto } from "../modules/datos/puertos/recursos-datos.puerto";
+import { RepositorioRecursosDatos } from "../modules/datos/puertos/repositorio-recursos-datos.puerto";
+import { RepositorioRecursosDatosPrisma } from "./prisma/repositorio-recursos-datos.prisma";
+import { ColaDatosBullMq } from "./reales/cola-bullmq";
+import { RecursosDatosDocker } from "./reales/recursos-datos-docker";
+import { ColaDatosMemoria } from "./stubs/cola-datos.memoria";
+import { RecursosDatosStub } from "./stubs/recursos-datos.stub";
 
 type Fabrica<T> = { docker: (c: ConfiguracionMotor, reloj: Reloj) => T; stub: () => T };
 
@@ -93,6 +101,8 @@ const PERSISTENCIA: Provider[] = [
   { provide: MuestrasMetricas, useClass: MuestrasMetricasPrisma },
   // Limpieza diaria (EST-01b): la corre el trabajador cada día y la API a demanda.
   { provide: PurgaDatosVencidosPuerto, useClass: PurgaDatosVencidosPrisma },
+  // Recursos de datos (feat/m5-recursos-datos): la API los pide y el trabajador los levanta.
+  { provide: RepositorioRecursosDatos, useClass: RepositorioRecursosDatosPrisma },
 ];
 
 const COMUNES: Provider[] = [
@@ -106,6 +116,8 @@ const COMUNES: Provider[] = [
   }),
   puerto(CancelacionesPuerto, { docker: (c) => new CancelacionesRedis(c.redisUrl), stub: () => new CancelacionesMemoria() }),
   puerto(ColaOperacionPuerto, { docker: (c) => new ColaOperacionBullMq(c.redisUrl), stub: () => new ColaOperacionMemoria() }),
+  // La API la produce y el trabajador también (el ciclo §4.4 suspende desde ahí).
+  puerto(ColaDatosPuerto, { docker: (c) => new ColaDatosBullMq(c.redisUrl), stub: () => new ColaDatosMemoria() }),
   puerto(RegistroEnviosCorreo, { docker: (c) => new RegistroEnviosRedis(c.redisUrl), stub: () => new RegistroEnviosMemoria() }),
   puerto(ReporteServidorPuerto, { docker: (c) => new ReporteServidorRedis(c.redisUrl), stub: () => new ReporteServidorMemoria() }),
   puerto(SalidaContenedorPuerto, { docker: (c) => new SalidaContenedorBullMq(c.redisUrl), stub: () => new SalidaContenedorMemoria() }),
@@ -118,6 +130,10 @@ const SOLO_TRABAJADOR: Provider[] = [
   puerto(ContenedorPuerto, {
     docker: (c) => new ContenedorDocker(socketDocker(), [c.traefikContenedor, c.trabajadorContenedor]),
     stub: () => new ContenedorStub(),
+  }),
+  puerto(RecursosDatosPuerto, {
+    docker: (c) => new RecursosDatosDocker(socketDocker(), [c.traefikContenedor, c.trabajadorContenedor]),
+    stub: () => new RecursosDatosStub(),
   }),
   puerto(VerificacionEntornoPuerto, { docker: (_c, reloj) => new VerificacionHttp(reloj), stub: () => new VerificacionEntornoStub() }),
   puerto(MetricasContenedorPuerto, { docker: () => new MetricasDockerStats(), stub: () => new MetricasContenedorStub() }),

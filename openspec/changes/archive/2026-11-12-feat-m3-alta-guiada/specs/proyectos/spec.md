@@ -100,3 +100,19 @@ En Configuración (19) el cliente SHALL poder cambiar nombre, repositorio, rama,
 
 - **WHEN** el cliente pide un proyecto que no es suyo o no existe
 - **THEN** responde 404 `proyecto-no-encontrado`
+
+#### Scenario: Comando de inicio
+
+- **WHEN** el cliente guarda `comandoInicio` = `node dist/worker-optimizer.main.js` y luego `null`
+- **THEN** la vista devuelve el comando y después `null`, y el siguiente despliegue usa el `CMD` de la imagen
+
+#### Scenario: Comando de inicio demasiado largo
+
+- **WHEN** el comando pasa de 512 caracteres
+- **THEN** se rechaza con `comando-invalido` (400)
+
+#### Scenario: Comando con comilla sin cerrar
+
+- **WHEN** el comando tiene una comilla sin cerrar o no es texto
+- **THEN** se rechaza con `comando-invalido` (400)
+

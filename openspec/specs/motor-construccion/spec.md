@@ -29,7 +29,7 @@ Al registrar un despliegue, la API SHALL crearlo con el número siguiente del pr
 
 ### Requirement: Construcción con Dockerfile
 
-El trabajador SHALL clonar la rama con profundidad 1, registrar el commit (sha, mensaje, autor), detectar el stack y ejecutar `docker build` con el `Dockerfile` del repositorio o, si no hay, con el `Dockerfile.deploya` que genera la receta detectada, detrás de `ConstructorImagenPuerto`, con un tiempo máximo de 10 minutos. Cada construcción exitosa SHALL registrar un artefacto `deploya/<subdominio>:<n>` con digest, tamaño, commit y receta.
+El trabajador SHALL clonar la rama con profundidad 1, registrar el commit (sha, mensaje, autor), detectar el stack y ejecutar `docker build` con el `Dockerfile` del repositorio o, si no hay, con el `Dockerfile.deploya` que genera la receta detectada, detrás de `ConstructorImagenPuerto`, con el tiempo máximo de `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN` (20 minutos por omisión). Cada construcción exitosa SHALL registrar un artefacto `deploya/<subdominio>:<n>` con digest, tamaño, commit y receta.
 
 #### Scenario: Construcción exitosa
 
@@ -48,8 +48,13 @@ El trabajador SHALL clonar la rama con profundidad 1, registrar el commit (sha, 
 
 #### Scenario: Tiempo de construcción agotado
 
-- **WHEN** la construcción pasa de 10 minutos
+- **WHEN** la construcción pasa del tiempo máximo configurado
 - **THEN** se detiene, el despliegue queda Fallido con motivo «tiempo de construcción agotado» y la versión activa no cambia
+
+#### Scenario: Tiempo de construcción configurable
+
+- **WHEN** `MOTOR_TIEMPO_MAXIMO_CONSTRUCCION_MIN` vale 30 (o falta, o no es un número positivo)
+- **THEN** cada `docker build` recibe un tope de 30 minutos (o de 20 por omisión)
 
 #### Scenario: Repositorio que no se puede clonar
 
@@ -198,3 +203,73 @@ El motor SHALL exponer la duración de cada etapa de los últimos despliegues de
 
 - **WHEN** #11 falló en Construcción
 - **THEN** sus tiempos marcan `falloEn: construccion` y las etapas siguientes en 0
+
+### Requirement: Capas del Dockerfile generado
+
+Cuando la receta detectada no es `dockerfile`, el `Dockerfile.deploya` SHALL armarse con la base de la receta más capas comunes, sin que la base las repita. Toda receta SHALL recibir la capa de puerto (`ENV PORT=8080` y `EXPOSE 8080`, una sola vez cada una). Las recetas que no fijan su propio usuario dentro de la base (Python, Go y sitio estático) SHALL recibir una capa `USER` final sin privilegios; Node SHALL conservar el `USER node` de su base y no recibir otro. En ninguna receta la imagen final SHALL correr como `root`. Las capas comunes SHALL ser las mismas en el alta (M3) y en el trabajador.
+
+En el trabajador, antes de escribir `Dockerfile.deploya`, el sistema SHALL agregar tres etiquetas del despliegue: `org.opencontainers.image.revision` con el sha del commit, `org.opencontainers.image.source` con la URL del repositorio y `deploya.proyecto` con el subdominio. La bitácora de Recepción SHALL registrar la línea «Capas: <stack> · <capa> · …» con las capas en el orden en que se aplicaron. El `Dockerfile` propio del repositorio SHALL usarse sin capas ni etiquetas.
+
+#### Scenario: Capas comunes en una receta
+
+- **WHEN** la rama tiene `go.mod` y no tiene `Dockerfile`
+- **THEN** el `Dockerfile.deploya` contiene `ENV PORT=8080` y `EXPOSE 8080` una sola vez cada uno, y su última instrucción `USER` es `USER nonroot:nonroot`
+
+#### Scenario: El sitio estático no termina como root
+
+- **WHEN** la rama solo tiene `index.html`
+- **THEN** la base cambia a `USER root` para limpiar el sitio, y la última instrucción `USER` del `Dockerfile.deploya` es `USER 101`
+
+#### Scenario: Node no recibe un usuario extra
+
+- **WHEN** la rama tiene `package.json` con script `start`
+- **THEN** el `Dockerfile.deploya` tiene una sola instrucción `USER`, `USER node`, antes de `npm ci` o `npm install`
+
+#### Scenario: Etiquetas del despliegue
+
+- **WHEN** el trabajador construye con receta el commit `a1b2c3d…` del proyecto `mi-api` desde `https://github.com/ana/mi-api`
+- **THEN** el `Dockerfile.deploya` contiene `LABEL org.opencontainers.image.revision="a1b2c3d…"`, `LABEL org.opencontainers.image.source="https://github.com/ana/mi-api"` y `LABEL deploya.proyecto="mi-api"`
+
+#### Scenario: Las capas en la bitácora
+
+- **WHEN** el trabajador construye un proyecto Python sin `Dockerfile`
+- **THEN** la bitácora de Recepción registra «Capas: Python 3.12 · puerto 8080 · usuario 10001 · etiqueta revision · etiqueta source · etiqueta proyecto»
+
+#### Scenario: El Dockerfile propio no se decora
+
+- **WHEN** la rama tiene `Dockerfile`
+- **THEN** no se escribe `Dockerfile.deploya`, se construye con el del repositorio sin etiquetas agregadas y la bitácora no registra la línea «Capas»
+
+#### Scenario: Un valor de etiqueta con comillas
+
+- **WHEN** un valor de etiqueta contiene `"` o `\`
+- **THEN** el carácter se escapa con `\` dentro de las comillas del `LABEL`, y el Dockerfile sigue siendo válido
+
+### Requirement: Comando de construcción en las recetas
+
+Cuando el proyecto tiene `comandoConstruccion` y se construye con receta, el `Dockerfile.deploya` SHALL correrlo en forma shell (`RUN <comando>`): en Node SHALL reemplazar `npm run build` después de instalar; en Python SHALL correr después de `pip install`; en Go SHALL correr antes de `go build`. Con `Dockerfile` propio o con sitio estático el comando SHALL ignorarse y la bitácora de Recepción SHALL decirlo.
+
+#### Scenario: Node con comando de construcción
+
+- **WHEN** la receta es `node` y el proyecto tiene `comandoConstruccion: "npm run build:prod"`
+- **THEN** el `Dockerfile.deploya` instala con `npm ci`, corre `RUN npm run build:prod` y no corre `npm run build`
+
+#### Scenario: Python con comando de construcción
+
+- **WHEN** la receta es `python` y el proyecto tiene `comandoConstruccion: "python manage.py collectstatic --noinput"`
+- **THEN** la línea `RUN python manage.py collectstatic --noinput` va después de `pip install`
+
+#### Scenario: Go con comando de construcción
+
+- **WHEN** la receta es `go` y el proyecto tiene `comandoConstruccion: "go generate ./..."`
+- **THEN** la línea `RUN go generate ./...` va antes de `go build`
+
+#### Scenario: Comando de construcción con Dockerfile propio
+
+- **WHEN** la rama trae `Dockerfile` y el proyecto tiene `comandoConstruccion`
+- **THEN** se construye con el `Dockerfile` del repositorio y la bitácora dice «Comando de construcción ignorado: el Dockerfile manda»
+
+#### Scenario: Receta sin comando de construcción
+
+- **WHEN** el proyecto no tiene `comandoConstruccion`
+- **THEN** el `Dockerfile.deploya` es el mismo de antes

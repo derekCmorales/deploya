@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent as TecladoReact, type PointerEvent as PunteroReact } from "react";
+import { useId, useState, type KeyboardEvent as TecladoReact, type PointerEvent as PunteroReact } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,6 +19,7 @@ import {
 } from "@/lib/proyeccion";
 
 import { Ejes } from "./ejes";
+import { useAnchoContenedor } from "./ancho-contenedor";
 import { escalaLineal } from "./escalas";
 import { PuntoVivoSvg } from "./punto-vivo-svg";
 import { esTeclaDeNavegacion, indiceAlMover } from "./series";
@@ -27,7 +28,6 @@ export interface GraficaRitmoProps {
   datos: ConsumoDiario;
 }
 
-const ANCHO_INICIAL = 640;
 const ALTO = 240;
 const MARGEN = { top: 20, right: 52, bottom: 26, left: 44 };
 const PORCENTAJE = 100;
@@ -52,22 +52,9 @@ const BORDE_ETIQUETA_HOY = 48;
 export function GraficaRitmo({ datos }: GraficaRitmoProps) {
   const [mostrarTabla, setMostrarTabla] = useState(false);
   const [indiceActivo, setIndiceActivo] = useState<number | null>(null);
-  const [ancho, setAncho] = useState(ANCHO_INICIAL);
-  const contenedorRef = useRef<HTMLDivElement>(null);
+  const { ancho, contenedorRef } = useAnchoContenedor<HTMLDivElement>();
   const idZona = `zona-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const idAviso = `aviso-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-
-  // El viewBox sigue al ancho real: así un texto de 10 px mide 10 px también en dos columnas.
-  useEffect(() => {
-    const contenedor = contenedorRef.current;
-    if (!contenedor || typeof ResizeObserver === "undefined") return;
-    const observador = new ResizeObserver((entradas) => {
-      const medida = entradas[0]?.contentRect.width ?? 0;
-      if (medida > 0) setAncho(Math.round(medida));
-    });
-    observador.observe(contenedor);
-    return () => observador.disconnect();
-  }, []);
 
   const dias = datos.diarios.length;
   const diasPeriodo = diasDelContrato(datos.desde, datos.reinicia);

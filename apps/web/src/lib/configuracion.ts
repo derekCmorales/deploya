@@ -34,6 +34,11 @@ export type CambiosConfiguracion = Partial<DatosProyecto>;
 /** `PATCH` guardó: el marco del proyecto vuelve a leer la lista para mostrar el nombre nuevo. */
 export const EVENTO_PROYECTO_ACTUALIZADO = "deploya:proyecto-actualizado";
 
+/** Avisa al marco del proyecto (y a toda lista de proyectos montada) que vuelva a leer: cambió un nombre o un estado. */
+export function avisarProyectoActualizado(): void {
+  window.dispatchEvent(new Event(EVENTO_PROYECTO_ACTUALIZADO));
+}
+
 const NOMBRE_MAXIMO = 64;
 const PUERTO_MINIMO = 1;
 const PUERTO_MAXIMO = 65535;

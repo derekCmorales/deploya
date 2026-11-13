@@ -17,6 +17,15 @@ export function esFalloDeConexion(estado: number): boolean {
   return estado === SIN_CONEXION || estado >= HTTP_ERROR_SERVIDOR;
 }
 
+/**
+ * Tras un error, un sondeo que seguía en marcha sigue preguntando si la API no respondió o falló del
+ * lado del servidor (red caída, 502 mientras se reinicia): la pantalla se recupera sola. Un 4xx no cambia
+ * reintentando, y una lectura única que falla no se repite.
+ */
+export function debeSeguirTrasError(estadoHttp: number, seguiaEnMarcha: boolean): boolean {
+  return seguiaEnMarcha && esFalloDeConexion(estadoHttp);
+}
+
 /** «GET /proyectos · sin-conexion · reintento en 8 s». */
 export function detalleReintento(ruta: string, codigo: string, segundos: number): string {
   return `GET ${ruta} · ${codigo} · reintento en ${segundos} s`;

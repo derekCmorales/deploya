@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent as TecladoReact, type PointerEvent as PunteroReact } from "react";
+import { useId, useState, type KeyboardEvent as TecladoReact, type PointerEvent as PunteroReact } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -17,6 +17,7 @@ import {
 
 import { ChipEvento } from "./chip-evento";
 import { Ejes } from "./ejes";
+import { useAnchoContenedor } from "./ancho-contenedor";
 import { escalaLineal, ticks } from "./escalas";
 import { PuntoVivoSvg } from "./punto-vivo-svg";
 import { esTeclaDeNavegacion, eventoEnX, indiceAlMover, indiceMasCercano, intervaloMaximo, puntosDeSerie } from "./series";
@@ -37,7 +38,6 @@ export interface GraficaUsoProps {
   mostrarTitulo?: boolean;
 }
 
-const ANCHO_INICIAL = 640;
 const ALTO_NORMAL = 240;
 const ALTO_COMPACTA = 96;
 const MARGEN_NORMAL = { top: 16, right: 52, bottom: 26, left: 44 };
@@ -61,22 +61,9 @@ export function GraficaUso({
 }: GraficaUsoProps) {
   const [mostrarTabla, setMostrarTabla] = useState(false);
   const [indiceActivo, setIndiceActivo] = useState<number | null>(null);
-  const [ancho, setAncho] = useState(ANCHO_INICIAL);
-  const contenedorRef = useRef<HTMLDivElement>(null);
+  const { ancho, contenedorRef } = useAnchoContenedor<HTMLDivElement>();
   const idAviso = `aviso-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const idZona = `zona-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-
-  // El viewBox sigue al ancho real: así un texto de 10 px mide 10 px también en dos columnas.
-  useEffect(() => {
-    const contenedor = contenedorRef.current;
-    if (!contenedor || typeof ResizeObserver === "undefined") return;
-    const observador = new ResizeObserver((entradas) => {
-      const medida = entradas[0]?.contentRect.width ?? 0;
-      if (medida > 0) setAncho(Math.round(medida));
-    });
-    observador.observe(contenedor);
-    return () => observador.disconnect();
-  }, []);
 
   const alto = compacta ? ALTO_COMPACTA : ALTO_NORMAL;
   const margen = compacta ? MARGEN_COMPACTA : MARGEN_NORMAL;

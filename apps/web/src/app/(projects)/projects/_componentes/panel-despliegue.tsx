@@ -11,6 +11,7 @@ import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBitacora } from "@/hooks/use-bitacora";
+import { useAvisoCambioDeEstado } from "@/hooks/use-aviso-estado";
 import { useDespliegue } from "@/hooks/use-despliegue";
 import { useDesplieguePorNumero } from "@/hooks/use-despliegue-por-numero";
 import { ErrorApi, pedirApi } from "@/lib/api";
@@ -44,6 +45,7 @@ export function PanelDespliegue({ proyectoId, numeroTexto }: { proyectoId: strin
   const vivo = useDespliegue(id, origen);
   const bitacora = useBitacora(id);
   const despliegue = vivo.datos ?? inicial.datos;
+  useAvisoCambioDeEstado(despliegue?.estado);
 
   if (!Number.isInteger(numero) || numero < 1 || inicial.error?.estado === HTTP_NO_ENCONTRADO) notFound();
   if (inicial.error) return <Banner variant="bad" title="No pudimos cargar el despliegue">{inicial.error.message}</Banner>;

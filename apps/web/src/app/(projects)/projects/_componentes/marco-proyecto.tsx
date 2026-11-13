@@ -29,7 +29,7 @@ import { BotonDesplegar } from "./boton-desplegar";
  */
 export function MarcoProyecto({ proyectoId }: { proyectoId: string }) {
   const ruta = usePathname();
-  const { datos, error, recargar } = useProyectos({ sondear: false });
+  const { datos, error, recargar } = useProyectos();
   const proyecto = datos?.proyectos.find((p) => p.id === proyectoId) ?? null;
   if (datos && !proyecto) notFound();
   const resumen = `/projects/${proyectoId}`;

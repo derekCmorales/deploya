@@ -19,8 +19,15 @@ export function useProyectos({ sondear = true }: { sondear?: boolean } = {}): So
   const sondeo = useSondeo(leerProyectos, sondear ? seguir : nunca);
   const { recargar } = sondeo;
   useEffect(() => {
+    const alVolver = () => {
+      if (document.visibilityState === "visible") recargar();
+    };
     window.addEventListener(EVENTO_PROYECTO_ACTUALIZADO, recargar);
-    return () => window.removeEventListener(EVENTO_PROYECTO_ACTUALIZADO, recargar);
+    document.addEventListener("visibilitychange", alVolver);
+    return () => {
+      window.removeEventListener(EVENTO_PROYECTO_ACTUALIZADO, recargar);
+      document.removeEventListener("visibilitychange", alVolver);
+    };
   }, [recargar]);
   return sondeo;
 }

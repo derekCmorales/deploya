@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ErrorApi, pedirApi } from "@/lib/api";
+import { avisarProyectoActualizado } from "@/lib/configuracion";
 import { rutaDespliegue } from "@/lib/despliegues";
 
 /**
@@ -21,6 +22,7 @@ export function BotonDesplegar({ proyectoId, bloqueado = false }: { proyectoId: 
     setError(null);
     try {
       const creado = await pedirApi<{ numero: number }>(`/proyectos/${proyectoId}/despliegues`, { metodo: "POST" });
+      avisarProyectoActualizado();
       router.push(rutaDespliegue(proyectoId, creado.numero));
     } catch (e) {
       setError(e instanceof ErrorApi ? e.message : "No pudimos iniciar el despliegue.");

@@ -18,6 +18,7 @@ import { RUTA_DOCKERFILE } from "./dominio/proyectos.constantes";
 import { chocaConRutaDeDatos, esSubdominioReservado, SUBDOMINIOS_RESERVADOS, subdominioDesdeNombre } from "./dominio/subdominio";
 import { CuotaProyectosPuerto } from "./puertos/cuota-proyectos.puerto";
 import { ProveedorFuente } from "./puertos/proveedor-fuente.puerto";
+import { RecursosDatosAlta, type LimiteDatosCuenta } from "./puertos/recursos-datos-alta.puerto";
 import { RepositorioProyectos } from "./puertos/repositorio-proyectos.puerto";
 import { validarConjuntoVariables } from "./dominio/variable";
 import { VariablesProyectoService, type VariablePublica } from "./servicios/variables-proyecto.service";
@@ -35,16 +36,29 @@ export interface ListaProyectos {
   usados: number;
   maximo: number;
   plan: { nombre: string; cpus: number; memoriaMb: number };
+  /** Recursos de datos de la cuenta, para el paso Datos del alta (feat/m3-alta-guiada). */
+  datos: LimiteDatosCuenta;
 }
 
 /** Cuerpo de `PATCH /proyectos/:id` (contrato v3). */
 export type VistaConfiguracion = Pick<Proyecto, "id" | "nombre" | "subdominio" | "urlRepositorio" | "rama" | "rutaDockerfile" | "puertoInterno"> & {
   comandoInicio: string | null;
+  comandoConstruccion: string | null;
 };
 
 export function vistaConfiguracion(proyecto: Proyecto): VistaConfiguracion {
   const { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno } = proyecto;
-  return { id, nombre, subdominio, urlRepositorio, rama, rutaDockerfile, puertoInterno, comandoInicio: proyecto.comandoInicio ?? null };
+  return {
+    id,
+    nombre,
+    subdominio,
+    urlRepositorio,
+    rama,
+    rutaDockerfile,
+    puertoInterno,
+    comandoInicio: proyecto.comandoInicio ?? null,
+    comandoConstruccion: proyecto.comandoConstruccion ?? null,
+  };
 }
 
 export interface ProyectoCreado {
@@ -62,7 +76,10 @@ export interface PedidoVariables {
   desplegar: boolean;
 }
 
-/** Caso de uso de M3: valida la fuente, guarda el proyecto y pide a M4 el despliegue #1. */
+/**
+ * Caso de uso de M3: valida la fuente y el plan (proyectos y datos), guarda el proyecto con sus
+ * variables y recursos de datos, y al final pide a M4 el despliegue #1 (feat/m3-alta-guiada).
+ */
 @Injectable()
 export class ProyectosService {
   constructor(
@@ -74,6 +91,7 @@ export class ProyectosService {
     private readonly variables: VariablesProyectoService,
     private readonly deteccion: DeteccionStackService,
     private readonly bloqueos: BloqueosService,
+    private readonly datos: RecursosDatosAlta,
     @Optional() @Inject(SUBDOMINIOS_RESERVADOS) private readonly reservados: readonly string[] = [],
   ) {}
 
@@ -84,13 +102,18 @@ export class ProyectosService {
   }
 
   async listar(usuarioId: string): Promise<ListaProyectos> {
-    const [proyectos, cuota] = await Promise.all([this.repositorio.deUsuario(usuarioId), this.cuota.cuotaDe(usuarioId)]);
+    const [proyectos, cuota, datos] = await Promise.all([
+      this.repositorio.deUsuario(usuarioId),
+      this.cuota.cuotaDe(usuarioId),
+      this.datos.limite(usuarioId),
+    ]);
     const ultimos = await this.construccion.ultimosDespliegues(proyectos.map((p) => p.id));
     return {
       proyectos: masRecientesPrimero(proyectos).map((p) => ({ ...p, ultimoDespliegue: ultimos[p.id] ?? null })),
       usados: proyectos.filter((proyecto) => cuentaParaElPlan(ultimos[proyecto.id])).length,
       maximo: cuota.maxProyectos,
       plan: { nombre: cuota.plan, cpus: cuota.cpus, memoriaMb: cuota.memoriaMb },
+      datos,
     };
   }
 
@@ -104,6 +127,8 @@ export class ProyectosService {
       throw new SubdominioEnUso(subdominio);
     }
     if (alta.variables) validarConjuntoVariables(alta.variables);
+    const recursos = alta.datos ?? [];
+    await this.datos.verificar(usuarioId, recursos);
     const proyecto = await this.repositorio.guardar({
       usuarioId,
       nombre: alta.nombre,
@@ -112,9 +137,11 @@ export class ProyectosService {
       rama: alta.rama,
       rutaDockerfile,
       puertoInterno: alta.puerto ?? validacion.puerto,
-      comandoInicio: null,
+      comandoInicio: alta.comandoInicio ?? null,
+      comandoConstruccion: alta.comandoConstruccion ?? null,
     });
     if (alta.variables?.length) await this.variables.reemplazar(usuarioId, proyecto.id, alta.variables);
+    if (recursos.length > 0) await this.datos.crear(usuarioId, proyecto.id, recursos);
     const despliegue = await this.construccion.crearDespliegue(proyecto.id, "alta");
     return { proyecto, despliegue };
   }
@@ -203,6 +230,11 @@ function conDeteccion(base: ValidacionRepositorio, deteccion: ResultadoDeteccion
   return {
     ...base,
     puerto: deteccion.puertoSugerido,
-    deteccion: { receta: deteccion.receta, nombre: deteccion.nombre, descripcion: deteccion.descripcion },
+    deteccion: {
+      receta: deteccion.receta,
+      nombre: deteccion.nombre,
+      descripcion: deteccion.descripcion,
+      aplicaComandoConstruccion: deteccion.aplicaComandoConstruccion,
+    },
   };
 }

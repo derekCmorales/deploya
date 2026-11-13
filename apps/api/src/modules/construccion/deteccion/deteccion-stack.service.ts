@@ -5,7 +5,7 @@ import type { LectorFuente } from "../puertos/lector-fuente.puerto";
 import { PISTA_GENERAL, RUTA_DOCKERFILE } from "./deteccion.constantes";
 import { LectorDockerfileEn } from "./lector-dockerfile-en";
 import type { MapaArchivos } from "./mapa-archivos";
-import type { RecetaStack } from "./receta-stack";
+import { SIN_OPCIONES, type OpcionesReceta, type RecetaStack } from "./receta-stack";
 import { RECETAS_STACK, recetasEnOrden } from "./recetas-stack";
 
 /** Contrato de despliegues v2 (`ResultadoDeteccion`); `nombre` y `dockerfile` los agrega v2.1 para el trabajador. */
@@ -18,6 +18,8 @@ export interface ResultadoDeteccion {
   evidencia: string[];
   /** El `Dockerfile.deploya` que hay que escribir; `null` si se usa el del repositorio. */
   dockerfile: string | null;
+  /** Si la receta corre el comando de construcción del proyecto (11a lo ofrece solo entonces). */
+  aplicaComandoConstruccion: boolean;
 }
 
 /**
@@ -29,7 +31,7 @@ export class DeteccionStackService {
   constructor(@Inject(RECETAS_STACK) private readonly recetas: readonly RecetaStack[]) {}
 
   /** Lanza `StackNoReconocido` si no hay `Dockerfile` ni receta que reconozca la rama. */
-  async detectar(fuente: LectorFuente, rutaDockerfile = RUTA_DOCKERFILE): Promise<ResultadoDeteccion> {
+  async detectar(fuente: LectorFuente, rutaDockerfile = RUTA_DOCKERFILE, opciones: OpcionesReceta = SIN_OPCIONES): Promise<ResultadoDeteccion> {
     const archivos = await this.leer(new LectorDockerfileEn(fuente, rutaDockerfile));
     const receta = this.recetas.find((candidata) => candidata.reconoce(archivos));
     if (!receta) throw new StackNoReconocido(this.pistaPara(archivos));
@@ -38,7 +40,8 @@ export class DeteccionStackService {
       nombre: receta.nombre,
       ...receta.describir(archivos),
       puertoSugerido: receta.puertoSugerido(archivos),
-      dockerfile: receta.dockerfile(archivos),
+      dockerfile: receta.dockerfile(archivos, opciones),
+      aplicaComandoConstruccion: receta.aplicaComandoConstruccion,
     };
   }
 

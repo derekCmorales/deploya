@@ -11,6 +11,8 @@ export interface DatosProyecto {
   puertoInterno: number;
   /** Sobrescribe el `CMD` de la imagen; `null` = el de la imagen. Opcional por si la API aún no lo devuelve. */
   comandoInicio?: string | null;
+  /** `RUN` de la receta (feat/m3-alta-guiada); `null` = el de la receta. */
+  comandoConstruccion?: string | null;
 }
 
 /** El formulario edita texto: el puerto y la ruta se normalizan al enviar. */
@@ -21,6 +23,7 @@ export interface BorradorProyecto {
   rutaDockerfile: string;
   puertoInterno: string;
   comandoInicio: string;
+  comandoConstruccion: string;
 }
 
 export type CampoConfiguracion = keyof BorradorProyecto;
@@ -54,6 +57,7 @@ export function borradorDe(proyecto: DatosProyecto): BorradorProyecto {
     rutaDockerfile: `/${rutaNormalizada(proyecto.rutaDockerfile)}`,
     puertoInterno: String(proyecto.puertoInterno),
     comandoInicio: proyecto.comandoInicio ?? "",
+    comandoConstruccion: proyecto.comandoConstruccion ?? "",
   };
 }
 
@@ -69,6 +73,8 @@ export function cambiosDe(original: BorradorProyecto, borrador: BorradorProyecto
   if (borrador.puertoInterno.trim() !== original.puertoInterno.trim()) cambios.puertoInterno = Number(borrador.puertoInterno);
   const comando = borrador.comandoInicio.trim();
   if (comando !== original.comandoInicio.trim()) cambios.comandoInicio = comando === "" ? null : comando;
+  const construccion = borrador.comandoConstruccion.trim();
+  if (construccion !== original.comandoConstruccion.trim()) cambios.comandoConstruccion = construccion === "" ? null : construccion;
   return cambios;
 }
 
@@ -99,6 +105,11 @@ export function erroresDeBorrador(borrador: BorradorProyecto): ErroresBorrador {
   if (borrador.comandoInicio.trim().length > COMANDO_INICIO_MAXIMO) {
     errores.comandoInicio = `El comando admite hasta ${COMANDO_INICIO_MAXIMO} caracteres.`;
   }
+  if (borrador.comandoConstruccion.trim().length > COMANDO_INICIO_MAXIMO) {
+    errores.comandoConstruccion = `El comando admite hasta ${COMANDO_INICIO_MAXIMO} caracteres.`;
+  } else if (/[\r\n]/.test(borrador.comandoConstruccion)) {
+    errores.comandoConstruccion = "El comando de construcción va en una sola línea.";
+  }
   return errores;
 }
 
@@ -119,6 +130,7 @@ const CAMPO_POR_CODIGO: Record<string, CampoConfiguracion> = {
 
 /** Cada `codigo` de la API se pinta bajo su campo; lo demás (sin red, GitHub caído) va en un aviso general. */
 export function errorDeGuardado(codigo: string, mensaje: string): ErrorGuardado {
+  if (codigo === "comando-invalido" && /construcci/i.test(mensaje)) return { campo: "comandoConstruccion", mensaje };
   return { campo: CAMPO_POR_CODIGO[codigo] ?? null, mensaje };
 }
 

@@ -77,3 +77,7 @@ Una variable por línea, CLAVE=valor. Ignoramos líneas vacías y comentarios co
 Contenido del .env
 Agregar al borrador
 ```
+
+## Alta guiada (`feat-m3-alta-guiada`)
+
+Cada fila gana «Quitar» (icono `Trash2`): borrar una variable guardada cuenta como cambio sin aplicar. La tabla es la misma `TablaVariables` del paso Variables del alta.

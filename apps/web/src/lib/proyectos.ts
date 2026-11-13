@@ -56,6 +56,8 @@ export interface ListaProyectos {
   usados: number;
   maximo: number;
   plan: PlanProyectos;
+  /** Recursos de datos de la cuenta (`maximo: null` = sin tope). Ausente en una API anterior. */
+  datos?: { usados: number; maximo: number | null };
 }
 
 export interface ValidacionRepositorio {
@@ -69,7 +71,8 @@ export interface ValidacionRepositorio {
   rutaDockerfile?: string;
   dockerfile: string | null;
   puerto: number;
-  deteccion?: { receta: string; nombre: string; descripcion: string };
+  /** `aplicaComandoConstruccion` desde feat/m3-alta-guiada; ausente en una API anterior. */
+  deteccion?: { receta: string; nombre: string; descripcion: string; aplicaComandoConstruccion?: boolean };
 }
 
 /** Ruta por omisión del Dockerfile en el alta (11a) y en Configuración (19). */
@@ -268,8 +271,14 @@ export type ErrorAlta =
   | { tipo: "sin-dockerfile"; rama: string }
   | { tipo: "stack-no-reconocido"; rama: string; pista: string; mensaje: string }
   | { tipo: "bloqueo"; codigo: string; titulo: string; accion: "Renovar" | "Cambiar de plan"; mensaje: string }
-  | { tipo: "campo"; campo: "url" | "rama" | "rutaDockerfile" | "nombre" | "puerto"; mensaje: string }
+  | { tipo: "campo"; campo: CampoAlta; mensaje: string }
+  | { tipo: "datos"; mensaje: string }
+  | { tipo: "variables"; mensaje: string }
   | { tipo: "aviso"; mensaje: string };
+
+export type CampoAlta = "url" | "rama" | "rutaDockerfile" | "nombre" | "puerto" | "comandoInicio" | "comandoConstruccion";
+
+const CODIGOS_DE_VARIABLES = new Set(["clave-invalida", "clave-reservada", "valor-demasiado-largo", "demasiadas-variables"]);
 
 const CAMPO_POR_CODIGO: Record<string, "url" | "rama" | "rutaDockerfile" | "nombre"> = {
   "url-invalida": "url",
@@ -286,6 +295,9 @@ export function errorDeAlta(codigo: string, mensaje: string, detalle: Record<str
   }
   const bloqueo = bloqueoDespliegue(codigo, mensaje);
   if (bloqueo) return { tipo: "bloqueo", codigo, ...bloqueo, mensaje };
+  if (codigo === "datos-no-permitidos" || (codigo === "datos-invalidos" && /recurso/i.test(mensaje))) return { tipo: "datos", mensaje };
+  if (codigo === "comando-invalido") return { tipo: "campo", campo: /construcci/i.test(mensaje) ? "comandoConstruccion" : "comandoInicio", mensaje };
+  if (CODIGOS_DE_VARIABLES.has(codigo)) return { tipo: "variables", mensaje };
   if (codigo === "datos-invalidos" && /puerto/i.test(mensaje)) return { tipo: "campo", campo: "puerto", mensaje };
   if (codigo === "datos-invalidos" && /nombre/i.test(mensaje)) return { tipo: "campo", campo: "nombre", mensaje };
   const campo = CAMPO_POR_CODIGO[codigo];

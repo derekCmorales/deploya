@@ -1,4 +1,4 @@
-import { fusionarVariables, textoInyeccion } from "./variables-contenedor";
+import { fusionarVariables, textoInyeccion, textoPendientes } from "./variables-contenedor";
 
 describe("fusionarVariables (recursos de datos → contenedor)", () => {
   it("cuenta solo lo que Deploya puso: una base pisada por el usuario no cuenta", () => {
@@ -9,5 +9,12 @@ describe("fusionarVariables (recursos de datos → contenedor)", () => {
 
   it("una sola variable va en singular", () => {
     expect(textoInyeccion(["Redis 7"], 1)).toBe("Recursos de datos conectados: Redis 7 · 1 variable inyectada");
+  });
+});
+
+describe("textoPendientes (feat/m3-alta-guiada)", () => {
+  it("nombra los recursos que siguen creándose, en singular y plural", () => {
+    expect(textoPendientes(["PostgreSQL 17 + pgvector"])).toMatch(/^PostgreSQL 17 \+ pgvector todavía se está creando/);
+    expect(textoPendientes(["Redis 7", "Almacenamiento S3"])).toMatch(/todavía se están creando/);
   });
 });

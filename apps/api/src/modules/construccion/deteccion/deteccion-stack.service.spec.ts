@@ -147,3 +147,53 @@ describe("Plantillas de las recetas", () => {
     expect(dockerfile.trimEnd().split("\n").reverse().find((l) => l.startsWith("USER "))).not.toBe("USER root");
   });
 });
+
+describe("Comando de construcción en las recetas (feat/m3-alta-guiada)", () => {
+  const detectarCon = (archivos: Record<string, string>, comandoConstruccion: string | null) =>
+    new DeteccionStackService(recetasEnOrden()).detectar(new LectorFuenteMemoria(new Map(Object.entries(archivos))), undefined, { comandoConstruccion });
+  const lineas = (texto: string | null) => (texto ?? "").split("\n");
+
+  it("Node con comando de construcción: instala con npm ci, corre el comando y no npm run build", async () => {
+    const archivos = { "package.json": paquete({ start: "node .", build: "tsc" }), "package-lock.json": "{}" };
+    const { dockerfile, aplicaComandoConstruccion } = await detectarCon(archivos, "npm run build:prod");
+
+    expect(aplicaComandoConstruccion).toBe(true);
+    expect(lineas(dockerfile)).toEqual(expect.arrayContaining(["RUN npm ci", "RUN npm run build:prod"]));
+    expect(lineas(dockerfile)).not.toContain("RUN npm run build");
+  });
+
+  it("Python con comando de construcción: va después de pip install", async () => {
+    const { dockerfile } = await detectarCon({ "requirements.txt": "django", "main.py": "" }, "python manage.py collectstatic --noinput");
+    const filas = lineas(dockerfile);
+
+    expect(filas.indexOf("RUN python manage.py collectstatic --noinput")).toBe(filas.indexOf("RUN pip install --no-cache-dir -r requirements.txt") + 1);
+  });
+
+  it("Go con comando de construcción: va antes de go build", async () => {
+    const { dockerfile } = await detectarCon({ "go.mod": "module x" }, "go generate ./...");
+    const filas = lineas(dockerfile);
+
+    expect(filas.indexOf("RUN go generate ./...")).toBe(filas.indexOf("RUN CGO_ENABLED=0 go build -o /app .") - 1);
+  });
+
+  it("Comando de construcción con Dockerfile propio: no aplica y no hay Dockerfile generado", async () => {
+    const resultado = await detectarCon({ Dockerfile: "FROM node", "package.json": paquete({ start: "node ." }) }, "npm run x");
+
+    expect(resultado).toMatchObject({ receta: "dockerfile", dockerfile: null, aplicaComandoConstruccion: false });
+  });
+
+  it("el sitio estático no aplica el comando", async () => {
+    const resultado = await detectarCon({ "index.html": "" }, "npm run x");
+
+    expect(resultado.aplicaComandoConstruccion).toBe(false);
+    expect(resultado.dockerfile).not.toContain("npm run x");
+  });
+
+  it.each([
+    ["node", { "package.json": paquete({ start: "node .", build: "tsc" }) }],
+    ["python", { "requirements.txt": "flask", "main.py": "" }],
+    ["go", { "go.mod": "module x" }],
+  ] as const)("Receta sin comando de construcción: %s genera el mismo Dockerfile de antes", async (_receta, archivos) => {
+    expect((await detectarCon(archivos, null)).dockerfile).toBe((await detectarEn(archivos)).dockerfile);
+  });
+});

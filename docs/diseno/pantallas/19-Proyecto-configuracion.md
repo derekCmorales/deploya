@@ -70,3 +70,7 @@ Zona de peligro
 Eliminar proyecto
 Detiene y borra el contenedor, sus imágenes, variables e historial. No se puede deshacer.
 ```
+
+## Alta guiada (`feat-m3-alta-guiada`)
+
+La sección «Contenedor» agrega «Comando de construcción (opcional)» (icono `Hammer`) antes del comando de inicio, con la pista «Solo con receta detectada (Node, Python, Go): en Node reemplaza npm run build; en Python corre después de pip install; en Go, antes de go build. Con tu Dockerfile se ignora.». Su descripción pasa a «Se construye con el Dockerfile de tu repositorio o con la receta que detectamos.».

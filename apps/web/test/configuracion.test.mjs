@@ -29,6 +29,7 @@ test("19 · el borrador muestra la ruta como /Dockerfile y el puerto como texto"
     rutaDockerfile: "/Dockerfile",
     puertoInterno: "8080",
     comandoInicio: "",
+    comandoConstruccion: "",
   });
 });
 
@@ -110,4 +111,20 @@ test("19 · comando de inicio admite hasta 512 caracteres", () => {
   assert.deepEqual(erroresDeBorrador({ ...ok, comandoInicio: "a".repeat(512) }), {});
   assert.deepEqual(Object.keys(erroresDeBorrador({ ...ok, comandoInicio: "a".repeat(513) })), ["comandoInicio"]);
   assert.equal(errorDeGuardado("comando-invalido", "x").campo, "comandoInicio");
+});
+
+test("Cambiar el comando de construcción: cambiosDe lo envía y vacío vuelve a null", () => {
+  const original = borradorDe({ ...proyecto, comandoConstruccion: "npm run build:prod" });
+  assert.equal(original.comandoConstruccion, "npm run build:prod");
+  assert.deepEqual(cambiosDe(original, { ...original, comandoConstruccion: " go generate ./... " }), { comandoConstruccion: "go generate ./..." });
+  assert.deepEqual(cambiosDe(original, { ...original, comandoConstruccion: "" }), { comandoConstruccion: null });
+});
+
+test("19 · el comando de construcción va en una sola línea", () => {
+  const borrador = { ...borradorDe(proyecto), comandoConstruccion: "npm ci\nnpm run build" };
+  assert.match(erroresDeBorrador(borrador).comandoConstruccion, /una sola línea/);
+  assert.deepEqual(errorDeGuardado("comando-invalido", "El comando de construcción va en una sola línea."), {
+    campo: "comandoConstruccion",
+    mensaje: "El comando de construcción va en una sola línea.",
+  });
 });

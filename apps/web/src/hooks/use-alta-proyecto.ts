@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
+import { cuerpoAlta, errorComando, pasoAnterior, pasoDeError, pasoSiguiente, type PasoAlta } from "@/lib/alta";
 import { ErrorApi, pedirApi } from "@/lib/api";
+import { alternarTipo, type TipoRecurso } from "@/lib/datos";
 import {
   errorDeAlta,
   nombreSugerido,
@@ -12,11 +14,17 @@ import {
   type ErrorAlta,
   type ValidacionRepositorio,
 } from "@/lib/proyectos";
-import { errorClave, variablesDeAlta, type FilaAlta } from "@/lib/variables";
+import {
+  combinarVariables,
+  errorClave,
+  filaNueva,
+  quitarFila,
+  variablesDeBorrador,
+  type FilaAlta,
+  type FilaVariable,
+} from "@/lib/variables";
 
-export type PasoAlta = "repositorio" | "variables" | "revisar";
-
-const FILA_VACIA: FilaAlta = { clave: "", valor: "" };
+export type { PasoAlta } from "@/lib/alta";
 
 interface ProyectoCreado {
   proyecto: { id: string };
@@ -26,8 +34,9 @@ interface ProyectoCreado {
 const RAMA_INICIAL = "main";
 
 /**
- * Estado del asistente «Nuevo proyecto» (11a → 11d, errores de 11e). Valida contra
- * `POST /proyectos/validar-repositorio` y crea con `POST /proyectos`.
+ * Estado del asistente «Nuevo proyecto» en cinco pasos (feat/m3-alta-guiada). El orden y a qué paso
+ * vuelve cada error salen de `lib/alta`; aquí solo se guarda lo escrito y se llama a la API
+ * (`POST /proyectos/validar-repositorio` y `POST /proyectos`).
  */
 export function useAltaProyecto() {
   const [paso, setPaso] = useState<PasoAlta>("repositorio");
@@ -37,10 +46,14 @@ export function useAltaProyecto() {
   const [nombre, setNombre] = useState("");
   const [nombreEditado, setNombreEditado] = useState(false);
   const [puerto, setPuerto] = useState("");
-  const [variables, setVariables] = useState<FilaAlta[]>([FILA_VACIA]);
+  const [comandoInicio, setComandoInicio] = useState("");
+  const [comandoConstruccion, setComandoConstruccion] = useState("");
+  const [datos, setDatos] = useState<TipoRecurso[]>([]);
+  const [variables, setVariables] = useState<FilaVariable[]>([filaNueva()]);
   const [validacion, setValidacion] = useState<ValidacionRepositorio | null>(null);
   const [error, setError] = useState<ErrorAlta | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const aplicaComandoConstruccion = validacion?.deteccion?.aplicaComandoConstruccion === true;
 
   const invalidar = () => {
     setValidacion(null);
@@ -65,28 +78,22 @@ export function useAltaProyecto() {
     }
   };
 
-  const errorLocal = (): ErrorAlta | null => {
-    if (!subdominioDesdeNombre(nombre)) {
-      return { tipo: "campo", campo: "nombre", mensaje: "El nombre necesita al menos una letra o un número." };
+  const errorDelPaso = (): ErrorAlta | null => {
+    if (paso === "repositorio") return errorRepositorio(nombre, puerto);
+    if (paso === "construccion") return errorConstruccion(comandoInicio, aplicaComandoConstruccion ? comandoConstruccion : "");
+    if (paso === "variables") {
+      const clave = variables.map((fila) => errorClave(fila.clave)).find((mensaje) => mensaje);
+      return clave ? { tipo: "variables", mensaje: clave } : null;
     }
-    if (!puertoValido(puerto)) return { tipo: "campo", campo: "puerto", mensaje: "Usa un puerto entre 1 y 65535." };
     return null;
   };
 
   const continuar = async () => {
-    if (paso === "repositorio") return continuarRepositorio();
-    const clave = variables.map((fila) => errorClave(fila.clave)).find((mensaje) => mensaje);
-    if (clave) return setError({ tipo: "aviso", mensaje: clave });
-    setError(null);
-    setPaso("revisar");
-  };
-
-  const continuarRepositorio = async () => {
-    if (!validacion) return validar();
-    const local = errorLocal();
+    if (paso === "repositorio" && !validacion) return validar();
+    const local = errorDelPaso();
     if (local) return setError(local);
     setError(null);
-    setPaso("variables");
+    setPaso(pasoSiguiente(paso));
   };
 
   /** Devuelve el proyecto y el número del despliegue, o `null` si la API lo rechazó. */
@@ -96,24 +103,38 @@ export function useAltaProyecto() {
     try {
       const creado = await pedirApi<ProyectoCreado>("/proyectos", {
         metodo: "POST",
-        cuerpo: {
+        cuerpo: cuerpoAlta({
           url: validacion.urlNormalizada,
           rama,
           rutaDockerfile,
           nombre,
-          puerto: Number(puerto),
-          variables: variablesDeAlta(variables),
-        },
+          puerto,
+          comandoInicio,
+          comandoConstruccion,
+          aplicaComandoConstruccion,
+          datos,
+          variables: variablesDeBorrador(variables),
+        }),
       });
       return { id: creado.proyecto.id, numero: creado.despliegue.numero };
     } catch (e) {
       const alta = errorDe(e);
       setError(alta);
-      if (alta.tipo !== "aviso") setPaso("repositorio");
+      setPaso(pasoDeError(alta));
       return null;
     } finally {
       setOcupado(false);
     }
+  };
+
+  const cambiar = (setter: (valor: string) => void) => (valor: string) => {
+    setter(valor);
+    setError(null);
+  };
+
+  const editarVariables = (cambio: (filas: FilaVariable[]) => FilaVariable[]) => {
+    setVariables(cambio);
+    setError(null);
   };
 
   return {
@@ -123,6 +144,10 @@ export function useAltaProyecto() {
     rutaDockerfile,
     nombre,
     puerto,
+    comandoInicio,
+    comandoConstruccion,
+    aplicaComandoConstruccion,
+    datos,
     variables,
     validacion,
     error,
@@ -145,21 +170,45 @@ export function useAltaProyecto() {
       setNombreEditado(true);
       setError(null);
     },
-    cambiarPuerto: (valor: string) => {
-      setPuerto(valor);
+    cambiarPuerto: cambiar(setPuerto),
+    cambiarComandoInicio: cambiar(setComandoInicio),
+    cambiarComandoConstruccion: cambiar(setComandoConstruccion),
+    alternarDato: (tipo: TipoRecurso) => {
+      setDatos((actuales) => alternarTipo(actuales, tipo));
       setError(null);
     },
     validar,
     continuar,
     desplegar,
-    anadirVariable: () => setVariables((filas) => [...filas, { ...FILA_VACIA }]),
-    editarVariable: (indice: number, cambio: Partial<FilaAlta>) => {
-      setVariables((filas) => filas.map((fila, i) => (i === indice ? { ...fila, ...cambio } : fila)));
+    anadirVariable: () => editarVariables((filas) => [...filas, filaNueva()]),
+    editarVariable: (indice: number, cambio: Partial<FilaVariable>) =>
+      editarVariables((filas) => filas.map((fila, i) => (i === indice ? { ...fila, ...cambio } : fila))),
+    quitarVariable: (indice: number) => editarVariables((filas) => quitarFila(filas, indice, true)),
+    alternarValor: (indice: number) =>
+      editarVariables((filas) => filas.map((fila, i) => (i === indice ? { ...fila, oculta: !fila.oculta } : fila))),
+    pegarVariables: (pegadas: readonly FilaAlta[]) => editarVariables((filas) => combinarVariables(filas, pegadas)),
+    irA: (destino: PasoAlta) => {
       setError(null);
+      setPaso(destino);
     },
-    irA: (destino: PasoAlta) => setPaso(destino),
-    volver: () => setPaso(paso === "revisar" ? "variables" : "repositorio"),
+    volver: () => {
+      setError(null);
+      setPaso(pasoAnterior(paso));
+    },
   };
+}
+
+function errorRepositorio(nombre: string, puerto: string): ErrorAlta | null {
+  if (!subdominioDesdeNombre(nombre)) return { tipo: "campo", campo: "nombre", mensaje: "El nombre necesita al menos una letra o un número." };
+  if (!puertoValido(puerto)) return { tipo: "campo", campo: "puerto", mensaje: "Usa un puerto entre 1 y 65535." };
+  return null;
+}
+
+function errorConstruccion(comandoInicio: string, comandoConstruccion: string): ErrorAlta | null {
+  const construccion = errorComando(comandoConstruccion, "construccion");
+  if (construccion) return { tipo: "campo", campo: "comandoConstruccion", mensaje: construccion };
+  const inicio = errorComando(comandoInicio, "inicio");
+  return inicio ? { tipo: "campo", campo: "comandoInicio", mensaje: inicio } : null;
 }
 
 function errorDe(e: unknown): ErrorAlta {

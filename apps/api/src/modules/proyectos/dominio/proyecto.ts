@@ -10,6 +10,8 @@ export interface Proyecto {
   puertoInterno: number;
   /** Sobrescribe el `CMD` de la imagen (feat/m5-recursos-datos); `null` o ausente = el de la imagen. */
   comandoInicio?: string | null;
+  /** `RUN` de la receta (feat/m3-alta-guiada); `null` o ausente = el de la receta. */
+  comandoConstruccion?: string | null;
   creado: Date;
 }
 
@@ -25,7 +27,16 @@ export interface AltaProyecto {
   puerto?: number;
   /** Paso 11c. Cada entrada trae valor: todavía no hay cifrado previo que conservar. */
   variables?: { clave: string; valor: string }[];
+  /** Paso Construcción (feat/m3-alta-guiada). */
+  comandoInicio?: string | null;
+  comandoConstruccion?: string | null;
+  /** Paso Datos: recursos que M5 crea antes del despliegue #1, sin repetir. */
+  datos?: TipoRecursoAlta[];
 }
+
+/** Los tipos de recurso de datos que el alta puede pedir (recursos-datos.md § Tipos). */
+export const TIPOS_RECURSO_ALTA = ["postgres", "redis", "s3"] as const;
+export type TipoRecursoAlta = (typeof TIPOS_RECURSO_ALTA)[number];
 
 export interface ConsultaRepositorio {
   url: string;
@@ -56,5 +67,5 @@ export interface ValidacionRepositorio {
   /** `EXPOSE` del Dockerfile, el de la receta, o el puerto por defecto. */
   puerto: number;
   /** Lo llena el servicio tras `DeteccionStackService.detectar`. */
-  deteccion?: { receta: string; nombre: string; descripcion: string };
+  deteccion?: { receta: string; nombre: string; descripcion: string; aplicaComandoConstruccion: boolean };
 }

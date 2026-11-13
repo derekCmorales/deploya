@@ -1,3 +1,4 @@
+import { Espera, EsperaInstantanea } from "../compartido/espera";
 import { RelojFijo } from "../compartido/reloj";
 import { ProyectosLecturaMemoria } from "../adapters/memoria/proyectos-lectura.memoria";
 import { RepositorioRecursosDatosMemoria } from "../adapters/memoria/repositorio-recursos-datos.memoria";
@@ -48,7 +49,7 @@ export function proyectoDatos(id: string, cambios: Partial<ProyectoDesplegable> 
  * Recursos de datos completos sin Docker, red, base ni reloj reales: la API (`servicio`) encola en
  * memoria y `procesar()` ejecuta la cola como el trabajador (`motor`) sobre el Docker falso.
  */
-export function datosDePrueba() {
+export function datosDePrueba(espera: Espera = new EsperaInstantanea()) {
   const reloj = new RelojFijo(new Date("2026-11-12T10:00:00.000Z"));
   const proyectos = new ProyectosLecturaMemoria();
   const repositorio = new RepositorioRecursosDatosMemoria(reloj);
@@ -60,7 +61,7 @@ export function datosDePrueba() {
   const servicio = new DatosService(proyectos, repositorio, cola, cuota, new GeneradorSecretosFijo(), cifrador, conexiones);
   const docker = new RecursosDatosStub();
   const rutas = new EnrutamientoStub();
-  const motor = new MotorDatosService(repositorio, proyectos, docker, conexiones, new EnrutamientoService(rutas), reloj);
+  const motor = new MotorDatosService(repositorio, proyectos, docker, conexiones, new EnrutamientoService(rutas), reloj, espera);
   for (const id of ["api", "worker", "web"]) proyectos.agregar(proyectoDatos(id));
   proyectos.agregar(proyectoDatos("ajeno", { usuarioId: "usuario-2" }));
   let procesados = 0;

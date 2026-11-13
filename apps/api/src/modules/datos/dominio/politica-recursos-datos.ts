@@ -27,6 +27,25 @@ export function verificarAlta(situacion: SituacionAlta): void {
   verificarTipoLibre(situacion.tiposConectados, situacion.tipo);
 }
 
+export interface SituacionAltaInicial {
+  estadoSuscripcion: EstadoSuscripcionDatos;
+  usados: number;
+  maximo: number;
+  /** Lo que pide el alta del proyecto (feat/m3-alta-guiada), antes de que el proyecto exista. */
+  tipos: readonly TipoRecurso[];
+}
+
+/**
+ * Mismas reglas que `verificarAlta`, para varios recursos de un proyecto que todavía no existe:
+ * todos deben caber en el plan y no repetir tipo.
+ */
+export function verificarAltaInicial(situacion: SituacionAltaInicial): void {
+  if (situacion.tipos.length === 0) return;
+  if (!ESTADOS_QUE_PERMITEN_CREAR.includes(situacion.estadoSuscripcion)) throw new SuscripcionBloqueada(situacion.estadoSuscripcion);
+  if (situacion.usados + situacion.tipos.length > situacion.maximo) throw new LimiteRecursosDatos(situacion.maximo);
+  situacion.tipos.forEach((tipo, indice) => verificarTipoLibre(situacion.tipos.slice(0, indice), tipo));
+}
+
 /** A lo sumo un recurso de cada tipo por proyecto, propio o compartido. */
 export function verificarTipoLibre(tiposConectados: readonly TipoRecurso[], tipo: TipoRecurso): void {
   if (tiposConectados.includes(tipo)) throw new TipoYaConectado(tipo);

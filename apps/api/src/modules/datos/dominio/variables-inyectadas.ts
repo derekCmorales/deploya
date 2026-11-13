@@ -5,6 +5,8 @@ export interface InyeccionDatos {
   /** Nombres legibles de los recursos («PostgreSQL 17 + pgvector»), para la bitácora. */
   recursos: string[];
   variables: VariablesRecurso;
+  /** Los que seguían en `creando` al tope de la espera (feat/m3-alta-guiada), para avisar en la bitácora. */
+  pendientes?: string[];
 }
 
 /** Junta las variables de varios recursos; un proyecto tiene a lo sumo uno por tipo, así que no chocan. */

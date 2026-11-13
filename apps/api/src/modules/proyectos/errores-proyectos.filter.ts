@@ -17,6 +17,7 @@ export const ESTADO_HTTP_POR_CODIGO: Record<string, HttpStatus> = {
   "puerto-invalido": HttpStatus.BAD_REQUEST,
   "comando-invalido": HttpStatus.BAD_REQUEST,
   "limite-proyectos": HttpStatus.CONFLICT,
+  "datos-no-permitidos": HttpStatus.CONFLICT,
   "proyecto-no-encontrado": HttpStatus.NOT_FOUND,
   "confirmacion-no-coincide": HttpStatus.BAD_REQUEST,
   "clave-invalida": HttpStatus.BAD_REQUEST,

@@ -84,6 +84,14 @@ PUT  /proyectos/:id/variables              body { variables: [{ clave, valor? }]
                                            · 400 { codigo: "ClaveInvalida" | "ClaveReservada" | "ValorDemasiadoLargo" | "DemasiadasVariables" }
                                            · con desplegar: true, los mismos 409 que crearDespliegue
 POST /proyectos                            body agrega variables?: [{ clave, valor }]   (paso 11c)
+POST /proyectos                            (v3.4, alta guiada) body agrega comandoInicio?: string, comandoConstruccion?: string,
+                                           datos?: ("postgres" | "redis" | "s3")[]
+                                           · valida el plan de datos ANTES de guardar; crea los recursos y al final encola el #1
+                                           · 400 comando-invalido (512 caracteres, comillas; el de construcción en una línea)
+                                           · 400 datos-invalidos (tipo desconocido o repetido)
+                                           · 409 { codigo: "datos-no-permitidos", motivo: "LIMITE_RECURSOS_DATOS" | "SUSCRIPCION_BLOQUEADA" | "TIPO_YA_CONECTADO", mensaje }
+PATCH /proyectos/:id                       (v3.4) acepta y devuelve comandoConstruccion: string | null
+POST /proyectos/validar-repositorio        (v3.4) deteccion agrega aplicaComandoConstruccion: boolean
 ```
 
 ## HTTP (requiere sesión; solo el dueño del proyecto; si no, 404)
@@ -189,7 +197,9 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 
 ## Lista de proyectos (M3)
 
-`GET /proyectos` incluye por proyecto `ultimoDespliegue: { id, numero, estado, etapas, creado } | null` para el riel de 55px de la pantalla 10.
+`GET /proyectos` incluye por proyecto `ultimoDespliegue: { id, numero, estado, etapas, creado } | null` para el riel de 55px de la pantalla 10. Desde v3.4 agrega `datos: { usados, maximo }` (recursos de datos de la cuenta; `maximo: null` = sin tope) para el paso Datos del alta.
+
+**Comando de construcción (v3.4).** `Proyecto.comandoConstruccion` va en un `RUN` del `Dockerfile.deploya`: en Node reemplaza `npm run build`, en Python corre después de `pip install` y en Go antes de `go build`. Con `Dockerfile` propio o sitio estático se ignora y Recepción escribe un aviso. `RecetaStack.dockerfile(archivos, opciones?)` y `DeteccionStackService.detectar(fuente, ruta?, opciones?)` reciben `OpcionesReceta { comandoConstruccion }`; `ResultadoDeteccion` agrega `aplicaComandoConstruccion`.
 
 ## Qué cambia para la web con v2 y v3
 
@@ -222,4 +232,5 @@ Reversión: crea un despliegue nuevo con `disparador = "reversion"` que **reusa*
 | 3 | 2026-10-11 | Avance 3, solo agrega: historial y resumen (M7-02), códigos de cancelar, reintentar y redesplegar (M4-02), `PATCH /proyectos/:id` (M3-04), consumo y actividad (M7-03), `certificado` (M6-02), `detenerTodosDe` / `reanudarTodosDe` para M2 y M9 |
 | 3.1 | 2026-10-14 | Solo aclara: `ContenedoresClientePuerto` y su adaptador `ContenedoresClienteM5` viven en M5 (`orquestacion/`) y `OrquestacionModule` exporta el token; `ProyectosLecturaPuerto.deUsuario` (interno de M4/M5) |
 | 3.2 | 2026-10-14 | Solo aclara `PATCH /proyectos/:id`: los códigos de error son los de M3 en kebab-case (`nombre-repetido`, `ruta-invalida`, `puerto-invalido`, `repositorio-no-accesible`, `rama-no-encontrada`), no los nombres de clase; el único consumidor es la pantalla 19 |
+| 3.4 | 2026-11-12 | Alta guiada (`feat-m3-alta-guiada`), solo agrega: `comandoInicio`, `comandoConstruccion` y `datos` en `POST /proyectos`; `comandoConstruccion` en `PATCH`; `aplicaComandoConstruccion` en la detección; `datos` en `GET /proyectos`; `OpcionesReceta` |
 | 3.3 | 2026-10-14 | Solo precisa `GET /despliegues/:id`: `certificado` es `{ vence }` (ISO 8601) solo si la `url` es https y Traefik ya emitió el certificado; en cualquier otro caso, `null` |

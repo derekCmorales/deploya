@@ -8,6 +8,8 @@ export interface InyeccionDespliegue {
     /** `DEPLOYA_*`: siempre se inyectan y no se pisan. */
     prefijadas: Record<string, string>;
   };
+  /** Recursos que seguían creándose al tope de la espera; se inyectaron igual. */
+  pendientes?: string[];
 }
 
 /**

@@ -208,9 +208,10 @@ test("18 · el estado del recurso tiene su badge canónico, distinto de desplieg
   assert.match(leer("src/app/sistema/page.tsx"), /<EstadoRecursoDatos key=\{e\} estado=\{e\} \/>/);
 });
 
-test("13 · el resumen muestra una tarjeta Datos y 11d anuncia la pestaña", () => {
+test("13 · el resumen muestra una tarjeta Datos y 11d anuncia que los recursos salen antes del despliegue #1", () => {
   assert.match(leer(`${COMPONENTES}/panel-resumen.tsx`), /<TarjetaDatosResumen proyectoId=\{proyectoId\} \/>/);
-  assert.match(leer(`${COMPONENTES}/paso-revisar.tsx`), /Después de crear el proyecto podrás agregar PostgreSQL, Redis o S3 desde la pestaña Datos\./);
+  assert.match(leer(`${COMPONENTES}/paso-revisar.tsx`), /Los recursos de datos se crean antes del despliegue #1 y siguen en la pestaña Datos\./);
+  assert.match(leer(`${COMPONENTES}/asistente-alta.tsx`), /<PasoDatos alta=\{alta\} lista=\{lista\} \/>/);
 });
 
 test("18 · la ficha de la pestaña Datos está en el design system", () => {

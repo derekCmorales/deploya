@@ -69,3 +69,7 @@ Paso 3 de 3
 Atrás
 Desplegar
 ```
+
+## Alta guiada (`feat-m3-alta-guiada`)
+
+Paso 5 de 5. Filas nuevas «Comandos» (build e inicio, o «Los detectados») y «Datos» (recursos elegidos o «Sin bases de datos»), cada una con «Editar» hacia su paso. La nota de datos cambia a «Los recursos de datos se crean antes del despliegue #1 y siguen en la pestaña Datos.» y solo aparece si se eligió alguno. Un error del alta devuelve al paso que lo corrige.

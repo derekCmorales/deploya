@@ -12,6 +12,7 @@ import {
   cuerpoVariables,
   errorClave,
   filasDesdeGuardadas,
+  quitarFila,
   type FilaAlta,
   type FilaVariable,
   type VariableGuardada,
@@ -94,6 +95,7 @@ export function useVariablesProyecto(proyectoId: string) {
     guardarYDesplegar: () => guardar(true),
     mostrar,
     pegar: (pegadas: readonly FilaAlta[]) => setBorrador(combinarVariables(filas, pegadas)),
+    quitar: (indice: number) => setBorrador(quitarFila(filas, indice, false)),
     anadir: () => setBorrador([...filas, { clave: "", valor: "", editada: false, nueva: true }]),
     editar: (indice: number, cambio: Partial<FilaVariable>) => actualizar(indice, { ...cambio, editada: true, oculta: false }),
   };

@@ -15,6 +15,8 @@ import { ConstruccionService } from "../construccion/construccion.service";
 import { ProyectosLecturaPuerto } from "../construccion/puertos/proyectos-lectura.puerto";
 import { CuotaPlanPuerto } from "../orquestacion/puertos/cuota-plan.puerto";
 import { MAXIMO_VARIABLES } from "./dominio/variable";
+import { RecursosDatosAltaMemoria } from "./adaptadores/recursos-datos-alta.datos";
+import { RecursosDatosAlta } from "./puertos/recursos-datos-alta.puerto";
 import {
   DatosAltaInvalidos,
   ErrorProyectos,
@@ -94,6 +96,8 @@ async function montarApi() {
     .useValue(new CuotaProyectosStub())
     .overrideProvider(CuotaPlanPuerto)
     .useValue(new CuotaPlanStub())
+    .overrideProvider(RecursosDatosAlta)
+    .useValue(new RecursosDatosAltaMemoria())
     .compile();
   return {
     controlador: modulo.get(ProyectosController),
@@ -176,6 +180,7 @@ describe("ProyectosController", () => {
       rutaDockerfile: "Dockerfile",
       puertoInterno: 8081,
       comandoInicio: null,
+      comandoConstruccion: null,
     });
     expect(await repositorio.porId(proyecto.id)).toMatchObject({ nombre: "Hola demo", subdominio: "hola-deploya" });
     expect((await motor.ultimosDespliegues([proyecto.id]))[proyecto.id]).toMatchObject({ numero: 1 });

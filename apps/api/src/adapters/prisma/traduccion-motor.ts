@@ -84,6 +84,7 @@ export function proyectoDesdePrisma(fila: ProyectoFila): Proyecto {
     rutaDockerfile: fila.rutaDockerfile,
     puertoInterno: fila.puertoInterno,
     comandoInicio: fila.comandoInicio,
+    comandoConstruccion: fila.comandoConstruccion,
     creado: fila.creado,
   };
 }

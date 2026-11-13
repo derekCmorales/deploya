@@ -1,4 +1,2 @@
-/** Pausa como dependencia: la tarjeta que «tarda 5 s» se prueba sin esperar de verdad. */
-export abstract class Espera {
-  abstract esperar(milisegundos: number): Promise<void>;
-}
+/** El puerto vive en `compartido/espera.ts` desde feat/m3-alta-guiada (también lo usa M5). */
+export { Espera } from "../../../compartido/espera";

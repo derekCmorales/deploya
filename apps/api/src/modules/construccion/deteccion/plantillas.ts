@@ -14,12 +14,18 @@ import {
  */
 const lineas = (...partes: (string | null)[]): string => `${partes.filter((p) => p !== null).join("\n")}\n`;
 
+/** `RUN <comando>` del proyecto, o `null` para que `lineas` lo omita. */
+const correr = (comando: string | null): string | null => (comando ? `RUN ${comando}` : null);
+
 export interface OpcionesNode {
   conLockfile: boolean;
   conBuild: boolean;
+  /** Reemplaza `npm run build`. */
+  comandoConstruccion?: string | null;
 }
 
-export function plantillaNode({ conLockfile, conBuild }: OpcionesNode): string {
+export function plantillaNode({ conLockfile, conBuild, comandoConstruccion = null }: OpcionesNode): string {
+  const construccion = comandoConstruccion ? correr(comandoConstruccion) : conBuild ? "RUN npm run build" : null;
   return lineas(
     `FROM node:${VERSION_NODE}-alpine`,
     "WORKDIR /app",
@@ -27,7 +33,7 @@ export function plantillaNode({ conLockfile, conBuild }: OpcionesNode): string {
     "USER node",
     "COPY --chown=node:node . .",
     conLockfile ? "RUN npm ci" : "RUN npm install",
-    conBuild ? "RUN npm run build" : null,
+    construccion,
     "ENV NODE_ENV=production",
     `ENV PORT=${PUERTO_RECETAS}`,
     `EXPOSE ${PUERTO_RECETAS}`,
@@ -39,9 +45,11 @@ export interface OpcionesPython {
   instalacion: "requirements" | "pyproject";
   modulo: "main" | "app";
   conGunicorn: boolean;
+  /** Corre después de `pip install`. */
+  comandoConstruccion?: string | null;
 }
 
-export function plantillaPython({ instalacion, modulo, conGunicorn }: OpcionesPython): string {
+export function plantillaPython({ instalacion, modulo, conGunicorn, comandoConstruccion = null }: OpcionesPython): string {
   const arranque = conGunicorn
     ? `CMD ["gunicorn", "-b", "0.0.0.0:${PUERTO_RECETAS}", "${modulo}:app"]`
     : `CMD ["python", "${modulo}.py"]`;
@@ -51,6 +59,7 @@ export function plantillaPython({ instalacion, modulo, conGunicorn }: OpcionesPy
     "WORKDIR /app",
     "COPY . .",
     instalacion === "requirements" ? "RUN pip install --no-cache-dir -r requirements.txt" : "RUN pip install --no-cache-dir .",
+    correr(comandoConstruccion),
     `USER ${UID_SIN_PRIVILEGIOS}`,
     `ENV PORT=${PUERTO_RECETAS}`,
     `EXPOSE ${PUERTO_RECETAS}`,
@@ -58,11 +67,13 @@ export function plantillaPython({ instalacion, modulo, conGunicorn }: OpcionesPy
   );
 }
 
-export function plantillaGo(): string {
+/** `comandoConstruccion` corre antes de `go build` (p. ej. `go generate ./...`). */
+export function plantillaGo(comandoConstruccion: string | null = null): string {
   return lineas(
     `FROM golang:${VERSION_GO}-alpine AS construccion`,
     "WORKDIR /src",
     "COPY . .",
+    correr(comandoConstruccion),
     "RUN CGO_ENABLED=0 go build -o /app .",
     "FROM gcr.io/distroless/static:nonroot",
     "COPY --from=construccion /app /app",

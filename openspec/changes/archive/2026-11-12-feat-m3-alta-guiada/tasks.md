@@ -44,4 +44,4 @@ Sin Docker, red, base ni reloj reales en las unitarias. Cada `Scenario` del spec
 
 - [x] 5.1 Contratos `despliegues.md` y `recursos-datos.md`; fichas 11b y 11f nuevas, notas en 11a, 11c, 11d, 17 y 19; `clases-unificado.mmd`
 - [x] 5.2 `pnpm check` en verde
-- [ ] 5.3 `/opsx-archive` después del merge
+- [x] 5.3 `/opsx-archive` después del merge

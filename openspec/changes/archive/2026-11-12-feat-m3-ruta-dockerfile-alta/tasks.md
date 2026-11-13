@@ -21,4 +21,4 @@ No real Docker, network, database or clock in the unit tests. Each `Scenario` in
 ## 3. Close-out
 
 - [x] 3.1 `pnpm test` (api and web), `tsc --noEmit` and `pnpm validate:mermaid` all green
-- [ ] 3.2 `/opsx-archive` after the merge
+- [x] 3.2 `/opsx-archive` after the merge

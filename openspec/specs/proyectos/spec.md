@@ -34,12 +34,37 @@ El sistema SHALL listar solo los proyectos del cliente de la sesión, del más r
 
 ### Requirement: Alta desde repositorio
 
-El sistema SHALL crear un proyecto desde la URL de un repositorio **público de GitHub**, una rama, un nombre (define el subdominio y es único) y un puerto interno. El sistema SHALL verificar que el repositorio es accesible y SHALL pedir a M4 (`DeteccionStackService.detectar`) cómo se construye: con el `Dockerfile` de la raíz o con una receta de stack reconocida. El puerto propuesto SHALL salir de `EXPOSE` o, con receta, ser 8080.
+El sistema SHALL crear un proyecto desde la URL de un repositorio **público de GitHub**, una rama, un nombre (define el subdominio y es único), un puerto interno y, opcionalmente, la ruta del `Dockerfile` relativa al repositorio (por omisión `Dockerfile`, en la raíz). El sistema SHALL verificar que el repositorio es accesible y SHALL pedir a M4 (`DeteccionStackService.detectar`) cómo se construye: con el `Dockerfile` de la ruta indicada o con una receta de stack reconocida. El puerto propuesto SHALL salir de `EXPOSE` de ese `Dockerfile` o, con receta, ser 8080. La ruta SHALL validarse con la misma regla que en Configuración y SHALL guardarse en el proyecto.
 
 #### Scenario: Repositorio válido
 
 - **WHEN** el cliente indica un repositorio público con `Dockerfile`
 - **THEN** ve la rama, el último commit, «Dockerfile detectado» y el puerto propuesto
+
+#### Scenario: Ruta del Dockerfile en el alta
+
+- **WHEN** el cliente indica `apps/api/Dockerfile` en un repositorio que tiene ese archivo con `EXPOSE 4000` y nada en la raíz
+- **THEN** ve «Dockerfile encontrado en apps/api/Dockerfile», el puerto 4000, y el proyecto se guarda con esa ruta
+
+#### Scenario: Ruta del Dockerfile vacía
+
+- **WHEN** el cliente deja la ruta vacía o no la envía
+- **THEN** se usa `Dockerfile` en la raíz, como antes
+
+#### Scenario: Ruta del Dockerfile inválida
+
+- **WHEN** la ruta sale del repositorio (`..`), tiene segmentos vacíos o `\`
+- **THEN** se rechaza con `ruta-invalida` junto al campo «Ruta del Dockerfile» sin llamar a GitHub
+
+#### Scenario: Ruta del Dockerfile inexistente sin stack reconocido
+
+- **WHEN** no hay `Dockerfile` en la ruta indicada y M4 no reconoce el stack
+- **THEN** se rechaza con «falta Dockerfile y no se reconoce el stack» y no se guarda nada
+
+#### Scenario: Cambiar la rama con un Dockerfile fuera de la raíz
+
+- **WHEN** en Configuración se cambia la rama de un proyecto cuyo `Dockerfile` está en `apps/api/Dockerfile`
+- **THEN** la validación consulta esa ruta, no la raíz
 
 #### Scenario: Repositorio sin Dockerfile con stack reconocido
 
@@ -151,7 +176,7 @@ Al confirmar el alta, el sistema SHALL persistir el proyecto y pedir a M4 el des
 
 ### Requirement: Variables cifradas
 
-Las variables de entorno SHALL almacenarse cifradas en reposo (`valorCifrado`, AES-256-GCM) y mostrarse enmascaradas; solo el dueño SHALL poder ver un valor con «Mostrar». Los cambios SHALL aplicar en el próximo despliegue; el cliente puede guardar o guardar y desplegar. Las claves SHALL ser `MAYUSCULAS_Y_GUIONES_BAJOS` de hasta 128 caracteres; `PORT` es reservada. El alta (11c) SHALL aceptar variables.
+Las variables de entorno SHALL almacenarse cifradas en reposo (`valorCifrado`, AES-256-GCM) y mostrarse enmascaradas; solo el dueño SHALL poder ver un valor con «Mostrar». Los cambios SHALL aplicar en el próximo despliegue; el cliente puede guardar o guardar y desplegar. Las claves SHALL ser `MAYUSCULAS_Y_GUIONES_BAJOS` de hasta 128 caracteres; `PORT` es reservada. Un proyecto SHALL admitir hasta 150 variables (sin contar las que inyectan sus recursos de datos). El alta (11c) SHALL aceptar variables.
 
 #### Scenario: Guardar variable
 
@@ -173,44 +198,69 @@ Las variables de entorno SHALL almacenarse cifradas en reposo (`valorCifrado`, A
 - **WHEN** el dueño pulsa «Mostrar» en una variable
 - **THEN** ve el valor descifrado; para cualquier otro cliente el proyecto no existe (404)
 
+#### Scenario: Hasta 150 variables
+
+- **WHEN** el cliente guarda 150 variables y luego intenta 151
+- **THEN** las 150 se aceptan y la 151 se rechaza con `demasiadas-variables`
+
 ### Requirement: Configuración y eliminación
 
-El cliente SHALL poder cambiar nombre (no cambia el subdominio), repositorio, rama, ruta del `Dockerfile` y puerto, con las mismas validaciones del alta. Los cambios SHALL aplicarse en el próximo despliegue, sin desplegar al guardar. Eliminar SHALL exigir escribir el nombre del proyecto y SHALL pedir a M5 detener y borrar contenedor e imágenes. Eliminar SHALL liberar el cupo del plan aunque el último despliegue haya fallado.
+En Configuración (19) el cliente SHALL poder cambiar nombre, repositorio, rama, ruta del `Dockerfile`, puerto interno, comando de inicio y comando de construcción; los cambios SHALL aplicar en el próximo despliegue. Renombrar no cambia el subdominio. Eliminar SHALL pedir escribir el nombre del proyecto.
 
 #### Scenario: Renombrar no cambia el subdominio
 
-- **WHEN** el cliente renombra `hola-deploya` a «Hola demo»
-- **THEN** el nombre cambia y la app sigue respondiendo en `hola-deploya.localhost`
+- **WHEN** el cliente cambia el nombre del proyecto
+- **THEN** el subdominio sigue igual
 
 #### Scenario: Cambiar la rama aplica en el próximo despliegue
 
-- **WHEN** el cliente cambia la rama a `sin-dockerfile` y guarda
-- **THEN** no se crea ningún despliegue y el siguiente que pida clona `sin-dockerfile`
+- **WHEN** el cliente cambia la rama
+- **THEN** se guarda y no se crea un despliegue
+
+#### Scenario: Cambiar el comando de construcción
+
+- **WHEN** el cliente escribe un comando de construcción y guarda
+- **THEN** el `PATCH` lo guarda; vacío vuelve a `null` (el de la receta)
 
 #### Scenario: Rama inexistente
 
-- **WHEN** el cliente guarda una rama que no existe en el repositorio
-- **THEN** se rechaza con `RamaInexistente` y nada cambia
+- **WHEN** el cliente pone una rama que no existe en el repositorio
+- **THEN** se rechaza con `rama-no-encontrada` junto al campo
 
 #### Scenario: Nombre repetido
 
 - **WHEN** el cliente usa el nombre de otro de sus proyectos
-- **THEN** se rechaza con `NombreRepetido`
+- **THEN** se rechaza con `nombre-repetido`
 
 #### Scenario: Eliminar proyecto
 
-- **WHEN** el cliente escribe el nombre del proyecto y confirma
-- **THEN** se detiene el servicio y se borran contenedor, imágenes, variables e historial
+- **WHEN** el cliente escribe el nombre exacto y confirma
+- **THEN** se borran el proyecto, sus variables, despliegues y contenedores
 
 #### Scenario: Confirmación distinta
 
-- **WHEN** el nombre escrito no coincide con el del proyecto
-- **THEN** se rechaza y el proyecto se conserva
+- **WHEN** el texto no coincide con el nombre
+- **THEN** se rechaza con `confirmacion-no-coincide`
 
 #### Scenario: Proyecto ajeno o inexistente
 
-- **WHEN** el cliente intenta eliminar un proyecto que no es suyo o que no existe
-- **THEN** se responde como no encontrado y no se borra nada
+- **WHEN** el cliente pide un proyecto que no es suyo o no existe
+- **THEN** responde 404 `proyecto-no-encontrado`
+
+#### Scenario: Comando de inicio
+
+- **WHEN** el cliente guarda `comandoInicio` = `node dist/worker-optimizer.main.js` y luego `null`
+- **THEN** la vista devuelve el comando y después `null`, y el siguiente despliegue usa el `CMD` de la imagen
+
+#### Scenario: Comando de inicio demasiado largo
+
+- **WHEN** el comando pasa de 512 caracteres
+- **THEN** se rechaza con `comando-invalido` (400)
+
+#### Scenario: Comando con comilla sin cerrar
+
+- **WHEN** el comando tiene una comilla sin cerrar o no es texto
+- **THEN** se rechaza con `comando-invalido` (400)
 
 ### Requirement: Web lista para el público
 
@@ -235,6 +285,68 @@ Un error inesperado al dibujar una pantalla SHALL mostrar el estado de error del
 
 - **WHEN** se abre «Mi suscripción»
 - **THEN** la pestaña dice «Mi suscripción · Deploya»
+
+### Requirement: Subdominios reservados para datos
+
+Un proyecto nuevo SHALL NOT tomar un subdominio que termine en `-s3`: esa etiqueta es la ruta pública del almacenamiento S3 de otro proyecto (`<subdominio>-s3.<dominio>`).
+
+#### Scenario: Subdominio que choca con una ruta S3
+
+- **WHEN** el cliente crea un proyecto llamado «tienda-s3»
+- **THEN** el alta se rechaza con `subdominio-en-uso` y no se guarda nada
+
+### Requirement: Alta guiada en cinco pasos
+
+El asistente «Nuevo proyecto» SHALL guiar al cliente por Repositorio, Construcción, Datos, Variables y Revisar, de modo que el despliegue #1 salga con todo lo que la app necesita. Construcción, Datos y Variables SHALL ser opcionales. El paso Variables SHALL ofrecer la misma experiencia que la pestaña Variables (17): tabla clave/valor, «Pegar .env», mostrar y ocultar valores y el contador hasta 150. Revisar SHALL tener una fila por paso con «Editar», que vuelve a ese paso sin perder lo escrito.
+
+#### Scenario: Pegar un .env en el alta
+
+- **WHEN** en el paso Variables el cliente pega `NODE_ENV=production` y `API_KEY="abc"`
+- **THEN** quedan dos variables nuevas, `API_KEY` con el valor `abc`, y el contador dice «2 / 150»
+
+#### Scenario: Variables que inyectan los recursos elegidos
+
+- **WHEN** el cliente eligió PostgreSQL en el paso Datos y llega a Variables
+- **THEN** ve que `DATABASE_URL` y `PG*` llegarán solas, y una variable propia con la misma clave se marca como «gana la tuya»
+
+#### Scenario: Comando de construcción sin receta
+
+- **WHEN** el repositorio trae su propio `Dockerfile`
+- **THEN** el campo «Comando de construcción» no se ofrece y el texto explica que el `Dockerfile` manda
+
+#### Scenario: Límite de datos del plan en el asistente
+
+- **WHEN** el plan permite 1 recurso de datos y la cuenta ya usa 1
+- **THEN** las tarjetas de PostgreSQL, Redis y S3 aparecen deshabilitadas con «Llegaste al límite de tu plan»
+
+### Requirement: Alta con comandos y recursos de datos
+
+`POST /proyectos` SHALL aceptar `comandoInicio`, `comandoConstruccion` y `datos` (lista de `postgres`, `redis`, `s3`, sin repetir), todos opcionales. Los comandos SHALL validarse como en Configuración (hasta 512 caracteres, comillas cerradas; el de construcción además en una sola línea). El sistema SHALL verificar la suscripción y el límite de recursos de datos **antes** de guardar el proyecto; con todo válido SHALL guardar el proyecto, sus variables y sus recursos, y SHALL encolar el despliegue #1 al final.
+
+#### Scenario: Alta con PostgreSQL y Redis
+
+- **WHEN** el cliente confirma un alta con `datos: ["postgres", "redis"]` y su plan admite dos recursos más
+- **THEN** el proyecto se guarda, se piden los dos recursos a M5 y después se crea el despliegue #1 en Encolado
+
+#### Scenario: Alta con más recursos de los que admite el plan
+
+- **WHEN** el cliente pide dos recursos y su plan solo admite uno más
+- **THEN** se rechaza con 409 `datos-no-permitidos` y el motivo del plan, y no se guarda el proyecto ni se crea el despliegue
+
+#### Scenario: Recurso repetido en el alta
+
+- **WHEN** `datos` trae `postgres` dos veces o un tipo desconocido
+- **THEN** se rechaza con 400 `datos-invalidos` sin llamar a GitHub
+
+#### Scenario: Comandos en el alta
+
+- **WHEN** el alta trae `comandoInicio: "node dist/worker.js"` y `comandoConstruccion: "npm run build:prod"`
+- **THEN** el proyecto se guarda con ambos y Configuración (19) los muestra
+
+#### Scenario: Comando de construcción con salto de línea
+
+- **WHEN** `comandoConstruccion` trae un salto de línea
+- **THEN** se rechaza con 400 `comando-invalido` y no se guarda nada
 
 ## Fuera de alcance · solo si da el tiempo
 

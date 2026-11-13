@@ -148,7 +148,7 @@ Por memoria es un cliente **Pro** (4 de 10 proyectos de 1 GB; 3 de 10 recursos),
 - **El piloto de 5 días con Nimbo cabe holgado** en el tope de 70 USD (≈ 25 USD). **Un mes completo no** (≈ 152 USD): o se vuelve a `m7i-flex.large` al terminar, o se sube `tope_presupuesto_usd` a 160 sabiendo que se agotan los créditos.
 - Requiere pasar la cuenta a **plan de pago** (ningún xlarge es elegible en el gratuito).
 - Cambio en sitio: `tipo_instancia = "m7i-flex.xlarge"` y `terraform apply` (≈ 2 min de corte; IP, disco y volúmenes se conservan). Detalle en [variables.tf](../infra/terraform/variables.tf).
-- **Costo atribuible a Nimbo:** ≈ 2.5 GB × 0.01324 USD/MB ≈ **33.90 USD/mes** en `m7i-flex.xlarge` (≈ 42.70 en el nodo de 8 GB) frente a 15 USD de un plan Pro: para el piloto es una inversión; como cliente estable debería ir en Business (40 USD, margen ≈ 4 USD).
+- **Costo atribuible a Nimbo:** ≈ 2.5 GB × 0.01324 USD/MB ≈ **33.90 USD/mes** en `m7i-flex.xlarge` (≈ 42.70 en el nodo de 8 GB) frente a 19 USD de un plan Pro: para el piloto es una inversión; como cliente estable debería ir en Business (49 USD; margen ≈ 12.63 USD en `m7i-flex.xlarge` y ≈ 3.83 en el nodo de 8 GB, ya con la comisión de 2.47).
 
 ## 6. Escenario de escala: ECS/Fargate + RDS (ADR 0010)
 

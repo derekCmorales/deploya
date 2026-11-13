@@ -82,9 +82,10 @@ test("Título por página", () => {
   }
 
   const icono = leer("src/app/icon.svg");
-  assert.match(icono, />deploy<tspan/, "el ícono no es el Wordmark");
+  assert.match(icono, /<path [^>]*d="M/, "el ícono es la «a» del Wordmark como trazado, sin depender de la fuente");
+  assert.doesNotMatch(icono, /<text/, "el ícono no depende de Geist en el navegador");
   assert.doesNotMatch(icono, /#[0-9a-fA-F]{3,8}\b/, "el ícono no inventa hex");
-  assert.match(icono, /oklch\(0\.5 0\.15 250\)/, "la última «a» va en Señal");
+  assert.match(icono, /oklch\(0\.78 0\.12 232\)/, "la «a» va en Señal");
 });
 
 test("Accesibilidad: un main por pantalla, medidores con nombre y bitácora con teclado (DOC-02)", () => {

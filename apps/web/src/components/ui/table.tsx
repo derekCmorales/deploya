@@ -11,7 +11,9 @@ interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
 function Table({ className, footer, ...props }: TableProps) {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
-      <table className={cn("w-full border-collapse text-sm", className)} {...props} />
+      <div className="overflow-x-auto">
+        <table className={cn("w-full border-collapse text-sm", className)} {...props} />
+      </div>
       {footer ? <div className="flex items-center gap-2 border-t border-border px-4 py-3">{footer}</div> : null}
     </div>
   );

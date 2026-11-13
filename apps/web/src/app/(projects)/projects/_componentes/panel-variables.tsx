@@ -26,7 +26,7 @@ export function PanelVariables({ proyectoId }: { proyectoId: string }) {
   if (variables.cargando) return <Skeleton className="mx-8 mt-6 h-40" />;
 
   return (
-    <div className="flex flex-col gap-5 px-8 py-6">
+    <div className="flex flex-col gap-5 px-4 sm:px-8 py-6">
       {bloqueada && aviso ? <BannerBloqueo codigo="suscripcion-no-permite" mensaje={aviso.texto} /> : null}
       <CambiosPendientes variables={variables} desplegarBloqueado={bloqueada} />
       {variables.codigo && variables.error && bloqueoDespliegue(variables.codigo, variables.error) ? (

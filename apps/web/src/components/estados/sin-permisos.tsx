@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 export function SinPermisos({ rol }: { rol: string }) {
   return (
     <section
-      className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center gap-3.5 bg-sunken px-8 py-16 text-center"
+      className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center gap-3.5 bg-sunken px-4 py-16 sm:px-8 text-center"
       role="alert"
     >
       <span className="grid size-12 place-items-center rounded-xl border border-border-strong bg-card text-muted-foreground">

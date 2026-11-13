@@ -44,7 +44,7 @@ export function PanelDatos({ proyectoId }: { proyectoId: string }) {
 
   if (datos.errorCarga && !datos.datos) {
     return (
-      <div className="px-8 py-6">
+      <div className="px-4 sm:px-8 py-6">
         <Banner variant="bad" title="No pudimos cargar las bases de datos">
           {datos.errorCarga.message}
         </Banner>
@@ -55,7 +55,7 @@ export function PanelDatos({ proyectoId }: { proyectoId: string }) {
   const lista = datos.datos;
 
   return (
-    <div className="flex max-w-[1040px] flex-col gap-6 px-8 py-6">
+    <div className="flex max-w-[1040px] flex-col gap-6 px-4 sm:px-8 py-6">
       {bloqueada && aviso ? <BannerBloqueo codigo={CODIGO_BLOQUEO} mensaje={aviso.texto} /> : null}
       <ErrorAccion datos={datos} />
       <Cabecera lista={lista} />
@@ -186,7 +186,7 @@ function ErrorAccion({ datos }: { datos: DatosProyecto }) {
 
 function Cargando() {
   return (
-    <div className="flex max-w-[1040px] flex-col gap-4 px-8 py-6" aria-busy="true" aria-label="Cargando bases de datos">
+    <div className="flex max-w-[1040px] flex-col gap-4 px-4 sm:px-8 py-6" aria-busy="true" aria-label="Cargando bases de datos">
       <Skeleton className="h-10 w-64" />
       <Skeleton className="h-32 w-full" />
     </div>

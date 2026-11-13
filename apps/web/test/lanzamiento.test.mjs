@@ -147,3 +147,22 @@ test("Alto completo: un <main> sin altura no envuelve un contenedor con min-h-fu
   const asistente = leer("src/app/(projects)/projects/_componentes/asistente-alta.tsx");
   assert.match(asistente, /className="grid flex-1 grid-cols-1/, "la rejilla del alta no crece hasta abajo");
 });
+
+test("Scroll único y sin desbordes: el cuerpo del shell contiene lo absoluto y tablas/pestañas scrollean solas", () => {
+  const shell = leer("src/components/shell/app-shell.tsx");
+  // Sin `relative`, los `sr-only` (absolutos) se posicionan contra la página y la alargan: aparece un segundo scroll y un hueco en blanco.
+  assert.match(shell, /className="relative min-h-0 min-w-0 flex-1 overflow-auto/, "el cuerpo del shell no contiene a sus descendientes absolutos");
+  assert.match(shell, /flex h-full min-h-0 flex-col overflow-hidden/, "el shell deja que la página scrollee aparte del cuerpo");
+
+  assert.match(leer("src/components/ui/table.tsx"), /<div className="overflow-x-auto">\s*<table/, "la tabla no scrollea sola en horizontal");
+  assert.match(leer("src/components/ui/tabs.tsx"), /flex gap-0\.5 overflow-x-auto border-b border-border \[scrollbar-width:none\]/, "las pestañas de ruta no scrollean solas");
+});
+
+test("Márgenes de pantalla responsivos: ningún contenedor de proyectos fija px-8 sin variante móvil", () => {
+  const raiz = fileURLToPath(new URL("../", import.meta.url));
+  const carpeta = join(raiz, "src/app/(projects)/projects/_componentes");
+  for (const archivo of readdirSync(carpeta).filter((f) => f.endsWith(".tsx"))) {
+    const codigo = leer(`src/app/(projects)/projects/_componentes/${archivo}`);
+    assert.doesNotMatch(codigo, /(?<![\w:-])px-8(?![\w-])/, `${archivo} fija px-8 también en móvil (usa px-4 sm:px-8)`);
+  }
+});

@@ -15,7 +15,7 @@ export function PaginaInexistente() {
   const router = useRouter();
 
   return (
-    <section className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center gap-3.5 bg-sunken px-8 py-16 text-center">
+    <section className="flex min-h-[calc(100dvh-56px)] flex-col items-center justify-center gap-3.5 bg-sunken px-4 py-16 sm:px-8 text-center">
       <span className="font-mono text-5xl font-semibold tracking-[-0.04em] text-muted-foreground">404</span>
       <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
         <RielEtapas etapas={SIN_ETAPA} />

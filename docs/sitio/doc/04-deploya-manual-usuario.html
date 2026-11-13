@@ -418,7 +418,7 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
   <span class="wordmark">deploy<span class="a-senal">a</span></span>
   <p class="portada-etiqueta">Documento 4 de 4 · Manual de usuario</p>
   <h1>Manual de usuario</h1>
-  <p class="portada-subtitulo">De la cuenta nueva a la aplicación en línea con HTTPS: registro, inicio de sesión, planes y pagos, proyectos, despliegues, reversión, métricas y administración.</p>
+  <p class="portada-subtitulo">De la cuenta nueva a la aplicación en línea con HTTPS: registro, planes y pagos, alta guiada en cinco pasos, despliegues, reversión, métricas, bases de datos y administración.</p>
   <div class="riel"><div class="riel-etapa">
   <span class="num">01</span><b>Requisitos</b>Qué hace y para quién
 </div>
@@ -445,7 +445,7 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
   </div>
 </section>
 <section class="preliminar">
-  <dl class="control"><div><dt>Versión</dt><dd>1.1</dd></div><div><dt>Fecha</dt><dd>13 de noviembre de 2026</dd></div><div><dt>Estado</dt><dd>Presentación final</dd></div><div><dt>Fuente</dt><dd>docs/sitio/doc/04-deploya-manual-usuario.html</dd></div></dl>
+  <dl class="control"><div><dt>Versión</dt><dd>1.2</dd></div><div><dt>Fecha</dt><dd>13 de noviembre de 2026</dd></div><div><dt>Estado</dt><dd>Presentación final</dd></div><div><dt>Fuente</dt><dd>docs/sitio/doc/04-deploya-manual-usuario.html</dd></div></dl>
   <p class="indice-titulo">Contenido</p>
   <ol class="indice"><li class="n2"><span class="numero">01</span><a href="#antes-de-empezar">Antes de empezar</a><span class="relleno"></span><span class="pagina">4</span></li>
 <li class="n3"><span class="numero">1.1</span><a href="#que-es-deploya">Qué es Deploya</a><span class="relleno"></span><span class="pagina">4</span></li>
@@ -456,51 +456,55 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
 <li class="n3"><span class="numero">2.2</span><a href="#verificar-tu-correo">Verificar tu correo</a><span class="relleno"></span><span class="pagina">7</span></li>
 <li class="n2"><span class="numero">03</span><a href="#iniciar-sesion">Iniciar sesión</a><span class="relleno"></span><span class="pagina">9</span></li>
 <li class="n3"><span class="numero">3.1</span><a href="#recuperar-tu-contrasena">Recuperar tu contraseña</a><span class="relleno"></span><span class="pagina">10</span></li>
-<li class="n2"><span class="numero">04</span><a href="#planes-y-pagos">Planes y pagos</a><span class="relleno"></span><span class="pagina">12</span></li>
-<li class="n3"><span class="numero">4.1</span><a href="#ver-los-planes">Ver los planes</a><span class="relleno"></span><span class="pagina">12</span></li>
-<li class="n3"><span class="numero">4.2</span><a href="#contratar-un-plan">Contratar un plan</a><span class="relleno"></span><span class="pagina">12</span></li>
-<li class="n3"><span class="numero">4.3</span><a href="#mi-suscripcion">Mi suscripción</a><span class="relleno"></span><span class="pagina">15</span></li>
-<li class="n3"><span class="numero">4.4</span><a href="#historial-de-pagos-y-comprobantes">Historial de pagos y comprobantes</a><span class="relleno"></span><span class="pagina">16</span></li>
-<li class="n2"><span class="numero">05</span><a href="#crear-tu-primer-proyecto">Crear tu primer proyecto</a><span class="relleno"></span><span class="pagina">18</span></li>
-<li class="n3"><span class="numero">5.1</span><a href="#la-lista-de-proyectos">La lista de proyectos</a><span class="relleno"></span><span class="pagina">18</span></li>
-<li class="n3"><span class="numero">5.2</span><a href="#paso-1-repositorio">Paso 1 · Repositorio</a><span class="relleno"></span><span class="pagina">18</span></li>
-<li class="n3"><span class="numero">5.3</span><a href="#paso-2-variables-de-entorno">Paso 2 · Variables de entorno</a><span class="relleno"></span><span class="pagina">21</span></li>
-<li class="n3"><span class="numero">5.4</span><a href="#paso-3-revisar-y-desplegar">Paso 3 · Revisar y desplegar</a><span class="relleno"></span><span class="pagina">22</span></li>
-<li class="n2"><span class="numero">06</span><a href="#desplegar-y-seguir-un-despliegue">Desplegar y seguir un despliegue</a><span class="relleno"></span><span class="pagina">23</span></li>
-<li class="n3"><span class="numero">6.1</span><a href="#las-cinco-etapas">Las cinco etapas</a><span class="relleno"></span><span class="pagina">23</span></li>
-<li class="n2"><span class="numero">07</span><a href="#operar-tu-proyecto">Operar tu proyecto</a><span class="relleno"></span><span class="pagina">25</span></li>
-<li class="n3"><span class="numero">7.1</span><a href="#resumen">Resumen</a><span class="relleno"></span><span class="pagina">25</span></li>
-<li class="n3"><span class="numero">7.2</span><a href="#despliegues-y-reversion">Despliegues y reversión</a><span class="relleno"></span><span class="pagina">25</span></li>
-<li class="n3"><span class="numero">7.3</span><a href="#metricas">Métricas</a><span class="relleno"></span><span class="pagina">28</span></li>
-<li class="n3"><span class="numero">7.4</span><a href="#bitacoras">Bitácoras</a><span class="relleno"></span><span class="pagina">28</span></li>
-<li class="n3"><span class="numero">7.5</span><a href="#variables">Variables</a><span class="relleno"></span><span class="pagina">29</span></li>
-<li class="n3"><span class="numero">7.6</span><a href="#configuracion-y-eliminacion">Configuración y eliminación</a><span class="relleno"></span><span class="pagina">30</span></li>
-<li class="n3"><span class="numero">7.7</span><a href="#bases-de-datos-y-almacenamiento">Bases de datos y almacenamiento</a><span class="relleno"></span><span class="pagina">31</span></li>
-<li class="n3"><span class="numero">7.8</span><a href="#la-lista-con-varios-proyectos">La lista con varios proyectos</a><span class="relleno"></span><span class="pagina">31</span></li>
-<li class="n2"><span class="numero">08</span><a href="#tu-cuenta">Tu cuenta</a><span class="relleno"></span><span class="pagina">33</span></li>
-<li class="n2"><span class="numero">09</span><a href="#administracion">Administración</a><span class="relleno"></span><span class="pagina">35</span></li>
-<li class="n3"><span class="numero">9.1</span><a href="#usuarios">Usuarios</a><span class="relleno"></span><span class="pagina">35</span></li>
-<li class="n3"><span class="numero">9.2</span><a href="#suspender-y-reactivar-una-cuenta">Suspender y reactivar una cuenta</a><span class="relleno"></span><span class="pagina">35</span></li>
-<li class="n3"><span class="numero">9.3</span><a href="#infraestructura">Infraestructura</a><span class="relleno"></span><span class="pagina">37</span></li>
-<li class="n2"><span class="numero">10</span><a href="#preguntas-frecuentes">Preguntas frecuentes</a><span class="relleno"></span><span class="pagina">39</span></li></ol>
+<li class="n2"><span class="numero">04</span><a href="#inicio">Inicio</a><span class="relleno"></span><span class="pagina">12</span></li>
+<li class="n2"><span class="numero">05</span><a href="#planes-y-pagos">Planes y pagos</a><span class="relleno"></span><span class="pagina">14</span></li>
+<li class="n3"><span class="numero">5.1</span><a href="#ver-los-planes">Ver los planes</a><span class="relleno"></span><span class="pagina">14</span></li>
+<li class="n3"><span class="numero">5.2</span><a href="#contratar-un-plan">Contratar un plan</a><span class="relleno"></span><span class="pagina">15</span></li>
+<li class="n3"><span class="numero">5.3</span><a href="#mi-suscripcion">Mi suscripción</a><span class="relleno"></span><span class="pagina">18</span></li>
+<li class="n3"><span class="numero">5.4</span><a href="#historial-de-pagos-y-comprobantes">Historial de pagos y comprobantes</a><span class="relleno"></span><span class="pagina">19</span></li>
+<li class="n2"><span class="numero">06</span><a href="#crear-tu-primer-proyecto">Crear tu primer proyecto</a><span class="relleno"></span><span class="pagina">21</span></li>
+<li class="n3"><span class="numero">6.1</span><a href="#la-lista-de-proyectos">La lista de proyectos</a><span class="relleno"></span><span class="pagina">21</span></li>
+<li class="n3"><span class="numero">6.2</span><a href="#paso-1-repositorio">Paso 1 · Repositorio</a><span class="relleno"></span><span class="pagina">22</span></li>
+<li class="n3"><span class="numero">6.3</span><a href="#paso-2-construccion">Paso 2 · Construcción</a><span class="relleno"></span><span class="pagina">24</span></li>
+<li class="n3"><span class="numero">6.4</span><a href="#paso-3-datos">Paso 3 · Datos</a><span class="relleno"></span><span class="pagina">25</span></li>
+<li class="n3"><span class="numero">6.5</span><a href="#paso-4-variables-de-entorno">Paso 4 · Variables de entorno</a><span class="relleno"></span><span class="pagina">26</span></li>
+<li class="n3"><span class="numero">6.6</span><a href="#paso-5-revisar-y-desplegar">Paso 5 · Revisar y desplegar</a><span class="relleno"></span><span class="pagina">27</span></li>
+<li class="n2"><span class="numero">07</span><a href="#desplegar-y-seguir-un-despliegue">Desplegar y seguir un despliegue</a><span class="relleno"></span><span class="pagina">29</span></li>
+<li class="n3"><span class="numero">7.1</span><a href="#las-cinco-etapas">Las cinco etapas</a><span class="relleno"></span><span class="pagina">29</span></li>
+<li class="n3"><span class="numero">7.2</span><a href="#si-un-despliegue-falla">Si un despliegue falla</a><span class="relleno"></span><span class="pagina">30</span></li>
+<li class="n2"><span class="numero">08</span><a href="#operar-tu-proyecto">Operar tu proyecto</a><span class="relleno"></span><span class="pagina">32</span></li>
+<li class="n3"><span class="numero">8.1</span><a href="#resumen">Resumen</a><span class="relleno"></span><span class="pagina">32</span></li>
+<li class="n3"><span class="numero">8.2</span><a href="#despliegues-y-reversion">Despliegues y reversión</a><span class="relleno"></span><span class="pagina">32</span></li>
+<li class="n3"><span class="numero">8.3</span><a href="#metricas">Métricas</a><span class="relleno"></span><span class="pagina">35</span></li>
+<li class="n3"><span class="numero">8.4</span><a href="#bitacoras">Bitácoras</a><span class="relleno"></span><span class="pagina">35</span></li>
+<li class="n3"><span class="numero">8.5</span><a href="#variables">Variables</a><span class="relleno"></span><span class="pagina">36</span></li>
+<li class="n3"><span class="numero">8.6</span><a href="#bases-de-datos-y-almacenamiento">Bases de datos y almacenamiento</a><span class="relleno"></span><span class="pagina">37</span></li>
+<li class="n3"><span class="numero">8.7</span><a href="#configuracion-y-eliminacion">Configuración y eliminación</a><span class="relleno"></span><span class="pagina">39</span></li>
+<li class="n3"><span class="numero">8.8</span><a href="#la-lista-con-varios-proyectos">La lista con varios proyectos</a><span class="relleno"></span><span class="pagina">40</span></li>
+<li class="n2"><span class="numero">09</span><a href="#tu-cuenta">Tu cuenta</a><span class="relleno"></span><span class="pagina">41</span></li>
+<li class="n2"><span class="numero">10</span><a href="#administracion">Administración</a><span class="relleno"></span><span class="pagina">43</span></li>
+<li class="n3"><span class="numero">10.1</span><a href="#usuarios">Usuarios</a><span class="relleno"></span><span class="pagina">43</span></li>
+<li class="n3"><span class="numero">10.2</span><a href="#suspender-y-reactivar-una-cuenta">Suspender y reactivar una cuenta</a><span class="relleno"></span><span class="pagina">43</span></li>
+<li class="n3"><span class="numero">10.3</span><a href="#infraestructura">Infraestructura</a><span class="relleno"></span><span class="pagina">45</span></li>
+<li class="n2"><span class="numero">11</span><a href="#preguntas-frecuentes">Preguntas frecuentes</a><span class="relleno"></span><span class="pagina">47</span></li></ol>
 </section>
 <main class="cuerpo">
 <h2 id="antes-de-empezar">Antes de empezar</h2>
 <h3 id="que-es-deploya">Qué es Deploya</h3>
-<p>Deploya publica tu aplicación web a partir de su repositorio de GitHub. Pegas la URL, Deploya la construye, la corre en un contenedor con los recursos de tu plan y te da una dirección propia con HTTPS: <code>https://&lt;tu-proyecto&gt;.deploya.larasolutions.dev</code>. Cada versión queda guardada y puedes volver a una anterior en segundos. Si tu app necesita base de datos, la agregas con un clic: PostgreSQL con pgvector, Redis o almacenamiento S3.</p>
+<p>Deploya publica tu aplicación web a partir de su repositorio de GitHub. Pegas la URL, Deploya la construye, la corre en un contenedor con los recursos de tu plan y te da una dirección propia con HTTPS: <code>https://&lt;tu-proyecto&gt;.deploya.larasolutions.dev</code>. Si tu app necesita base de datos, la eliges en el mismo alta: PostgreSQL con pgvector, Redis o almacenamiento S3. Cada versión queda guardada y puedes volver a una anterior en segundos.</p>
 <p>Entras en <code>https://app.deploya.larasolutions.dev</code>. La dirección <code>https://deploya.larasolutions.dev</code> es la página del producto, con los planes y el registro.</p>
 <p>Este manual sigue a <strong>Lucía</strong>, que tiene una tienda en línea, desde que crea su cuenta hasta que su aplicación está en línea y la opera. Al final hay un capítulo para el <strong>administrador</strong> de la plataforma.</p>
-<aside class="aviso aviso-nota"><p class="aviso-titulo">Nota</p><p>Las imágenes son capturas reales de Deploya. En ellas la app aparece en <code>hola-deploya.localhost</code> porque se tomaron con la plataforma corriendo en local; en el servidor la dirección es <code>https://hola-deploya.deploya.larasolutions.dev</code>.</p>
+<aside class="aviso aviso-nota"><p class="aviso-titulo">Nota</p><p>Las imágenes son capturas de la versión actual de Deploya con datos de demostración: la cuenta de Lucía, su tienda y dos proyectos más. Las direcciones que ves (<code>tienda-lucia.deploya.larasolutions.dev</code>) son las que Deploya da en el servidor.</p>
 </aside>
 <h3 id="lo-que-necesitas">Lo que necesitas</h3>
 <div class="tabla"><table><thead><tr><th class="sin-corte">Necesitas</th><th class="sin-corte">Detalle</th></tr></thead><tbody><tr><td>Un navegador actualizado</td><td>Chrome, Edge, Firefox o Safari</td></tr>
 <tr><td>Un correo al que tengas acceso</td><td>Para verificar tu cuenta y recibir avisos</td></tr>
-<tr><td>Un repositorio <strong>público</strong> de GitHub</td><td>Con un <code>Dockerfile</code> en la raíz, o un proyecto Node, Python, Go o un sitio estático</td></tr>
+<tr><td>Un repositorio <strong>público</strong> de GitHub</td><td>Con un <code>Dockerfile</code> (en la raíz o en la ruta que indiques), o un proyecto Node, Python, Go o un sitio estático</td></tr>
 <tr><td>Que tu app escuche HTTP</td><td>En el puerto que declara tu <code>Dockerfile</code> (<code>EXPOSE</code>), o en <code>PORT</code> (8080) si Deploya construye por ti</td></tr></tbody></table></div>
 <h3 id="como-esta-organizado-el-panel">Cómo está organizado el panel</h3>
-<div class="tabla"><table><thead><tr><th class="sin-corte">Zona</th><th class="sin-corte">Para qué</th></tr></thead><tbody><tr><td><strong>Inicio</strong></td><td>Lo primero que ves al entrar: tus proyectos, el consumo del período, tu plan y la actividad reciente</td></tr>
-<tr><td><strong>Proyectos</strong></td><td>Tus aplicaciones, su estado, cada despliegue y sus bases de datos</td></tr>
-<tr><td><strong>Suscripción</strong></td><td>Tu plan, consumo del mes, planes y pagos</td></tr>
+<div class="tabla"><table><thead><tr><th class="sin-corte">Zona</th><th class="sin-corte">Para qué</th></tr></thead><tbody><tr><td><strong>Inicio</strong></td><td>Lo primero que ves al entrar: tus proyectos, las construcciones del mes, tu plan y la actividad reciente</td></tr>
+<tr><td><strong>Proyectos</strong></td><td>Tus aplicaciones, su estado, cada despliegue, sus métricas y sus bases de datos</td></tr>
+<tr><td><strong>Suscripción</strong></td><td>Tu plan, el consumo del período, los planes y el historial de pagos</td></tr>
 <tr><td class="sin-corte"><strong>Cuenta</strong></td><td>Tu nombre, tu contraseña y tus sesiones</td></tr>
 <tr><td><strong>Administración</strong> e <strong>Infraestructura</strong></td><td>Solo para administradores</td></tr>
 <tr><td>Luna / sol (arriba a la derecha)</td><td>Cambia entre modo claro y oscuro</td></tr></tbody></table></div>
@@ -512,23 +516,23 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
 <li>Escribe tu correo y una contraseña. Mientras escribes, la lista de abajo marca qué reglas ya cumple.</li>
 <li>Confirma la contraseña y pulsa <strong>Crear cuenta</strong>.</li>
 </ol>
-<p></p><figure class="captura"><img src="img/04-8c9c5fe953.png" alt="Registro"><figcaption><span class="figura-numero">Figura 1.</span> Registro: la política de contraseña se revisa mientras escribes</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-a179011175.png" alt="Registro"><figcaption><span class="figura-numero">Figura 1.</span> Registro: la política de contraseña se revisa mientras escribes</figcaption></figure><p></p>
 <p>La contraseña debe tener <strong>al menos 12 caracteres</strong>, mayúsculas y minúsculas, un número y un símbolo.</p>
-<p></p><figure class="captura"><img src="img/04-d95d7c60b2.png" alt="Registro listo para enviar"><figcaption><span class="figura-numero">Figura 2.</span> Registro con una contraseña que cumple todas las reglas</figcaption></figure><p></p>
-<aside class="aviso aviso-consejo"><p class="aviso-titulo">Consejo</p><p>Toda cuenta nueva empieza en el plan <strong>Sandbox</strong>: sin costo, sin tarjeta y sin vencimiento. Te alcanza para un proyecto.</p>
+<p></p><figure class="captura"><img src="img/04-c250edffdd.png" alt="Registro listo para enviar"><figcaption><span class="figura-numero">Figura 2.</span> Registro con una contraseña que cumple todas las reglas</figcaption></figure><p></p>
+<aside class="aviso aviso-consejo"><p class="aviso-titulo">Consejo</p><p>Toda cuenta nueva empieza en el plan <strong>Sandbox</strong>: sin costo, sin tarjeta y sin vencimiento. Te alcanza para un proyecto. Sandbox no incluye bases de datos administradas: si tu app usa una, pásale su URL como variable de entorno o cambia a un plan de pago.</p>
 </aside>
 <h3 id="verificar-tu-correo">Verificar tu correo</h3>
 <p>Al crear la cuenta queda <strong>Pendiente de verificación</strong> y te enviamos un correo con un botón (y el enlace en texto, por si el botón no funciona).</p>
-<p></p><figure class="captura"><img src="img/04-92c8043bee.png" alt="Cuenta creada"><figcaption><span class="figura-numero">Figura 3.</span> La cuenta queda pendiente hasta que abras el enlace del correo</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-454759439d.png" alt="Cuenta creada"><figcaption><span class="figura-numero">Figura 3.</span> La cuenta queda pendiente hasta que abras el enlace del correo</figcaption></figure><p></p>
 <p>Abre el enlace y tu cuenta pasa a <strong>Activa</strong>.</p>
-<p></p><figure class="captura"><img src="img/04-b189377b6c.png" alt="Cuenta activada"><figcaption><span class="figura-numero">Figura 4.</span> Al abrir el enlace, la cuenta queda activa</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-5ebfc50a71.png" alt="Cuenta activada"><figcaption><span class="figura-numero">Figura 4.</span> Al abrir el enlace, la cuenta queda activa</figcaption></figure><p></p>
 <div class="tabla"><table><thead><tr><th class="sin-corte">Si…</th><th class="sin-corte">Qué pasa</th></tr></thead><tbody><tr><td>No te llegó el correo</td><td>Revisa spam y pide otro desde la misma pantalla (puedes hacerlo cada 60 segundos)</td></tr>
 <tr><td>El enlace venció</td><td>Vale <strong>24 horas</strong> y una sola vez. Pide otro: el anterior deja de servir</td></tr></tbody></table></div>
 <h2 id="iniciar-sesion">Iniciar sesión</h2>
-<p>Escribe tu correo y tu contraseña en <strong>Iniciar sesión</strong>.</p>
-<p></p><figure class="captura"><img src="img/04-6900aa90cc.png" alt="Iniciar sesión"><figcaption><span class="figura-numero">Figura 5.</span> Inicio de sesión</figcaption></figure><p></p>
+<p>Escribe tu correo y tu contraseña en <strong>Iniciar sesión</strong>. Al entrar llegas a <strong>Inicio</strong>.</p>
+<p></p><figure class="captura"><img src="img/04-82008e176f.png" alt="Iniciar sesión"><figcaption><span class="figura-numero">Figura 5.</span> Inicio de sesión</figcaption></figure><p></p>
 <p>Si algo no coincide, Deploya no te dice cuál de los dos datos falló, para no revelar qué correos tienen cuenta.</p>
-<p></p><figure class="captura"><img src="img/04-b4c4a339f0.png" alt="Credenciales incorrectas"><figcaption><span class="figura-numero">Figura 6.</span> Correo o contraseña incorrectos</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-002acc54ad.png" alt="Credenciales incorrectas"><figcaption><span class="figura-numero">Figura 6.</span> Correo o contraseña incorrectos</figcaption></figure><p></p>
 <div class="tabla"><table><thead><tr><th class="sin-corte">Mensaje</th><th>Qué significa y qué hacer</th></tr></thead><tbody><tr><td>Correo o contraseña incorrectos</td><td>Revisa ambos; si no recuerdas la contraseña, usa <strong>Olvidé mi contraseña</strong></td></tr>
 <tr><td>Cuenta sin verificar</td><td>Abre el enlace del correo o pide uno nuevo</td></tr>
 <tr><td>Cuenta suspendida por administración</td><td>Un administrador la suspendió y te muestra el motivo. Escribe a soporte</td></tr>
@@ -536,28 +540,38 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
 <h3 id="recuperar-tu-contrasena">Recuperar tu contraseña</h3>
 <ol>
 <li>En <strong>Iniciar sesión</strong>, elige <strong>Olvidé mi contraseña</strong>.</li>
-<li>Escribe tu correo y envía.</li>
+<li>Escribe tu correo y pulsa <strong>Enviar enlace</strong>.</li>
 <li>Abre el enlace del correo y elige una contraseña nueva.</li>
 </ol>
-<p></p><figure class="captura"><img src="img/04-b7406e8bf6.png" alt="Recuperar contraseña"><figcaption><span class="figura-numero">Figura 7.</span> Pide el enlace con tu correo</figcaption></figure><p></p>
-<p></p><figure class="captura"><img src="img/04-6b5e226f8d.png" alt="Enlace enviado"><figcaption><span class="figura-numero">Figura 8.</span> La respuesta es la misma exista o no la cuenta</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-9fdb76c50e.png" alt="Recuperar contraseña"><figcaption><span class="figura-numero">Figura 7.</span> Pide el enlace con tu correo</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-7639e6bdc9.png" alt="Enlace enviado"><figcaption><span class="figura-numero">Figura 8.</span> La respuesta es la misma exista o no la cuenta</figcaption></figure><p></p>
 <aside class="aviso aviso-importante"><p class="aviso-titulo">Importante</p><p>El enlace dura <strong>30 minutos</strong> y sirve una sola vez. Al cambiar la contraseña se <strong>cierran todas tus sesiones</strong> en todos los dispositivos. Si no pediste el correo, ignóralo: tu contraseña no cambia.</p>
 </aside>
+<h2 id="inicio">Inicio</h2>
+<p>Es tu tablero. Con la cuenta recién creada te propone el primer proyecto en tres pasos y te muestra lo que te da tu plan: proyectos, construcciones del mes y vigencia.</p>
+<p></p><figure class="captura"><img src="img/04-9a7e91a807.png" alt="Inicio sin proyectos"><figcaption><span class="figura-numero">Figura 9.</span> Inicio de una cuenta nueva en Sandbox</figcaption></figure><p></p>
+<p>Cuando ya tienes proyectos, Inicio lista cada uno con su último despliegue, la <strong>actividad reciente</strong> (el azul marca lo que está en curso) y el consumo del período frente a tu plan. <strong>Nuevo proyecto</strong> abre el asistente de alta desde aquí.</p>
+<p></p><figure class="captura"><img src="img/04-073f233740.png" alt="Inicio con proyectos"><figcaption><span class="figura-numero">Figura 10.</span> Inicio con tres proyectos, uno de ellos construyendo</figcaption></figure><p></p>
 <h2 id="planes-y-pagos">Planes y pagos</h2>
 <h3 id="ver-los-planes">Ver los planes</h3>
-<p>En <strong>Suscripción → Planes</strong> comparas los cuatro planes. Alterna entre <strong>30 días</strong> y <strong>365 días</strong> para ver el precio de cada vigencia.</p>
-<p></p><figure class="captura"><img src="img/04-ff524aee03.png" alt="Planes"><figcaption><span class="figura-numero">Figura 9.</span> Los cuatro planes con sus recursos por proyecto</figcaption></figure><p></p>
-<div class="tabla"><table><thead><tr><th class="sin-corte">Plan</th><th class="sin-corte">Precio</th><th class="sin-corte">Proyectos</th><th>CPU / proyecto</th><th>Memoria / proyecto</th><th>Construcciones / mes</th><th>Bases de datos</th><th>Disco por base</th></tr></thead><tbody><tr><td class="sin-corte">Sandbox</td><td class="sin-corte">Sin costo</td><td class="sin-corte">1</td><td class="sin-corte">0.25 vCPU</td><td class="sin-corte">256 MB</td><td class="sin-corte">30</td><td class="sin-corte">1</td><td class="sin-corte">512 MB</td></tr>
-<tr><td class="sin-corte">Starter</td><td>USD 5.00 / 30 días</td><td class="sin-corte">3</td><td class="sin-corte">0.5 vCPU</td><td class="sin-corte">512 MB</td><td class="sin-corte">150</td><td class="sin-corte">3</td><td class="sin-corte">2 GB</td></tr>
-<tr><td class="sin-corte">Pro</td><td>USD 15.00 / 30 días</td><td class="sin-corte">10</td><td class="sin-corte">1 vCPU</td><td class="sin-corte">1 GB</td><td class="sin-corte">500</td><td class="sin-corte">10</td><td class="sin-corte">10 GB</td></tr>
-<tr><td class="sin-corte">Business</td><td>USD 40.00 / 30 días</td><td class="sin-corte">25</td><td class="sin-corte">2 vCPU</td><td class="sin-corte">2 GB</td><td class="sin-corte">2 000</td><td class="sin-corte">25</td><td class="sin-corte">25 GB</td></tr></tbody></table></div>
+<p>En <strong>Suscripción → Planes</strong> comparas los cuatro planes con la <strong>tarifa de lanzamiento</strong>. Alterna entre <strong>30 días</strong> y <strong>365 días</strong>: por un año pagas 10 meses, es decir, dos meses gratis. Nada se renueva sin tu permiso.</p>
+<p></p><figure class="captura"><img src="img/04-a5c8c136ab.png" alt="Planes"><figcaption><span class="figura-numero">Figura 11.</span> Los cuatro planes con su precio por 30 días y su equivalente anual</figcaption></figure><p></p>
+<div class="tabla"><table><thead><tr><th class="sin-corte">Plan</th><th class="sin-corte">30 días</th><th class="sin-corte">365 días</th><th class="sin-corte">Proyectos</th><th>CPU / proyecto</th><th>Memoria / proyecto</th><th>Construcciones / mes</th><th>Recursos de datos</th><th>Disco por base</th></tr></thead><tbody><tr><td class="sin-corte">Sandbox</td><td class="sin-corte">Sin costo</td><td class="sin-corte">—</td><td class="sin-corte">1</td><td class="sin-corte">0.25 vCPU</td><td class="sin-corte">256 MB</td><td class="sin-corte">30</td><td class="sin-corte">0</td><td class="sin-corte">—</td></tr>
+<tr><td class="sin-corte">Starter</td><td class="sin-corte">USD 6.00</td><td class="sin-corte">USD 60.00</td><td class="sin-corte">3</td><td class="sin-corte">0.5 vCPU</td><td class="sin-corte">512 MB</td><td class="sin-corte">150</td><td class="sin-corte">3</td><td class="sin-corte">2 GB</td></tr>
+<tr><td class="sin-corte">Pro</td><td class="sin-corte">USD 19.00</td><td class="sin-corte">USD 190.00</td><td class="sin-corte">10</td><td class="sin-corte">1 vCPU</td><td class="sin-corte">1 GB</td><td class="sin-corte">500</td><td class="sin-corte">10</td><td class="sin-corte">5 GB</td></tr>
+<tr><td class="sin-corte">Business</td><td class="sin-corte">USD 49.00</td><td class="sin-corte">USD 490.00</td><td class="sin-corte">25</td><td class="sin-corte">2 vCPU</td><td class="sin-corte">2 GB</td><td class="sin-corte">2 000</td><td class="sin-corte">25</td><td class="sin-corte">20 GB</td></tr></tbody></table></div>
+<p><strong>Bases incluidas:</strong> Sandbox, ninguna (trae tu propia URL); Starter, aparte desde USD 2; Pro, PostgreSQL + Redis; Business, PostgreSQL + Redis + S3.</p>
+<p>Todos los planes incluyen HTTPS con subdominio propio, reversión a las últimas 5 versiones sin reconstruir y bitácoras y métricas de 24 h. Más abajo, <strong>Datos aparte</strong> muestra la tarifa de los complementos de datos por 30 días (PostgreSQL + pgvector de 2 GB, Redis, S3 de 10 GB y disco extra).</p>
+<p></p><figure class="captura"><img src="img/04-642b056215.png" alt="Planes: recursos de datos y complementos"><figcaption><span class="figura-numero">Figura 12.</span> Recursos de datos de cada plan, lo incluido en todos y los complementos de datos</figcaption></figure><p></p>
+<aside class="aviso aviso-nota"><p class="aviso-titulo">Nota</p><p>Los límites que se aplican son los de la tabla: proyectos, CPU, memoria, construcciones y recursos de datos se validan antes de crear nada. Los complementos de <strong>Datos aparte</strong> son informativos por ahora: todavía no se contratan desde el panel.</p>
+</aside>
 <h3 id="contratar-un-plan">Contratar un plan</h3>
 <ol>
 <li>En el plan que quieres, pulsa <strong>Contratar</strong>.</li>
 <li>Revisa el resumen: plan, vigencia, fechas y total.</li>
 <li>Escribe los datos de la tarjeta y pulsa <strong>Confirmar pago</strong>.</li>
 </ol>
-<p></p><figure class="captura"><img src="img/04-770a4fa1ec.png" alt="Contratar"><figcaption><span class="figura-numero">Figura 10.</span> Resumen del plan y datos de la tarjeta</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-a65e6b1bcc.png" alt="Contratar Pro"><figcaption><span class="figura-numero">Figura 13.</span> Resumen del plan Pro y datos de la tarjeta</figcaption></figure><p></p>
 <aside class="aviso aviso-nota"><p class="aviso-titulo">Nota</p><p>Los pagos son <strong>simulados</strong>: no se cobra dinero real. Usa estas tarjetas de prueba (las tienes como atajo debajo del formulario):</p>
 <ul>
 <li><code>4242 4242 4242 4242</code>: el pago se aprueba.</li>
@@ -565,16 +579,16 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
 <li><code>4000 0000 0000 3220</code>: la pasarela tarda 5 segundos y luego aprueba.</li>
 </ul>
 </aside>
-<p></p><figure class="captura"><img src="img/04-05cc9a1401.png" alt="Pago procesando"><figcaption><span class="figura-numero">Figura 11.</span> La pasarela está procesando: no cierres la ventana</figcaption></figure><p></p>
-<p></p><figure class="captura"><img src="img/04-7739a310cf.png" alt="Pago aprobado"><figcaption><span class="figura-numero">Figura 12.</span> Pago aprobado: el plan queda activo de inmediato y recibes un comprobante</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-2b44be4fd8.png" alt="Procesando el pago"><figcaption><span class="figura-numero">Figura 14.</span> La pasarela está procesando: no cierres la ventana</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-0fac84b9a5.png" alt="Pago aprobado"><figcaption><span class="figura-numero">Figura 15.</span> Pago aprobado: el plan queda activo de inmediato y recibes un comprobante</figcaption></figure><p></p>
 <p>Si el pago se rechaza, <strong>tu plan no cambia</strong> y puedes intentar con otra tarjeta.</p>
-<p></p><figure class="captura"><img src="img/04-6588aafb5a.png" alt="Pago rechazado"><figcaption><span class="figura-numero">Figura 13.</span> Pago rechazado: no se aplica ningún cambio</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-eee570a822.png" alt="Pago rechazado"><figcaption><span class="figura-numero">Figura 16.</span> Pago rechazado: no se aplica ningún cambio</figcaption></figure><p></p>
 <h3 id="mi-suscripcion">Mi suscripción</h3>
-<p>En <strong>Suscripción → Mi suscripción</strong> ves tu plan, su estado, los días que quedan, el consumo del mes y el ritmo de tus construcciones.</p>
-<p></p><figure class="captura"><img src="img/04-e7d71ab832.png" alt="Mi suscripción"><figcaption><span class="figura-numero">Figura 14.</span> Plan actual, vigencia, consumo del período, ritmo de construcciones y cambio de plan</figcaption></figure><p></p>
+<p>En <strong>Suscripción → Mi suscripción</strong> ves tu plan, su estado, los días que quedan, el consumo del período (proyectos y construcciones), el <strong>ritmo de construcciones</strong> del mes con su proyección al cierre y las opciones para cambiar de plan.</p>
+<p></p><figure class="captura"><img src="img/04-cb92418d7f.png" alt="Mi suscripción"><figcaption><span class="figura-numero">Figura 17.</span> Plan actual, vigencia, consumo del período, ritmo de construcciones y cambio de plan</figcaption></figure><p></p>
 <div class="tabla"><table><thead><tr><th class="sin-corte">Acción</th><th class="sin-corte">Qué hace</th></tr></thead><tbody><tr><td><strong>Renovar ahora</strong></td><td>Paga el plan actual y suma la vigencia al final de la que tienes</td></tr>
-<tr><td><strong>Cambiar a un plan mayor</strong></td><td>Pagas el plan completo y arrancan 30 (o 365) días nuevos desde hoy</td></tr>
-<tr><td><strong>Cambiar a un plan menor</strong></td><td>No se cobra: el cambio se aplica cuando termina tu vigencia actual</td></tr></tbody></table></div>
+<tr><td><strong>Cambiar a un plan mayor</strong> (Ascenso)</td><td>Pagas el plan completo y arrancan 30 (o 365) días nuevos desde hoy</td></tr>
+<tr><td><strong>Cambiar a un plan menor</strong> (Descenso)</td><td>No se cobra: el cambio se aplica cuando termina tu vigencia actual</td></tr></tbody></table></div>
 <h4 id="el-ciclo-de-tu-suscripcion">El ciclo de tu suscripción</h4>
 <div class="tabla"><table><thead><tr><th class="sin-corte">Estado</th><th class="sin-corte">Cuándo</th><th>Qué pasa con tus apps</th></tr></thead><tbody><tr><td><span class="estado ok">Activa</span></td><td>Vigencia en curso</td><td>Todo funciona</td></tr>
 <tr><td><span class="estado warn">Por vencer</span></td><td>Faltan 7 días o menos</td><td>Funciona; te avisamos por correo</td></tr>
@@ -582,134 +596,167 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
 <tr><td><span class="estado bad">Suspendida</span></td><td>Terminaron los 5 días</td><td>Tus contenedores se detienen; tus datos se conservan</td></tr>
 <tr><td><span class="estado neutro">Cancelada</span></td><td>30 días suspendida</td><td>La suscripción se cierra</td></tr></tbody></table></div>
 <p>Si renuevas una suscripción Vencida o Suspendida, vuelve a <strong>Activa</strong> y tus apps arrancan solas.</p>
-<p></p><figure class="captura"><img src="img/04-2b4b8c1c2d.png" alt="Suscripción vencida"><figcaption><span class="figura-numero">Figura 15.</span> Con la suscripción vencida, Proyectos avisa cuándo termina la gracia y bloquea los despliegues</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-43827f00c1.png" alt="Suscripción vencida"><figcaption><span class="figura-numero">Figura 18.</span> Con la suscripción vencida, Proyectos avisa cuándo termina la gracia y bloquea los despliegues</figcaption></figure><p></p>
 <h3 id="historial-de-pagos-y-comprobantes">Historial de pagos y comprobantes</h3>
-<p>En <strong>Suscripción → Historial de pagos</strong> ves cada intento de pago, aprobado o rechazado. Los aprobados tienen comprobante: ábrelo con <strong>Ver comprobante</strong> y descárgalo en PDF.</p>
-<p></p><figure class="captura"><img src="img/04-802e33c214.png" alt="Historial de pagos"><figcaption><span class="figura-numero">Figura 16.</span> Historial con el comprobante abierto</figcaption></figure><p></p>
-<p></p><figure class="captura"><img src="img/04-01e4c7ccc4.png" alt="Comprobante PDF"><figcaption><span class="figura-numero">Figura 17.</span> El comprobante PDF que descargas, con su número consecutivo</figcaption></figure><p></p>
+<p>En <strong>Suscripción → Historial de pagos</strong> ves cada intento de pago, aprobado o rechazado. Los aprobados tienen comprobante: ábrelo con <strong>Ver comprobante</strong> y descárgalo con <strong>Descargar PDF</strong>.</p>
+<p></p><figure class="captura"><img src="img/04-917022ac52.png" alt="Historial de pagos"><figcaption><span class="figura-numero">Figura 19.</span> Historial con el comprobante abierto</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-5815aac2b4.png" alt="Comprobante PDF"><figcaption><span class="figura-numero">Figura 20.</span> El comprobante PDF que descargas, con su número consecutivo</figcaption></figure><p></p>
 <h2 id="crear-tu-primer-proyecto">Crear tu primer proyecto</h2>
 <h3 id="la-lista-de-proyectos">La lista de proyectos</h3>
-<p>Sin proyectos, Deploya te muestra qué necesitas. Con proyectos, verás cada uno con el estado de su último despliegue y cuántos llevas frente al límite de tu plan.</p>
-<p></p><figure class="captura"><img src="img/04-3cdaa4bc22.png" alt="Primer proyecto"><figcaption><span class="figura-numero">Figura 18.</span> La guía del primer proyecto</figcaption></figure><p></p>
+<p>Sin proyectos, <strong>Proyectos</strong> te muestra lo único que necesitas: un repositorio público, un <code>Dockerfile</code> (o un stack que Deploya reconozca) y un puerto HTTP.</p>
+<p></p><figure class="captura"><img src="img/04-0591831ae3.png" alt="Proyectos sin proyectos"><figcaption><span class="figura-numero">Figura 21.</span> La guía del primer proyecto</figcaption></figure><p></p>
+<p>Pulsa <strong>Nuevo proyecto</strong> (o <strong>Crear primer proyecto</strong>). El asistente tiene <strong>cinco pasos</strong>, a la izquierda, para que el despliegue #1 salga con todo lo que tu app necesita:</p>
+<div class="tabla"><table><thead><tr><th class="sin-corte">Paso</th><th>Qué defines</th><th class="sin-corte">¿Obligatorio?</th></tr></thead><tbody><tr><td class="sin-corte">1 · Repositorio</td><td>URL, rama, ruta del <code>Dockerfile</code>, nombre y puerto</td><td class="sin-corte">Sí</td></tr>
+<tr><td class="sin-corte">2 · Construcción</td><td>Comando de construcción (solo con receta) y comando de inicio</td><td class="sin-corte">Opcional</td></tr>
+<tr><td class="sin-corte">3 · Datos</td><td>PostgreSQL, Redis o S3, con el límite de tu plan a la vista</td><td class="sin-corte">Opcional</td></tr>
+<tr><td class="sin-corte">4 · Variables</td><td>Claves y valores cifrados, o un <code>.env</code> pegado</td><td class="sin-corte">Opcional</td></tr>
+<tr><td class="sin-corte">5 · Revisar</td><td>Todo junto, con <strong>Editar</strong> en cada fila, y <strong>Desplegar</strong></td><td class="sin-corte">Sí</td></tr></tbody></table></div>
+<p>Abajo a la izquierda ves siempre los <strong>recursos del plan</strong> que recibirá el contenedor. Con <strong>Atrás</strong> vuelves sin perder lo que escribiste.</p>
 <h3 id="paso-1-repositorio">Paso 1 · Repositorio</h3>
 <ol>
-<li>Pulsa <strong>Nuevo proyecto</strong> (o <strong>Crear primer proyecto</strong>).</li>
-<li>Pega la URL de tu repositorio de GitHub y escribe la rama.</li>
+<li>Pega la URL de tu repositorio de GitHub. La rama es <code>main</code> por omisión.</li>
+<li>Si tu <code>Dockerfile</code> no está en la raíz (por ejemplo, <code>apps/api/Dockerfile</code> en un monorepo), escribe su <strong>ruta</strong>.</li>
 <li>Pulsa <strong>Continuar</strong>. Deploya revisa el repositorio, lee el último commit y busca cómo construirlo.</li>
 </ol>
-<p></p><figure class="captura"><img src="img/04-24278d317d.png" alt="Repositorio con Dockerfile"><figcaption><span class="figura-numero">Figura 19.</span> Repositorio accesible con Dockerfile: Deploya propone nombre, URL y puerto</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-4f3f8d23ca.png" alt="Paso 1 con Dockerfile"><figcaption><span class="figura-numero">Figura 22.</span> Repositorio accesible con Dockerfile: Deploya propone nombre, URL y puerto</figcaption></figure><p></p>
 <ul>
-<li>El <strong>nombre</strong> define tu dirección: <code>hola-deploya</code> → <code>hola-deploya.deploya.larasolutions.dev</code>. No cambia aunque después renombres el proyecto.</li>
-<li>El <strong>puerto</strong> sale del <code>EXPOSE</code> de tu <code>Dockerfile</code>. Puedes cambiarlo.</li>
-<li>Si tu <code>Dockerfile</code> no está en la raíz (por ejemplo, <code>apps/api/Dockerfile</code> en un monorepo), escribe su <strong>ruta</strong> en el mismo paso. Deploya comprueba que exista en la rama.</li>
+<li>El <strong>nombre</strong> define tu dirección: <code>tienda-lucia</code> → <code>tienda-lucia.deploya.larasolutions.dev</code>. No cambia aunque después renombres el proyecto.</li>
+<li>El <strong>puerto interno</strong> sale del <code>EXPOSE</code> de tu <code>Dockerfile</code>. Puedes cambiarlo.</li>
+<li>Abajo ves el último commit de la rama: es lo que se va a construir.</li>
 </ul>
 <p><strong>¿Sin <code>Dockerfile</code>?</strong> Si tu repositorio es Node (con un script <code>start</code>), Python (<code>requirements.txt</code> o <code>pyproject.toml</code> con <code>main.py</code> o <code>app.py</code>), Go (<code>go.mod</code>) o un sitio estático (<code>index.html</code>), Deploya lo reconoce y lo construye con su propia receta. Tu app debe escuchar en el puerto <code>PORT</code> (8080).</p>
-<p></p><figure class="captura"><img src="img/04-d199e64d89.png" alt="Stack detectado"><figcaption><span class="figura-numero">Figura 20.</span> Sin Dockerfile: Deploya detecta Node.js 22 y construye con su receta</figcaption></figure><p></p>
-<div class="tabla"><table><thead><tr><th class="sin-corte">Error</th><th class="sin-corte">Qué hacer</th></tr></thead><tbody><tr><td>No pudimos acceder al repositorio</td><td>Revisa la URL y que el repositorio sea <strong>público</strong></td></tr>
-<tr><td>Falta el <code>Dockerfile</code> y no se reconoce el stack</td><td>Agrega un <code>Dockerfile</code> en la raíz (la pantalla trae un ejemplo)</td></tr>
+<p></p><figure class="captura"><img src="img/04-8d6594c6e4.png" alt="Paso 1 sin Dockerfile"><figcaption><span class="figura-numero">Figura 23.</span> Sin Dockerfile: Deploya detecta Node.js 22 y construye con su receta</figcaption></figure><p></p>
+<div class="tabla"><table><thead><tr><th class="sin-corte">Error</th><th class="sin-corte">Qué hacer</th></tr></thead><tbody><tr><td>No pudimos acceder al repositorio</td><td>Revisa que la URL termine en el nombre del repositorio y que sea <strong>público</strong></td></tr>
+<tr><td>Falta el <code>Dockerfile</code> y no se reconoce el stack</td><td>Agrega un <code>Dockerfile</code> o corrige su ruta (la pantalla trae un ejemplo)</td></tr>
 <tr><td>La rama no existe</td><td>Elige una de las ramas que lista Deploya</td></tr>
 <tr><td>GitHub no disponible</td><td>Es temporal: vuelve a intentar en unos minutos</td></tr>
 <tr><td>Llegaste al límite de proyectos</td><td>Elimina uno o cambia a un plan mayor</td></tr></tbody></table></div>
-<p></p><figure class="captura"><img src="img/04-a15d12b308.png" alt="Repositorio no accesible"><figcaption><span class="figura-numero">Figura 21.</span> Error claro con qué revisar y un botón para reintentar</figcaption></figure><p></p>
-<h3 id="paso-2-variables-de-entorno">Paso 2 · Variables de entorno</h3>
-<p>Agrega las claves que tu app necesita (contraseñas, <em>tokens</em>, configuración). Este paso es opcional.</p>
-<p></p><figure class="captura"><img src="img/04-1cac82f9af.png" alt="Variables"><figcaption><span class="figura-numero">Figura 22.</span> Las variables se guardan cifradas y se pasan al contenedor al arrancar</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-d7635c313d.png" alt="Repositorio inaccesible"><figcaption><span class="figura-numero">Figura 24.</span> Error claro con qué revisar y un botón para reintentar</figcaption></figure><p></p>
+<h3 id="paso-2-construccion">Paso 2 · Construcción</h3>
+<p>Aquí decides cómo se construye y cómo arranca tu app. Déjalo vacío para usar lo que Deploya detectó; también puedes cambiarlo después en <strong>Configuración</strong>.</p>
+<ul>
+<li><strong>Comando de inicio</strong> (opcional): reemplaza el <code>CMD</code> de la imagen. Sirve, por ejemplo, para correr un trabajador con la misma imagen que tu API: <code>node dist/worker.js</code>.</li>
+<li><strong>Comando de construcción</strong> (opcional, solo con receta): en Node reemplaza <code>npm run build</code> y corre después de instalar dependencias; en Python corre después de <code>pip install</code>; en Go, antes de <code>go build</code>. Va en una sola línea.</li>
+</ul>
+<p>Con un <code>Dockerfile</code> propio, el campo de construcción no aparece: <strong>tu Dockerfile manda</strong> y el build lo definen sus instrucciones <code>RUN</code>.</p>
+<p></p><figure class="captura"><img src="img/04-6ef6e1d9df.png" alt="Paso 2 con Dockerfile"><figcaption><span class="figura-numero">Figura 25.</span> Con Dockerfile solo se ofrece el comando de inicio</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-8857d2cd56.png" alt="Paso 2 con receta Node"><figcaption><span class="figura-numero">Figura 26.</span> Con la receta de Node puedes cambiar el comando de construcción</figcaption></figure><p></p>
+<h3 id="paso-3-datos">Paso 3 · Datos</h3>
+<p>Marca las bases que tu app necesita. Se crean junto con el proyecto, con un volumen persistente, y sus variables de conexión llegan solas al despliegue #1: tu app arranca ya conectada.</p>
+<div class="tabla"><table><thead><tr><th class="sin-corte">Tipo</th><th>Para qué</th><th>Variables que recibe tu app</th></tr></thead><tbody><tr><td><strong>PostgreSQL 17 + pgvector</strong></td><td>Base relacional con búsqueda vectorial</td><td><code>DATABASE_URL</code> y <code>PG*</code></td></tr>
+<tr><td><strong>Redis 7</strong></td><td>Caché y colas, con persistencia en disco</td><td><code>REDIS_URL</code></td></tr>
+<tr><td><strong>Almacenamiento S3</strong></td><td>Archivos con URL pública, compatible con S3</td><td><code>S3_ENDPOINT</code>, <code>S3_PUBLIC_ENDPOINT</code>, <code>S3_BUCKET</code> y sus claves</td></tr></tbody></table></div>
+<p></p><figure class="captura"><img src="img/04-ddc1091533.png" alt="Paso 3 Datos"><figcaption><span class="figura-numero">Figura 27.</span> Lucía elige PostgreSQL y Redis; abajo, cuántas bases usa de las que permite su plan</figcaption></figure><p></p>
+<p>Si tu plan ya no admite más bases (en Sandbox no admite ninguna), las tarjetas aparecen deshabilitadas con <strong>Llegaste al límite de tu plan</strong>.</p>
+<h3 id="paso-4-variables-de-entorno">Paso 4 · Variables de entorno</h3>
+<p>Agrega las claves que tu app necesita (contraseñas, <em>tokens</em>, configuración). Es la misma tabla que la pestaña <strong>Variables</strong> del proyecto.</p>
 <ul>
 <li>Las claves van en <code>MAYUSCULAS_Y_GUIONES_BAJOS</code>.</li>
-<li>No declares <code>PORT</code>: Deploya la pone con el puerto del paso anterior.</li>
-<li>¿Ya tienes un archivo <code>.env</code>? Usa <strong>Pegar .env</strong> y Deploya separa cada línea en clave y valor. Caben hasta <strong>150 variables</strong> por proyecto.</li>
+<li>¿Ya tienes un archivo <code>.env</code>? Usa <strong>Pegar .env</strong>, pega el contenido y pulsa <strong>Agregar al borrador</strong>: Deploya separa cada línea en clave y valor. Caben hasta <strong>150 variables</strong> por proyecto (el contador lo dice).</li>
+<li>Arriba ves las variables que <strong>llegan solas</strong> de las bases que elegiste. Si declaras una con la misma clave, se marca <strong>gana la tuya</strong>: tu valor reemplaza al de Deploya.</li>
+<li>No declares <code>PORT</code>: Deploya la pone con el puerto interno.</li>
 <li>Los valores se guardan <strong>cifrados</strong> y nunca aparecen en las bitácoras.</li>
 </ul>
-<h3 id="paso-3-revisar-y-desplegar">Paso 3 · Revisar y desplegar</h3>
-<p>Revisa todo y pulsa <strong>Desplegar</strong>. Empieza el despliegue #1.</p>
-<p></p><figure class="captura"><img src="img/04-aa644b6f3a.png" alt="Revisar"><figcaption><span class="figura-numero">Figura 23.</span> Resumen antes de desplegar, con los recursos del plan y la URL final</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-3278eed1d3.png" alt="Paso 4 Variables"><figcaption><span class="figura-numero">Figura 28.</span> Variables pegadas desde un .env; la DATABASE_URL propia gana a la de Deploya</figcaption></figure><p></p>
+<aside class="aviso aviso-consejo"><p class="aviso-titulo">Consejo</p><p>Si elegiste PostgreSQL en el paso anterior, no copies una <code>DATABASE_URL</code> de otro lado: la tuya ganaría y tu app se conectaría a esa otra base. Lucía la quita después en la pestaña Variables.</p>
+</aside>
+<h3 id="paso-5-revisar-y-desplegar">Paso 5 · Revisar y desplegar</h3>
+<p>Revisa la fuente, la construcción, los comandos, el puerto, los datos, las variables, los recursos y la URL final. Cada fila tiene <strong>Editar</strong>, que te lleva a ese paso. Pulsa <strong>Desplegar</strong>: se crean las bases y empieza el despliegue #1.</p>
+<p></p><figure class="captura"><img src="img/04-4a5a4978c3.png" alt="Paso 5 Revisar"><figcaption><span class="figura-numero">Figura 29.</span> Resumen antes de desplegar, con los recursos del plan y la URL final</figcaption></figure><p></p>
 <h2 id="desplegar-y-seguir-un-despliegue">Desplegar y seguir un despliegue</h2>
 <h3 id="las-cinco-etapas">Las cinco etapas</h3>
-<p>Cada despliegue pasa por cinco etapas. La pantalla las muestra con su duración y una bitácora que se actualiza cada 3 segundos.</p>
-<div class="tabla"><table><thead><tr><th class="sin-corte">Etapa</th><th>Qué hace Deploya</th></tr></thead><tbody><tr><td><strong>Recepción</strong></td><td>Clona tu rama, registra el commit y detecta cómo construir</td></tr>
-<tr><td><strong>Construcción</strong></td><td>Construye la imagen con tu <code>Dockerfile</code> o con la receta (máximo 10 minutos)</td></tr>
-<tr><td><strong>Ejecución</strong></td><td>Arranca el contenedor con la CPU y la memoria de tu plan y verifica que responda</td></tr>
+<p>Cada despliegue pasa por cinco etapas. La pantalla las muestra con su duración, el tiempo transcurrido y una bitácora de construcción que se actualiza cada 3 segundos.</p>
+<div class="tabla"><table><thead><tr><th class="sin-corte">Etapa</th><th>Qué hace Deploya</th></tr></thead><tbody><tr><td><strong>Recepción</strong></td><td>Clona tu rama, registra el commit y detecta cómo construir (tu <code>Dockerfile</code> o la receta, con sus capas)</td></tr>
+<tr><td><strong>Construcción</strong></td><td>Construye la imagen con tu <code>Dockerfile</code> o con la receta</td></tr>
+<tr><td><strong>Ejecución</strong></td><td>Espera a que tus bases estén listas, arranca el contenedor con la CPU y la memoria de tu plan, inyecta tus variables y verifica que responda</td></tr>
 <tr><td><strong>Enrutamiento</strong></td><td>Publica tu dirección con HTTPS; la versión anterior sigue sirviendo hasta este momento</td></tr>
 <tr><td><strong>Operación</strong></td><td>El despliegue queda Saludable y es la versión activa</td></tr></tbody></table></div>
-<p></p><figure class="captura"><img src="img/04-83f07805b9.png" alt="Despliegue en curso"><figcaption><span class="figura-numero">Figura 24.</span> La etapa en curso va en azul; la bitácora de construcción aparece en vivo</figcaption></figure><p></p>
-<p>Cuando termina, verás <strong>Saludable</strong>, la dirección pública, la imagen y la bitácora completa. Con <strong>Copiar</strong> te llevas la bitácora.</p>
-<p></p><figure class="captura"><img src="img/04-791d44b63f.png" alt="Despliegue saludable"><figcaption><span class="figura-numero">Figura 25.</span> Despliegue saludable con la URL, la imagen y la bitácora completa</figcaption></figure><p></p>
-<aside class="aviso aviso-aviso"><p class="aviso-titulo">Atención</p><p>Si un despliegue <strong>falla</strong>, la pantalla marca la etapa y la línea del error. <strong>Tu versión anterior sigue en línea</strong>: un fallo nunca tumba lo que ya funciona. Corrige y vuelve a desplegar, o usa <strong>Reintentar</strong>.</p>
+<p></p><figure class="captura"><img src="img/04-23b8aa4564.png" alt="Despliegue en curso"><figcaption><span class="figura-numero">Figura 30.</span> La etapa en curso va en azul; la bitácora de construcción aparece en vivo</figcaption></figure><p></p>
+<p>Mientras un despliegue está en Encolado o Construyendo puedes usar <strong>Cancelar despliegue</strong>. Cuando termina verás <strong>Saludable</strong>, la dirección pública, la imagen, los recursos aplicados y la bitácora completa; con <strong>Copiar</strong> te la llevas.</p>
+<p></p><figure class="captura"><img src="img/04-cf2e15114e.png" alt="Despliegue saludable"><figcaption><span class="figura-numero">Figura 31.</span> Despliegue saludable con la URL, la imagen y la bitácora completa</figcaption></figure><p></p>
+<h3 id="si-un-despliegue-falla">Si un despliegue falla</h3>
+<p>La pantalla marca la etapa que falló, resume el error y resalta las líneas en rojo. <strong>Ir al error</strong> te lleva a la línea exacta.</p>
+<p></p><figure class="captura"><img src="img/04-705e113ebe.png" alt="Despliegue fallido"><figcaption><span class="figura-numero">Figura 32.</span> La construcción terminó con código 127 porque el repositorio llama a tsc sin instalarlo</figcaption></figure><p></p>
+<aside class="aviso aviso-aviso"><p class="aviso-titulo">Atención</p><p><strong>Tu versión anterior sigue en línea</strong>: un fallo nunca tumba lo que ya funciona. Corrige el repositorio y vuelve a desplegar, o usa <strong>Reintentar</strong> para repetir el mismo commit.</p>
 </aside>
-<p>Mientras un despliegue está en Encolado o Construyendo puedes <strong>cancelarlo</strong>.</p>
 <h2 id="operar-tu-proyecto">Operar tu proyecto</h2>
-<p>Al abrir un proyecto ves seis pestañas.</p>
+<p>Al abrir un proyecto ves siete pestañas, una por cada sección de este capítulo.</p>
 <h3 id="resumen">Resumen</h3>
-<p>Estado actual, URL pública, versión activa, imagen, recursos aplicados, el último despliegue paso a paso y el uso de las últimas 24 horas.</p>
-<p></p><figure class="captura"><img src="img/04-4e2091e73d.png" alt="Resumen"><figcaption><span class="figura-numero">Figura 26.</span> Resumen del proyecto con la versión activa y los recursos del plan</figcaption></figure><p></p>
+<p>Estado actual, URL pública, la versión activa con su imagen, los recursos aplicados, el último despliegue paso a paso, tus bases de datos y el uso de las últimas 24 horas.</p>
+<p></p><figure class="captura"><img src="img/04-1b6617d741.png" alt="Resumen del proyecto"><figcaption><span class="figura-numero">Figura 33.</span> Resumen del proyecto con la versión activa, los recursos del plan y sus datos</figcaption></figure><p></p>
 <p>Botones de arriba: <strong>Visitar</strong> abre tu app; <strong>Reiniciar</strong> la vuelve a arrancar sin reconstruir; <strong>Detener</strong> la apaga; <strong>Desplegar</strong> construye el último commit de tu rama.</p>
 <h3 id="despliegues-y-reversion">Despliegues y reversión</h3>
-<p>El historial lista cada versión con su commit, fecha, duración, estado e imagen. Arriba, la gráfica <strong>Tiempo por etapa</strong> muestra cuánto tarda cada etapa y la mediana.</p>
-<p></p><figure class="captura"><img src="img/04-70198cd6d8.png" alt="Despliegues"><figcaption><span class="figura-numero">Figura 27.</span> Historial con el tiempo por etapa y la versión activa</figcaption></figure><p></p>
+<p>Arriba, la gráfica <strong>Tiempo por etapa</strong> muestra cuánto tardó cada etapa en los últimos despliegues, la mediana, qué parte del tiempo se va en construir, cuántos fallaron (en rojo, donde fallaron) y las reversiones. <strong>Ver tabla</strong> da los mismos datos en tabla. Debajo, el historial lista cada versión con su commit, fecha, duración, estado e imagen; filtra por <strong>Saludables</strong> o <strong>Fallidos</strong>.</p>
+<p></p><figure class="captura"><img src="img/04-8d5b7ca44c.png" alt="Historial de despliegues"><figcaption><span class="figura-numero">Figura 34.</span> Tiempo por etapa de los últimos cinco despliegues e historial con la versión activa</figcaption></figure><p></p>
 <p>Por cada fila puedes:</p>
 <div class="tabla"><table><thead><tr><th class="sin-corte">Acción</th><th class="sin-corte">Qué hace</th><th>¿Consume construcciones?</th></tr></thead><tbody><tr><td class="sin-corte"><strong>Revertir</strong></td><td>Vuelve a esa versión <strong>usando la imagen ya construida</strong>. Tarda segundos</td><td class="sin-corte"><strong>No</strong></td></tr>
 <tr><td><strong>Redesplegar</strong></td><td>Vuelve a construir ese commit desde cero</td><td class="sin-corte">Sí</td></tr>
 <tr><td><strong>Reintentar</strong> (en un Fallido)</td><td>Repite el despliegue del mismo commit</td><td class="sin-corte">Sí</td></tr></tbody></table></div>
-<p></p><figure class="captura"><img src="img/04-eefdad3186.png" alt="Revertir"><figcaption><span class="figura-numero">Figura 28.</span> Revertir explica que no reconstruye ni gasta construcciones</figcaption></figure><p></p>
-<p>La reversión crea un despliegue nuevo en estado <strong>Revirtiendo</strong>, salta Recepción y Construcción y queda Saludable en segundos. Se conservan las <strong>5 versiones más recientes</strong> de cada proyecto para revertir.</p>
-<p></p><figure class="captura"><img src="img/04-9b72875601.png" alt="Reversión en curso"><figcaption><span class="figura-numero">Figura 29.</span> La reversión salta Recepción y Construcción</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-00988b943f.png" alt="Confirmar reversión"><figcaption><span class="figura-numero">Figura 35.</span> Revertir explica que no reconstruye ni gasta construcciones</figcaption></figure><p></p>
+<p>La reversión crea un despliegue nuevo en estado <strong>Revirtiendo</strong>: no pasa por Recepción ni Construcción (quedan sin tiempo) y queda Saludable en segundos con la imagen de la versión elegida. Se conservan las <strong>5 versiones más recientes</strong> de cada proyecto para revertir.</p>
+<p></p><figure class="captura"><img src="img/04-243a66a302.png" alt="Reversión terminada"><figcaption><span class="figura-numero">Figura 36.</span> La versión #6 reutiliza la imagen de la #4 sin reconstruir</figcaption></figure><p></p>
 <h3 id="metricas">Métricas</h3>
-<p>CPU y memoria de tu contenedor en la última hora o en las últimas 24 h, frente al límite de tu plan. Desde el 80 % la gráfica marca la <strong>zona de aviso</strong>, y cada despliegue aparece como un evento. <strong>Ver tabla</strong> muestra los mismos datos en una tabla.</p>
-<p></p><figure class="captura"><img src="img/04-995c1844e4.png" alt="Métricas"><figcaption><span class="figura-numero">Figura 30.</span> Memoria y CPU de 24 h frente al límite del plan</figcaption></figure><p></p>
+<p>Memoria y CPU de tu contenedor en la <strong>última hora</strong> o en las <strong>últimas 24 h</strong>, frente al límite de tu plan, con una muestra por minuto. Cada tarjeta te dice:</p>
+<ul>
+<li>El uso de ahora en porcentaje y en valor (<code>194 MB de 1024 MB</code>) y cuánto cambió desde el último despliegue.</li>
+<li>El promedio con cada versión y el <strong>pico</strong> con su hora.</li>
+<li>Un estado: <span class="estado ok">Holgada</span> por debajo del 80 % del límite, <span class="estado warn">Cerca del límite</span> desde el 80 % y <span class="estado bad">Al límite</span> al 100 %, con una frase que lo explica (por ejemplo, «Cerca del límite: llegó al 87 % del límite en 24 h»).</li>
+</ul>
+<p>En la gráfica, la línea punteada es el límite del plan, la franja es la <strong>zona de aviso</strong> (desde el 80 %), cada despliegue aparece como una línea vertical con su número y el punto azul es <em>ahora</em>. <strong>Ver tabla</strong> muestra los mismos datos en una tabla.</p>
+<p></p><figure class="captura"><img src="img/04-83c4eb8906.png" alt="Métricas"><figcaption><span class="figura-numero">Figura 37.</span> Memoria y CPU de 24 h frente al límite del plan, con el despliegue #5 marcado</figcaption></figure><p></p>
 <h3 id="bitacoras">Bitácoras</h3>
-<p>La salida de tu aplicación en vivo (últimas 500 líneas), con filtro por nivel, búsqueda, pausa y descarga. Deploya no guarda estas líneas: las lee de tu contenedor.</p>
-<p></p><figure class="captura"><img src="img/04-c82afc591b.png" alt="Bitácoras"><figcaption><span class="figura-numero">Figura 31.</span> Bitácora de ejecución con un aviso y un error resaltados</figcaption></figure><p></p>
+<p>La salida de tu aplicación en vivo (últimas 500 líneas, se actualiza cada 3 segundos), con filtro por nivel (<strong>Info</strong>, <strong>Aviso</strong>, <strong>Error</strong>), búsqueda, <strong>Pausar</strong> y <strong>Descargar</strong>. Los avisos y errores se resaltan. Deploya no guarda estas líneas: las lee de tu contenedor.</p>
+<p></p><figure class="captura"><img src="img/04-bb8d3ba9b3.png" alt="Bitácoras"><figcaption><span class="figura-numero">Figura 38.</span> Bitácora de ejecución con avisos y errores resaltados</figcaption></figure><p></p>
 <h3 id="variables">Variables</h3>
-<p>Agrega, edita o borra variables. <strong>Mostrar</strong> revela un valor solo a ti. Puedes <strong>Guardar</strong> (aplica en el próximo despliegue) o <strong>Guardar y desplegar</strong>.</p>
-<p></p><figure class="captura"><img src="img/04-234d77254c.png" alt="Variables del proyecto"><figcaption><span class="figura-numero">Figura 32.</span> Variables enmascaradas; Mostrar revela un valor</figcaption></figure><p></p>
-<h3 id="configuracion-y-eliminacion">Configuración y eliminación</h3>
-<p>Cambia el nombre, el repositorio, la rama, la ruta del <code>Dockerfile</code> o el puerto. Los cambios aplican en el <strong>próximo despliegue</strong>; guardar no despliega.</p>
-<p></p><figure class="captura"><img src="img/04-bb1149c675.png" alt="Configuración"><figcaption><span class="figura-numero">Figura 33.</span> Configuración del proyecto</figcaption></figure><p></p>
-<p>Para <strong>eliminar</strong> el proyecto, escribe su nombre y confirma. Se borran el contenedor, las imágenes, las variables y el historial, y se libera el cupo de tu plan.</p>
-<p></p><figure class="captura"><img src="img/04-d057e1af75.png" alt="Eliminar"><figcaption><span class="figura-numero">Figura 34.</span> Eliminar exige escribir el nombre del proyecto</figcaption></figure><p></p>
-<p>En <strong>Configuración</strong> también está el <strong>comando de inicio</strong>: reemplaza el que trae la imagen, por ejemplo <code>node dist/worker.main.js</code> para correr un trabajador con la misma imagen que tu API. Déjalo vacío para usar el de la imagen.</p>
+<p>Agrega, edita o borra variables, o pega un <code>.env</code>. <strong>Mostrar</strong> revela un valor solo a ti. Puedes <strong>Guardar</strong> (aplica en el próximo despliegue) o <strong>Guardar y desplegar</strong>.</p>
+<p></p><figure class="captura"><img src="img/04-5c13b113da.png" alt="Variables"><figcaption><span class="figura-numero">Figura 39.</span> Variables enmascaradas; Mostrar revela un valor</figcaption></figure><p></p>
 <h3 id="bases-de-datos-y-almacenamiento">Bases de datos y almacenamiento</h3>
-<p>La pestaña <strong>Datos</strong> del proyecto agrega bases administradas por Deploya. Sus datos viven en un volumen propio: <strong>sobreviven</strong> a redespliegues, reversiones y reinicios de tu app.</p>
-<div class="tabla"><table><thead><tr><th class="sin-corte">Tipo</th><th>Para qué</th><th>Variables que recibe tu app</th></tr></thead><tbody><tr><td><strong>PostgreSQL 17 + pgvector</strong></td><td>Base relacional con búsqueda vectorial</td><td><code>DATABASE_URL</code> y <code>PG*</code></td></tr>
-<tr><td><strong>Redis 7</strong></td><td>Caché y colas, con persistencia en disco</td><td><code>REDIS_URL</code></td></tr>
-<tr><td><strong>Almacenamiento S3</strong></td><td>Archivos con URL pública, compatible con S3</td><td><code>S3_ENDPOINT</code>, <code>S3_PUBLIC_ENDPOINT</code>, <code>S3_BUCKET</code> y sus claves</td></tr></tbody></table></div>
+<p>La pestaña <strong>Datos</strong> muestra las bases del proyecto (las que elegiste en el alta y las que agregues después) y cuántas usas de las que permite tu plan. Sus datos viven en un volumen propio: <strong>sobreviven</strong> a redespliegues, reversiones y reinicios de tu app.</p>
+<p></p><figure class="captura"><img src="img/04-3b4ce9b2ab.png" alt="Datos"><figcaption><span class="figura-numero">Figura 40.</span> PostgreSQL y Redis disponibles, con su host interno, sus variables, el disco y con quién se comparten</figcaption></figure><p></p>
 <ol>
-<li>Abre tu proyecto y entra en <strong>Datos</strong>. Arriba ves cuántas bases usas de las que permite tu plan.</li>
-<li>Pulsa <strong>Agregar</strong> en el tipo que necesitas. El recurso pasa de <span class="estado curso">Creando</span> a <span class="estado ok">Disponible</span> en unos segundos.</li>
+<li>Para agregar otra, pulsa <strong>Agregar</strong> en el tipo que necesitas. El recurso pasa de <span class="estado curso">Creando</span> a <span class="estado ok">Disponible</span> en unos segundos.</li>
 <li><strong>Despliega</strong> tu proyecto: las variables de conexión se inyectan en el siguiente despliegue. Si ya definiste una variable con el mismo nombre, se respeta la tuya.</li>
 <li>Con <strong>Ver conexión</strong> copias los valores reales, por ejemplo para conectarte desde tu computadora con un túnel o para migrar datos.</li>
 </ol>
-<p><strong>Compartir.</strong> Si tu sistema son varios proyectos (una API y sus trabajadores), crea la base en uno y pulsa <strong>Compartir con otro proyecto</strong>: solo aparecen tus propios proyectos, y cada proyecto puede tener una base de cada tipo.</p>
+<p></p><figure class="captura"><img src="img/04-57f96f4761.png" alt="Ver conexión"><figcaption><span class="figura-numero">Figura 41.</span> Ver conexión muestra cada variable con su botón para copiarla</figcaption></figure><p></p>
+<p><strong>Compartir.</strong> Si tu sistema son varios proyectos (una API y sus trabajadores), crea la base en uno y pulsa <strong>Compartir con otro proyecto</strong>: solo aparecen tus propios proyectos, y cada proyecto puede tener una base de cada tipo. El otro proyecto recibe las variables en su siguiente despliegue.</p>
+<p></p><figure class="captura"><img src="img/04-17bdb52618.png" alt="Compartir una base"><figcaption><span class="figura-numero">Figura 42.</span> Lucía comparte su PostgreSQL con el proyecto tienda-trabajador</figcaption></figure><p></p>
 <aside class="aviso aviso-importante"><p class="aviso-titulo">Importante</p><p>Las bases <strong>no tienen acceso desde internet</strong>: solo las ven tus proyectos. El S3 es la excepción: tiene dirección pública propia, <code>https://&lt;proyecto&gt;-s3.deploya.larasolutions.dev</code>, para que el navegador descargue archivos.</p>
 </aside>
 <p>El disco de cada base se mide y se muestra. Cerca del límite de tu plan te avisamos, pero <strong>no cortamos</strong> el servicio. Para <strong>eliminar</strong> una base escribe su tipo (<code>postgres</code>, <code>redis</code> o <code>s3</code>): sus datos se pierden para siempre. Si la base era compartida contigo, eliminarla desde tu proyecto solo la desconecta.</p>
+<h3 id="configuracion-y-eliminacion">Configuración y eliminación</h3>
+<p>Cambia el nombre, el repositorio, la rama, la ruta del <code>Dockerfile</code>, el puerto interno, el <strong>comando de construcción</strong> (solo con receta) o el <strong>comando de inicio</strong>. Los cambios aplican en el <strong>próximo despliegue</strong>; guardar no despliega. Deja un comando vacío para volver al de la receta o al de la imagen.</p>
+<p></p><figure class="captura"><img src="img/04-a4835adec8.png" alt="Configuración"><figcaption><span class="figura-numero">Figura 43.</span> Configuración del proyecto con los comandos de construcción e inicio</figcaption></figure><p></p>
+<p>En la <strong>Zona de peligro</strong>, <strong>Eliminar proyecto</strong> pide escribir su nombre. Se borran el contenedor, las imágenes, las variables y el historial, y se libera el cupo de tu plan.</p>
+<p></p><figure class="captura"><img src="img/04-159674491b.png" alt="Eliminar proyecto"><figcaption><span class="figura-numero">Figura 44.</span> Eliminar se habilita solo cuando el nombre coincide</figcaption></figure><p></p>
 <h3 id="la-lista-con-varios-proyectos">La lista con varios proyectos</h3>
-<p></p><figure class="captura"><img src="img/04-cd2aaa5bd6.png" alt="Proyectos"><figcaption><span class="figura-numero">Figura 35.</span> La lista muestra cada proyecto, su último despliegue y el cupo del plan</figcaption></figure><p></p>
+<p>Con varios proyectos, <strong>Proyectos</strong> muestra cada uno con su estado, su ciclo de etapas y su último despliegue, cuántos llevas frente al límite de tu plan y, a la derecha, el detalle del que elijas. Arriba puedes buscar por nombre.</p>
+<p></p><figure class="captura"><img src="img/04-cd285c9529.png" alt="Lista de proyectos"><figcaption><span class="figura-numero">Figura 45.</span> La lista con tres proyectos y el detalle de tienda-lucia</figcaption></figure><p></p>
 <h2 id="tu-cuenta">Tu cuenta</h2>
 <p>En <strong>Cuenta</strong> cambias tu nombre (hasta 64 caracteres). El correo y el rol se muestran pero no se editan.</p>
-<p></p><figure class="captura"><img src="img/04-de88195f39.png" alt="Mi cuenta"><figcaption><span class="figura-numero">Figura 36.</span> Perfil</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-aa1936a833.png" alt="Mi cuenta"><figcaption><span class="figura-numero">Figura 46.</span> Perfil</figcaption></figure><p></p>
 <p>En <strong>Cuenta → Seguridad</strong> cambias tu contraseña (pide la actual; cierra tus otras sesiones) o cierras sesión <strong>en todos los dispositivos</strong>.</p>
-<p></p><figure class="captura"><img src="img/04-d026cf905f.png" alt="Seguridad"><figcaption><span class="figura-numero">Figura 37.</span> Cambiar contraseña y cerrar todas las sesiones</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-ca0a563f48.png" alt="Seguridad"><figcaption><span class="figura-numero">Figura 47.</span> Cambiar contraseña y cerrar todas las sesiones</figcaption></figure><p></p>
 <h2 id="administracion">Administración</h2>
-<p>Esta parte solo la ve una cuenta con rol <strong>Administrador</strong>.</p>
+<p>Esta parte solo la ve una cuenta con rol <strong>Administrador</strong>, que tiene dos entradas más en el menú.</p>
 <h3 id="usuarios">Usuarios</h3>
 <p><strong>Administración</strong> lista todas las cuentas. Busca por correo, filtra por estado de suscripción y abre una cuenta para ver su suscripción, sus proyectos con su estado y sus pagos.</p>
-<p></p><figure class="captura"><img src="img/04-ac05308042.png" alt="Usuarios"><figcaption><span class="figura-numero">Figura 38.</span> Lista de usuarios con el detalle de una cuenta</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-154bda30cc.png" alt="Usuarios"><figcaption><span class="figura-numero">Figura 48.</span> Lista de usuarios con el detalle de la cuenta de Lucía</figcaption></figure><p></p>
 <h3 id="suspender-y-reactivar-una-cuenta">Suspender y reactivar una cuenta</h3>
 <ol>
 <li>Abre la cuenta y pulsa <strong>Suspender cuenta</strong>.</li>
-<li>Elige un <strong>motivo</strong> de la lista y escribe un <strong>detalle</strong> para el registro.</li>
-<li>Confirma.</li>
+<li>Elige un <strong>motivo</strong> de la lista (es lo que verá el usuario) y escribe un <strong>detalle para el registro</strong>.</li>
+<li>Confirma con <strong>Suspender cuenta</strong>.</li>
 </ol>
-<p></p><figure class="captura"><img src="img/04-d25f4a5042.png" alt="Suspender"><figcaption><span class="figura-numero">Figura 39.</span> Suspender pide motivo y detalle</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-c35a2e127b.png" alt="Suspender cuenta"><figcaption><span class="figura-numero">Figura 49.</span> Suspender pide motivo y detalle</figcaption></figure><p></p>
 <p>La cuenta no podrá iniciar sesión, sus contenedores se detienen y sus datos se conservan. La acción queda registrada con quién, cuándo y por qué. No se puede suspender a otro administrador.</p>
-<p></p><figure class="captura"><img src="img/04-8147e017cc.png" alt="Cuenta suspendida"><figcaption><span class="figura-numero">Figura 40.</span> La cuenta queda suspendida y se ofrece reactivarla</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-94b933bc97.png" alt="Cuenta suspendida"><figcaption><span class="figura-numero">Figura 50.</span> La cuenta queda suspendida y se ofrece reactivarla</figcaption></figure><p></p>
 <p>El usuario ve el motivo al intentar entrar:</p>
-<p></p><figure class="captura"><img src="img/04-b92c6870c0.png" alt="Inicio con cuenta suspendida"><figcaption><span class="figura-numero">Figura 41.</span> Lo que ve el usuario suspendido</figcaption></figure><p></p>
+<p></p><figure class="captura"><img src="img/04-80367ecbc0.png" alt="Usuario suspendido"><figcaption><span class="figura-numero">Figura 51.</span> Lo que ve el usuario suspendido</figcaption></figure><p></p>
 <p>Para deshacerlo, pulsa <strong>Reactivar cuenta</strong> y escribe un detalle. Sus contenedores vuelven a arrancar si su suscripción está vigente.</p>
 <h3 id="infraestructura">Infraestructura</h3>
-<p>Vista de solo lectura del servidor: CPU, memoria y disco del nodo, la cola de construcción (en espera, en curso, fallidas en 24 h) y la última muestra de cada entorno.</p>
-<p></p><figure class="captura"><img src="img/04-5329152606.png" alt="Infraestructura"><figcaption><span class="figura-numero">Figura 42.</span> Estado del nodo, de la cola y de los entornos</figcaption></figure><p></p>
+<p>Vista de solo lectura del servidor: CPU, memoria y disco del nodo, la cola de construcción (en espera, en curso y fallidas en 24 h, con lo que se está construyendo) y la última muestra de CPU y memoria de cada entorno con su titular.</p>
+<p></p><figure class="captura"><img src="img/04-8e22f46225.png" alt="Infraestructura"><figcaption><span class="figura-numero">Figura 52.</span> Estado del nodo, de la cola y de los entornos</figcaption></figure><p></p>
 <h2 id="preguntas-frecuentes">Preguntas frecuentes</h2>
 <div class="tabla"><table><thead><tr><th class="sin-corte">Pregunta</th><th class="sin-corte">Respuesta</th></tr></thead><tbody><tr><td>¿Me cobran dinero real?</td><td>No. Los pagos son simulados y el comprobante lo dice</td></tr>
 <tr><td>¿Mi app se cae si un despliegue falla?</td><td>No. La versión anterior sigue en línea hasta que una nueva pasa la verificación de salud</td></tr>
@@ -719,8 +766,10 @@ td.sin-corte, th.sin-corte { white-space: nowrap; }
 <tr><td>¿Puedo usar mi propio dominio?</td><td>No por ahora: cada proyecto recibe <code>&lt;nombre&gt;.deploya.larasolutions.dev</code> con HTTPS</td></tr>
 <tr><td>¿Qué pasa con mis datos si mi suscripción se suspende?</td><td>Se conservan. Al renovar, tus apps vuelven a arrancar</td></tr>
 <tr><td>¿Por qué mi app no pasa la salud?</td><td>Debe responder HTTP en el puerto configurado (o en <code>PORT</code>) dentro de 60 segundos</td></tr>
-<tr><td>¿Necesito contratar una base de datos aparte?</td><td>No. Agrégala en la pestaña <strong>Datos</strong>; cuántas puedes tener depende de tu plan</td></tr>
+<tr><td>¿Necesito contratar una base de datos aparte?</td><td>No, en Starter, Pro y Business: elígela en el paso <strong>Datos</strong> del alta o agrégala después en la pestaña Datos; cuántas puedes tener depende de tu plan. Sandbox no incluye bases: usa la URL de una propia</td></tr>
+<tr><td>¿Puedo agregar la base después del primer despliegue?</td><td>Sí. Agrégala en la pestaña Datos y vuelve a desplegar para que tu app reciba las variables</td></tr>
 <tr><td>¿Mis datos se pierden si redespliego o revierto?</td><td>No. Las bases viven en su propio volumen; solo se borran si eliminas la base o el proyecto dueño</td></tr>
+<tr><td>¿Cuándo uso el comando de construcción?</td><td>Solo si Deploya construye con su receta (sin <code>Dockerfile</code>) y tu proyecto necesita otro paso de build. Con <code>Dockerfile</code> propio, el build lo define tu Dockerfile</td></tr>
 <tr><td>¿Puedo instalar Deploya en mi servidor?</td><td>Sí: es de código abierto (AGPL-3.0). Mira el capítulo <em>Modo autoalojado</em> del manual técnico</td></tr></tbody></table></div>
 
 </main>

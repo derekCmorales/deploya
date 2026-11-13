@@ -1,0 +1,10 @@
+{
+  "name": "@deploya/docs-sitio",
+  "private": true,
+  "description": "Genera los PDF de docs/sitio y redibuja sus diagramas Mermaid",
+  "type": "module",
+  "dependencies": {
+    "mermaid": "11.4.1",
+    "playwright": "1.63.0"
+  }
+}

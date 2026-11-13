@@ -1,5 +1,7 @@
 # Entrega final · Deploya v1.0.0
 
+> **Versión oficial de los cuatro documentos (1.1, 13 de noviembre de 2026):** [docs/sitio/](../sitio/README.md), en HTML y PDF, publicada en Cloudflare Pages en `https://docs.deploya.larasolutions.dev`. Los Markdown de esta carpeta son los borradores de la entrega del 6 de noviembre.
+
 Documentos exigidos por el curso ([propuesta.md §12](../propuesta.md)) y de la entrega final ([plan-avances.md § Entrega final](../plan-avances.md#entrega-final--100--entrega-y-exposición-viernes-6-de-noviembre)).
 
 | Documento | Historia | Contenido |

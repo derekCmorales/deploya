@@ -20,6 +20,9 @@ erDiagram
     ARTEFACTO |o--o{ DESPLIEGUE : "construido o reusado por"
     DESPLIEGUE ||--|{ ETAPA_DESPLIEGUE : "cinco etapas"
     DESPLIEGUE ||--o{ LINEA_BITACORA : produce
+    PROYECTO ||--o{ RECURSO_DATOS : "es dueño de"
+    RECURSO_DATOS ||--o{ RECURSO_DATOS_COMPARTIDO : "se comparte"
+    PROYECTO ||--o{ RECURSO_DATOS_COMPARTIDO : "usa compartido"
 
     USUARIO {
         string id PK
@@ -56,6 +59,8 @@ erDiagram
         decimal cpus
         int memoriaMb
         int construccionesMes
+        int maxRecursosDatos "por cuenta"
+        int discoDatosMb "por recurso: se mide y se avisa"
     }
     SUSCRIPCION {
         string id PK
@@ -94,6 +99,7 @@ erDiagram
         string urlRepositorio
         string rama
         string rutaDockerfile
+        string comandoInicio "null = CMD de la imagen"
         int puertoInterno
         RecetaConstruccion receta "dockerfile | node | python | go | estatica"
         string despliegueActivoId FK,UK
@@ -157,4 +163,20 @@ erDiagram
         int proyectosPorUsuario "null = sin límite"
         datetime ultimaLimpieza "EST-01b: última limpieza diaria"
         int filasLimpiadas "filas que borró esa corrida"
+    }
+    RECURSO_DATOS {
+        string id PK
+        string proyectoId FK "dueño"
+        TipoRecursoDatos tipo "postgres | redis | s3"
+        EstadoRecursoDatos estado "creando | disponible | detenido | error"
+        string contenedor "deploya-datos-<subdominio>-<tipo>"
+        string volumen
+        string contrasenaCifrada "AES-256-GCM"
+        int usoDiscoMb "última medición"
+        datetime medidoEn
+    }
+    RECURSO_DATOS_COMPARTIDO {
+        string recursoId PK,FK
+        string proyectoId PK,FK "mismo usuario"
+        datetime creado
     }

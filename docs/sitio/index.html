@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentación de Deploya</title>
+<meta name="description" content="Requisitos, diseño, manual técnico y manual de usuario de Deploya, la plataforma de código abierto que lleva un repositorio de GitHub a una app en línea con HTTPS y su base de datos.">
+<link rel="icon" href="assets/icono.svg" type="image/svg+xml">
+<style>
+@font-face { font-family: "Geist"; src: url(assets/fuentes/geist.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url(assets/fuentes/geist-mono.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+  --background: oklch(0.974 0.006 85); --sunken: oklch(0.952 0.008 85); --card: oklch(0.995 0.003 85);
+  --foreground: oklch(0.2 0.012 70); --muted-foreground: oklch(0.465 0.012 70); --faint: oklch(0.66 0.01 70);
+  --border: oklch(0.25 0.02 70 / 0.11); --border-strong: oklch(0.25 0.02 70 / 0.2); --border-stronger: oklch(0.25 0.02 70 / 0.4);
+  --primary: oklch(0.2 0.012 70); --primary-foreground: oklch(0.974 0.006 85);
+  --signal: oklch(0.5 0.15 250); --signal-soft: oklch(0.5 0.15 250 / 0.09);
+  --ok: oklch(0.5 0.12 163); --ok-soft: oklch(0.5 0.12 163 / 0.1); --dot: oklch(0.25 0.02 70 / 0.1);
+  --sans: "Geist", ui-sans-serif, system-ui, sans-serif; --mono: "Geist Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: oklch(0.155 0.006 70); --sunken: oklch(0.128 0.006 70); --card: oklch(0.183 0.006 70);
+    --foreground: oklch(0.965 0.006 85); --muted-foreground: oklch(0.745 0.008 80); --faint: oklch(0.56 0.008 80);
+    --border: oklch(0.96 0.01 85 / 0.085); --border-strong: oklch(0.96 0.01 85 / 0.15); --border-stronger: oklch(0.96 0.01 85 / 0.3);
+    --primary: oklch(0.965 0.006 85); --primary-foreground: oklch(0.155 0.006 70);
+    --signal: oklch(0.78 0.12 232); --signal-soft: oklch(0.78 0.12 232 / 0.13);
+    --ok: oklch(0.765 0.177 163.223); --ok-soft: oklch(0.765 0.177 163.223 / 0.13); --dot: oklch(0.96 0.01 85 / 0.075);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --background: oklch(0.155 0.006 70); --sunken: oklch(0.128 0.006 70); --card: oklch(0.183 0.006 70);
+  --foreground: oklch(0.965 0.006 85); --muted-foreground: oklch(0.745 0.008 80); --faint: oklch(0.56 0.008 80);
+  --border: oklch(0.96 0.01 85 / 0.085); --border-strong: oklch(0.96 0.01 85 / 0.15); --border-stronger: oklch(0.96 0.01 85 / 0.3);
+  --primary: oklch(0.965 0.006 85); --primary-foreground: oklch(0.155 0.006 70);
+  --signal: oklch(0.78 0.12 232); --signal-soft: oklch(0.78 0.12 232 / 0.13);
+  --ok: oklch(0.765 0.177 163.223); --ok-soft: oklch(0.765 0.177 163.223 / 0.13); --dot: oklch(0.96 0.01 85 / 0.075);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--background); color: var(--foreground); font: 15px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+.pagina { max-width: 1040px; margin: 0 auto; padding: 28px 16px 64px; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
+.barra { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.wordmark { font-weight: 700; font-size: 26px; letter-spacing: -0.06em; line-height: 1; text-decoration: none; }
+.wordmark span { color: var(--signal); }
+.etiqueta { font: 500 12px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); }
+.barra nav { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; }
+.barra nav a { text-decoration: none; color: var(--muted-foreground); }
+.barra nav a:hover { color: var(--foreground); }
+.encabezado { position: relative; margin-top: 40px; padding-block: 8px 36px; border-bottom: 1px solid var(--border-strong); }
+.encabezado::before { content: ""; position: absolute; inset: -40px -16px 0; background-image: radial-gradient(var(--dot) 1px, transparent 1.2px); background-size: 14px 14px; mask-image: linear-gradient(180deg, transparent, #000 40%, transparent); pointer-events: none; }
+.encabezado > * { position: relative; }
+h1 { margin: 14px 0 0; font-size: clamp(34px, 6vw, 54px); line-height: 1.04; font-weight: 650; letter-spacing: -0.035em; text-wrap: balance; max-width: 18ch; }
+.bajada { margin: 16px 0 0; max-width: 62ch; font-size: 17px; color: var(--muted-foreground); }
+.riel { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.etapa { position: relative; padding-top: 26px; min-width: 0; }
+.etapa::before { content: ""; position: absolute; top: 8px; left: 0; right: -16px; height: 2px; background: var(--ok); }
+.etapa:last-child::before { right: 0; }
+.etapa::after { content: ""; position: absolute; top: 1px; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px var(--ok-soft); }
+.doc { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 18px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--card); }
+.doc-num { font: 500 12px/1 var(--mono); color: var(--muted-foreground); }
+.doc h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; line-height: 1.2; }
+.doc p { margin: 0; font-size: 14px; color: var(--muted-foreground); }
+.datos { display: flex; gap: 14px; flex-wrap: wrap; font: 500 12px/1.4 var(--mono); color: var(--muted-foreground); }
+.acciones { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; padding-top: 6px; }
+.boton { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 8px 12px; border-radius: 8px; font: 500 14px/1 var(--sans); text-decoration: none; border: 1px solid var(--border-strong); background: var(--card); }
+.boton.principal { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.boton:hover { border-color: var(--border-stronger); }
+.boton.principal:hover { opacity: 0.9; }
+.boton svg { width: 15px; height: 15px; }
+section { margin-top: 56px; }
+section > h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.02em; }
+section > p.intro { margin: 0 0 20px; color: var(--muted-foreground); max-width: 65ch; }
+.metricas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.metrica { padding: 16px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--card); }
+.metrica b { display: block; font-size: 28px; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.metrica span { font-size: 13px; color: var(--muted-foreground); }
+.abierto { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; padding: 24px; border: 1px solid var(--border-strong); border-radius: 14px; background: var(--sunken); }
+.abierto h2 { margin: 0 0 8px; font-size: 22px; letter-spacing: -0.02em; }
+.abierto p { margin: 0 0 12px; color: var(--muted-foreground); }
+.abierto ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+.tabla { overflow-x: auto; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--card); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted-foreground); background: var(--sunken); padding: 10px 14px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+td { padding: 11px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+tbody tr:first-child td { border-top: 0; }
+td.donde { font-family: var(--mono); font-size: 13px; color: var(--muted-foreground); white-space: nowrap; }
+.nuevo { display: inline-block; margin-left: 6px; padding: 0 6px; border: 1px solid var(--border-strong); border-radius: 6px; font: 500 11px/18px var(--mono); color: var(--muted-foreground); }
+code { font: 0.88em var(--mono); background: var(--sunken); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+.pie { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border-strong); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; font-size: 14px; color: var(--muted-foreground); }
+.pie ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.pie b { color: var(--foreground); font-weight: 600; }
+@media (max-width: 860px) {
+  .riel { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 24px; }
+  .etapa:nth-child(2)::before { right: 0; }
+  .metricas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .abierto { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .riel { grid-template-columns: minmax(0, 1fr); }
+  .etapa::before { right: 0; }
+  .pie { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) { .boton { transition: border-color 120ms ease, opacity 120ms ease; } }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="barra">
+    <a class="wordmark" href="./" aria-label="deploya, inicio de la documentación">deploy<span>a</span></a>
+    <nav aria-label="Enlaces del producto">
+      <a href="https://deploya.larasolutions.dev">Producto</a>
+      <a href="https://app.deploya.larasolutions.dev">Entrar a la app</a>
+      <a href="https://github.com/derekCmorales/deploya">Código en GitHub</a>
+    </nav>
+  </header>
+
+  <div class="encabezado">
+    <p class="etiqueta">Ingeniería de Software I · Presentación final · 13 de noviembre de 2026</p>
+    <h1>Documentación técnica de Deploya</h1>
+    <p class="bajada">Pegas la URL de un repositorio de GitHub y en minutos tu app está en línea con HTTPS y su base de datos. Estos son los cuatro documentos del proyecto, escritos desde el código, los specs y las pantallas reales, y al día con la versión que corre en AWS.</p>
+
+    <ol class="riel" aria-label="Documentos">
+      <li class="etapa">
+        <article class="doc">
+          <span class="doc-num">01 · Qué hace y para quién</span>
+          <h2>Requisitos</h2>
+          <p>Alcance, actores, 76 requisitos funcionales, 36 no funcionales, casos de uso y trazabilidad con el enunciado.</p>
+          <div class="datos"><span>36 págs.</span><span>7 figuras</span></div>
+          <div class="acciones">
+            <a class="boton principal" href="doc/01-deploya-requisitos.html">Leer</a>
+            <a class="boton" href="pdf/01-deploya-requisitos.pdf" download>PDF</a>
+          </div>
+        </article>
+      </li>
+      <li class="etapa">
+        <article class="doc">
+          <span class="doc-num">02 · Cómo está hecho y por qué</span>
+          <h2>Diseño</h2>
+          <p>Arquitectura C4 y hexagonal, el motor por dentro, UML, SOLID y patrones con evidencia, ERD y diccionario de datos.</p>
+          <div class="datos"><span>52 págs.</span><span>19 figuras</span></div>
+          <div class="acciones">
+            <a class="boton principal" href="doc/02-deploya-diseno.html">Leer</a>
+            <a class="boton" href="pdf/02-deploya-diseno.pdf" download>PDF</a>
+          </div>
+        </article>
+      </li>
+      <li class="etapa">
+        <article class="doc">
+          <span class="doc-num">03 · Cómo se instala y opera</span>
+          <h2>Manual técnico</h2>
+          <p>Tecnologías, instalación local, variables, despliegue en AWS con Terraform, autoalojado, respaldos y problemas comunes.</p>
+          <div class="datos"><span>23 págs.</span><span>3 figuras</span></div>
+          <div class="acciones">
+            <a class="boton principal" href="doc/03-deploya-manual-tecnico.html">Leer</a>
+            <a class="boton" href="pdf/03-deploya-manual-tecnico.pdf" download>PDF</a>
+          </div>
+        </article>
+      </li>
+      <li class="etapa">
+        <article class="doc">
+          <span class="doc-num">04 · Cómo se usa</span>
+          <h2>Manual de usuario</h2>
+          <p>De la cuenta nueva a la app en línea: planes y pagos, proyectos, despliegues, bases de datos, reversión, métricas y administración.</p>
+          <div class="datos"><span>39 págs.</span><span>42 capturas</span></div>
+          <div class="acciones">
+            <a class="boton principal" href="doc/04-deploya-manual-usuario.html">Leer</a>
+            <a class="boton" href="pdf/04-deploya-manual-usuario.pdf" download>PDF</a>
+          </div>
+        </article>
+      </li>
+    </ol>
+  </div>
+
+  <section aria-labelledby="t-abierto">
+    <div class="abierto">
+      <div>
+        <h2 id="t-abierto">Código abierto, sin encierro</h2>
+        <p>Deploya se publica bajo la licencia <strong>AGPL-3.0</strong>. El mismo producto que corre en la nube se instala en tu servidor con un script, en modo autoalojado y sin cobro. Si un día Deploya no te sirve, te llevas tus contenedores, tu <code>Dockerfile</code> y la plataforma completa.</p>
+        <a class="boton" href="https://github.com/derekCmorales/deploya">Ver el código en GitHub</a>
+      </div>
+      <ul>
+        <li>Repositorio público, con licencia, guía de contribución y política de seguridad.</li>
+        <li><code>gitleaks</code> revisa todo el historial en cada PR: ningún secreto en el código.</li>
+        <li><code>scripts/instalar.sh</code> comprueba requisitos, DNS y certificado antes de tocar nada.</li>
+        <li>Cada decisión grande tiene su ADR con alternativas y consecuencias.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-numeros">
+    <h2 id="t-numeros">Lo que respalda cada documento</h2>
+    <p class="intro">Ningún requisito se inventó para el documento: cada uno resume un spec de OpenSpec y cada escenario tiene su prueba automatizada.</p>
+    <div class="metricas">
+      <div class="metrica"><b>83</b><span>requisitos en 12 specs</span></div>
+      <div class="metrica"><b>354</b><span>escenarios de aceptación</span></div>
+      <div class="metrica"><b>1 596</b><span>pruebas automatizadas</span></div>
+      <div class="metrica"><b>97.1 %</b><span>líneas cubiertas en la API</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-cambios">
+    <h2 id="t-cambios">Qué cambió desde la entrega final</h2>
+    <p class="intro">Versión 1.1 de los cuatro documentos (13 de noviembre de 2026).</p>
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Cambio</th><th>Dónde</th></tr></thead>
+        <tbody>
+          <tr><td>Bases de datos administradas: PostgreSQL 17 con pgvector, Redis 7 y almacenamiento S3, compartibles entre proyectos <span class="nuevo">ADR 0012</span></td><td class="donde">01 · RF-70 a RF-76 · 04 · 7.7</td></tr>
+          <tr><td>Piloto en AWS: EC2 creada con Terraform, disco cifrado y snapshot diario <span class="nuevo">ADR 0009</span></td><td class="donde">03 · cap. 5 · 02 · cap. 9</td></tr>
+          <tr><td>Landing en S3 y CloudFront; la app en <code>app.deploya.larasolutions.dev</code> <span class="nuevo">ADR 0011</span></td><td class="donde">03 · 5.3</td></tr>
+          <tr><td>Ruta del <code>Dockerfile</code> en el alta, comando de inicio y hasta 150 variables</td><td class="donde">01 · RF-67 a RF-69</td></tr>
+          <tr><td>Ruta de escala con ECS sobre EC2 y construcciones en Fargate Spot (propuesta) <span class="nuevo">ADR 0010</span></td><td class="donde">02 · cap. 11</td></tr>
+          <tr><td>Modelo de datos con <code>RecursoDatos</code> y <code>RecursoDatosCompartido</code>; ERD y diagrama de despliegue nuevos</td><td class="donde">02 · cap. 7 y 9</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <div>
+      <b>Equipo</b>
+      <ul>
+        <li>Eddy Poroj · cuentas, seguridad y notificaciones</li>
+        <li>Javier Rodríguez · suscripciones, pagos y administración</li>
+        <li>Eduardo Portillo · proyectos, observabilidad y design system</li>
+        <li>Derek Calderón Morales · motor de despliegue, infraestructura y arquitectura</li>
+      </ul>
+    </div>
+    <div>
+      <b>Fuente</b>
+      <ul>
+        <li>Repositorio: <a href="https://github.com/derekCmorales/deploya"><code>github.com/derekCmorales/deploya</code></a></li>
+        <li>Este sitio: <code>docs/sitio/</code>, publicado con Cloudflare Pages</li>
+        <li>Facultad de Ingeniería · Ingeniería en Informática y Sistemas</li>
+      </ul>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

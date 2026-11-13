@@ -1,70 +1,55 @@
 ---
-title: Despliegue — servicios de docker compose, redes y volúmenes (desarrollo y VPS)
+title: Despliegue — Deploya en AWS (piloto) y en local
 ---
-flowchart LR
-    subgraph HOST["Nodo único · Docker Engine"]
-        subgraph RED_INTERNA["red deploya_interna"]
-            PG[("postgres:16<br/>:5432 · volumen deploya_pg")]
-            RD[("redis:7<br/>:6379")]
-            API["api<br/>Dockerfile.api · node dist/main.js<br/>:3001 → 3000"]
-            WK["worker<br/>Dockerfile.api · node dist/trabajador.js<br/>git + docker.sock"]
-            WEB["web<br/>Dockerfile.web<br/>:3000"]
-            MP["mailpit<br/>:1025 SMTP · :8025 UI"]
-            TR["traefik:v3<br/>:80 (:443 y redirección 80→443 en el VPS)"]
-        end
-
-        subgraph RED_P1["red deploya-p-hola-deploya"]
-            C1["deploya-hola-deploya-3<br/>imagen deploya/hola-deploya:3<br/>NanoCpus 0.25e9 · Memory 256 MiB<br/>sin privilegios · CapDrop ALL"]
-        end
-
-        subgraph RED_P2["red deploya-p-api-tienda"]
-            C2["deploya-api-tienda-14"]
-        end
-
-        SOCK["/var/run/docker.sock"]
-        VOL["volumen traefik_dinamico<br/>/traefik/dinamico/*.yml"]
-        ACME[("volumen traefik_acme<br/>/acme/acme.json · solo VPS")]
-    end
-
-    subgraph EXTERNOS["Solo en el VPS (docker-compose.vps.yml)"]
-        LE["Let's Encrypt<br/>certificado comodín *.&lt;dominio&gt;"]
-        DNS["Proveedor DNS<br/>A de * · CNAME de la raíz a CloudFront<br/>desafío DNS-01 · token solo de la zona"]
-        CF["CloudFront + ACM (us-east-1)<br/>landing en &lt;dominio&gt; y www · ADR 0011"]
-        S3[("S3 privado<br/>dist/ de la landing · solo por OAC")]
-        SMTP["Proveedor SMTP<br/>Resend o Brevo · SPF y DKIM"]
-    end
-
+flowchart TB
     NAV["Navegador"]
+    DNS["Cloudflare · solo DNS<br/>raíz y www → CloudFront · app, api y * → IP elástica"]
 
-    NAV -->|"localhost:3000"| WEB
-    NAV -->|"localhost:3001"| API
-    NAV -->|"hola-deploya.localhost"| TR
-    NAV -->|"localhost:8025 (sin Mailpit en el VPS)"| MP
-    NAV -->|"https://app.&lt;dominio&gt; · https://api.&lt;dominio&gt; · https://hola-deploya.&lt;dominio&gt;"| TR
-    NAV -->|"https://&lt;dominio&gt; (landing)"| CF
-    CF -->|"lee con OAC"| S3
-    TR -->|"emite y renueva por DNS-01"| LE
-    LE -->|"verifica el TXT"| DNS
-    TR -->|"escribe"| ACME
-    API -->|"lee solo el vencimiento"| ACME
-    API -->|"SMTP del proveedor"| SMTP
+    subgraph LANDING["Landing · ADR 0011"]
+        CF["CloudFront + ACM<br/>HSTS · nosniff"]
+        S3L[("S3 privado · landing Astro")]
+    end
+
+    subgraph EC2["EC2 m7i-flex.large · 8 GB"]
+        TR["Traefik v3 · TLS comodín *.&lt;dominio&gt; por DNS-01"]
+        subgraph PLATAFORMA["docker compose"]
+            WEB["web · Next.js<br/>app.&lt;dominio&gt;"]
+            API["api · NestJS<br/>api.&lt;dominio&gt;"]
+            WK["worker<br/>construye y orquesta · docker.sock"]
+            PG[("PostgreSQL 16<br/>plataforma")]
+            RD[("Redis 7<br/>colas BullMQ")]
+        end
+        subgraph PROYECTO["red de cada proyecto"]
+            C1["app del cliente<br/>límites del plan · CapDrop ALL"]
+            DATOS[("Postgres 17 + pgvector · Redis · S3<br/>volumen persistente")]
+        end
+        EBS[("EBS gp3 80 GB cifrado · snapshot diario DLM, 7 días")]
+    end
+
+    GH["GitHub · repos públicos"]
+    SMTP["Resend · correo"]
+
+    NAV --> DNS
+    DNS --> CF --> S3L
+    DNS --> TR
+    TR --> WEB
+    TR --> API
+    TR --> C1
     API --> PG
     API --> RD
-    API -->|SMTP| MP
-    WK --> RD
-    WK --> PG
-    WK --> SOCK
-    WK -->|escribe| VOL
-    TR -->|"vigila"| VOL
-    TR -->|"conectado por el worker"| RED_P1
-    TR --> RED_P2
-    WK -.->|"salud HTTP · conectado por el worker"| RED_P1
+    RD --> WK
+    WK -->|"clona"| GH
+    WK -->|"ContenedorPuerto"| C1
+    WK -->|"RecursosDatosPuerto"| DATOS
+    C1 --> DATOS
+    API -->|"verificación y avisos"| SMTP
+    PROYECTO -.-> EBS
 
     classDef data fill:#fefce8,stroke:#facc15,stroke-width:2px,color:#713f12
     classDef app fill:#f5f3ff,stroke:#a78bfa,stroke-width:2px,color:#312e81
     classDef cliente fill:#f0fdf4,stroke:#4ade80,stroke-width:2px,color:#166534
     classDef ext fill:#f0f9ff,stroke:#38bdf8,stroke-width:2px,color:#0c4a6e
-    class PG,RD,VOL,ACME,S3 data
-    class API,WK,WEB,MP,TR app
-    class C1,C2 cliente
-    class SOCK,NAV,LE,DNS,SMTP,CF ext
+    class PG,RD,S3L,DATOS,EBS data
+    class API,WK,WEB,TR app
+    class C1 cliente
+    class NAV,DNS,SMTP,CF,GH ext

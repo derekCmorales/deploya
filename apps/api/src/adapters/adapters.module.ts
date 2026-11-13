@@ -136,7 +136,7 @@ const SOLO_TRABAJADOR: Provider[] = [
     stub: () => new RecursosDatosStub(),
   }),
   puerto(VerificacionEntornoPuerto, { docker: (_c, reloj) => new VerificacionHttp(reloj), stub: () => new VerificacionEntornoStub() }),
-  puerto(MetricasContenedorPuerto, { docker: () => new MetricasDockerStats(), stub: () => new MetricasContenedorStub() }),
+  puerto(MetricasContenedorPuerto, { docker: () => new MetricasDockerStats(socketDocker()), stub: () => new MetricasContenedorStub() }),
   puerto(LecturaServidorPuerto, {
     docker: (c) => new LecturaServidorDocker(socketDocker(), c.directorioTrabajo, c.proyectoCompose),
     stub: () => new LecturaServidorStub(),

@@ -1,20 +1,39 @@
 import { MuestraIlegible } from "./errores";
-import { muestraDesdeStats } from "./muestra-desde-stats";
+import { muestraDesdeStats, type StatsMotor } from "./muestra-desde-stats";
 
-const LINEA = '{"CPUPerc":"12.00%","MemUsage":"430MiB / 512MiB","Name":"api"}';
+const MB = 1024 * 1024;
+
+function stats(parcial: Partial<StatsMotor> = {}): StatsMotor {
+  return {
+    cpu_stats: { cpu_usage: { total_usage: 1_240_000_000 }, system_cpu_usage: 20_000_000_000, online_cpus: 2 },
+    precpu_stats: { cpu_usage: { total_usage: 1_000_000_000 }, system_cpu_usage: 16_000_000_000 },
+    memory_stats: { usage: 480 * MB, stats: { inactive_file: 50 * MB } },
+    ...parcial,
+  };
+}
 
 describe("muestraDesdeStats", () => {
-  it("docker stats --format json se lee como vCPU y MB", () => {
-    expect(muestraDesdeStats(LINEA)).toEqual({ cpu: 0.12, memoriaMb: 430 });
+  it("las stats del Engine API se leen como vCPU y MB, igual que docker stats", () => {
+    // Δuso 0.24e9 / Δsistema 4e9 × 2 CPUs = 0.12 vCPU; 480 MB − 50 MB de caché inactiva.
+    expect(muestraDesdeStats(stats())).toEqual({ cpu: 0.12, memoriaMb: 430 });
   });
 
-  it("acepta GiB y una línea entre ruido", () => {
-    expect(muestraDesdeStats(`\n${'{"CPUPerc":"50%","MemUsage":"1.5GiB / 2GiB"}'}\n`)).toEqual({ cpu: 0.5, memoriaMb: 1536 });
+  it("en cgroup v1 descuenta total_inactive_file y cuenta las CPUs por percpu_usage", () => {
+    const v1 = stats({
+      cpu_stats: { cpu_usage: { total_usage: 3_000_000_000, percpu_usage: [1, 1, 1, 1] }, system_cpu_usage: 24_000_000_000 },
+      memory_stats: { usage: 1_600 * MB, stats: { total_inactive_file: 64 * MB } },
+    });
+    expect(muestraDesdeStats(v1)).toEqual({ cpu: 1, memoriaMb: 1_536 });
   });
 
-  it("rechaza una salida que no es json de stats", () => {
-    expect(() => muestraDesdeStats("error: no such container")).toThrow(MuestraIlegible);
-    expect(() => muestraDesdeStats('{"Name":"api"}')).toThrow(MuestraIlegible);
-    expect(() => muestraDesdeStats("{")).toThrow(MuestraIlegible);
+  it("sin delta del sistema la CPU es 0", () => {
+    const quieto = stats({ precpu_stats: { cpu_usage: { total_usage: 1_240_000_000 }, system_cpu_usage: 20_000_000_000 } });
+    expect(muestraDesdeStats(quieto).cpu).toBe(0);
+  });
+
+  it("rechaza stats sin CPU o sin memoria", () => {
+    expect(() => muestraDesdeStats(stats({ cpu_stats: {} }))).toThrow(MuestraIlegible);
+    expect(() => muestraDesdeStats(stats({ memory_stats: {} }))).toThrow(MuestraIlegible);
+    expect(() => muestraDesdeStats({})).toThrow(MuestraIlegible);
   });
 });

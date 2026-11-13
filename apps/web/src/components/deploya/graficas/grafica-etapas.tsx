@@ -18,6 +18,7 @@ import {
   type TiemposDespliegue,
 } from "@/lib/tiempos";
 
+import { useAnchoContenedor } from "./ancho-contenedor";
 import { escalaLineal } from "./escalas";
 import { esTeclaDeNavegacion, indiceAlMover } from "./series";
 
@@ -29,11 +30,13 @@ export interface GraficaEtapasProps {
   medianaMs: number;
 }
 
-const ANCHO = 720;
-const ALTO = 248;
+/** Alto fijo: el ancho sigue a la tarjeta y la gráfica no crece de alto al ensancharla. */
+const ALTO = 216;
 const MARGEN = { top: 18, right: 62, bottom: 42, left: 42 };
 const ALTO_MINIMO_BARRA = 2;
-const ANCHO_MAXIMO_BARRA = 32;
+const ANCHO_MAXIMO_BARRA = 28;
+/** Al recorrer una columna, las demás quedan atenuadas para leerla sin ruido. */
+const OPACIDAD_COLUMNA_EN_REPOSO = 0.35;
 const ANCHO_TOOLTIP = 174;
 /** Cabecera y cinco etapas en `text-[10px]` con `leading-tight`, más el relleno. */
 const ALTO_TOOLTIP = 124;
@@ -61,10 +64,11 @@ const Y_PALABRA_MEDIANA = 13;
 export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaEtapasProps) {
   const [mostrarTabla, setMostrarTabla] = useState(false);
   const [indiceActivo, setIndiceActivo] = useState<number | null>(null);
+  const { ancho, contenedorRef } = useAnchoContenedor<HTMLDivElement>();
 
   if (despliegues.length === 0) return null;
 
-  const anchoGrafica = ANCHO - MARGEN.left - MARGEN.right;
+  const anchoGrafica = ancho - MARGEN.left - MARGEN.right;
   const altoGrafica = ALTO - MARGEN.top - MARGEN.bottom;
   const minutos = minutosDelEje(despliegues);
   const topeMs = minutos * MS_POR_MINUTO;
@@ -76,7 +80,7 @@ export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaE
 
   const moverPuntero = (evento: PunteroReact<SVGSVGElement>) => {
     const caja = evento.currentTarget.getBoundingClientRect();
-    const x = ((evento.clientX - caja.left) / caja.width) * ANCHO - MARGEN.left;
+    const x = ((evento.clientX - caja.left) / caja.width) * ancho - MARGEN.left;
     if (x < 0 || x > anchoGrafica) {
       setIndiceActivo(null);
       return;
@@ -92,12 +96,7 @@ export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaE
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex justify-end">
-        <Button type="button" variant="outline" size="sm" onClick={() => setMostrarTabla((valor) => !valor)}>
-          {mostrarTabla ? "Ver gráfica" : "Ver tabla"}
-        </Button>
-      </div>
+    <div ref={contenedorRef} className="flex flex-col gap-3">
 
       {mostrarTabla ? (
         <div className="max-h-[320px] overflow-y-auto">
@@ -143,7 +142,7 @@ export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaE
           className="rounded outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <svg
-            viewBox={`0 0 ${ANCHO} ${ALTO}`}
+            viewBox={`0 0 ${ancho} ${ALTO}`}
             className="h-auto w-full overflow-visible"
             onPointerMove={moverPuntero}
             onPointerLeave={() => setIndiceActivo(null)}
@@ -157,7 +156,11 @@ export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaE
                 const tramos = tramosVisibles(despliegue);
                 let base = altoGrafica;
                 return (
-                  <g key={despliegue.numero}>
+                  <g
+                    key={despliegue.numero}
+                    opacity={indiceActivo === null || indiceActivo === indice ? 1 : OPACIDAD_COLUMNA_EN_REPOSO}
+                    className="transition-opacity duration-150"
+                  >
                     {tramos.map((tramo) => {
                       const altura = Math.max(ALTO_MINIMO_BARRA, (tramo.ms / topeMs) * altoGrafica);
                       base -= altura;
@@ -196,10 +199,10 @@ export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaE
                     strokeWidth="1"
                     strokeDasharray="4 4"
                   />
-                  <text x={anchoGrafica + SEPARACION_ETIQUETA} y={escalaY(medianaMs) + AJUSTE_BASE_TEXTO} className="fill-muted-foreground font-mono text-[9px] tnum">
+                  <text x={anchoGrafica + SEPARACION_ETIQUETA} y={escalaY(medianaMs) + AJUSTE_BASE_TEXTO} className="fill-muted-foreground font-mono text-[10px] tnum">
                     {formatoDuracion(medianaMs)}
                   </text>
-                  <text x={anchoGrafica + SEPARACION_ETIQUETA} y={escalaY(medianaMs) + Y_PALABRA_MEDIANA} className="fill-muted-foreground font-mono text-[8px]">
+                  <text x={anchoGrafica + SEPARACION_ETIQUETA} y={escalaY(medianaMs) + Y_PALABRA_MEDIANA} className="fill-muted-foreground font-mono text-[9px]">
                     mediana
                   </text>
                 </g>
@@ -229,7 +232,12 @@ export function GraficaEtapas({ despliegues, numeroActivo, medianaMs }: GraficaE
         </div>
       )}
 
-      <Leyenda />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Leyenda />
+        <Button type="button" variant="outline" size="sm" onClick={() => setMostrarTabla((valor) => !valor)}>
+          {mostrarTabla ? "Ver gráfica" : "Ver tabla"}
+        </Button>
+      </div>
       <p className="sr-only" aria-live="polite">
         {activa
           ? `#${activa.numero}: ${ETAPAS_TIEMPO.map((etapa) => `${ETIQUETA_ETAPA[etapa]} ${textoTramo(activa.etapas[etapa])}`).join(", ")}.`

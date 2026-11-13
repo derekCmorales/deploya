@@ -13,8 +13,6 @@ export const PUNTOS_SERIE_24H = 48;
 
 export const MS_POR_MINUTO = 60_000;
 
-/** `docker stats` expresa 100 % como 1 vCPU; el contrato guarda vCPU. */
-export const PORCENTAJE_A_VCPU = 100;
 export const DECIMALES_CPU = 3;
 
 /** Contenedores que se miden a la vez: acota el tick aunque varios cuelguen hasta su timeout. */

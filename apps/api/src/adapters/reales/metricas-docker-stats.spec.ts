@@ -1,37 +1,46 @@
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import type Docker from "dockerode";
 import { MuestraIlegible } from "../../modules/orquestacion/metricas/dominio/errores";
 import { MetricasDockerStats } from "./metricas-docker-stats";
 
+const MB = 1024 * 1024;
+const STATS = {
+  cpu_stats: { cpu_usage: { total_usage: 1_240_000_000 }, system_cpu_usage: 20_000_000_000, online_cpus: 2 },
+  precpu_stats: { cpu_usage: { total_usage: 1_000_000_000 }, system_cpu_usage: 16_000_000_000 },
+  memory_stats: { usage: 430 * MB, stats: {} },
+};
+
+function motor(stats: jest.Mock): { docker: Docker; getContainer: jest.Mock } {
+  const getContainer = jest.fn(() => ({ stats }));
+  return { docker: { getContainer } as unknown as Docker, getContainer };
+}
+
 describe("MetricasDockerStats", () => {
-  it("invoca docker stats --no-stream --format json y traduce la salida", async () => {
-    const directorio = await mkdtemp(join(tmpdir(), "stats-"));
-    const ejecutable = join(directorio, "docker");
-    const script = [
-      "#!/bin/sh",
-      'test "$1" = "stats" && test "$2" = "--no-stream" && test "$3" = "--format" && test "$4" = "json" || exit 2',
-      "printf '%s\\n' '{\"CPUPerc\":\"12.00%\",\"MemUsage\":\"430MiB / 512MiB\"}'",
-    ].join("\n");
-    await writeFile(ejecutable, script, { mode: 0o755 });
-    await chmod(ejecutable, 0o755);
-    try {
-      const adaptador = new MetricasDockerStats(ejecutable);
-      await expect(adaptador.muestra("abc123")).resolves.toEqual({ cpu: 0.12, memoriaMb: 430 });
-    } finally {
-      await rm(directorio, { recursive: true, force: true });
-    }
+  it("pide las stats sin stream por el socket y las traduce", async () => {
+    const stats = jest.fn().mockResolvedValue(STATS);
+    const { docker, getContainer } = motor(stats);
+
+    await expect(new MetricasDockerStats(docker).muestra("abc123")).resolves.toEqual({ cpu: 0.12, memoriaMb: 430 });
+
+    expect(getContainer).toHaveBeenCalledWith("abc123");
+    expect(stats).toHaveBeenCalledWith({ stream: false });
   });
 
-  it("si docker stats falla, la muestra es ilegible", async () => {
-    const directorio = await mkdtemp(join(tmpdir(), "stats-"));
-    const ejecutable = join(directorio, "docker");
-    await writeFile(ejecutable, "#!/bin/sh\necho caido >&2\nexit 1\n", { mode: 0o755 });
-    try {
-      await expect(new MetricasDockerStats(ejecutable).muestra("abc")).rejects.toBeInstanceOf(MuestraIlegible);
-      await expect(new MetricasDockerStats(ejecutable).muestra("-mal")).rejects.toBeInstanceOf(MuestraIlegible);
-    } finally {
-      await rm(directorio, { recursive: true, force: true });
-    }
+  it("si el motor falla, la muestra es ilegible", async () => {
+    const { docker } = motor(jest.fn().mockRejectedValue(new Error("no such container")));
+
+    await expect(new MetricasDockerStats(docker).muestra("abc")).rejects.toBeInstanceOf(MuestraIlegible);
+  });
+
+  it("un id inválido no llega al motor", async () => {
+    const { docker, getContainer } = motor(jest.fn());
+
+    await expect(new MetricasDockerStats(docker).muestra("-mal")).rejects.toBeInstanceOf(MuestraIlegible);
+    expect(getContainer).not.toHaveBeenCalled();
+  });
+
+  it("si el motor no responde a tiempo, la muestra es ilegible", async () => {
+    const { docker } = motor(jest.fn(() => new Promise(() => undefined)));
+
+    await expect(new MetricasDockerStats(docker, 5).muestra("abc")).rejects.toThrow("no respondió a tiempo");
   });
 });

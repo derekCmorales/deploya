@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, Sunken } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { verificarCorreo } from "@/lib/api-identidad";
 import { leerCorreoPendiente } from "@/lib/correo-pendiente";
@@ -74,7 +74,7 @@ function RevisaTuBandeja({ correo }: { correo: string | null }) {
         ) : null}
         . Caduca en 24 horas.
       </p>
-      <p className="text-sm text-muted-foreground">¿No llegó? Revisa spam o promociones.</p>
+      <Sunken className="px-3.5 py-3 text-sm text-muted-foreground">¿No llegó? Revisa spam o promociones.</Sunken>
       {reenvio ? <BotonReenviar destino={{ correo: reenvio.correo }} segundosIniciales={reenvio.segundos} /> : null}
     </TarjetaEstado>
   );

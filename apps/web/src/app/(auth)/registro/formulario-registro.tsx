@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Loader2, MailCheck } from "lucide-react";
+import { ArrowRight, Loader2, Mail, MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -173,9 +173,12 @@ function CuentaCreada({ correoEnmascarado, correoEnviado }: { correoEnmascarado:
       )}
       <Sunken className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm">
         Estado de la cuenta
-        <Badge variant="warn">Pendiente de verificación</Badge>
+        <Badge variant="muted">
+          <Mail aria-hidden />
+          Pendiente de verificación
+        </Badge>
       </Sunken>
-      <Button asChild size="lg" className="w-full">
+      <Button asChild variant="outline" size="lg" className="w-full">
         <Link href={destino}>
           Ir a verificar correo
           <ArrowRight aria-hidden />

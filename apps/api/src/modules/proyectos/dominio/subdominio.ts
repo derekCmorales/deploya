@@ -20,11 +20,11 @@ export function subdominioDesdeNombre(nombre: string): string {
 }
 
 /**
- * Nombres que la plataforma usa en el VPS (la web va en la raíz y la API en `api.`): un proyecto con
+ * Nombres que la plataforma usa en producción (la web en `app.`, la API en `api.` y la documentación en `docs.`): un proyecto con
  * uno de ellos publicaría una ruta que choca con la de la plataforma (ADR 0007). Solo se aplican donde
  * hay esas rutas (con resolvedor ACME): en local `api.localhost` no choca con nada.
  */
-export const SUBDOMINIOS_DE_PLATAFORMA: readonly string[] = ["api", "www", "web", "app", "admin", "mail", "smtp", "traefik"];
+export const SUBDOMINIOS_DE_PLATAFORMA: readonly string[] = ["api", "www", "web", "app", "admin", "docs", "mail", "smtp", "traefik"];
 
 /** Token de Nest con los subdominios que un proyecto no puede usar en este entorno. */
 export const SUBDOMINIOS_RESERVADOS = Symbol("SUBDOMINIOS_RESERVADOS");

@@ -2,7 +2,7 @@
 
 Modelo de costos del producto: cuánto cuesta el nodo del piloto, cuántos clientes caben, cuánto deja cada plan y qué cambia con Nimbo y con la escala del [ADR 0010](adr/0010-escala-con-ecs-y-construcciones-en-fargate.md). Decisiones relacionadas: [ADR 0009](adr/0009-piloto-en-aws-ec2-con-terraform.md) (piloto en EC2), [ADR 0011](adr/0011-landing-en-s3-y-cloudfront.md) (landing), [ADR 0012](adr/0012-recursos-de-datos-en-el-nodo.md) (recursos de datos). Infraestructura: [infra/terraform/](../infra/terraform/README.md).
 
-> **Fecha de las cifras:** 12 de noviembre de 2026. Todo en USD, bajo demanda, sin impuestos, mes de 730 h.
+> **Fecha de las cifras:** 12 de noviembre de 2026 para AWS; **13 de noviembre de 2026** para los precios de los planes (tarifa de lanzamiento: Starter 6, Pro 19, Business 49, la misma de la landing, la semilla de planes y [alcance.md](alcance.md#planes-y-recursos-v41)). Todo en USD, bajo demanda, sin impuestos, mes de 730 h.
 
 ## 1. Precios unitarios
 
@@ -29,7 +29,7 @@ Modelo de costos del producto: cuánto cuesta el nodo del piloto, cuántos clien
 | NLB · NAT Gateway * | 0.0225 /h + LCU · 0.045 /h + 0.045 /GB | 16.43 · 32.85 de piso (cifras del ADR 0010) |
 | Resend (correo) * | plan gratis: 3 000 correos/mes, 100/día, 1 dominio; Pro: 20 /mes por 50 000 | 0 en el piloto |
 | Dominio * | `deploya.larasolutions.dev` es un subdominio de un `.dev` ya pagado (≈ 12–15 /año); DNS en Cloudflare gratis | ≈ 1.10 prorrateado; 0 incremental |
-| Cobro con Recurrente * | 4.5 % + ≈ 0.26 por cobro (ADR 0010) | Starter 0.49 · Pro 0.94 · Business 2.06 |
+| Cobro con Recurrente * | 4.5 % + ≈ 0.26 por cobro (ADR 0010) | Starter 0.53 · Pro 1.12 · Business 2.47 |
 
 **Nota sobre snapshots.** DLM toma uno diario del disco de 80 GB y guarda 7 ([respaldos.tf](../infra/terraform/respaldos.tf)). El primero cuenta solo los bloques escritos (≈ 30 GB al inicio) y los siguientes solo lo que cambió (≈ 1–2 GB/día de imágenes nuevas y datos): ≈ 30 + 7 × 1.5 ≈ 40 GB × 0.05 ≈ **2 USD/mes** (rango 1.5–3).
 
@@ -57,12 +57,12 @@ Nodo = EC2 + gp3 de 80 GB + IPv4 + snapshots. La landing (S3 + CloudFront), Rese
 1. **Memoria real ≤ 80 %** de la disponible (4.8 GB en 8 GB; 11.2 GB en 16 GB): el 20 % restante es para picos y para la construcción en curso.
 2. **Memoria comprometida (suma de límites) ≤ 3 ×** la disponible. Los límites del plan son techos, no reservas; una app pequeña real usa ≈ 128 MB aunque su límite sea 256 MB o 2 GB (ADR 0009). 3 × es una sobreasignación razonable para apps pequeñas e inactivas la mayor parte del día; más allá, un pico simultáneo de varias apps lleva al OOM del host.
 
-**Cliente típico por plan** (supuestos, como en el ADR 0010; recursos de datos según el contrato: Postgres 512 MB, Redis 256 MB, S3 512 MB de límite, ≈ 128, 16 y 128 MB reales):
+**Cliente típico por plan** (supuestos, como en el ADR 0010; recursos de datos según el contrato: Postgres 512 MB, Redis 256 MB, S3 512 MB de límite, ≈ 128, 16 y 128 MB reales). Desde la tarifa de lanzamiento **Sandbox no trae recursos de datos** (usa su propia URL) y **Starter no incluye bases**: las compra como complemento ([§7](#7-costos-que-ve-el-cliente)). Solo Pro (PostgreSQL + Redis) y Business (+ S3) las traen incluidas:
 
 | Plan | Perfil típico | Comprometida | Real | Caben en 8 GB (real / comp. 3 × / **final**) | Caben en 16 GB |
 |---|---|---|---|---|---|
-| Sandbox | 1 app de 256 MB; la mitad crea un Postgres | 512 MB | 192 MB | 25 / 36 / **25** | **59** |
-| Starter | 1.5 apps de 512 MB + Postgres | 1 280 MB | 320 MB | 15 / 14 / **14** | **33** |
+| Sandbox | 1 app de 256 MB, sin base | 256 MB | 128 MB | 37 / 72 / **37** | **87** |
+| Starter | 1.5 apps de 512 MB, sin base | 768 MB | 192 MB | 25 / 24 / **24** | **56** |
 | Pro | 4 apps de 1 GB + Postgres + Redis | 4 864 MB | 656 MB | 7 / 3 / **3** | **8** |
 | Business | 10 apps de 2 GB + Postgres + Redis + S3 | 21 760 MB | 1 552 MB | 3 / 0 / **0** (un solo cliente ya es 3.6 ×) | **1** |
 
@@ -81,21 +81,41 @@ Nodo = EC2 + gp3 de 80 GB + IPv4 + snapshots. La landing (S3 + CloudFront), Rese
 | `m7i-flex.xlarge` | 0.01324 | 1.69 |
 | ECS sobre EC2, apps empacadas (ADR 0010, sin el fijo de 91) | 0.00977 | 1.25 |
 
-**Margen = precio − comisión de Recurrente − costo prorrateado** (USD por cliente y mes):
+**Margen = precio − comisión de Recurrente − costo prorrateado** (USD por cliente y mes, pago de 30 días, sin complementos):
 
 | Plan | Precio | Comisión | `m7i-flex.large` | `m7i-flex.xlarge` | `t3.xlarge` | ECS (ADR 0010) |
 |---|---|---|---|---|---|---|
-| Sandbox | 0 | 0 | −3.20 | −2.54 | −2.24 | −1.88 |
-| Starter | 5.00 | 0.49 | −0.82 (−16 %) | 0.28 (6 %) | 0.79 (16 %) | 1.38 (28 %) |
-| Pro | 15.00 | 0.94 | 3.13 (21 %) | 5.38 (36 %) | 6.43 (43 %) | 7.65 (51 %) |
-| Business | 40.00 | 2.06 | 12.06 (30 %) | 17.39 (43 %) | 19.87 (50 %) | 22.78 (57 %) |
+| Sandbox | 0 | 0 | −2.13 | −1.69 | −1.49 | −1.25 |
+| Starter | 6.00 | 0.53 | 2.27 (38 %) | 2.93 (49 %) | 3.23 (54 %) | 3.59 (60 %) |
+| Pro | 19.00 | 1.12 | 6.94 (37 %) | 9.19 (48 %) | 10.24 (54 %) | 11.47 (60 %) |
+| Business | 49.00 | 2.47 | 20.65 (42 %) | 25.98 (53 %) | 28.46 (58 %) | 31.37 (64 %) |
+
+**Pago anual** (365 días = 10 × el mensual, dos meses gratis; se cobra una vez, así que la comisión fija de 0.26 se reparte en 12): el ingreso equivale a 5.00, 15.83 y 40.83 USD por mes.
+
+| Plan | Pago | Equivale a / mes | Comisión / mes | `m7i-flex.large` | ECS (ADR 0010) |
+|---|---|---|---|---|---|
+| Starter | 60 | 5.00 | 0.25 | 1.55 (31 %) | 2.88 (58 %) |
+| Pro | 190 | 15.83 | 0.73 | 4.16 (26 %) | 8.69 (55 %) |
+| Business | 490 | 40.83 | 1.86 | 13.10 (32 %) | 23.82 (58 %) |
 
 Lectura:
 
-- En el nodo del piloto (8 GB, plataforma incluida) **Starter no se paga solo** y cada Sandbox cuesta ≈ 3 USD/mes. Es el precio de un nodo chico con la plataforma adentro: el ≈ 25 % de la memoria es de Deploya.
-- Con 16 GB el costo por MB baja ≈ 20–30 % (la plataforma se reparte entre más clientes) y todos los planes de pago dejan margen. Con ECS empacado (ADR 0010) los márgenes llegan a los del ADR 0010 (≈ 50–57 % en Pro y Business), pero sobre un fijo de ≈ 91 USD/mes.
-- Los recursos de datos encarecen al cliente: un Postgres real (≈ 128 MB) cuesta lo mismo que una app pequeña. Sandbox con un Postgres pasa de ≈ 2.13 a ≈ 4.27 USD en el piloto.
-- Palancas: dormir los Sandbox sin tráfico (ADR 0010), el fondo de memoria por plan, y subir Starter o limitarle los recursos de datos si el piloto lo confirma.
+- **Con la tarifa de lanzamiento los tres planes de pago dejan margen ya en el nodo del piloto** (8 GB, plataforma incluida): Starter 38 %, Pro 37 %, Business 42 %. Con los precios anteriores (5, 15 y 40) Starter perdía 0.82 USD por cliente. Cada Sandbox sigue costando ≈ 2.13 USD/mes (el ≈ 25 % de la memoria del nodo es de Deploya).
+- Con 16 GB el costo por MB baja ≈ 20–30 % (la plataforma se reparte entre más clientes) y los márgenes suben a 49–53 %. Con ECS empacado (ADR 0010) llegan a ≈ 60–64 %, pero sobre un fijo de ≈ 91 USD/mes.
+- **Starter es rentable porque no incluye bases**: un Postgres real (≈ 128 MB) cuesta lo mismo que una app pequeña. Si se hubieran incluido Postgres, Redis y S3 en todos los planes, Starter quedaba en −0.82 USD. Pro y Business sí las traen: su costo prorrateado ya las incluye, y por eso el margen de Pro (60 % en ECS) es menor que el de apps solas del ADR 0010 (68 %).
+- **El pago anual baja el margen** (Pro 26 % en el nodo del piloto) a cambio de caja por adelantado: el cliente paga 10 meses por 12.
+- Palancas: dormir los Sandbox sin tráfico (ADR 0010), el fondo de memoria por plan, los complementos de datos y empujar el pago mensual en Pro.
+
+**Complementos de datos** (por 30 días, sobre el plan; margen = precio − 4.5 % de comisión − memoria real prorrateada − disco ≈ 0.08 USD/GB más snapshots; la comisión fija de 0.26 va en el cobro del plan):
+
+| Complemento | Precio | Memoria real | Margen `m7i-flex.large` | Margen ECS |
+|---|---|---|---|---|
+| PostgreSQL + pgvector · 2 GB | 5.00 | ≈ 128 MB | 2.44 (49 %) | 3.33 (66 %) |
+| Redis | 2.00 | ≈ 16 MB | 1.64 (82 %) | 1.75 (88 %) |
+| S3 · 10 GB | 4.00 | ≈ 128 MB | 0.69 (17 %) | 1.57 (39 %) |
+| + 10 GB de disco | 2.00 | 0 | 0.91 (45 %) | 0.91 (45 %) |
+
+El S3 de 10 GB es el complemento más delgado en el piloto: su disco pesa más que su precio. Se revisa si el piloto muestra uso alto.
 
 ## 5. Escenario «piloto con Nimbo»
 
@@ -140,27 +160,31 @@ Por memoria es un cliente **Pro** (4 de 10 proyectos de 1 GB; 3 de 10 recursos),
 | ECS sobre EC2 + RDS y Valkey compartidos | ≈ 17 «apps de 128 MB» × 1.25 = 21 | parte de RDS/Valkey compartidos ≈ 2–3 | **≈ 24** (+ su parte del fijo) |
 | Todo Fargate + RDS y ElastiCache propios | 4 × 18.02 = 72.08 (0.5 vCPU, 1 GB) | RDS `db.t4g.micro` 11.68 + 2.30, Valkey `t4g.micro` 9.34, S3 ≈ 0.25 | **≈ 95.65** |
 
-- **Fargate y servicios administrados por proyecto no son viables** con precios de 5–40 USD (ADR 0010, [ADR 0012](adr/0012-recursos-de-datos-en-el-nodo.md)). La escala sensata es ECS sobre EC2 para las apps y **una** instancia RDS (y un Valkey) compartida con una base por recurso.
-- **Equilibrio de la fase 1:** ≈ 58 registrados (≈ 17 de pago), como dice el ADR 0010. Por debajo de eso conviene el nodo único: la fase 1 con un nodo `t3.large` de apps cuesta ≈ 154 USD/mes por ≈ 7.3 GB para apps, y un `m7i-flex.xlarge` ≈ 152 USD por ≈ 14 GB (con la plataforma adentro, pero sin alta disponibilidad).
+- **Fargate y servicios administrados por proyecto no son viables** con precios de 6–49 USD (ADR 0010, [ADR 0012](adr/0012-recursos-de-datos-en-el-nodo.md)). La escala sensata es ECS sobre EC2 para las apps y **una** instancia RDS (y un Valkey) compartida con una base por recurso.
+- **Equilibrio de la fase 1:** ≈ 45 registrados (≈ 13 de pago), con la tarifa de lanzamiento y la mezcla del ADR 0010 (10 Starter + 6 Pro + 1 Business ≈ 136 USD de margen en ECS, frente a 91 fijos + 41 Sandbox dormidos ≈ 15). Con los precios anteriores eran ≈ 58 (≈ 17 de pago). Por debajo de eso conviene el nodo único: la fase 1 con un nodo `t3.large` de apps cuesta ≈ 154 USD/mes por ≈ 7.3 GB para apps, y un `m7i-flex.xlarge` ≈ 152 USD por ≈ 14 GB (con la plataforma adentro, pero sin alta disponibilidad).
 - **Cuándo migrar:** al acercarse a ≈ 40 apps en un nodo, cuando la CPU de las construcciones degrade las apps, o cuando haya un cliente que pida alta disponibilidad para sus datos.
 
 ## 7. Costos que ve el cliente
 
-Precios por 30 días, en USD. El precio anual (365 días) lo fija la semilla de planes (pendiente).
+Tarifa de lanzamiento, en USD. Precio de 30 días; el de 365 días es 10 × el mensual (dos meses gratis), como en la semilla de planes.
 
 | | **Sandbox** | **Starter** | **Pro** | **Business** |
 |---|---|---|---|---|
-| Precio | **Gratis**, sin tarjeta y sin vencimiento | **5** | **15** | **40** |
+| Precio por 30 días | **Gratis**, sin tarjeta y sin vencimiento | **6** | **19** | **49** |
+| Precio por 365 días | — | **60** | **190** | **490** |
 | Proyectos | 1 | 3 | 10 | 25 |
 | CPU por proyecto | 0.25 vCPU | 0.5 vCPU | 1 vCPU | 2 vCPU |
 | Memoria por proyecto | 256 MB | 512 MB | 1 GB | 2 GB |
 | Construcciones al mes | 30 | 150 | 500 | 2 000 |
-| Bases de datos y almacenamiento (por cuenta) | 1 | 3 | 10 | 25 |
-| Disco por base o bucket | 512 MB | 2 GB | 10 GB | 25 GB |
+| Recursos de datos (por cuenta) | 0 | 3 | 10 | 25 |
+| Disco por base | — | 2 GB | 5 GB | 20 GB |
+| Bases incluidas | ninguna: trae tu propia URL | aparte, desde USD 2 | PostgreSQL + Redis | PostgreSQL + Redis + S3 |
 
-Incluido en todos los planes:
+**Complementos de datos** (por 30 días, sobre el plan): PostgreSQL + pgvector 2 GB USD 5, Redis USD 2, S3 10 GB USD 4, +10 GB de disco USD 2.
 
-- **PostgreSQL 17 con pgvector, Redis 7 y almacenamiento compatible con S3**, creados con un clic. Las variables de conexión (`DATABASE_URL`, `REDIS_URL`, `S3_*`) se inyectan solas en el siguiente despliegue, y una base se puede **compartir entre tus proyectos**. Memoria de cada recurso: PostgreSQL 512 MB, Redis 256 MB, S3 512 MB, aparte de la de tus proyectos.
+Los recursos de datos:
+
+- **PostgreSQL 17 con pgvector, Redis 7 y almacenamiento compatible con S3**, creados con un clic: incluidos en Pro (PostgreSQL + Redis) y Business (+ S3); en Starter, como complementos. Las variables de conexión (`DATABASE_URL`, `REDIS_URL`, `S3_*`) se inyectan solas en el siguiente despliegue, y una base se puede **compartir entre tus proyectos**. Memoria de cada recurso: PostgreSQL 512 MB, Redis 256 MB, S3 512 MB, aparte de la de tus proyectos.
 - El S3 tiene dirección pública propia (`https://<proyecto>-s3.<dominio>`) para descargar archivos desde el navegador; las bases no tienen acceso desde internet.
 - El disco de cada recurso **se mide y se avisa** al acercarse al límite del plan; no se corta.
 - HTTPS con certificado incluido en `https://<proyecto>.deploya.larasolutions.dev`, reversión a una de las 5 versiones anteriores sin reconstruir, y bitácoras de construcción.

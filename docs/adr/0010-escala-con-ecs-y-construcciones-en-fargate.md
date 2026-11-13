@@ -9,7 +9,9 @@
 
 El piloto corre en una sola EC2 ([ADR 0009](0009-piloto-en-aws-ec2-con-terraform.md)). Esa EC2 tiene tres techos: memoria (≈ 45 apps pequeñas), CPU compartida entre construcciones y apps, y un único punto de falla. Además el worker monta `docker.sock`, el riesgo mayor del host. La pregunta es cómo crecer **sin Kubernetes** (EKS cuesta ≈ 73 USD/mes solo por el plano de control) y **sin reescribir el núcleo**.
 
-Restricción económica: el ingreso por proyecto es bajo. Starter cobra 5 USD por 3 proyectos (≈ 1.67 USD por proyecto), Pro 15 USD por 10 (≈ 1.50) y Business 40 USD por 25 (≈ 1.60). Cualquier arquitectura que cueste más de ≈ 1.5 USD por app encendida 24/7 pierde dinero.
+> **Actualización (2026-11-13):** los precios de los planes pasaron a la tarifa de lanzamiento (Starter 6, Pro 19, Business 49 USD; [alcance.md](../alcance.md#planes-y-recursos-v41)) y los recursos de datos dejaron de ir en todos los planes ([ADR 0012](0012-recursos-de-datos-en-el-nodo.md)). Las cifras de ingreso, margen y equilibrio de este ADR se recalcularon; el modelo completo está en [costos.md](../costos.md). La decisión no cambia.
+
+Restricción económica: el ingreso por proyecto es bajo. Starter cobra 6 USD por 3 proyectos (≈ 2.00 USD por proyecto), Pro 19 USD por 10 (≈ 1.90) y Business 49 USD por 25 (≈ 1.96). Cualquier arquitectura que cueste más de ≈ 1.9 USD por app encendida 24/7 pierde dinero.
 
 Cifras de referencia (us-east-1, bajo demanda, aprox.; **verificar en la calculadora de AWS** antes de decidir):
 
@@ -24,7 +26,7 @@ Cifras de referencia (us-east-1, bajo demanda, aprox.; **verificar en la calcula
 | ECR · CloudWatch Logs | 0.10 USD/GB-mes · 0.50 USD/GB ingerido |
 | Salida a internet | 100 GB/mes gratis; luego ≈ 0.09 USD/GB |
 
-**Fargate 24/7 por proyecto**, con el mínimo de memoria de su vCPU: Starter (0.5 vCPU, 1 GB) ≈ 18.02 USD/mes, Pro (1 vCPU, 2 GB) ≈ 36.04, Business (2 vCPU, 4 GB) ≈ 72.08. Frente a ≈ 1.5–1.7 USD de ingreso por proyecto, **Fargate no es viable para las apps**. En cambio, **una construcción** en Fargate Spot (2 vCPU, 4 GB, 3 min) cuesta ≈ 0.0015 USD: **ideal para builds**, que son cortos, intermitentes y los que más CPU queman.
+**Fargate 24/7 por proyecto**, con el mínimo de memoria de su vCPU: Starter (0.5 vCPU, 1 GB) ≈ 18.02 USD/mes, Pro (1 vCPU, 2 GB) ≈ 36.04, Business (2 vCPU, 4 GB) ≈ 72.08. Frente a ≈ 1.9–2.0 USD de ingreso por proyecto, **Fargate no es viable para las apps**. En cambio, **una construcción** en Fargate Spot (2 vCPU, 4 GB, 3 min) cuesta ≈ 0.0015 USD: **ideal para builds**, que son cortos, intermitentes y los que más CPU queman.
 
 ## Decisión
 
@@ -64,15 +66,17 @@ revertir sin reconstruir → apuntar el servicio al tag anterior en ECR
 
 **Margen por cliente** con la comisión de Recurrente (4.5 % + ≈ 0.26 USD por cobro) y un uso supuesto de 1.5, 4 y 10 apps encendidas a 1.25 USD:
 
-| Plan | Precio | Comisión | Costo de apps | Margen |
+| Plan | Precio | Comisión | Costo de apps | Margen (solo apps) |
 |---|---|---|---|---|
-| Starter | 5.00 | 0.49 | 1.88 | **2.63 (53 %)** |
-| Pro | 15.00 | 0.94 | 5.00 | **9.06 (60 %)** |
-| Business | 40.00 | 2.06 | 12.50 | **25.44 (64 %)** |
+| Starter | 6.00 | 0.53 | 1.88 | **3.59 (60 %)** |
+| Pro | 19.00 | 1.12 | 5.00 | **12.88 (68 %)** |
+| Business | 49.00 | 2.47 | 12.50 | **34.03 (69 %)** |
 
-**Equilibrio ≈ 58 registrados (≈ 17 de pago).** Ejemplo: 10 Starter + 6 Pro + 1 Business dan ≈ 106 USD de margen, que cubren los 91 fijos más 41 Sandbox dormidos ≈ 70 % del tiempo (≈ 0.37 USD cada uno).
+La tabla cuenta solo las apps. Con los datos incluidos de Pro (PostgreSQL + Redis) y Business (+ S3) el margen en ECS es de ≈ 60 % y ≈ 64 % ([costos.md §4](../costos.md#4-margen-por-plan)).
 
-**Riesgo del peor caso:** los límites del plan son techos, no reservas. Si todos llenan sus cupos (Business: 25 proyectos × 2 GB = 50 GB), un cliente de 40 USD ocuparía ≈ 7 nodos. Salvaguardas: los **límites duros que ya existen** (`Memory`, `NanoCpus` y `maxProyectos` por plan, M5); **dormir los Sandbox** sin tráfico; una **política de uso justo**; y un **fondo de memoria por plan** (la memoria se reparte entre los proyectos del cliente en vez de multiplicarse por cada uno).
+**Equilibrio ≈ 45 registrados (≈ 13 de pago).** Ejemplo: 10 Starter + 6 Pro + 1 Business dan ≈ 136 USD de margen (con los datos incluidos), que cubren los 91 fijos más 41 Sandbox dormidos ≈ 70 % del tiempo (≈ 0.37 USD cada uno).
+
+**Riesgo del peor caso:** los límites del plan son techos, no reservas. Si todos llenan sus cupos (Business: 25 proyectos × 2 GB = 50 GB), un cliente de 49 USD ocuparía ≈ 7 nodos. Salvaguardas: los **límites duros que ya existen** (`Memory`, `NanoCpus` y `maxProyectos` por plan, M5); **dormir los Sandbox** sin tráfico; una **política de uso justo**; y un **fondo de memoria por plan** (la memoria se reparte entre los proyectos del cliente en vez de multiplicarse por cada uno).
 
 **Qué cambia en el código: solo adaptadores nuevos de puertos que ya existen**, elegidos en `apps/api/src/adapters/adapters.module.ts` según la configuración (Factory + Strategy):
 

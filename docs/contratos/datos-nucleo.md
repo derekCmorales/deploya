@@ -379,11 +379,12 @@ model LineaBitacora {
 | `codigo` | `nombre` | `precio30` | `precio365` | `maxProyectos` | `cpus` | `memoriaMb` | `construccionesMes` | `orden` |
 |---|---|---|---|---|---|---|---|---|
 | `sandbox` | Sandbox | 0.00 | — | 1 | 0.25 | 256 | 30 | 1 |
-| `starter` | Starter | 5.00 | 50.00 | 3 | 0.50 | 512 | 150 | 2 |
-| `pro` | Pro | 15.00 | 150.00 | 10 | 1.00 | 1024 | 500 | 3 |
-| `business` | Business | 40.00 | 400.00 | 25 | 2.00 | 2048 | 2000 | 4 |
+| `starter` | Starter | 6.00 | 60.00 | 3 | 0.50 | 512 | 150 | 2 |
+| `pro` | Pro | 19.00 | 190.00 | 10 | 1.00 | 1024 | 500 | 3 |
+| `business` | Business | 49.00 | 490.00 | 25 | 2.00 | 2048 | 2000 | 4 |
 
-- Precio de 365 días: propuesta 10 × el mensual (dos meses gratis). Lo decide Javier; si cambia, solo cambia esta tabla.
+- Precios: tarifa de lanzamiento (2026-11-13), la de la landing y de [alcance.md](../alcance.md#planes-y-recursos-v41). Los límites de recursos de datos (`maxRecursosDatos`, `discoDatosMb`) están en [recursos-datos.md](recursos-datos.md).
+- Precio de 365 días: 10 × el mensual (dos meses gratis). Lo decide Javier; si cambia, solo cambia esta tabla.
 - Administrador: `ADMIN_CORREO` (por defecto `admin@deploya.app`) y `ADMIN_CLAVE` (obligatoria, sin valor por defecto), `rol = administrador`, `estadoCuenta = activa`, con Sandbox.
 - Cliente de demostración para Eduardo hasta que llegue el guard: `cliente@deploya.app`, `activa`, con Sandbox.
 - Avance 2 (M5-03): `vencida@deploya.app` y `suspendida@deploya.app` en **Starter** de 30 días con `vence` en el pasado, para demostrar los bloqueos antes del ciclo §4.4 (M2-05). `vencida@`: `vence` = hace 2 días, **Vencida** desde `vence`. `suspendida@`: `vence` = hace 10 días, **Suspendida** desde `vence` + 5 días (gracia). En ambas `inicio` = `vence` − 30 días y sin descenso pendiente. Solo se escriben si la cuenta sigue con la Sandbox recién asignada (`vence` nulo), así una segunda corrida no las toca. Misma contraseña de demo que `cliente@deploya.app`.

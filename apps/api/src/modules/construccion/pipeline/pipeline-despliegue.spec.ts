@@ -107,6 +107,26 @@ describe("PipelineDespliegue (plan construcción, puertos en stub)", () => {
     expect(textos).toContain("Dockerfile detectado (Dockerfile)");
   });
 
+  it("Comando de construcción con Dockerfile propio: la bitácora avisa que se ignora", async () => {
+    const motor = motorDePrueba();
+    motor.proyectos.agregar(proyectoDemo({ comandoConstruccion: "npm run build:prod" }));
+
+    const despliegue = await motor.desplegar();
+
+    const lineas = await motor.despliegues.lineasDesde(despliegue.id, 0, 500);
+    expect(lineas).toEqual(expect.arrayContaining([expect.objectContaining({ texto: "Comando de construcción ignorado: el Dockerfile manda", nivel: "aviso" })]));
+  });
+
+  it("con receta Node el comando de construcción llega al Dockerfile.deploya", async () => {
+    const motor = motorDePrueba();
+    motor.proyectos.agregar(proyectoDemo({ comandoConstruccion: "npm run build:prod" }));
+    motor.clonador.archivos = new Map([["package.json", JSON.stringify({ scripts: { start: "node server.js" } })]]);
+
+    await motor.desplegar();
+
+    expect(motor.clonador.escritos[0].contenido).toContain("RUN npm run build:prod");
+  });
+
   it("Contenedor saludable: publica, detiene el anterior y el nuevo pasa a ser el activo", async () => {
     const motor = motorDePrueba();
     const primero = await motor.desplegar();

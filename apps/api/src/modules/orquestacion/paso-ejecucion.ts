@@ -5,7 +5,7 @@ import { RepositorioArtefactos } from "../construccion/puertos/repositorio-artef
 import { RepositorioDespliegues } from "../construccion/puertos/repositorio-despliegues.puerto";
 import { PUERTO_RECETAS } from "../construccion/deteccion/deteccion.constantes";
 import { OrquestacionService } from "./orquestacion.service";
-import { fusionarVariables, textoInyeccion } from "./dominio/variables-contenedor";
+import { fusionarVariables, textoInyeccion, textoPendientes } from "./dominio/variables-contenedor";
 import { RecursosDatosDespliegue } from "./puertos/recursos-datos-despliegue.puerto";
 import { VariablesEntornoPuerto } from "./puertos/variables-entorno.puerto";
 
@@ -47,6 +47,7 @@ export class PasoEjecucion extends PasoPipeline {
     const cantidad = Object.keys(delUsuario).length;
     if (cantidad > 0) bitacora.escribir(this.etapa, textoVariables(cantidad));
     if (inyeccion.recursos.length > 0) bitacora.escribir(this.etapa, textoInyeccion(inyeccion.recursos, inyectadas));
+    if (inyeccion.pendientes?.length) bitacora.escribir(this.etapa, textoPendientes(inyeccion.pendientes), "aviso");
     bitacora.escribir(this.etapa, `Verificación de salud OK · ${salud.detalle} en ${salud.milisegundos} ms`);
   }
 

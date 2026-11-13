@@ -2287,6 +2287,16 @@ classDiagram
         +configurar(usuarioId, proyectoId, cambios) Proyecto
         +eliminar(usuarioId, proyectoId, confirmacion) void
         -bloqueos BloqueosService
+        -datos RecursosDatosAlta
+    }
+    class RecursosDatosAlta {
+        <<abstract>>
+        +verificar(usuarioId, tipos) void
+        +limite(usuarioId) LimiteDatosCuenta
+        +crear(usuarioId, proyectoId, tipos) void
+    }
+    class RecursosDatosAltaDatos {
+        <<Adapter>>
     }
     class CambiosProyecto {
         <<Value Object>>
@@ -2296,6 +2306,7 @@ classDiagram
         +rutaDockerfile String
         +puertoInterno Integer
         +comandoInicio String
+        +comandoConstruccion String
         +de(cuerpo) CambiosProyecto
     }
     class ProveedorFuente {
@@ -2422,16 +2433,17 @@ classDiagram
     }
     class DeteccionStackService {
         -recetas List~RecetaStack~
-        +detectar(fuente LectorFuente, rutaDockerfile) ResultadoDeteccion
+        +detectar(fuente LectorFuente, rutaDockerfile, opciones OpcionesReceta) ResultadoDeteccion
     }
     class RecetaStack {
         <<abstract>>
         +receta RecetaConstruccion
         +nombre String
         +archivosQueLee List~String~
+        +aplicaComandoConstruccion Boolean
         +reconoce(archivos MapaArchivos) Boolean
         +describir(archivos MapaArchivos) DescripcionReceta
-        +dockerfile(archivos MapaArchivos) String
+        +dockerfile(archivos MapaArchivos, opciones OpcionesReceta) String
         +puertoSugerido(archivos MapaArchivos) Integer
         +pista(archivos MapaArchivos) String
     }
@@ -2607,6 +2619,8 @@ classDiagram
         -cifrador CifradorVariables
         -conexiones ConexionesDatos
         +listar(usuarioId, proyectoId) ListaRecursosDatos
+        +limiteDe(usuarioId) LimiteDatosCuenta
+        +verificarAltaInicial(usuarioId, tipos) void
         +crear(usuarioId, proyectoId, tipo) VistaRecursoDatos
         +conexion(usuarioId, proyectoId, recursoId) ConexionRecursoDatos
         +compartir(usuarioId, proyectoId, recursoId, destinoId) VistaRecursoDatos
@@ -2621,6 +2635,7 @@ classDiagram
         -recursos RecursosDatosPuerto
         -conexiones ConexionesDatos
         -enrutamiento EnrutamientoService
+        -espera Espera
         +ejecutar(comando ComandoDatos) void
         +paraDespliegue(proyecto) InyeccionDatos
         +liberarProyecto(subdominio) void
@@ -3181,6 +3196,10 @@ classDiagram
     FuenteGitHubPublica --> LectorFuenteGitHub
     LectorFuente <|-- LectorFuenteGitHub
     ProyectosService --> BloqueosService : verificar
+    ProyectosService --> RecursosDatosAlta : verificar · crear
+    RecursosDatosAlta <|-- RecursosDatosAltaDatos
+    RecursosDatosAltaDatos --> DatosService
+    MotorDatosService --> Espera : recursos en creando
     FuenteGitHubPublica --> ParserExpose
     RepositorioProyectos <|-- RepositorioProyectosPrisma
     CuotaProyectosPuerto <|-- CuotaProyectosSuscripciones

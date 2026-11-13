@@ -25,6 +25,8 @@ Se generan desde las fuentes del canvas; si cambias una pantalla en el diseño, 
 | 10b | [Proyectos · primer proyecto](10b-Proyectos-vacio.md) | `/projects` | Eduardo | A1 |
 | 10c | [Proyectos · suscripción vencida](10c-Proyectos-vencida.md) | `/projects` | Eduardo + Javier | A3 |
 | 11a | [Nuevo proyecto · 1 Repositorio](11a-Nuevo-fuente.md) | `/projects/nuevo` | Eduardo | A1 |
+| 11b | [Nuevo proyecto · 2 Construcción](11b-Nuevo-construccion.md) | `/projects/nuevo` | Eduardo (+ Derek) | Alta guiada |
+| 11f | [Nuevo proyecto · 3 Datos](11f-Nuevo-datos.md) | `/projects/nuevo` | Eduardo (+ Derek) | Alta guiada |
 | 11c | [Nuevo proyecto · 2 Variables](11c-Nuevo-variables.md) | `/projects/nuevo` | Eduardo | A2 (en A1 el paso se muestra deshabilitado) |
 | 11d | [Nuevo proyecto · 3 Revisar](11d-Nuevo-revisar.md) | `/projects/nuevo` | Eduardo | A1 |
 | 11e | [Nuevo proyecto · errores](11e-Nuevo-errores.md) | `/projects/nuevo` | Eduardo | A1 |

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { puerto } from "../../adapters/adapters.module";
+import { Espera, EsperaTemporizador } from "../../compartido/espera";
 import { configuracionEnrutamientoDesde } from "../enrutamiento/configuracion-enrutamiento";
 import { EnrutamientoTrabajadorModule } from "../enrutamiento/enrutamiento-trabajador.module";
 import { VariablesModule } from "../proyectos/variables.module";
@@ -21,6 +22,7 @@ import { MotorDatosService } from "./motor-datos.service";
     ConexionesDatos,
     { provide: DOMINIO_DATOS, useFactory: () => configuracionEnrutamientoDesde(process.env) },
     MotorDatosService,
+    { provide: Espera, useClass: EsperaTemporizador },
     puerto(ColaMedicionDiscoPuerto, { docker: (c) => new ColaMedicionDiscoBullMq(c.redisUrl), stub: () => new ColaMedicionDiscoMemoria() }),
     TareaMedicionDisco,
   ],

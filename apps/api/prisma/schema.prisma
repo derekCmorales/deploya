@@ -183,21 +183,22 @@ enum RecetaConstruccion {
 }
 
 model Proyecto {
-  id                 String             @id @default(uuid())
-  usuarioId          String
-  usuario            Usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  nombre             String             @db.VarChar(64)
-  subdominio         String             @unique @db.VarChar(63) // etiqueta DNS; no cambia al renombrar
-  urlRepositorio     String
-  rama               String             @default("main")
-  rutaDockerfile     String             @default("Dockerfile")
-  puertoInterno      Int                @default(8080)
-  comandoInicio      String?            @db.VarChar(512) // sobrescribe el CMD de la imagen; null = el de la imagen
-  receta             RecetaConstruccion @default(dockerfile) // la última que detectó M4
-  despliegueActivoId String?            @unique // el que atiende tráfico; lo escribe M5
-  despliegueActivo   Despliegue?        @relation("DespliegueActivo", fields: [despliegueActivoId], references: [id], onDelete: SetNull)
-  creado             DateTime           @default(now())
-  actualizado        DateTime           @updatedAt
+  id                  String             @id @default(uuid())
+  usuarioId           String
+  usuario             Usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  nombre              String             @db.VarChar(64)
+  subdominio          String             @unique @db.VarChar(63) // etiqueta DNS; no cambia al renombrar
+  urlRepositorio      String
+  rama                String             @default("main")
+  rutaDockerfile      String             @default("Dockerfile")
+  puertoInterno       Int                @default(8080)
+  comandoInicio       String?            @db.VarChar(512) // sobrescribe el CMD de la imagen; null = el de la imagen
+  comandoConstruccion String?            @db.VarChar(512) // RUN de la receta (feat/m3-alta-guiada); null = el de la receta
+  receta              RecetaConstruccion @default(dockerfile) // la última que detectó M4
+  despliegueActivoId  String?            @unique // el que atiende tráfico; lo escribe M5
+  despliegueActivo    Despliegue?        @relation("DespliegueActivo", fields: [despliegueActivoId], references: [id], onDelete: SetNull)
+  creado              DateTime           @default(now())
+  actualizado         DateTime           @updatedAt
 
   variables                VariableEntorno[]
   despliegues              Despliegue[]             @relation("DesplieguesDelProyecto")

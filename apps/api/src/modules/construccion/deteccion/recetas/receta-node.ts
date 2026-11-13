@@ -1,7 +1,7 @@
 import { PUERTO_RECETAS, VERSION_NODE } from "../deteccion.constantes";
 import { existe, presentes, type MapaArchivos } from "../mapa-archivos";
 import { plantillaNode } from "../plantillas";
-import { RecetaStack, type DescripcionReceta } from "../receta-stack";
+import { RecetaStack, SIN_OPCIONES, type DescripcionReceta, type OpcionesReceta } from "../receta-stack";
 
 const PACKAGE_JSON = "package.json";
 const LOCKFILE = "package-lock.json";
@@ -15,6 +15,7 @@ export class RecetaNode extends RecetaStack {
   readonly receta = "node" as const;
   readonly nombre = `Node.js ${VERSION_NODE}`;
   readonly archivosQueLee = [PACKAGE_JSON, LOCKFILE];
+  override readonly aplicaComandoConstruccion = true;
 
   reconoce(archivos: MapaArchivos): boolean {
     return tieneScript(archivos, "start");
@@ -24,8 +25,12 @@ export class RecetaNode extends RecetaStack {
     return { descripcion: `${this.nombre} · npm start`, evidencia: presentes(archivos, this.archivosQueLee) };
   }
 
-  dockerfile(archivos: MapaArchivos): string {
-    return plantillaNode({ conLockfile: existe(archivos, LOCKFILE), conBuild: tieneScript(archivos, "build") });
+  dockerfile(archivos: MapaArchivos, opciones: OpcionesReceta = SIN_OPCIONES): string {
+    return plantillaNode({
+      conLockfile: existe(archivos, LOCKFILE),
+      conBuild: tieneScript(archivos, "build"),
+      comandoConstruccion: opciones.comandoConstruccion,
+    });
   }
 
   puertoSugerido(): number {

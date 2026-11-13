@@ -75,6 +75,8 @@ export interface ProyectoDesplegable {
   puertoInterno: number;
   /** Sobrescribe el `CMD` de la imagen; se parte en argumentos sin shell (feat/m5-recursos-datos). */
   comandoInicio?: string | null;
+  /** `RUN` de la receta; con Dockerfile propio se ignora (feat/m3-alta-guiada). */
+  comandoConstruccion?: string | null;
 }
 
 /** Comando serializable que viaja por la cola (patrón Command). */

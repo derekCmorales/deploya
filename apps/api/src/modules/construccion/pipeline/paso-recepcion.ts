@@ -8,6 +8,11 @@ import { RepositorioDespliegues } from "../puertos/repositorio-despliegues.puert
 import { PasoPipeline, type ContextoDespliegue } from "./paso-pipeline";
 
 const LARGO_SHA_CORTO = 7;
+/** Con Dockerfile propio o sitio estático no hay paso de construcción donde poner el comando. */
+export function avisoComandoIgnorado(receta: string): string {
+  const motivo = receta === "estatica" ? "el sitio estático se publica tal cual" : "el Dockerfile manda";
+  return `Comando de construcción ignorado: ${motivo}`;
+}
 
 /**
  * Etapa 1 · Recepción: clona la rama, registra el commit y detecta el stack (M4-03).
@@ -50,7 +55,10 @@ export class PasoRecepcion extends PasoPipeline {
 
   private async detectar(contexto: ContextoDespliegue): Promise<ResultadoDeteccion> {
     try {
-      return await this.deteccion.detectar(this.clonador.lector(contexto.directorio ?? ""), contexto.proyecto.rutaDockerfile);
+      const { rutaDockerfile, comandoConstruccion } = contexto.proyecto;
+      return await this.deteccion.detectar(this.clonador.lector(contexto.directorio ?? ""), rutaDockerfile, {
+        comandoConstruccion: comandoConstruccion ?? null,
+      });
     } catch (error) {
       if (error instanceof StackNoReconocido) throw new DeteccionFallida(error);
       throw error;
@@ -68,6 +76,7 @@ export class PasoRecepcion extends PasoPipeline {
     } else {
       bitacora.escribir(this.etapa, `Dockerfile detectado (${proyecto.rutaDockerfile})`);
     }
+    if (proyecto.comandoConstruccion && !deteccion.aplicaComandoConstruccion) bitacora.escribir(this.etapa, avisoComandoIgnorado(deteccion.receta), "aviso");
     await this.recetas.registrar(proyecto.id, deteccion.receta);
   }
 }

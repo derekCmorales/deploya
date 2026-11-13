@@ -1,4 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
+import { Espera } from "../../compartido/espera";
 import { Reloj } from "../../compartido/reloj";
 import { redDeProyecto } from "../construccion/dominio/motor.constantes";
 import { ProyectosLecturaPuerto } from "../construccion/puertos/proyectos-lectura.puerto";
@@ -13,6 +14,10 @@ import { RecursosDatosPuerto } from "./puertos/recursos-datos.puerto";
 import { RepositorioRecursosDatos } from "./puertos/repositorio-recursos-datos.puerto";
 
 const LARGO_MAXIMO_DETALLE = 500;
+/** Ejecución vuelve a mirar un recurso en `creando` cada 2 s, hasta 2 min (feat/m3-alta-guiada). */
+export const PAUSA_RECURSO_CREANDO_MS = 2_000;
+export const ESPERA_MAXIMA_RECURSO_CREANDO_MS = 120_000;
+const CONSULTAS_MAXIMAS = ESPERA_MAXIMA_RECURSO_CREANDO_MS / PAUSA_RECURSO_CREANDO_MS;
 
 /** Lo que el motor sabe del proyecto que despliega o elimina. */
 export interface ProyectoConDatos {
@@ -46,6 +51,7 @@ export class MotorDatosService {
     private readonly conexiones: ConexionesDatos,
     private readonly enrutamiento: EnrutamientoService,
     private readonly reloj: Reloj,
+    private readonly espera: Espera,
   ) {}
 
   ejecutar(comando: ComandoDatos): Promise<void> {
@@ -54,13 +60,16 @@ export class MotorDatosService {
   }
 
   /**
-   * Antes de crear el contenedor de la app (Ejecución): asegura que cada recurso disponible esté en la
-   * red del proyecto y devuelve sus variables. Los recursos en `error` no se inyectan.
+   * Antes de crear el contenedor de la app (Ejecución): espera a los recursos que siguen en `creando`
+   * (el alta guiada los pide justo antes del despliegue #1), asegura que cada recurso disponible esté
+   * en la red del proyecto y devuelve sus variables. Los recursos en `error` no se inyectan; los que
+   * siguen creándose al tope se inyectan igual y quedan en `pendientes`.
    */
   async paraDespliegue(proyecto: ProyectoConDatos): Promise<InyeccionDatos> {
-    const conectados = (await this.repositorio.conectadosA(proyecto.id)).filter((r) => r.estado !== "error");
+    const conectados = (await this.listosOAlTope(proyecto.id)).filter((r) => r.estado !== "error");
     const partes: VariablesRecurso[] = [];
     const nombres: string[] = [];
+    const pendientes = conectados.filter((r) => r.estado === "creando").map((r) => tipoRecursoDe(r.tipo).nombre);
     for (const recurso of conectados) {
       const subdominioDueno = await this.subdominioDueno(recurso, proyecto);
       if (!subdominioDueno) continue;
@@ -68,7 +77,16 @@ export class MotorDatosService {
       partes.push(this.conexiones.variablesDe(recurso, subdominioDueno));
       nombres.push(tipoRecursoDe(recurso.tipo).nombre);
     }
-    return { recursos: nombres, variables: juntarVariables(partes) };
+    return { recursos: nombres, variables: juntarVariables(partes), ...(pendientes.length > 0 ? { pendientes } : {}) };
+  }
+
+  private async listosOAlTope(proyectoId: string): Promise<RecursoDatos[]> {
+    let conectados = await this.repositorio.conectadosA(proyectoId);
+    for (let consulta = 0; consulta < CONSULTAS_MAXIMAS && conectados.some((r) => r.estado === "creando"); consulta += 1) {
+      await this.espera.esperar(PAUSA_RECURSO_CREANDO_MS);
+      conectados = await this.repositorio.conectadosA(proyectoId);
+    }
+    return conectados;
   }
 
   /**

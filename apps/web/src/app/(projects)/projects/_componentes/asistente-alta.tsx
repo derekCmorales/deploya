@@ -10,19 +10,22 @@ import { Button } from "@/components/ui/button";
 import { useAltaProyecto } from "@/hooks/use-alta-proyecto";
 import { useMiSuscripcion } from "@/hooks/use-suscripcion";
 import { useProyectos } from "@/hooks/use-proyectos";
+import { esUltimoPaso, indicePaso, textoProgreso } from "@/lib/alta";
 import { rutaDespliegue } from "@/lib/despliegues";
 import { contadorProyectos, puedeCrearProyecto } from "@/lib/proyectos";
 import { avisoEstado, RUTA_SUSCRIPCION, sinVigencia } from "@/lib/suscripcion";
 
 import { LateralAlta } from "./lateral-alta";
+import { PasoConstruccion } from "./paso-construccion";
+import { PasoDatos } from "./paso-datos";
 import { PasoRepositorio } from "./paso-repositorio";
 import { PasoRevisar } from "./paso-revisar";
 import { PasoVariables } from "./paso-variables";
 
-const INDICE_PASO = { repositorio: 0, variables: 1, revisar: 2 } as const;
-const TOTAL_PASOS = 3;
-
-/** Container del asistente «Nuevo proyecto» (11a → 11d, con 11e). */
+/**
+ * Container del asistente «Nuevo proyecto» en cinco pasos (11a → 11d, con 11e; feat/m3-alta-guiada):
+ * Repositorio, Construcción, Datos, Variables y Revisar. El despliegue #1 sale con todo.
+ */
 export function AsistenteAlta() {
   const router = useRouter();
   const alta = useAltaProyecto();
@@ -31,11 +34,12 @@ export function AsistenteAlta() {
   const sinCupo = lista !== null && !puedeCrearProyecto(lista);
   const sinVigenciaActual = suscripcion.datos ? sinVigencia(suscripcion.datos.estado) : false;
   const aviso = suscripcion.datos ? avisoEstado(suscripcion.datos.estado) : null;
-  const indice = INDICE_PASO[alta.paso];
+  const indice = indicePaso(alta.paso);
+  const ultimo = esUltimoPaso(alta.paso);
 
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
-    if (alta.paso !== "revisar") return alta.continuar();
+    if (!ultimo) return alta.continuar();
     const creado = await alta.desplegar();
     if (creado) router.push(rutaDespliegue(creado.id, creado.numero));
   };
@@ -72,12 +76,14 @@ export function AsistenteAlta() {
             </Banner>
           ) : null}
           {alta.paso === "repositorio" ? <PasoRepositorio alta={alta} /> : null}
+          {alta.paso === "construccion" ? <PasoConstruccion alta={alta} /> : null}
+          {alta.paso === "datos" ? <PasoDatos alta={alta} lista={lista} /> : null}
           {alta.paso === "variables" ? <PasoVariables alta={alta} /> : null}
           {alta.paso === "revisar" ? <PasoRevisar alta={alta} lista={lista} /> : null}
         </div>
         <div className="sticky bottom-0 flex items-center gap-2 border-t border-border bg-background px-4 py-4 sm:px-8 lg:px-12">
           <span className="flex-1 text-xs text-muted-foreground">
-            Paso {indice + 1} de {TOTAL_PASOS}
+            {textoProgreso(alta.paso)}
           </span>
           {alta.paso === "repositorio" ? (
             <Button asChild variant="ghost">
@@ -90,7 +96,7 @@ export function AsistenteAlta() {
           )}
           <Button type="submit" disabled={alta.ocupado || sinCupo || sinVigenciaActual}>
             {alta.ocupado ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
-            {alta.paso === "revisar" ? (
+            {ultimo ? (
               <>
                 {alta.ocupado ? null : <Rocket />}
                 Desplegar

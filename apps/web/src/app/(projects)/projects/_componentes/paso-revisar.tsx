@@ -1,4 +1,4 @@
-import { Cpu, Database, FolderGit2, Globe, Package, Pencil, Terminal, Variable, type LucideIcon } from "lucide-react";
+import { Cpu, Database, FolderGit2, Globe, Hammer, Package, Pencil, Terminal, Variable, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { RielEtapas } from "@/components/deploya/riel-etapas";
@@ -6,15 +6,17 @@ import { Banner } from "@/components/ui/banner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { useAltaProyecto } from "@/hooks/use-alta-proyecto";
+import type { PasoAlta } from "@/lib/alta";
 import { DOMINIO_APPS, ESQUEMA_APPS } from "@/lib/api";
+import { DESCRIPCION_TIPO } from "@/lib/datos";
 import { recursosPlan, shaCorto, textoConstruccion, urlProyecto, type ListaProyectos } from "@/lib/proyectos";
-import { variablesDeAlta } from "@/lib/variables";
+import { variablesDeBorrador } from "@/lib/variables";
 
 import { BannerBloqueo } from "./banner-bloqueo";
 
 type Alta = ReturnType<typeof useAltaProyecto>;
 
-export const NOTA_DATOS = "Después de crear el proyecto podrás agregar PostgreSQL, Redis o S3 desde la pestaña Datos.";
+export const NOTA_DATOS = "Los recursos de datos se crean antes del despliegue #1 y siguen en la pestaña Datos.";
 
 const SIN_EMPEZAR = ["pendiente", "pendiente", "pendiente", "pendiente", "pendiente"] as const;
 
@@ -22,19 +24,15 @@ const SIN_EMPEZAR = ["pendiente", "pendiente", "pendiente", "pendiente", "pendie
 export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos | null }) {
   const { validacion } = alta;
   if (!validacion) return null;
-  const editarFuente = (
-    <Button type="button" variant="ghost" size="xs" onClick={() => alta.irA("repositorio")}>
+  const editar = (destino: PasoAlta) => (
+    <Button type="button" variant="ghost" size="xs" onClick={() => alta.irA(destino)}>
       <Pencil />
       Editar
     </Button>
   );
-  const editarVariables = (
-    <Button type="button" variant="ghost" size="xs" onClick={() => alta.irA("variables")}>
-      <Pencil />
-      Editar
-    </Button>
-  );
-  const cantidad = variablesDeAlta(alta.variables).length;
+  const cantidad = variablesDeBorrador(alta.variables).length;
+  const construccion = alta.aplicaComandoConstruccion ? alta.comandoConstruccion.trim() : "";
+  const inicio = alta.comandoInicio.trim();
 
   return (
     <div className="flex flex-col gap-6">
@@ -49,16 +47,30 @@ export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos
 
       <Card className="overflow-hidden">
         <dl>
-          <Fila icono={FolderGit2} titulo="Fuente" accion={editarFuente}>
+          <Fila icono={FolderGit2} titulo="Fuente" accion={editar("repositorio")}>
             {validacion.repositorio} · {alta.rama} · {shaCorto(validacion.commit.sha)}
           </Fila>
-          <Fila icono={Package} titulo="Construcción" accion={editarFuente}>
+          <Fila icono={Package} titulo="Construcción" accion={editar("repositorio")}>
             {textoConstruccion(validacion)}
           </Fila>
-          <Fila icono={Terminal} titulo="Puerto" accion={editarFuente}>
+          <Fila icono={Hammer} titulo="Comandos" accion={editar("construccion")}>
+            {construccion || inicio ? (
+              [construccion && `build: ${construccion}`, inicio && `inicio: ${inicio}`].filter(Boolean).join(" · ")
+            ) : (
+              <span className="text-muted-foreground">Los detectados</span>
+            )}
+          </Fila>
+          <Fila icono={Terminal} titulo="Puerto" accion={editar("repositorio")}>
             {alta.puerto} → {ESQUEMA_APPS}
           </Fila>
-          <Fila icono={Variable} titulo="Variables" accion={editarVariables}>
+          <Fila icono={Database} titulo="Datos" accion={editar("datos")}>
+            {alta.datos.length === 0 ? (
+              <span className="text-muted-foreground">Sin bases de datos</span>
+            ) : (
+              alta.datos.map((tipo) => DESCRIPCION_TIPO[tipo].nombre).join(" · ")
+            )}
+          </Fila>
+          <Fila icono={Variable} titulo="Variables" accion={editar("variables")}>
             {cantidad === 0 ? <span className="text-muted-foreground">Sin variables</span> : `${cantidad} cifradas`}
           </Fila>
           <Fila icono={Cpu} titulo="Recursos" nota="según tu plan">
@@ -70,10 +82,12 @@ export function PasoRevisar({ alta, lista }: { alta: Alta; lista: ListaProyectos
         </dl>
       </Card>
 
-      <p className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Database className="size-3.5 shrink-0" aria-hidden />
-        {NOTA_DATOS}
-      </p>
+      {alta.datos.length > 0 ? (
+        <p className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Database className="size-3.5 shrink-0" aria-hidden />
+          {NOTA_DATOS}
+        </p>
+      ) : null}
 
       <div className="flex flex-col gap-3">
         <p className="text-xs font-medium text-muted-foreground">Qué pasará</p>

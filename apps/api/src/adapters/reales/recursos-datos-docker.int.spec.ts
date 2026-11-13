@@ -1,3 +1,4 @@
+import { EsperaTemporizador } from "../../compartido/espera";
 import { existsSync } from "node:fs";
 import Docker from "dockerode";
 import { RelojFijo } from "../../compartido/reloj";
@@ -41,7 +42,7 @@ conDocker("RecursosDatosDocker con Docker real", () => {
   const servicio = new DatosService(proyectos, repositorio, cola, new CuotaDatosFija(), new GeneradorSecretosCrypto(), cifrador, conexiones);
   const recursos = new RecursosDatosDocker(docker, []);
   const rutas = new EnrutamientoStub();
-  const motor = new MotorDatosService(repositorio, proyectos, recursos, conexiones, new EnrutamientoService(rutas), new RelojFijo());
+  const motor = new MotorDatosService(repositorio, proyectos, recursos, conexiones, new EnrutamientoService(rutas), new RelojFijo(), new EsperaTemporizador());
   let procesados = 0;
   const ids: Partial<Record<TipoRecurso, string>> = {};
 

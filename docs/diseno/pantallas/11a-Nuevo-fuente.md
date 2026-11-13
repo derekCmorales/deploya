@@ -81,3 +81,7 @@ Paso 1 de 3
 Cancelar
 Continuar
 ```
+
+## Alta guiada (`feat-m3-alta-guiada`)
+
+El asistente pasa a cinco pasos: Repositorio → Construcción ([11b](11b-Nuevo-construccion.md)) → Datos ([11f](11f-Nuevo-datos.md)) → Variables ([11c](11c-Nuevo-variables.md)) → Revisar ([11d](11d-Nuevo-revisar.md)). Esta pantalla no cambia; el pie dice «Paso 1 de 5».

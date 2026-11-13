@@ -209,3 +209,44 @@ export function errorDeDatos(codigo: string, mensaje: string): ErrorDatos {
   if (BLOQUEOS.has(normalizado)) return { tipo: "bloqueo", titulo: "Tu suscripción no permite crear bases de datos", mensaje };
   return { tipo: "aviso", titulo: "No pudimos completar la operación", mensaje };
 }
+
+// ── Paso Datos del alta (feat/m3-alta-guiada) ──────────────────────────────
+
+/** Variables de nombre corto que inyecta cada tipo (contrato recursos-datos.md § Tipos); las `DEPLOYA_*` no se listan. */
+export const VARIABLES_POR_TIPO: Record<TipoRecurso, readonly string[]> = {
+  postgres: ["DATABASE_URL", "PGHOST", "PGPORT", "PGUSER", "PGPASSWORD", "PGDATABASE"],
+  redis: ["REDIS_URL"],
+  s3: ["S3_ENDPOINT", "S3_PUBLIC_ENDPOINT", "S3_ACCESS_KEY", "S3_SECRET_KEY", "S3_BUCKET", "S3_REGION"],
+};
+
+/** Lo que llegará solo al contenedor por los recursos elegidos, en el orden fijo de los tipos. */
+export function variablesInyectadasPor(tipos: readonly TipoRecurso[]): { tipo: TipoRecurso; claves: readonly string[] }[] {
+  return TIPOS_RECURSO.filter((tipo) => tipos.includes(tipo)).map((tipo) => ({ tipo, claves: VARIABLES_POR_TIPO[tipo] }));
+}
+
+export interface OpcionAlta {
+  tipo: TipoRecurso;
+  elegido: boolean;
+  /** No se puede marcar: el plan ya no tiene lugar. Uno elegido siempre se puede desmarcar. */
+  deshabilitado: boolean;
+}
+
+/** Tarjetas del paso Datos: `maximo: null` es sin tope (autoalojado). */
+export function opcionesAlta(limite: LimiteRecursosDatos, elegidos: readonly TipoRecurso[]): OpcionAlta[] {
+  const lleno = limite.maximo !== null && limite.usados + elegidos.length >= limite.maximo;
+  return TIPOS_RECURSO.map((tipo) => {
+    const elegido = elegidos.includes(tipo);
+    return { tipo, elegido, deshabilitado: !elegido && lleno };
+  });
+}
+
+/** «Usas 1 de 3 bases de datos del plan · este proyecto agrega 1». */
+export function textoLimiteAlta(limite: LimiteRecursosDatos, elegidos: number): string {
+  const agrega = elegidos === 0 ? "" : ` · este proyecto agrega ${elegidos}`;
+  if (limite.maximo === null) return `Sin límite de bases de datos${agrega}`;
+  return `Usas ${limite.usados} de ${limite.maximo} bases de datos del plan${agrega}`;
+}
+
+export function alternarTipo(elegidos: readonly TipoRecurso[], tipo: TipoRecurso): TipoRecurso[] {
+  return elegidos.includes(tipo) ? elegidos.filter((t) => t !== tipo) : TIPOS_RECURSO.filter((t) => t === tipo || elegidos.includes(t));
+}

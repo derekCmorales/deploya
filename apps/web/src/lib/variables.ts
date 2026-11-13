@@ -153,3 +153,30 @@ export function textoResumenPegado(filas: readonly FilaVariable[], pegadas: read
   const textoNuevas = nuevas === 1 ? "1 nueva" : `${nuevas} nuevas`;
   return reemplazadas === 0 ? `Se agregan ${textoNuevas}` : `Se agregan ${textoNuevas} y se reemplazan ${reemplazadas}`;
 }
+
+// ── Alta guiada (feat/m3-alta-guiada): el borrador del alta usa las mismas filas que 17 ─────
+
+export function filaNueva(): FilaVariable {
+  return { clave: "", valor: "", editada: false, nueva: true };
+}
+
+/** En el alta todo es nuevo: cada clave con su valor, sin filas vacías. */
+export function variablesDeBorrador(filas: readonly FilaVariable[]): { clave: string; valor: string }[] {
+  return filas.filter((fila) => fila.clave.trim() !== "").map((fila) => ({ clave: fila.clave.trim(), valor: fila.valor ?? "" }));
+}
+
+/** Claves propias que coinciden con una que inyecta un recurso: la del usuario gana (recursos-datos.md). */
+export function clavesQueGanan(filas: readonly FilaVariable[], inyectadas: readonly string[]): Set<string> {
+  const conjunto = new Set(inyectadas);
+  return new Set(filas.map((fila) => fila.clave.trim()).filter((clave) => clave !== "" && conjunto.has(clave)));
+}
+
+export function contarClaves(filas: readonly FilaVariable[]): number {
+  return filas.filter((fila) => fila.clave.trim() !== "").length;
+}
+
+/** Quita una fila; si era la última, deja una vacía para seguir escribiendo. */
+export function quitarFila(filas: readonly FilaVariable[], indice: number, dejarVacia: boolean): FilaVariable[] {
+  const restantes = filas.filter((_, i) => i !== indice);
+  return restantes.length === 0 && dejarVacia ? [filaNueva()] : restantes;
+}

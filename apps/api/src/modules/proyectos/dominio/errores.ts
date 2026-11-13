@@ -33,6 +33,22 @@ export class ComandoInicioInvalido extends ErrorProyectos {
   readonly codigo = "comando-invalido";
 }
 
+/** El plan, la suscripción o un tipo repetido impiden los recursos de datos del alta (feat/m3-alta-guiada). */
+export class RecursosDatosNoPermitidos extends ErrorProyectos {
+  readonly codigo = "datos-no-permitidos";
+
+  constructor(
+    readonly motivo: string,
+    mensaje: string,
+  ) {
+    super(mensaje);
+  }
+
+  detalle(): Record<string, unknown> {
+    return { motivo: this.motivo };
+  }
+}
+
 export class RepositorioNoAccesible extends ErrorProyectos {
   readonly codigo = "repositorio-no-accesible";
 

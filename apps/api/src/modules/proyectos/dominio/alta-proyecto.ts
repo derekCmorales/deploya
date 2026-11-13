@@ -1,5 +1,6 @@
+import { comandoConstruccionDe, comandoInicioDe } from "./comandos-proyecto";
 import { DatosAltaInvalidos } from "./errores";
-import type { AltaProyecto, ConsultaRepositorio } from "./proyecto";
+import { TIPOS_RECURSO_ALTA, type AltaProyecto, type ConsultaRepositorio, type TipoRecursoAlta } from "./proyecto";
 import type { EntradaVariable } from "./variable";
 import { PUERTO_MAXIMO, PUERTO_MINIMO, RAMA_POR_DEFECTO } from "./proyectos.constantes";
 import { repositorioDesdeUrl } from "./repositorio-github";
@@ -23,8 +24,30 @@ export function validarAltaProyecto(cuerpo: unknown): AltaProyecto {
   const consulta = validarConsultaRepositorio(datos);
   const puerto = puertoDe(datos.puerto);
   const variables = variablesDe(datos.variables);
-  const alta: AltaProyecto = { ...consulta, nombre, ...(puerto === undefined ? {} : { puerto }) };
-  return variables === undefined ? alta : { ...alta, variables };
+  const recursos = recursosDatosDe(datos.datos);
+  const comandoInicio = comandoInicioDe(datos.comandoInicio);
+  const comandoConstruccion = comandoConstruccionDe(datos.comandoConstruccion);
+  return {
+    ...consulta,
+    nombre,
+    ...(puerto === undefined ? {} : { puerto }),
+    ...(variables === undefined ? {} : { variables }),
+    ...(recursos === undefined ? {} : { datos: recursos }),
+    ...(comandoInicio === null ? {} : { comandoInicio }),
+    ...(comandoConstruccion === null ? {} : { comandoConstruccion }),
+  };
+}
+
+/** Paso Datos: una lista de tipos conocidos sin repetir; el plan lo valida M5 antes de guardar. */
+function recursosDatosDe(valor: unknown): TipoRecursoAlta[] | undefined {
+  if (valor === undefined) return undefined;
+  if (!Array.isArray(valor)) throw new DatosAltaInvalidos("datos debe ser una lista.");
+  const tipos = valor.map((tipo) => {
+    if (!TIPOS_RECURSO_ALTA.includes(tipo as TipoRecursoAlta)) throw new DatosAltaInvalidos(`No conocemos el recurso ${String(tipo)}.`);
+    return tipo as TipoRecursoAlta;
+  });
+  if (new Set(tipos).size !== tipos.length) throw new DatosAltaInvalidos("Cada recurso de datos va una sola vez.");
+  return tipos;
 }
 
 /** `PUT /proyectos/:id/variables`. Sin `valor` se conserva el cifrado guardado. */

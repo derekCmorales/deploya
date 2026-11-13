@@ -5,13 +5,8 @@ import { Pasos } from "@/components/deploya/pasos";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sunken } from "@/components/ui/card";
+import { PASOS_VISIBLES } from "@/lib/alta";
 import { contadorProyectos, recursosPlan, type ListaProyectos } from "@/lib/proyectos";
-
-const PASOS = [
-  { titulo: "Repositorio", detalle: "URL, rama y Dockerfile" },
-  { titulo: "Variables", detalle: "Claves cifradas" },
-  { titulo: "Revisar", detalle: "Confirmar y desplegar" },
-] as const;
 
 /** Columna izquierda del asistente (patrón E): pasos y recursos del plan. */
 export function LateralAlta({ actual, lista }: { actual: number; lista: ListaProyectos | null }) {
@@ -28,7 +23,7 @@ export function LateralAlta({ actual, lista }: { actual: number; lista: ListaPro
         <h1 className="text-[28px] leading-[34px] font-semibold tracking-[-0.032em]">Nuevo proyecto</h1>
         {lista ? <p className="text-xs text-muted-foreground">{contadorProyectos(lista)}</p> : <Skeleton className="h-3 w-40" />}
       </div>
-      <Pasos pasos={PASOS} actual={actual} />
+      <Pasos pasos={PASOS_VISIBLES} actual={actual} />
       <Sunken className="mt-auto flex flex-col gap-2 bg-background p-3.5">
         <p className="text-xs font-medium text-muted-foreground">Recursos del plan</p>
         {lista ? (

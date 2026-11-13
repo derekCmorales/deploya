@@ -68,3 +68,7 @@ Paso 2 de 3
 Atrás
 Continuar
 ```
+
+## Alta guiada (`feat-m3-alta-guiada`)
+
+Ahora es el paso 4 de 5 y copia la experiencia de la pestaña Variables (17): misma `TablaVariables`, «Pegar .env», «Mostrar»/«Ocultar», «Quitar» por fila y contador «n / 150». Si el paso Datos eligió recursos, un `Sunken` lista «Llegan solas de tus recursos de datos» con sus claves («Si declaras una con la misma clave, gana la tuya.») y la fila propia que coincide lleva la insignia «gana la tuya». Los valores ya no se piden en campos de contraseña: se ven como en 17 y se ocultan con «Ocultar».

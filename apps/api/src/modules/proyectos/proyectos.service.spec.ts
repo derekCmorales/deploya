@@ -10,6 +10,7 @@ import { BloqueosService } from "../orquestacion/bloqueos.service";
 import { CuotaConstruccionesAgotada, SuscripcionNoPermite } from "../orquestacion/dominio/errores";
 import { CUOTA_SANDBOX } from "./adaptadores/cuota-proyectos.stub";
 import { CifradorFalso } from "./adaptadores/cifrador-falso";
+import { RecursosDatosAltaMemoria } from "./adaptadores/recursos-datos-alta.datos";
 import {
   ClaveInvalida,
   ConfirmacionNoCoincide,
@@ -17,6 +18,7 @@ import {
   NombreRepetido,
   ProyectoNoEncontrado,
   RamaNoEncontrada,
+  RecursosDatosNoPermitidos,
   RepositorioNoAccesible,
   RepositorioSinDockerfile,
   StackNoReconocidoEnAlta,
@@ -103,6 +105,7 @@ function montar() {
   const acciones = { pedirEliminacion: jest.fn(async () => undefined) };
   const variables = new VariablesProyectoService(new CifradorFalso(), new RepositorioVariablesMemoria(reloj), repositorio);
   const bloqueos = new BloqueosDoble();
+  const datos = new RecursosDatosAltaMemoria();
   const servicio = new ProyectosService(
     fuente,
     repositorio,
@@ -112,8 +115,9 @@ function montar() {
     variables,
     new DeteccionStackService(recetasEnOrden()),
     bloqueos as unknown as BloqueosService,
+    datos,
   );
-  return { servicio, fuente, reloj, repositorio, cuota, construccion, acciones, variables, bloqueos };
+  return { servicio, fuente, reloj, repositorio, cuota, construccion, acciones, variables, bloqueos, datos };
 }
 
 const alta = (cambios: Partial<AltaProyecto> = {}): AltaProyecto => ({ url: URL, rama: "main", nombre: "Hola Deploya", ...cambios });
@@ -147,7 +151,7 @@ describe("ProyectosService", () => {
 
   describe("crear", () => {
     it("En el VPS un nombre que la plataforma usa (api, www…) se rechaza como subdominio en uso", async () => {
-      const { servicio: base, repositorio, fuente, cuota, construccion, acciones, variables, bloqueos } = montar();
+      const { servicio: base, repositorio, fuente, cuota, construccion, acciones, variables, bloqueos, datos } = montar();
       const servicio = new ProyectosService(
         fuente,
         repositorio,
@@ -157,6 +161,7 @@ describe("ProyectosService", () => {
         variables,
         new DeteccionStackService(recetasEnOrden()),
         bloqueos as unknown as BloqueosService,
+        datos,
         SUBDOMINIOS_DE_PLATAFORMA,
       );
 
@@ -182,6 +187,56 @@ describe("ProyectosService", () => {
       });
       expect(construccion.crearDespliegue).toHaveBeenCalledWith(proyecto.id, "alta");
       expect(despliegue).toEqual({ id: "despliegue-1", numero: 1, estado: "encolado" });
+    });
+
+    it("Alta con PostgreSQL y Redis: guarda el proyecto, pide los recursos y después el despliegue #1", async () => {
+      const { servicio, construccion, datos } = montar();
+      const creadosAlDesplegar: number[] = [];
+      construccion.crearDespliegue.mockImplementation(async () => {
+        creadosAlDesplegar.push(datos.creados.length);
+        return { id: "despliegue-1", numero: 1, estado: "encolado" as const };
+      });
+
+      const { proyecto, despliegue } = await servicio.crear("usuario-1", alta({ datos: ["postgres", "redis"] }));
+
+      expect(datos.verificados).toEqual([["postgres", "redis"]]);
+      expect(datos.creados).toEqual([{ proyectoId: proyecto.id, tipos: ["postgres", "redis"] }]);
+      expect(creadosAlDesplegar).toEqual([1]);
+      expect(despliegue.estado).toBe("encolado");
+    });
+
+    it("Alta con más recursos de los que admite el plan: no guarda el proyecto ni crea el despliegue", async () => {
+      const { servicio, repositorio, construccion, datos } = montar();
+      datos.rechazo = new RecursosDatosNoPermitidos("LIMITE_RECURSOS_DATOS", "Tu plan permite 1 base de datos");
+
+      await expect(servicio.crear("usuario-1", alta({ datos: ["postgres", "redis"] }))).rejects.toThrow(RecursosDatosNoPermitidos);
+
+      expect(await repositorio.deUsuario("usuario-1")).toHaveLength(0);
+      expect(datos.creados).toHaveLength(0);
+      expect(construccion.crearDespliegue).not.toHaveBeenCalled();
+    });
+
+    it("sin datos no pide recursos a M5", async () => {
+      const { servicio, datos } = montar();
+      await servicio.crear("usuario-1", alta());
+      expect(datos.creados).toHaveLength(0);
+    });
+
+    it("Comandos en el alta: el proyecto se guarda con comandoInicio y comandoConstruccion", async () => {
+      const { servicio, repositorio } = montar();
+      const { proyecto } = await servicio.crear("usuario-1", alta({ comandoInicio: "node dist/worker.js", comandoConstruccion: "npm run build:prod" }));
+
+      expect(await repositorio.porId(proyecto.id)).toMatchObject({ comandoInicio: "node dist/worker.js", comandoConstruccion: "npm run build:prod" });
+    });
+
+    it("Comando de construcción sin receta: la validación dice si la receta lo aplica", async () => {
+      const { servicio, fuente } = montar();
+      const conDockerfile = await servicio.validarRepositorio({ url: URL, rama: "main" });
+      fuente.archivos = new Map([["package.json", JSON.stringify({ scripts: { start: "node ." } })]]);
+      const conReceta = await servicio.validarRepositorio({ url: URL, rama: "main" });
+
+      expect(conDockerfile.deteccion?.aplicaComandoConstruccion).toBe(false);
+      expect(conReceta.deteccion?.aplicaComandoConstruccion).toBe(true);
     });
 
     it("Ruta del Dockerfile en el alta: valida esa ruta, sugiere su EXPOSE y la guarda en el proyecto", async () => {
@@ -323,6 +378,7 @@ describe("ProyectosService", () => {
         usados: 0,
         maximo: 1,
         plan: { nombre: "Sandbox", cpus: 0.25, memoriaMb: 256 },
+        datos: { usados: 0, maximo: Number.POSITIVE_INFINITY },
       });
     });
 

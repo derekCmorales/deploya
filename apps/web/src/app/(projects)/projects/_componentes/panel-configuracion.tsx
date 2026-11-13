@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, FolderGit2, GitBranch, Hash, Terminal, type LucideIcon } from "lucide-react";
+import { FileText, FolderGit2, GitBranch, Hammer, Hash, Terminal, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -29,6 +29,9 @@ import { cn } from "@/lib/utils";
 import { EliminarProyecto, type ConteosProyecto } from "./eliminar-proyecto";
 
 type ErroresCampo = Partial<Record<CampoConfiguracion, string>>;
+
+const TEXTO_AYUDA_CONSTRUCCION =
+  "Solo con receta detectada (Node, Python, Go): en Node reemplaza npm run build; en Python corre después de pip install; en Go, antes de go build. Con tu Dockerfile se ignora.";
 
 const TEXTO_AYUDA_COMANDO = "Sobrescribe el CMD de la imagen. Útil para correr un worker con la misma imagen, p. ej. node dist/worker.js";
 
@@ -118,11 +121,23 @@ function Formulario({ proyecto }: { proyecto: DatosProyecto & { id: string } }) 
           <Campo id="rama" etiqueta="Rama" icono={GitBranch} valor={borrador.rama} error={errores.rama} alCambiar={(v) => editar("rama", v)} mono className="min-w-32 flex-[1_1_0]" />
         </div>
       </Seccion>
-      <Seccion id="contenedor" titulo="Contenedor" descripcion="Se construye con el Dockerfile de tu repositorio.">
+      <Seccion id="contenedor" titulo="Contenedor" descripcion="Se construye con el Dockerfile de tu repositorio o con la receta que detectamos.">
         <div className="flex flex-wrap gap-3">
           <Campo id="rutaDockerfile" etiqueta="Ruta del Dockerfile" icono={FileText} valor={borrador.rutaDockerfile} error={errores.rutaDockerfile} alCambiar={(v) => editar("rutaDockerfile", v)} mono className="min-w-48 flex-[2_1_0]" />
           <Campo id="puertoInterno" etiqueta="Puerto interno" icono={Hash} valor={borrador.puertoInterno} error={errores.puertoInterno} alCambiar={(v) => editar("puertoInterno", v)} mono className="min-w-32 flex-[1_1_0]" />
         </div>
+        <Campo
+          id="comandoConstruccion"
+          etiqueta="Comando de construcción (opcional)"
+          icono={Hammer}
+          valor={borrador.comandoConstruccion}
+          error={errores.comandoConstruccion}
+          pista={TEXTO_AYUDA_CONSTRUCCION}
+          placeholder="npm run build:prod"
+          maximo={COMANDO_INICIO_MAXIMO}
+          alCambiar={(v) => editar("comandoConstruccion", v)}
+          mono
+        />
         <Campo
           id="comandoInicio"
           etiqueta="Comando de inicio (opcional)"

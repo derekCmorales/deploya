@@ -1,7 +1,7 @@
 import { PUERTO_RECETAS, VERSION_PYTHON } from "../deteccion.constantes";
 import { existe, presentes, type MapaArchivos } from "../mapa-archivos";
 import { plantillaPython } from "../plantillas";
-import { RecetaStack, type DescripcionReceta } from "../receta-stack";
+import { RecetaStack, SIN_OPCIONES, type DescripcionReceta, type OpcionesReceta } from "../receta-stack";
 
 const REQUIREMENTS = "requirements.txt";
 const PYPROJECT = "pyproject.toml";
@@ -13,6 +13,7 @@ export class RecetaPython extends RecetaStack {
   readonly receta = "python" as const;
   readonly nombre = `Python ${VERSION_PYTHON}`;
   readonly archivosQueLee = [REQUIREMENTS, PYPROJECT, ...ENTRADAS];
+  override readonly aplicaComandoConstruccion = true;
 
   reconoce(archivos: MapaArchivos): boolean {
     return (existe(archivos, REQUIREMENTS) || existe(archivos, PYPROJECT)) && entradaDe(archivos) !== null;
@@ -23,11 +24,12 @@ export class RecetaPython extends RecetaStack {
     return { descripcion: `${this.nombre} · ${arranque}`, evidencia: presentes(archivos, this.archivosQueLee) };
   }
 
-  dockerfile(archivos: MapaArchivos): string {
+  dockerfile(archivos: MapaArchivos, opciones: OpcionesReceta = SIN_OPCIONES): string {
     return plantillaPython({
       instalacion: existe(archivos, REQUIREMENTS) ? "requirements" : "pyproject",
       modulo: entradaDe(archivos) ?? "main",
       conGunicorn: conGunicorn(archivos),
+      comandoConstruccion: opciones.comandoConstruccion,
     });
   }
 

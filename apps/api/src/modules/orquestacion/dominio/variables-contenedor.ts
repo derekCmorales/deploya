@@ -19,6 +19,12 @@ export function fusionarVariables(usuario: Readonly<Record<string, string>>, dat
 }
 
 /** «Recursos de datos conectados: PostgreSQL 17 + pgvector, Redis 7 · 7 variables inyectadas» (sin valores). */
+/** «PostgreSQL 17 + pgvector todavía se está creando»: el contenedor arranca igual con sus variables. */
+export function textoPendientes(pendientes: readonly string[]): string {
+  const verbo = pendientes.length === 1 ? "todavía se está creando" : "todavía se están creando";
+  return `${pendientes.join(", ")} ${verbo}: la app arranca con sus variables y puede tardar en conectarse`;
+}
+
 export function textoInyeccion(recursos: readonly string[], inyectadas: number): string {
   const variables = inyectadas === 1 ? "1 variable inyectada" : `${inyectadas} variables inyectadas`;
   return `Recursos de datos conectados: ${recursos.join(", ")} · ${variables}`;

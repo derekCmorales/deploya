@@ -6,7 +6,7 @@ import { ConexionesDatos } from "./conexiones-datos";
 import { LARGO_CONTRASENA } from "./datos.constantes";
 import type { ComandoDatos } from "./dominio/comando-datos";
 import { ConfirmacionRecursoNoCoincide, ProyectoDatosNoEncontrado, RecursoNoEncontrado, TipoYaConectado } from "./dominio/errores";
-import { tiposDisponibles, verificarAlta, verificarTipoLibre } from "./dominio/politica-recursos-datos";
+import { tiposDisponibles, verificarAlta, verificarAltaInicial, verificarTipoLibre } from "./dominio/politica-recursos-datos";
 import { conectadoA, nombreRecursoDatos, TIPOS_RECURSO, type EstadoRecursoDatos, type RecursoDatos, type TipoRecurso } from "./dominio/recurso-datos";
 import { enOrden, vistaRecurso, type ContextoVista, type VistaRecursoDatos } from "./dominio/vista-recurso";
 import { ColaDatosPuerto } from "./puertos/cola-datos.puerto";
@@ -83,6 +83,22 @@ export class DatosService {
     });
     await this.cola.encolar({ accion: "crear", recursoId: recurso.id });
     return vistaRecurso(recurso, this.contextoVista(contexto));
+  }
+
+  /** Recursos de la cuenta frente al plan, para el paso Datos del alta guiada (aún no hay proyecto). */
+  async limiteDe(usuarioId: string): Promise<{ usados: number; maximo: number }> {
+    const [proyectos, cuota] = await Promise.all([this.proyectos.deUsuario(usuarioId), this.cuota.deUsuario(usuarioId)]);
+    return { usados: await this.usadosDe(proyectos), maximo: cuota.maxRecursosDatos };
+  }
+
+  /**
+   * El alta guiada (M3) pregunta antes de guardar el proyecto si sus recursos caben en el plan.
+   * Es una consulta: no escribe nada; `crear` vuelve a validar cada uno.
+   */
+  async verificarAltaInicial(usuarioId: string, tipos: readonly TipoRecurso[]): Promise<void> {
+    if (tipos.length === 0) return;
+    const [proyectos, cuota] = await Promise.all([this.proyectos.deUsuario(usuarioId), this.cuota.deUsuario(usuarioId)]);
+    verificarAltaInicial({ estadoSuscripcion: cuota.estado, usados: await this.usadosDe(proyectos), maximo: cuota.maxRecursosDatos, tipos });
   }
 
   /** Valores reales para copiar: las variables de nombre corto y las `DEPLOYA_*`. */

@@ -4,7 +4,7 @@ Los cuatro documentos de Deploya (requisitos, diseño, manual técnico y manual 
 
 | Ruta | Qué es |
 |---|---|
-| `index.html` | Portada con los cuatro documentos, sus PDF y lo que cambió |
+| `index.html` | Portada: qué es Deploya, los cuatro documentos con sus PDF y cómo autoalojarlo. Modo claro por defecto (como los documentos) y botón a oscuro, que se recuerda en `localStorage` (`deploya-tema`) |
 | `doc/*.html` | Cada documento (estilos de pantalla y de impresión en el mismo archivo) |
 | `doc/img/` | Capturas del manual de usuario |
 | `pdf/*.pdf` | Los PDF que se entregan; se generan desde `doc/*.html` |

@@ -14,6 +14,7 @@ import { CopyField } from "@/components/ui/copy-field";
 import { LineaTiempo } from "@/components/deploya/linea-tiempo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { publicarEstadoActivo } from "@/hooks/use-estado-activo";
+import { useAvisoCambioDeEstado } from "@/hooks/use-aviso-estado";
 import { useResumen } from "@/hooks/use-resumen";
 import { ESQUEMA_APPS } from "@/lib/api";
 import { rutaDespliegue } from "@/lib/despliegues";
@@ -56,6 +57,7 @@ export function PanelResumen({ proyectoId }: { proyectoId: string }) {
     if (datos) setActualizado(Date.now());
   }, [datos]);
   useAccionesDeCabecera(datos, setOrigen, recargar);
+  useAvisoCambioDeEstado(datos?.ultimo?.estado);
 
   if (error && !datos) return <Banner variant="bad" title="No pudimos cargar el resumen">{error.message}</Banner>;
   if (cargando || !datos) return <Cargando />;

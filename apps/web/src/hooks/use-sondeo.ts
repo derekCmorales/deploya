@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ErrorApi } from "@/lib/api";
 import { INTERVALO_SONDEO_MS } from "@/lib/proyectos";
+import { debeSeguirTrasError } from "@/lib/reintento";
 
 export interface Sondeo<T> {
   datos: T | null;
@@ -14,7 +15,8 @@ export interface Sondeo<T> {
 
 /**
  * Lectura por polling (CQRS ligero): pide `leer` y repite cada 3 s mientras
- * `seguir(datos)` sea verdadero. `leer = null` no pide nada.
+ * `seguir(datos)` sea verdadero. `leer = null` no pide nada. Si una lectura falla por la red o el
+ * servidor mientras seguía en marcha, reintenta en el siguiente ciclo en vez de dejar la pantalla congelada.
  */
 export function useSondeo<T>(leer: (() => Promise<T>) | null, seguir: (datos: T) => boolean): Sondeo<T> {
   const [datos, setDatos] = useState<T | null>(null);
@@ -26,15 +28,20 @@ export function useSondeo<T>(leer: (() => Promise<T>) | null, seguir: (datos: T)
     if (!leer) return;
     let vigente = true;
     let temporizador: ReturnType<typeof setTimeout> | undefined;
+    let seguiaEnMarcha = false;
     const pedir = async () => {
       try {
         const nuevos = await leer();
         if (!vigente) return;
         setDatos(nuevos);
         setError(null);
-        if (seguir(nuevos)) temporizador = setTimeout(pedir, INTERVALO_SONDEO_MS);
+        seguiaEnMarcha = seguir(nuevos);
+        if (seguiaEnMarcha) temporizador = setTimeout(pedir, INTERVALO_SONDEO_MS);
       } catch (e) {
-        if (vigente) setError(e instanceof ErrorApi ? e : new ErrorApi(0, "desconocido", "Algo salió mal."));
+        if (!vigente) return;
+        const falla = e instanceof ErrorApi ? e : new ErrorApi(0, "desconocido", "Algo salió mal.");
+        setError(falla);
+        if (debeSeguirTrasError(falla.estado, seguiaEnMarcha)) temporizador = setTimeout(pedir, INTERVALO_SONDEO_MS);
       }
     };
     void pedir();

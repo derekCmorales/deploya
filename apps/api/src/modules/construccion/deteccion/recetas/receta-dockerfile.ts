@@ -8,6 +8,7 @@ export class RecetaDockerfile extends RecetaStack {
   readonly receta = "dockerfile" as const;
   readonly nombre = "Dockerfile propio";
   readonly archivosQueLee = [RUTA_DOCKERFILE];
+  readonly usuarioFinal = null;
 
   reconoce(archivos: MapaArchivos): boolean {
     return existe(archivos, RUTA_DOCKERFILE);

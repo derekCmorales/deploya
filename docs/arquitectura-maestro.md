@@ -2443,12 +2443,38 @@ classDiagram
         +aplicaComandoConstruccion Boolean
         +reconoce(archivos MapaArchivos) Boolean
         +describir(archivos MapaArchivos) DescripcionReceta
-        +dockerfile(archivos MapaArchivos, opciones OpcionesReceta) String
+        +usuarioFinal String
+        +dockerfile(archivos MapaArchivos, opciones OpcionesReceta) DockerfileReceta
         +puertoSugerido(archivos MapaArchivos) Integer
         +pista(archivos MapaArchivos) String
     }
     class LectorDockerfileEn {
         <<Decorator>>
+    }
+    class DockerfileReceta {
+        <<interface>>
+        +instrucciones() List~String~
+        +descripcion() String
+    }
+    class DockerfileBase {
+        -nombre String
+        -lineas List~String~
+        +instrucciones() List~String~
+        +descripcion() String
+    }
+    class DecoradorDockerfile {
+        <<abstract>>
+        #wrappee DockerfileReceta
+        +instrucciones() List~String~
+        +descripcion() String
+    }
+    class ConPuertoDeploya
+    class ConUsuarioSinPrivilegios {
+        -usuario String
+    }
+    class ConEtiqueta {
+        -clave String
+        -valor String
     }
     class RecetaDockerfile
     class RecetaNode
@@ -3284,6 +3310,16 @@ classDiagram
     LectorFuente <|-- LectorFuenteLocal
     LectorFuente <|-- LectorDockerfileEn
     DeteccionStackService --> LectorDockerfileEn
+    DockerfileReceta <|.. DockerfileBase : implements
+    DockerfileReceta <|.. DecoradorDockerfile : implements
+    DecoradorDockerfile <|-- ConPuertoDeploya : extends
+    DecoradorDockerfile <|-- ConUsuarioSinPrivilegios : extends
+    DecoradorDockerfile <|-- ConEtiqueta : extends
+    DecoradorDockerfile o-- DockerfileReceta : wrappee
+    RecetaStack ..> DockerfileBase : crea
+    DeteccionStackService ..> ConPuertoDeploya : capas comunes
+    DeteccionStackService ..> ConUsuarioSinPrivilegios : capas comunes
+    PasoRecepcion ..> ConEtiqueta : etiquetas del despliegue
     PasoRecepcion --> RecetaProyectoPuerto
     RecetaProyectoPuerto <|-- RecetaProyectoPrisma
     RepositorioDespliegues <|-- RepositorioDesplieguesPrisma

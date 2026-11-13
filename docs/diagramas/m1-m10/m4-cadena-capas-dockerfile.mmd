@@ -1,0 +1,15 @@
+flowchart LR
+    Cliente["paso-recepcion.ts"]
+    E3["ConEtiqueta (proyecto)"]
+    E2["ConEtiqueta (source)"]
+    E1["ConEtiqueta (revision)"]
+    U["ConUsuarioSinPrivilegios"]
+    P["ConPuertoDeploya"]
+    B["DockerfileBase (Go 1.23)"]
+
+    Cliente --> E3
+    E3 -->|"wrappee"| E2
+    E2 -->|"wrappee"| E1
+    E1 -->|"wrappee"| U
+    U -->|"wrappee"| P
+    P -->|"wrappee"| B

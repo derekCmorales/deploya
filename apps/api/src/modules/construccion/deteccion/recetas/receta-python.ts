@@ -1,4 +1,5 @@
-import { PUERTO_RECETAS, VERSION_PYTHON } from "../deteccion.constantes";
+import { PUERTO_RECETAS, UID_SIN_PRIVILEGIOS, VERSION_PYTHON } from "../deteccion.constantes";
+import { DockerfileBase } from "../dockerfile-receta";
 import { existe, presentes, type MapaArchivos } from "../mapa-archivos";
 import { plantillaPython } from "../plantillas";
 import { RecetaStack, SIN_OPCIONES, type DescripcionReceta, type OpcionesReceta } from "../receta-stack";
@@ -14,6 +15,7 @@ export class RecetaPython extends RecetaStack {
   readonly nombre = `Python ${VERSION_PYTHON}`;
   readonly archivosQueLee = [REQUIREMENTS, PYPROJECT, ...ENTRADAS];
   override readonly aplicaComandoConstruccion = true;
+  readonly usuarioFinal = String(UID_SIN_PRIVILEGIOS);
 
   reconoce(archivos: MapaArchivos): boolean {
     return (existe(archivos, REQUIREMENTS) || existe(archivos, PYPROJECT)) && entradaDe(archivos) !== null;
@@ -24,13 +26,14 @@ export class RecetaPython extends RecetaStack {
     return { descripcion: `${this.nombre} · ${arranque}`, evidencia: presentes(archivos, this.archivosQueLee) };
   }
 
-  dockerfile(archivos: MapaArchivos, opciones: OpcionesReceta = SIN_OPCIONES): string {
-    return plantillaPython({
+  dockerfile(archivos: MapaArchivos, opciones: OpcionesReceta = SIN_OPCIONES): DockerfileBase {
+    const lineas = plantillaPython({
       instalacion: existe(archivos, REQUIREMENTS) ? "requirements" : "pyproject",
       modulo: entradaDe(archivos) ?? "main",
       conGunicorn: conGunicorn(archivos),
       comandoConstruccion: opciones.comandoConstruccion,
     });
+    return new DockerfileBase(this.nombre, lineas);
   }
 
   puertoSugerido(): number {

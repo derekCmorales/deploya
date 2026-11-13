@@ -1,4 +1,5 @@
 import type { RecetaConstruccion } from "../dominio/estados";
+import type { DockerfileReceta } from "./dockerfile-receta";
 import type { MapaArchivos } from "./mapa-archivos";
 
 /** Lo que el proyecto agrega a la receta (feat/m3-alta-guiada). */
@@ -25,10 +26,12 @@ export abstract class RecetaStack {
   abstract readonly archivosQueLee: readonly string[];
   /** Si la receta corre `comandoConstruccion`; con Dockerfile propio o sitio estático no aplica. */
   readonly aplicaComandoConstruccion: boolean = false;
+  /** `USER` que agrega la capa sin privilegios; `null` si la base ya fija el suyo (Node) o no hay base. */
+  abstract readonly usuarioFinal: string | null;
   abstract reconoce(archivos: MapaArchivos): boolean;
   abstract describir(archivos: MapaArchivos): DescripcionReceta;
-  /** El `Dockerfile.deploya` que genera la receta; `null` si se usa el del repositorio. */
-  abstract dockerfile(archivos: MapaArchivos, opciones?: OpcionesReceta): string | null;
+  /** La base del `Dockerfile.deploya`, sin capas comunes; `null` si se usa el del repositorio. */
+  abstract dockerfile(archivos: MapaArchivos, opciones?: OpcionesReceta): DockerfileReceta | null;
   abstract puertoSugerido(archivos: MapaArchivos): number;
 
   /** Qué le falta al repositorio para que esta receta lo reconozca, si casi lo hace. */

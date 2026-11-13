@@ -166,3 +166,15 @@ test("Márgenes de pantalla responsivos: ningún contenedor de proyectos fija px
     assert.doesNotMatch(codigo, /(?<![\w:-])px-8(?![\w-])/, `${archivo} fija px-8 también en móvil (usa px-4 sm:px-8)`);
   }
 });
+
+test("Select: lista desplegable estilizada (no el <select> nativo), accesible y que no se recorta en un Dialog", () => {
+  const select = leer("src/components/ui/select.tsx");
+  assert.doesNotMatch(select, /<select\s/, "volvió el <select> nativo, con la lista sin tema del navegador");
+  assert.match(select, /role="combobox"/);
+  assert.match(select, /role="listbox"/);
+  assert.match(select, /role="option"/);
+  assert.match(select, /aria-activedescendant/, "la opción activa no se anuncia con teclado");
+  assert.match(select, /popover: "manual"/, "la lista no va en la capa superior y un Dialog la recortaría");
+  assert.match(select, /bg-popover/, "la lista no usa los tokens del tema");
+  for (const tecla of ["ArrowDown", "ArrowUp", "Home", "End", "Enter", "Escape"]) assert.match(select, new RegExp(`"${tecla}"`), `sin soporte de ${tecla}`);
+});

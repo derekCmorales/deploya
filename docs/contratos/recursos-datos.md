@@ -27,8 +27,10 @@ Un **recurso de datos** es un contenedor de Deploya (imagen fija, no código del
 
 | Recurso | Sandbox | Starter | Pro | Business |
 |---|---|---|---|---|
-| `maxRecursosDatos` (por cuenta) | 1 | 3 | 10 | 25 |
-| `discoDatosMb` (por recurso, se mide y se avisa; no corta) | 512 | 2 048 | 10 240 | 25 600 |
+| `maxRecursosDatos` (por cuenta) | 0 | 3 | 10 | 25 |
+| `discoDatosMb` (por recurso, se mide y se avisa; no corta) | 512 (sin uso) | 2 048 | 5 120 | 20 480 |
+
+Tarifa de lanzamiento (2026-11-13): Sandbox no trae bases (el usuario usa su propia URL); el seed actualiza los planes existentes en cada despliegue.
 
 Crear por encima de `maxRecursosDatos` → `409 LIMITE_RECURSOS_DATOS`. Con la suscripción Vencida o Suspendida no se crean recursos (`409 SUSCRIPCION_BLOQUEADA`, mismo bloqueo que los despliegues).
 

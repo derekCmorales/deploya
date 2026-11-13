@@ -7,7 +7,7 @@ export function CabeceraPlanes({ children }: { children: ReactNode }) {
     <CabeceraCobro
       eyebrow="Cobro · Planes"
       titulo="Planes"
-      subtitulo="Precios en USD. Pagas por vigencia; nada se renueva sin tu permiso."
+      subtitulo="Tarifa de lanzamiento en USD. Por 365 días pagas 10 meses: dos gratis. Nada se renueva sin tu permiso."
       actual="planes"
     >
       {children}

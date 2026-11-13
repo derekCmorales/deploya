@@ -24,9 +24,9 @@ Toda cuenta nueva empieza en **Sandbox**: gratis, sin tarjeta, un proyecto con 0
 | Plan | 30 días | 365 días | Proyectos | CPU | Memoria | Construcciones al mes |
 |---|---|---|---|---|---|---|
 | Sandbox | gratis | — | 1 | 0.25 vCPU | 256 MB | 30 |
-| Starter | USD 5 | USD 50 | 3 | 0.5 vCPU | 512 MB | 150 |
-| Pro | USD 15 | USD 150 | 10 | 1 vCPU | 1 GB | 500 |
-| Business | USD 40 | USD 400 | 25 | 2 vCPU | 2 GB | 2 000 |
+| Starter | USD 6 | USD 60 | 3 | 0.5 vCPU | 512 MB | 150 |
+| Pro | USD 19 | USD 190 | 10 | 1 vCPU | 1 GB | 500 |
+| Business | USD 49 | USD 490 | 25 | 2 vCPU | 2 GB | 2 000 |
 
 1. **Planes** (`/planes`) → elige un plan y la vigencia → **Contratar**.
 2. El pago es **simulado** (no se cobra nada). Tarjetas de prueba:

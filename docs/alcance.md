@@ -182,14 +182,18 @@ Sustituye la tabla §4.2 de la propuesta. Solo se aplican estos cuatro recursos.
 
 | Recurso | Sandbox | Starter | Pro | Business |
 |---|---|---|---|---|
-| Precio | Sin costo | USD 5.00 / 30 días | USD 15.00 / 30 días | USD 40.00 / 30 días |
+| Precio | Sin costo | USD 6.00 / 30 días | USD 19.00 / 30 días | USD 49.00 / 30 días |
 | Vigencia | sin vencimiento | 30 o 365 días | 30 o 365 días | 30 o 365 días |
 | Proyectos | 1 | 3 | 10 | 25 |
 | CPU por proyecto | 0.25 vCPU | 0.5 vCPU | 1 vCPU | 2 vCPU |
 | Memoria por proyecto | 256 MB | 512 MB | 1 GB | 2 GB |
 | Construcciones / mes | 30 | 150 | 500 | 2 000 |
+| Recursos de datos (por cuenta) | 0 | 3 | 10 | 25 |
+| Disco por base | — | 2 GB | 5 GB | 20 GB |
+| Bases incluidas | ninguna (URL propia) | aparte, desde USD 2 | PostgreSQL + Redis | PostgreSQL + Redis + S3 |
 
-- Precio de 365 días: lo fija Javier en el seed (propuesta: precio reducido).
+- Tarifa de lanzamiento (2026-11-13), la misma que anuncia la landing. Precio de 365 días = 10 × el de 30 (dos meses gratis).
+- Complementos de datos por 30 días: PostgreSQL + pgvector 2 GB USD 5, Redis USD 2, S3 10 GB USD 4, +10 GB de disco USD 2.
 - Todos los proyectos corren en un único VPS y se publican en `*.deploya.larasolutions.dev` con HTTPS.
 - Sandbox no vence, para no bloquear a un usuario nuevo; se decide así para simplificar §4.4.
 

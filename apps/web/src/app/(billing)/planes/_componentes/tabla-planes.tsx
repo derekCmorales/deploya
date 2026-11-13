@@ -1,14 +1,21 @@
-import { Check, Cpu, Database, FolderGit2, Hammer, HardDrive, Info, MemoryStick, type LucideIcon } from "lucide-react";
+import { Check, Cpu, Database, FolderGit2, Hammer, HardDrive, Info, Layers, MemoryStick, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DOMINIO_APPS } from "@/lib/api";
 import {
+  COMPLEMENTOS_DATOS,
   esGratuito,
+  INCLUIDO_EN_TODOS,
   recursosDelCatalogo,
+  textoBasesIncluidas,
+  textoEquivalencia,
   textoPeriodo,
   textoPrecio,
+  textoUsd,
   valorRecurso,
   type ClaveRecurso,
   type PlanCatalogo,
@@ -81,6 +88,7 @@ export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada 
                     <span className="text-[13px] whitespace-nowrap text-muted-foreground">{textoPeriodo(plan, vigencia)}</span>
                   ) : null}
                 </p>
+                <p className="-mt-2 font-mono text-xs text-muted-foreground">{textoEquivalencia(plan, vigencia)}</p>
                 <p className="min-h-8 text-[13px] text-muted-foreground">{plan.descripcion}</p>
                 <AccionPlan
                   plan={plan}
@@ -92,9 +100,8 @@ export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada 
               </div>
             ))}
           </div>
-          {recursos.map((recurso, i) => {
+          {recursos.map((recurso) => {
             const Icono = ICONOS[recurso.clave];
-            const ultima = i === recursos.length - 1;
             return (
               <div role="row" key={recurso.clave} className="contents">
                 <div role="rowheader" className="flex items-center gap-2 border-t border-border py-3 text-sm">
@@ -105,7 +112,7 @@ export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada 
                   <div
                     role="cell"
                     key={plan.codigo}
-                    className={cn("border-t border-border px-5 py-3 font-mono text-[13px]", columna(plan, ultima))}
+                    className={cn("border-t border-border px-5 py-3 font-mono text-[13px]", columna(plan))}
                   >
                     {valorRecurso(plan, recurso)}
                   </div>
@@ -113,13 +120,48 @@ export function TablaPlanes({ planes, vigencia, codigoActual, vigenciaTerminada 
               </div>
             );
           })}
+          <div role="row" className="contents">
+            <div role="rowheader" className="flex items-center gap-2 border-t border-border py-3 text-sm">
+              <Layers aria-hidden className="size-4 text-muted-foreground" />
+              <span>Bases incluidas</span>
+            </div>
+            {planes.map((plan) => (
+              <div role="cell" key={plan.codigo} className={cn("border-t border-border px-5 py-3 text-[13px]", columna(plan, true))}>
+                {textoBasesIncluidas(plan)}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+      <ul aria-label="Incluido en todos los planes" className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+        {INCLUIDO_EN_TODOS.map((texto) => (
+          <li key={texto} className="flex items-center gap-2">
+            <Check aria-hidden className="size-4 text-ok" />
+            {texto}
+          </li>
+        ))}
+      </ul>
+      <Card className="max-w-[560px]">
+        <CardHeader>
+          <CardTitle>Datos aparte</CardTitle>
+          <CardDescription>Complementos por 30 días, sobre tu plan.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="flex flex-col">
+            {COMPLEMENTOS_DATOS.map((complemento) => (
+              <li key={complemento.nombre} className="flex items-center justify-between gap-3 border-t border-border py-2.5 text-sm">
+                <span>{complemento.nombre}</span>
+                <span className="font-mono text-[13px]">{textoUsd(complemento.precio30)}</span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
       <p className="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
         <Info aria-hidden className="size-4" />
         Todos los proyectos corren en un único servidor (VPS) y se publican en un subdominio
-        <code className="font-mono text-foreground">*.deploya.app</code>
-        con HTTPS.
+        <code className="font-mono text-foreground">*.{DOMINIO_APPS}</code>
+        con HTTPS. Sin costos por transferencia ni por peticiones durante el piloto; aún no hay alta disponibilidad.
       </p>
     </div>
   );

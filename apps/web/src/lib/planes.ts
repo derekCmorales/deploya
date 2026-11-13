@@ -35,7 +35,7 @@ export function esGratuito(plan: PlanCatalogo): boolean {
 export function textoPrecio(plan: PlanCatalogo, vigencia: Vigencia): string {
   if (esGratuito(plan)) return "Sin costo";
   const precio = vigencia === "30" ? plan.precio30 : plan.precio365;
-  return precio === null ? "No disponible" : `USD ${precio.toFixed(2)}`;
+  return precio === null ? "No disponible" : textoUsd(precio);
 }
 
 export function textoPeriodo(plan: PlanCatalogo, vigencia: Vigencia): string | null {
@@ -75,11 +75,55 @@ export const RECURSOS: FilaRecurso[] = [
 
 /** Filas de recursos de datos: solo aparecen si algún plan del catálogo las trae. */
 export const RECURSOS_DATOS: FilaRecurso[] = [
-  { clave: "maxRecursosDatos", etiqueta: "Bases de datos", formato: textoMiles },
+  { clave: "maxRecursosDatos", etiqueta: "Recursos de datos", formato: textoMiles },
   { clave: "discoDatosMb", etiqueta: "Disco por base", formato: textoGb },
 ];
 
 const SIN_DATO = "—";
+const MESES_PAGADOS_POR_ANIO = 10;
+
+/** Qué bases trae cada plan en la tarifa de lanzamiento (igual que la landing). */
+const BASES_INCLUIDAS: Record<string, string> = {
+  sandbox: "Ninguna: trae tu propia URL",
+  starter: "Aparte, desde USD 2",
+  pro: "PostgreSQL + Redis",
+  business: "PostgreSQL + Redis + S3",
+};
+
+export function textoBasesIncluidas(plan: Pick<PlanCatalogo, "codigo">): string {
+  return BASES_INCLUIDAS[plan.codigo] ?? SIN_DATO;
+}
+
+/** Bajo el precio: con 30 días, lo que cuesta el año; con 365, que se pagan 10 meses. */
+export function textoEquivalencia(plan: PlanCatalogo, vigencia: Vigencia): string {
+  if (esGratuito(plan)) return "No vence · sin tarjeta";
+  if (plan.precio365 === null) return "Solo por 30 días";
+  if (vigencia === "30") return `USD ${plan.precio365.toFixed(2)} por 365 días`;
+  return `Pagas ${MESES_PAGADOS_POR_ANIO} meses: dos gratis`;
+}
+
+export const INCLUIDO_EN_TODOS = [
+  "HTTPS con subdominio propio",
+  "Reversión a las últimas 5 versiones sin reconstruir",
+  "Bitácoras y métricas de 24 h",
+] as const;
+
+export interface ComplementoDatos {
+  nombre: string;
+  precio30: number;
+}
+
+/** Complementos por 30 días, sobre el plan. */
+export const COMPLEMENTOS_DATOS: readonly ComplementoDatos[] = [
+  { nombre: "PostgreSQL + pgvector · 2 GB", precio30: 5 },
+  { nombre: "Redis", precio30: 2 },
+  { nombre: "S3 · 10 GB", precio30: 4 },
+  { nombre: "+10 GB de disco", precio30: 2 },
+];
+
+export function textoUsd(monto: number): string {
+  return `USD ${monto.toFixed(2)}`;
+}
 
 export function recursosDelCatalogo(planes: readonly PlanCatalogo[]): FilaRecurso[] {
   const opcionales = RECURSOS_DATOS.filter((fila) => planes.some((plan) => typeof plan[fila.clave] === "number"));
@@ -88,6 +132,7 @@ export function recursosDelCatalogo(planes: readonly PlanCatalogo[]): FilaRecurs
 
 /** Valor de la celda; un plan que no trae el campo muestra «—» en vez de romper. */
 export function valorRecurso(plan: PlanCatalogo, fila: FilaRecurso): string {
+  if (fila.clave === "discoDatosMb" && plan.maxRecursosDatos === 0) return SIN_DATO;
   const valor = plan[fila.clave];
   return typeof valor === "number" ? fila.formato(valor) : SIN_DATO;
 }

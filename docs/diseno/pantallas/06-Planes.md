@@ -12,7 +12,7 @@
 
 Pública. `Segmented` 30 / 365 días; cuatro planes; tabla de recursos v4.1; con sesión marca «Plan actual».
 
-Las filas «Bases de datos» (`maxRecursosDatos`) y «Disco por base» (`discoDatosMb`, en GB) aparecen solo si el catálogo las trae ([recursos-datos.md](../../contratos/recursos-datos.md)); un plan sin el campo muestra «—».
+Las filas «Recursos de datos» (`maxRecursosDatos`) y «Disco por base» (`discoDatosMb`, en GB) aparecen solo si el catálogo las trae ([recursos-datos.md](../../contratos/recursos-datos.md)); un plan sin el campo muestra «—».
 
 ## Componentes
 
@@ -35,7 +35,7 @@ Copia exacta del diseño, en orden de aparición. Los datos (correos, nombres, h
 ```text
 Cobro · Planes
 Planes
-Precios en USD. Pagas por vigencia; nada se renueva sin tu permiso.
+Tarifa de lanzamiento en USD. Por 365 días pagas 10 meses: dos gratis. Nada se renueva sin tu permiso.
 Vigencia
 30 días
 365 días
@@ -49,16 +49,17 @@ Para probar deploya con un proyecto.
 Cambiar a Sandbox
 Starter
 Plan actual
-USD 5.00
+USD 6.00
 / 30 días
+USD 60.00 por 365 días
 Para un servicio pequeño en producción.
 Pro
-USD 15.00
-Para varios servicios pequeños.
+USD 19.00
+Para varios servicios con sus datos.
 Contratar
 Business
-USD 40.00
-Para servicios con más carga.
+USD 49.00
+Para sistemas completos con más carga.
 Proyectos
 1
 3
@@ -79,17 +80,35 @@ Construcciones / mes
 150
 500
 2 000
-Bases de datos
-1
+Recursos de datos
+0
 3
 10
 25
 Disco por base
-0.5 GB
+—
 2 GB
-10 GB
-25 GB
+5 GB
+20 GB
+Bases incluidas
+Ninguna: trae tu propia URL
+Aparte, desde USD 2
+PostgreSQL + Redis
+PostgreSQL + Redis + S3
+HTTPS con subdominio propio
+Reversión a las últimas 5 versiones sin reconstruir
+Bitácoras y métricas de 24 h
+Datos aparte
+Complementos por 30 días, sobre tu plan.
+PostgreSQL + pgvector · 2 GB
+USD 5.00
+Redis
+USD 2.00
+S3 · 10 GB
+USD 4.00
++10 GB de disco
+USD 2.00
 Todos los proyectos corren en un único servidor (VPS) y se publican en un subdominio
-*.deploya.app
-con HTTPS.
+*.deploya.larasolutions.dev
+con HTTPS. Sin costos por transferencia ni por peticiones durante el piloto; aún no hay alta disponibilidad.
 ```

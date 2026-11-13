@@ -29,7 +29,7 @@ Web: `apps/web/src/app/(billing)/`, `apps/web/src/app/(admin)/`
 
 | | Sandbox | Starter | Pro | Business |
 |---|---|---|---|---|
-| Precio | Sin costo | USD 5.00 | USD 15.00 | USD 40.00 |
+| Precio | Sin costo | USD 6.00 | USD 19.00 | USD 49.00 |
 | Proyectos | 1 | 3 | 10 | 25 |
 | CPU | 0.25 vCPU | 0.5 vCPU | 1 vCPU | 2 vCPU |
 | Memoria | 256 MB | 512 MB | 1 GB | 2 GB |

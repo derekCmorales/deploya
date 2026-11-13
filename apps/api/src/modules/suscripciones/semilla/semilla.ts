@@ -113,7 +113,10 @@ export function planesSemilla(entorno: NodeJS.ProcessEnv = {}): PlanSemilla[] {
   return esAutoalojado(entorno) ? [PLAN_AUTOALOJADO] : planesNube();
 }
 
-/** Planes v4.1 (docs/alcance.md). El precio de 365 días es 10 × el de 30: dos meses gratis. */
+/**
+ * Planes v4.1 con la tarifa de lanzamiento (docs/alcance.md, igual que la landing). El precio de 365
+ * días es 10 × el de 30: dos meses gratis. Sandbox no trae bases: el usuario usa su propia URL.
+ */
 function planesNube(): PlanSemilla[] {
   return [
     {
@@ -126,7 +129,7 @@ function planesNube(): PlanSemilla[] {
       cpus: 0.25,
       memoriaMb: 256,
       construccionesMes: 30,
-      maxRecursosDatos: 1,
+      maxRecursosDatos: 0,
       discoDatosMb: 512,
       orden: 1,
     },
@@ -134,8 +137,8 @@ function planesNube(): PlanSemilla[] {
       codigo: "starter",
       nombre: "Starter",
       descripcion: "Para un servicio pequeño en producción.",
-      precio30: 5,
-      precio365: 50,
+      precio30: 6,
+      precio365: 60,
       maxProyectos: 3,
       cpus: 0.5,
       memoriaMb: 512,
@@ -147,29 +150,29 @@ function planesNube(): PlanSemilla[] {
     {
       codigo: "pro",
       nombre: "Pro",
-      descripcion: "Para varios servicios pequeños.",
-      precio30: 15,
-      precio365: 150,
+      descripcion: "Para varios servicios con sus datos.",
+      precio30: 19,
+      precio365: 190,
       maxProyectos: 10,
       cpus: 1,
       memoriaMb: 1024,
       construccionesMes: 500,
       maxRecursosDatos: 10,
-      discoDatosMb: 10_240,
+      discoDatosMb: 5_120,
       orden: 3,
     },
     {
       codigo: "business",
       nombre: "Business",
-      descripcion: "Para servicios con más carga.",
-      precio30: 40,
-      precio365: 400,
+      descripcion: "Para sistemas completos con más carga.",
+      precio30: 49,
+      precio365: 490,
       maxProyectos: 25,
       cpus: 2,
       memoriaMb: 2048,
       construccionesMes: 2000,
       maxRecursosDatos: 25,
-      discoDatosMb: 25_600,
+      discoDatosMb: 20_480,
       orden: 4,
     },
   ];

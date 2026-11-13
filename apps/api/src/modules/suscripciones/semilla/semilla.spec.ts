@@ -14,19 +14,19 @@ describe("planesSemilla", () => {
     ]);
     expect(tabla).toEqual([
       ["sandbox", 1, 0.25, 256, 30, 0, null, 1],
-      ["starter", 3, 0.5, 512, 150, 5, 50, 2],
-      ["pro", 10, 1, 1024, 500, 15, 150, 3],
-      ["business", 25, 2, 2048, 2000, 40, 400, 4],
+      ["starter", 3, 0.5, 512, 150, 6, 60, 2],
+      ["pro", 10, 1, 1024, 500, 19, 190, 3],
+      ["business", 25, 2, 2048, 2000, 49, 490, 4],
     ]);
   });
 
-  it("Límites de recursos de datos por plan: 1/3/10/25 recursos y 512/2048/10240/25600 MB de disco", () => {
+  it("Límites de recursos de datos por plan: 0/3/10/25 recursos y 512/2048/5120/20480 MB de disco", () => {
     const tabla = planesSemilla().map((p) => [p.codigo, p.maxRecursosDatos, p.discoDatosMb]);
     expect(tabla).toEqual([
-      ["sandbox", 1, 512],
+      ["sandbox", 0, 512],
       ["starter", 3, 2048],
-      ["pro", 10, 10240],
-      ["business", 25, 25600],
+      ["pro", 10, 5120],
+      ["business", 25, 20480],
     ]);
   });
 
